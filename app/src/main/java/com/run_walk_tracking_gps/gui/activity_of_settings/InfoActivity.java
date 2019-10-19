@@ -1,0 +1,17 @@
+package com.run_walk_tracking_gps.gui.activity_of_settings;
+
+import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.CommonActivity;
+
+public class InfoActivity extends CommonActivity {
+    @Override
+    protected void initGui() {
+        setContentView(R.layout.activity_info);
+        getSupportActionBar().setTitle(R.string.info);
+    }
+
+    @Override
+    protected void listenerAction() {
+
+    }
+}

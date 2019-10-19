@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        android:paddingBottom="50dp">
+
+
+        <TextView
+            android:id="@+id/signup_physical_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/physical_data"
+            android:textSize="30sp" />
+
+        <RelativeLayout
+            android:id="@+id/profile_layout_gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+
+            <TextView
+                android:id="@+id/signup_profile_gender_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="@string/gender" />
+
+
+            <Spinner
+                android:id="@+id/signup_profile_gender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/signup_profile_gender_title"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/textview_rounded_corners_with_press_state"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:hint="@string/gender"
+                android:paddingStart="15dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@android:color/background_light"
+                android:textColorHint="@android:color/background_light"
+                android:textSize="18sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/profile_layout_height"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+
+            <TextView
+                android:id="@+id/signup_profile_height_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="@string/height" />
+
+
+            <TextView
+                android:id="@+id/signup_profile_height"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/signup_profile_height_title"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/textview_rounded_corners_with_press_state"
+                android:drawableStart="@drawable/ic_height"
+                android:drawablePadding="20dp"
+                android:gravity="center_vertical"
+                android:hint="@string/height"
+                android:paddingStart="25dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="20dp"
+                android:textColor="@android:color/background_light"
+                android:textColorHint="@android:color/background_light" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/profile_layout_weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+
+            <TextView
+                android:id="@+id/signup_profile_weight_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="@string/weight" />
+
+
+            <TextView
+                android:id="@+id/signup_profile_weight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/signup_profile_weight_title"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/textview_rounded_corners_with_press_state"
+                android:drawableStart="@drawable/ic_weight"
+                android:drawablePadding="20dp"
+                android:gravity="center_vertical"
+                android:hint="@string/weight"
+                android:paddingStart="25dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="20dp"
+                android:textColor="@android:color/background_light"
+                android:textColorHint="@android:color/background_light" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/profile_layout_target"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+
+            <TextView
+                android:id="@+id/signup_profile_target_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="@string/target" />
+
+
+            <Spinner
+                android:id="@+id/signup_profile_target"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/signup_profile_target_title"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/textview_rounded_corners_with_press_state"
+                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
+                android:hint="@string/target"
+                android:inputType="phone"
+                android:paddingStart="15dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@android:color/background_light"
+                android:textColorHint="@android:color/background_light" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</ScrollView>

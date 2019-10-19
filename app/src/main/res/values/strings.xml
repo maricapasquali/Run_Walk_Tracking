@@ -1,3 +1,180 @@
 <resources>
-    <string name="app_name">Run_Walk_Tracking_Gps</string>
+    <string name="app_name"><i>Run/Walk Tracking</i></string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Annulla</string>
+
+    <!-- BootApp -->
+    <string name="rec">Iscriviti</string>
+    <string name="login">Accedi</string>
+
+    <!-- Login -->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="forgot_password"><u><i>Password Dimenticata ?</i></u></string>
+
+    <!-- Sign Up -->
+    <string name="forward">Avanti</string>
+    <string name="personal_data">Dati personali</string>
+    <string name="img_profilo">Immagine profilo</string>
+    <string name="name">Nome</string>
+    <string name="lastname">Cognome</string>
+    <string name="birth_date">Data di Nascita</string>
+    <string name="email">Email</string>
+    <string name="tel">Telefono</string>
+    <string name="city">Città</string>
+    <string name="auth_personal_data">Acconsento al trattamento del miei dati personali .</string>
+
+    <string name="physical_data">Dati relativi al fisico</string>
+
+    <string name="gender">Genere</string>
+    <string name="female">Femmina</string>
+    <string name="male">Maschio</string>
+    <string name="other">Altro</string>
+
+    <string name="weight">Peso</string>
+    <string name="height">Altezza</string>
+
+
+    <string name="target">Obiettivo</string>
+    <string name="marathon">Maratona</string>
+    <string name="lose_weight">Dimagrire</string>
+
+    <string name="dot">.</string>
+
+    <string name="access_data">Dati di accesso</string>
+    <string name="confirm_password">Conferma Password</string>
+
+    <!-- Home -->
+    <string name="setting">Impostazioni</string>
+
+    <string name="workouts">Allenamenti</string>
+    <string name="home">Home</string>
+    <string name="statistics">Statistiche</string>
+
+    <!-- Impostazioni -->
+    <string name="sport">Sport</string>
+    <string name="walk">Camminata</string>
+    <string name="run">Corsa</string>
+
+    <string name="profile">Profilo</string>
+    <string name="location">Localizzazione</string>
+    <string name="measure_unit">Unità di misura</string>
+    <string name="language">Lingua</string>
+    <string name="playlist">Playlist</string>
+    <string name="vocal_coach">Allenatore Vocale</string>
+    <string name="info">Informazioni</string>
+    <string name="exit">Esci</string>
+
+
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+
+    <!-- Home -->
+    <string name="request_location_permissions">Richiedo Permessi</string>
+    <string name="gps_disabled">Il GPS sembra essere disattivato, vuoi attivarlo?</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+
+    <string name="my_position">Mia Posizione</string>
+    <string name="type_map">Tipi di mappe</string>
+
+
+    <string name="date">Giorno</string>
+    <string name="time">Durata</string>
+    <string name="distance">Distanza</string>
+    <string name="calories">Calorie</string>
+    <string name="middle_speed">Velocità Media</string>
+
+    <string name="time_workout">00:00</string>
+    <string name="distance_workout">0.00 Km</string>
+    <string name="calories_workout">0 Kcal</string>
+
+
+    <string name="start">Inizia</string>
+    <string name="pause">Pausa</string>
+    <string name="stop">Stop</string>
+    <string name="restart">Riprendi</string>
+
+    <string name="block_screen">Blocca schermo</string>
+    <string name="unlock_screen">Sblocca schermo</string>
+
+    <string-array name="type_map">
+        <item name="standard">Standard</item>
+        <item name="satellite">Satellite</item>
+        <item name="terrain">Terrena</item>
+        <item name="hybrid">Ibrida</item>
+    </string-array>
+
+    <!-- INTENT REQUEST  -->
+    <string name="new_workout">Nuovo Allenamento</string>
+    <string name="new_workout_manual">Nuovo Allenamento Manuale</string>
+    <string name="modify_workout">Modifica Allenamento</string>
+    <string name="changed_workout">Allenamento Modificato</string>
+
+
+    <!-- Riepilogo / Dettaglio Allenamento -->
+
+    <string name="summary_workout">Riepilogo</string>
+
+    <string name="modify">Modifica</string>
+    <string name="delete">Elimina</string>
+
+    <string name="all"> Tutti </string>
+    <string name="year"> Anno </string>
+    <string name="month"> Mese </string>
+    <string name="week"> Settimana </string>
+
+    <string name="detail_workout">Dettaglio</string>
+
+    <string name="add_workout">Aggiungi Allenamento manualmente</string>
+    <string name="workout">Allenamento</string>
+    <string name="add">Aggiungi</string>
+    <!--<string name="no_available">Non Disponibile</string>-->
+    <string name="no_available_abbr">N.D.</string>
+
+    <string name="space">\u0020</string>
+    <string name="colon">:</string>
+    <string name="unit_hours">h</string>
+    <string name="unit_min">min</string>
+
+    <!--Unità di misura -->
+    <string name="measure">Misura</string>
+    <string name="kilometer">Km</string>
+    <string name="meter">m</string>
+    <string name="kilogram">Kg</string>
+
+    <string name="mile">mi</string>
+    <string name="pound">lb</string>
+    <string name="feet">ft</string>
+
+    <string name="kilo_calories">Kcal</string>
+
+    <string name="kilometer_per_hour">Km/h</string>
+    <string name="mile_per_hour">mi/h</string>
+    <!-- Profile -->
+    <string name="change_password">Cambia Password</string>
+    <string name="save">Salva</string>
+
+    <!-- Statistiche -->
+    <string name="statistic_data">Dati</string>
+    <string name="graphic_statistics">Grafico</string>
+
+    <string name="new_weight">Nuovo Peso</string>
+
+    <string name="changed_profile">Profilo Modificato</string>
+
+
+    <string name="info_description">
+        <i>Run/Walk Tracking</i> è un\' innovativa suite di applicazioni,
+        prodotti e servizi che tracciano e gestiscono dati sulla salute ed il fitness per moticare
+        i singoli individui a mantenersi in forma e a migliorare il proprio benessere personale.
+
+    </string>
+
+
+    <!-- Messaggi di errore -->
+    <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
+
+
 </resources>

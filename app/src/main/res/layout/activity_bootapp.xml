@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bootappLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:background="@drawable/boot_app_background"
+    android:orientation="vertical"
+    tools:context=".gui.BootAppActivity">
+
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/container_boot">
+
+        <!-- <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="510dp"
+            android:alpha="0.6"
+            android:background="@drawable/layout_boot_app" />-->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+
+            android:elevation="24dp"
+            android:orientation="vertical"
+            android:paddingTop="30dp">
+
+            <ImageView
+                android:id="@+id/appicon"
+                android:layout_width="190dp"
+                android:layout_height="172dp"
+                android:layout_marginStart="70dp"
+                android:layout_marginEnd="70dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_runtracking" />
+
+            <TextView
+                android:id="@+id/app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/app_name"
+                android:textAlignment="center"
+                android:textColor="@android:color/background_dark"
+                android:textSize="40sp" />
+
+            <RelativeLayout
+                android:id="@+id/btnLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/recbtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/button_boot_app"
+                        android:drawableStart="@drawable/ic_sign_up"
+                        android:drawablePadding="10dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="@string/rec"
+                        android:textColor="@android:color/background_light"
+                        android:textSize="24sp" />
+
+                    <Button
+                        android:id="@+id/loginbtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/button_boot_app"
+                        android:drawableStart="@drawable/ic_login"
+                        android:drawablePadding="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="30dp"
+                        android:text="@string/login"
+                        android:textColor="@android:color/background_light"
+                        android:textSize="24sp" />
+                </LinearLayout>
+
+            </RelativeLayout>
+        </LinearLayout>
+
+    </FrameLayout>
+
+</RelativeLayout>

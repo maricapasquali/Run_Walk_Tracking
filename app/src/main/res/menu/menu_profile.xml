@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/profile_modify"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="@string/modify" />
+    <item
+        android:id="@+id/profile_change_password"
+        android:icon="@drawable/ic_password"
+        android:title="@string/change_password" />
+</menu>
