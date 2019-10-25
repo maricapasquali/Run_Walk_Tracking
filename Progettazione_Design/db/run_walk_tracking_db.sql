@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Ott 21, 2019 alle 21:47
+-- Creato il: Ott 25, 2019 alle 14:13
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -55,8 +55,8 @@ CREATE TABLE `location` (
 CREATE TABLE `login` (
   `id_user` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `hash_password` varchar(100) NOT NULL,
-  `salt` varchar(20) NOT NULL
+  `hash_password` char(60) NOT NULL,
+  `date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -68,6 +68,18 @@ CREATE TABLE `login` (
 CREATE TABLE `profile_image` (
   `id_user` int(11) NOT NULL,
   `img_encode` longblob NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `request_forgot_password`
+--
+
+CREATE TABLE `request_forgot_password` (
+  `email` varchar(30) NOT NULL,
+  `c_key` text NOT NULL,
+  `end_validity` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -283,6 +295,17 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Struttura della tabella `verify_registration`
+--
+
+CREATE TABLE `verify_registration` (
+  `id_user` int(11) NOT NULL,
+  `token` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Struttura della tabella `weight`
 --
 
@@ -302,13 +325,13 @@ CREATE TABLE `weight` (
 CREATE TABLE `workout` (
   `id_workout` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
-  `map_route` linestring DEFAULT NULL,
+  `map_route` longblob DEFAULT NULL,
   `date` datetime NOT NULL,
   `duration` int(10) UNSIGNED NOT NULL,
   `distance` float DEFAULT NULL,
   `calories` float DEFAULT NULL,
   `middle_speed` float DEFAULT NULL,
-  `sport` int(11) NOT NULL
+  `id_sport` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -344,6 +367,12 @@ ALTER TABLE `login`
 ALTER TABLE `profile_image`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `FKhave_IND` (`id_user`);
+
+--
+-- Indici per le tabelle `request_forgot_password`
+--
+ALTER TABLE `request_forgot_password`
+  ADD PRIMARY KEY (`email`) USING BTREE;
 
 --
 -- Indici per le tabelle `sport`
@@ -424,6 +453,13 @@ ALTER TABLE `user`
   ADD UNIQUE KEY `SID_User_IND` (`name`,`last_name`);
 
 --
+-- Indici per le tabelle `verify_registration`
+--
+ALTER TABLE `verify_registration`
+  ADD PRIMARY KEY (`id_user`),
+  ADD UNIQUE KEY `FKachieve_IND` (`id_user`);
+
+--
 -- Indici per le tabelle `weight`
 --
 ALTER TABLE `weight`
@@ -437,7 +473,7 @@ ALTER TABLE `weight`
 ALTER TABLE `workout`
   ADD PRIMARY KEY (`id_workout`),
   ADD UNIQUE KEY `ID_Workout_IND` (`id_workout`),
-  ADD KEY `FKabout_IND` (`sport`),
+  ADD KEY `FKabout_IND` (`id_sport`),
   ADD KEY `FKcarry_out_IND` (`id_user`) USING BTREE;
 
 --
@@ -485,6 +521,12 @@ ALTER TABLE `unit_measure_weight`
 --
 ALTER TABLE `user`
   MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `weight`
+--
+ALTER TABLE `weight`
+  MODIFY `id_weight` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT per la tabella `workout`
@@ -545,6 +587,12 @@ ALTER TABLE `unit_measure_default`
   ADD CONSTRAINT `FKchoose_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
+-- Limiti per la tabella `verify_registration`
+--
+ALTER TABLE `verify_registration`
+  ADD CONSTRAINT `FKachieve_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
 -- Limiti per la tabella `weight`
 --
 ALTER TABLE `weight`
@@ -554,7 +602,7 @@ ALTER TABLE `weight`
 -- Limiti per la tabella `workout`
 --
 ALTER TABLE `workout`
-  ADD CONSTRAINT `FKabout_FK` FOREIGN KEY (`sport`) REFERENCES `sport` (`id_sport`),
+  ADD CONSTRAINT `FKabout_FK` FOREIGN KEY (`id_sport`) REFERENCES `sport` (`id_sport`),
   ADD CONSTRAINT `FKcarry_out_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 COMMIT;
 
