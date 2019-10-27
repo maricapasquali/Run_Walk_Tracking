@@ -13,7 +13,6 @@ public class NewManualWorkoutAdapter extends NewInformationAdapter<InfoWorkout> 
 
     private final String TAG = NewManualWorkoutAdapter.class.getName();
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public NewManualWorkoutAdapter(Context context) {
         super(context, InfoWorkout.infoWorkoutNoSpeed());
     }

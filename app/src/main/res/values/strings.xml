@@ -152,7 +152,7 @@
 
     <string name="kilometer_per_hour">Km/h</string>
     <string name="mile_per_hour">mi/h</string>
-    <!-- Profile -->
+    <!-- User -->
     <string name="change_password">Cambia Password</string>
     <string name="save">Salva</string>
 
@@ -175,6 +175,7 @@
 
     <!-- Messaggi di errore -->
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
+    <string name="internet_not_available">Internet non attivo</string>
 
 
 </resources>

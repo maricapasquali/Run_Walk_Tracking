@@ -32,14 +32,13 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
         super(R.string.workout);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public NewInformationAdapter getAdapterListView() {
         return new NewManualWorkoutAdapter(this);
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
         final InfoWorkout title =(InfoWorkout) parent.getAdapter().getItem(position);

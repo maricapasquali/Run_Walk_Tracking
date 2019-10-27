@@ -100,7 +100,7 @@ public class Workout implements Parcelable {
         return date;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public String getDateString() {
         return DateUtilities.parseShortToString(this.date);
     }
@@ -150,7 +150,7 @@ public class Workout implements Parcelable {
         this.middle_speed = middle_speed;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public String[] toArrayString() {
         return new String[]{this.getDateString(), this.sport.toString(), this.time, this.distance, this.calories, this.middle_speed};
     }

@@ -16,13 +16,11 @@ public class MapTypeDialog extends ChooseDialog<Integer> {
             GoogleMap.MAP_TYPE_HYBRID
     };
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private MapTypeDialog(Context context, Integer checkedItem, OnSelectedItemListener<Integer> onSelectedItemListener) {
         super(context, googleMapType, checkedItem, R.array.type_map, onSelectedItemListener);
         setTitle(context.getResources().getString(R.string.type_map));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static MapTypeDialog create(Context context, int checkedItem, OnSelectedItemListener onSelectedItemListener)    {
         return new MapTypeDialog(context, checkedItem, onSelectedItemListener);
     }

@@ -2,7 +2,9 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Menu;
@@ -13,16 +15,22 @@ import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.model.Profile;
+import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
+import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
+import com.run_walk_tracking_gps.model.HttpRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.Iterator;
 
-public class ProfileActivity extends CommonActivity {
+public class UserActivity extends CommonActivity {
 
-    private static final String TAG = ProfileActivity.class.getName();
+    private static final String TAG = UserActivity.class.getName();
 
     private static final int REQUEST_MODIFY_PROFILE = 11;
 
@@ -37,7 +45,8 @@ public class ProfileActivity extends CommonActivity {
     private TextView height;
 
 
-    private Profile profile;
+    private User user;
+
     @Override
     protected void initGui() {
         setContentView(R.layout.activity_profile);
@@ -55,27 +64,56 @@ public class ProfileActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         // TODO: 10/17/2019  RICHIESTA AL DATABASE (anche username)
+        /*if(!HttpRequest.requestJsonGetToServerVolley(this, HttpRequest.USER + "68", null,
+                response -> {
+                    Iterator<String> it = response.keys();
+                    if(it.hasNext() && it.next().equals(HttpRequest.ERROR))
+                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                    else {
+                        try {
+                            Log.d(TAG, response.get("user").toString());
+                            JSONArray responseArray = (JSONArray) response.get("user");
+                            String imageString = (String) ((JSONObject)responseArray.get(1)).get("img_encode");
+                            Log.e(TAG, imageString);
+                            Bitmap bitmap = BitmapUtilities.StringToBitMap(imageString);
+                            img.setImageBitmap(bitmap);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })){
+            Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+        }*/
+
 
         try {
-            profile = Profile.create("Mario", "Rossi", Gender.MALE,
+            user = User.create("Mario", "Rossi", Gender.MALE,
                     DateUtilities.parseShortToDate("03/05/1997"),
                                      "mario@gmail.com", "Roma", "1.70 m");
         } catch (ParseException e) {
             Log.e(TAG, e.getMessage());
         }
-        profile.setImg(Uri.EMPTY);
-        profile.setTel("3333333333");
+        user.setImg(Uri.EMPTY);
+        user.setTel("3333333333");
 
-        name.setText(profile.getName());
-        lastName.setText(profile.getLastName());
-        gender.setText(profile.getGender().getStrId());
-        gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(profile.getGender().getIconId()),
+        name.setText(user.getName());
+        lastName.setText(user.getLastName());
+        gender.setText(user.getGender().getStrId());
+        gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(user.getGender().getIconId()),
                 null, null, null);
-        birthDate.setText(profile.getBirthDateString());
-        email.setText(profile.getEmail());
-        city.setText(profile.getCity());
-        tel.setText(profile.getTel());
-        height.setText(profile.getHeight());
+        birthDate.setText(user.getBirthDateString());
+        email.setText(user.getEmail());
+        city.setText(user.getCity());
+        tel.setText(user.getTel());
+        height.setText(user.getHeight());
+
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
     }
 
@@ -91,8 +129,8 @@ public class ProfileActivity extends CommonActivity {
             case R.id.profile_modify:{
                 Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
 
-                final Intent profileIntent = new Intent(this, ModifyProfileActivity.class);
-                profileIntent.putExtra(getString(R.string.profile), profile);
+                final Intent profileIntent = new Intent(this, ModifyUserActivity.class);
+                profileIntent.putExtra(getString(R.string.profile), user);
                 startActivityForResult(profileIntent, REQUEST_MODIFY_PROFILE);
             }
             break;
@@ -112,16 +150,16 @@ public class ProfileActivity extends CommonActivity {
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
                 if(resultCode== Activity.RESULT_OK){
-                    final Profile newProfile = (Profile)data.getParcelableExtra(getString(R.string.changed_profile));
-                    modifyFieldsChanged(profile, newProfile);
-                    profile = newProfile;
-                    Log.d(TAG, "Change Profile = " +newProfile);
+                    final User newUser = (User)data.getParcelableExtra(getString(R.string.changed_profile));
+                    modifyFieldsChanged(user, newUser);
+                    user = newUser;
+                    Log.d(TAG, "Change User = " + newUser);
                 }
                 break;
         }
     }
 
-    private void modifyFieldsChanged(Profile oldP, Profile newP){
+    private void modifyFieldsChanged(User oldP, User newP){
         if(!oldP.getImg().equals(newP.getImg())){
             img.setImageURI(newP.getImg());
 
@@ -153,10 +191,10 @@ public class ProfileActivity extends CommonActivity {
         if(!oldP.getHeight().equals(newP.getHeight())){
             height.setText(newP.getHeight());
         }
-
     }
 
     @Override
     protected void listenerAction() {
     }
+
 }

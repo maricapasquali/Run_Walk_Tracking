@@ -49,7 +49,7 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
         return 0;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -85,7 +85,7 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
         private TextView title;
         private TextView detail;
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         private ListHolder(TextView title, TextView detail) {
             this.title = title;
             this.detail = detail;

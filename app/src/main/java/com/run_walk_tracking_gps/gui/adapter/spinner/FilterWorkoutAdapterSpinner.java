@@ -15,7 +15,6 @@ public class FilterWorkoutAdapterSpinner extends CustomSpinnerAdapter<FilterTime
         super(context, FilterTime.values(), isDisabledFirst);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public FilterWorkoutAdapterSpinner(Context context, boolean isDisabledFirst, boolean isCenter) {
         super(context, FilterTime.values(), isDisabledFirst);
         setTextViewInCenter(isCenter);

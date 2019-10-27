@@ -11,7 +11,7 @@ import com.run_walk_tracking_gps.utilities.DateUtilities;
 import java.text.DateFormat;
 import java.util.Date;
 
-public class Profile implements Parcelable {
+public class User implements Parcelable {
 
     private int id;
     private Uri img;
@@ -24,7 +24,9 @@ public class Profile implements Parcelable {
     private String tel;
     private String height;
 
-    private Profile(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height) {
+    public User(){}
+
+    private User(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height) {
         this.name = name;
         this.lastName = lastName;
         this.gender = gender;
@@ -35,7 +37,7 @@ public class Profile implements Parcelable {
     }
 
 
-    protected Profile(Parcel in) {
+    protected User(Parcel in) {
         id = in.readInt();
         img = Uri.parse(in.readString());
         name = in.readString();
@@ -67,20 +69,20 @@ public class Profile implements Parcelable {
         return 0;
     }
 
-    public static final Creator<Profile> CREATOR = new Creator<Profile>() {
+    public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
-        public Profile createFromParcel(Parcel in) {
-            return new Profile(in);
+        public User createFromParcel(Parcel in) {
+            return new User(in);
         }
 
         @Override
-        public Profile[] newArray(int size) {
-            return new Profile[size];
+        public User[] newArray(int size) {
+            return new User[size];
         }
     };
 
-    public static Profile create(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height){
-        return new Profile(name, lastName, gender, birthDate, email, city, height);
+    public static User create(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height){
+        return new User(name, lastName, gender, birthDate, email, city, height);
     }
 
     public int getId() {
@@ -170,7 +172,7 @@ public class Profile implements Parcelable {
     @Override
     public String toString() {
 
-        return "Profile{ Id = " + id + '\'' +
+        return "User{ Id = " + id + '\'' +
                 ", pathImg='" + img + '\'' +
                 ", name='" + name + '\'' +
                 ", lastName='" + lastName + '\'' +

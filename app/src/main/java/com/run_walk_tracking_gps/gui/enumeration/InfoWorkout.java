@@ -38,7 +38,6 @@ public enum InfoWorkout {
         return info==SPORT;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static InfoWorkout[] infoWorkoutNoSpeed() {
         return new ArrayList<>(Arrays.asList(values())).stream().filter(i -> i != MIDDLE_SPEED).toArray(InfoWorkout[]::new);
     }

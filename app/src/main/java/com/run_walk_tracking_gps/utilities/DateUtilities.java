@@ -65,7 +65,6 @@ public class DateUtilities {
      * @param dateWithTime to format
      * @return date string short format with time
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String parseShortToString(Date dateWithTime){
         if(dateWithTime==null) return "";
         final Calendar c = Calendar.getInstance();

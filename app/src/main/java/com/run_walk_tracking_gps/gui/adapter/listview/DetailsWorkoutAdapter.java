@@ -28,7 +28,7 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
 
     private String[] detailsWorkout ;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
     public DetailsWorkoutAdapter(Context context, String[] details) {
         this.context = context;
         this.infoWorkouts = InfoWorkout.values();
@@ -38,7 +38,7 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         Log.d(TAG, Arrays.toString(detailsWorkout));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
     public DetailsWorkoutAdapter(Context context, String[] details, boolean isModify) {
         this.context = context;
         this.infoWorkouts = isModify? InfoWorkout.infoWorkoutNoSpeed() :InfoWorkout.values();
@@ -54,7 +54,7 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public void updateDetails(Workout workout){
         detailsWorkout = workout.toArrayString();
         this.notifyDataSetChanged();

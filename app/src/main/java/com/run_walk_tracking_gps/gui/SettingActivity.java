@@ -19,7 +19,7 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
 import com.run_walk_tracking_gps.gui.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
-import com.run_walk_tracking_gps.gui.activity_of_settings.ProfileActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 
 
 public class SettingActivity extends CommonActivity {
@@ -41,7 +41,6 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout info;
     private LinearLayout exit;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void initGui() {
         setContentView(R.layout.activity_setting);
@@ -102,7 +101,7 @@ public class SettingActivity extends CommonActivity {
             startActivity(intent);
         });
 
-        profile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        profile.setOnClickListener(v -> startActivity(new Intent(this, UserActivity.class)));
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
         exit.setOnClickListener(v -> {
             final Intent intent = new Intent(this, BootAppActivity.class);

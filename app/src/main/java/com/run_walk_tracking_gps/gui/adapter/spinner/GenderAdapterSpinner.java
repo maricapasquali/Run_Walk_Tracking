@@ -11,7 +11,6 @@ import com.run_walk_tracking_gps.model.enumerations.Gender;
 
 public class GenderAdapterSpinner extends CustomSpinnerAdapter<Integer> {
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public GenderAdapterSpinner(Context context, boolean isDisabledFirst) {
         super(context, isDisabledFirst ?
                        EnumUtilities.valuesWithDescription(Gender.class):
@@ -19,7 +18,6 @@ public class GenderAdapterSpinner extends CustomSpinnerAdapter<Integer> {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void setItemSpinner(TextView textView, Integer item) {
         textView.setText(item);

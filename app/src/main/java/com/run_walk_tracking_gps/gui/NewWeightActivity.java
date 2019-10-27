@@ -32,13 +32,12 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
         super(R.string.weight);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public NewInformationAdapter getAdapterListView() {
         return new NewWeightAdapter(this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
         final InfoWeight title =(InfoWeight) parent.getAdapter().getItem(position);

@@ -40,7 +40,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
     private Workout workout;
 
 
-    @TargetApi(Build.VERSION_CODES.O)
+
     @Override
     protected void initGui() {
         setContentView(R.layout.activity_details_workout);
@@ -92,7 +92,6 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -118,7 +117,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -140,7 +139,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     private boolean isChangedWorkout(Workout work){
 
         return !(work.getDate().equals(workout.getDate()) &&

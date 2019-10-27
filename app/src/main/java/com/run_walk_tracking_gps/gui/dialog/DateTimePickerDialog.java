@@ -22,8 +22,6 @@ public class DateTimePickerDialog {
     private Calendar calendar;
     private DatePickerDialog datePickerDialog;
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private DateTimePickerDialog(Context context, OnSelectDateTime onSelectDateTime) {
         calendar = DateUtilities.getCalendar();
 
@@ -36,7 +34,6 @@ public class DateTimePickerDialog {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private DateTimePickerDialog(Context context, String dateString, OnSelectDateTime onSelectDateTime, boolean alsoTime) {
 
         calendar = DateUtilities.getCalendar();
@@ -59,7 +56,6 @@ public class DateTimePickerDialog {
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private TimePickerDialog createTimePicker(Context context, OnSelectDateTime onSelectDateTime){
         return new TimePickerDialog(context, (timePicker, hourOfDay, minute) -> {
             calendar.set(is24HourView ? Calendar.HOUR_OF_DAY :Calendar.HOUR, hourOfDay);
@@ -71,13 +67,11 @@ public class DateTimePickerDialog {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static DateTimePickerDialog create(Context context, OnSelectDateTime listener) {
         return new DateTimePickerDialog(context, listener);
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static DateTimePickerDialog create(Context context, String dateString, OnSelectDateTime listener, boolean alsoTime) {
         return new DateTimePickerDialog(context, dateString, listener, alsoTime);
     }

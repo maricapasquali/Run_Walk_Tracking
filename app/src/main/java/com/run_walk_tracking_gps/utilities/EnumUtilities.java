@@ -75,6 +75,36 @@ public class EnumUtilities {
        return values.stream().toArray(Integer[]::new);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static Enum<?> getEnumFromStrId(Class<?> enumeration, int strId){
+        Enum genEnum =null;
+        try {
+            final Method valuesMethod = enumeration.getDeclaredMethod(VALUES);
+            final Method getStrIdMethod = enumeration.getMethod(STRID);
+            genEnum = (Enum)Arrays.asList((Object[])valuesMethod.invoke(null)).stream()
+                    .filter( e -> {
+                        Integer s =null;
+                        try {
+                            s = (Integer) getStrIdMethod.invoke(e);
+                        } catch (IllegalAccessException e1) {
+                            Log.e(TAG, e1.getMessage());
+                        } catch (InvocationTargetException e1) {
+                            Log.e(TAG, e1.getMessage());
+                        }
+                        return s==strId;
+                    }).findFirst().orElse(null);
+
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return genEnum;
+    }
+
 
     public static boolean isNotDescription(Class<?> enumeration, int valueStrId) {
         return valueStrId != description(enumeration);

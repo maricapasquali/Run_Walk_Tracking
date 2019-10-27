@@ -12,7 +12,6 @@ public class NewWeightAdapter extends NewInformationAdapter<InfoWeight> {
 
     private final String TAG = NewWeightAdapter.class.getName();
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public NewWeightAdapter(Context context) {
         super(context, InfoWeight.values());
     }

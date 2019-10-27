@@ -48,7 +48,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private Workout workoutChanged;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void initGui() {
         Log.d(TAG,"OnCreate");
@@ -68,7 +67,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         return DateUtilities.parseShortToDate(string);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void listenerAction() {
         navigationBarBottom.setOnNavigationItemSelectedListener(menuItem -> {
@@ -120,7 +118,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -246,7 +243,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     }
 
     //Results
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

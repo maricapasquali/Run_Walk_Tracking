@@ -52,10 +52,14 @@ public class HeightDialog extends MeasureDialog {
     }
 
     protected void setPositiveListener(DialogInterface dialog, int which){
-        onSelectHeightListener.setPositiveListener(getValue(Measure.HEIGHT));
+        onSelectHeightListener.setPositiveListener(getValue(Measure.HEIGHT), getValueDouble());
     }
 
     public interface OnSelectHeightListener{
-        void setPositiveListener(String height);
+        void setPositiveListener(String heightString, Double height);
+    }
+
+    private Double getValueDouble(){
+        return Double.valueOf( getValue(Measure.HEIGHT).split(" ")[0]);
     }
 }

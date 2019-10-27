@@ -92,7 +92,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
@@ -116,7 +115,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         return rootView;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("RestrictedApi")
     private void setListener() {
         myLocation.setOnClickListener(v ->{

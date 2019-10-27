@@ -33,7 +33,7 @@ public class ModifyWorkoutActivity extends  CommonActivity {
     private Workout workout ;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void initGui() {
         setContentView(R.layout.activity_details_workout);
@@ -57,7 +57,7 @@ public class ModifyWorkoutActivity extends  CommonActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void listenerAction() {
         details_workout.setOnItemClickListener((parent, view, position, id) -> {
@@ -115,7 +115,6 @@ public class ModifyWorkoutActivity extends  CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){

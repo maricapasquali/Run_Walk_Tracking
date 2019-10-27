@@ -9,8 +9,6 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,12 +20,12 @@ import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
-import com.run_walk_tracking_gps.model.Profile;
+import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import java.util.Arrays;
 
-public class ModifyProfileActivity extends CommonActivity {
-    private static final String TAG =ModifyProfileActivity.class.getName();
+public class ModifyUserActivity extends CommonActivity {
+    private static final String TAG = ModifyUserActivity.class.getName();
 
     private ImageView img;
     private EditText name;
@@ -42,7 +40,7 @@ public class ModifyProfileActivity extends CommonActivity {
 
     private ImagePicker imagePicker;
 
-    private Profile profile;
+    private User user;
     @Override
     protected void initGui() {
         setContentView(R.layout.activity_modify_profile);
@@ -62,22 +60,22 @@ public class ModifyProfileActivity extends CommonActivity {
         height = findViewById(R.id.modify_profile_height);
 
         if(getIntent()!=null){
-            profile = (Profile)getIntent().getParcelableExtra(getString(R.string.profile));
-            Log.d(TAG, profile.toString());
+            user = (User)getIntent().getParcelableExtra(getString(R.string.profile));
+            Log.d(TAG, user.toString());
 
-            if(!profile.getImg().equals(Uri.EMPTY)) {
-                img.setImageURI(profile.getImg());
+            if(!user.getImg().equals(Uri.EMPTY)) {
+                img.setImageURI(user.getImg());
             }
-            name.setText(profile.getName());
-            lastName.setText(profile.getLastName());
-            gender.setText(profile.getGender().getStrId());
-            gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(profile.getGender().getIconId()), null, null, null);
-            birthDate.setText(profile.getBirthDateString());
-            email.setText(profile.getEmail());
-            city.setText(profile.getCity());
-            tel.setText(profile.getTel());
+            name.setText(user.getName());
+            lastName.setText(user.getLastName());
+            gender.setText(user.getGender().getStrId());
+            gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(user.getGender().getIconId()), null, null, null);
+            birthDate.setText(user.getBirthDateString());
+            email.setText(user.getEmail());
+            city.setText(user.getCity());
+            tel.setText(user.getTel());
 
-            height.setText(profile.getHeight());
+            height.setText(user.getHeight());
         }
     }
 
@@ -92,14 +90,14 @@ public class ModifyProfileActivity extends CommonActivity {
         switch (item.getItemId()){
             case R.id.save_profile:{
                 Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
-                profile.setName(name.getText().toString());
-                profile.setLastName(lastName.getText().toString());
-                profile.setEmail(email.getText().toString());
-                profile.setCity(city.getText().toString());
-                profile.setTel(tel.getText().toString());
+                user.setName(name.getText().toString());
+                user.setLastName(lastName.getText().toString());
+                user.setEmail(email.getText().toString());
+                user.setCity(city.getText().toString());
+                user.setTel(tel.getText().toString());
 
                 final Intent returnIntent = new Intent();
-                returnIntent.putExtra(getString(R.string.changed_profile), profile);
+                returnIntent.putExtra(getString(R.string.changed_profile), user);
                 setResult(RESULT_OK, returnIntent);
                 finish();
             }
@@ -109,7 +107,7 @@ public class ModifyProfileActivity extends CommonActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void listenerAction() {
 
@@ -117,11 +115,11 @@ public class ModifyProfileActivity extends CommonActivity {
             imagePicker = new ImagePicker(this /*activity non null*/,
                     null /*fragment nullable*/,
                     imageUri -> { /*on image picked*/
-                        profile.setImg(imageUri);
+                        user.setImg(imageUri);
 
                         img.setImageURI(imageUri);
-                        Log.d(TAG, profile.toString());
-                        Toast.makeText(this, profile.toString(), Toast.LENGTH_LONG).show();
+                        Log.d(TAG, user.toString());
+                        Toast.makeText(this, user.toString(), Toast.LENGTH_LONG).show();
 
                     }).setWithImageCrop(1,1);
             imagePicker.choosePicture(true);
@@ -136,7 +134,7 @@ public class ModifyProfileActivity extends CommonActivity {
                         TextView gView = ((TextView) v);
                         gView.setText(val.getStrId());
                         gView.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null, null);
-                        profile.setGender(val);
+                        user.setGender(val);
 
 
                     },
@@ -152,15 +150,15 @@ public class ModifyProfileActivity extends CommonActivity {
             final TextView d = ((TextView) v);
             DateTimePickerDialog.create(this, d.getText().toString() , (date, calendar) -> {
                 d.setText(date);
-                profile.setBirthDate(calendar.getTime());
+                user.setBirthDate(calendar.getTime());
             }, true).show();
         });
 
         height.setOnClickListener(v ->{
             final TextView h = ((TextView) v);
-            HeightDialog.create(this, h.getText().toString(),  height -> {
-                h .setText(height);
-                profile.setHeight(height);
+            HeightDialog.create(this, h.getText().toString(),  (heightString, height) -> {
+                h .setText(heightString);
+                user.setHeight(heightString);
             }).create().show();
         });
     }

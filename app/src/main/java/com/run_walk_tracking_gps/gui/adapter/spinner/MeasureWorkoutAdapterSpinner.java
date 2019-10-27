@@ -14,8 +14,6 @@ public class MeasureWorkoutAdapterSpinner extends CustomSpinnerAdapter<Measure> 
         super(context, objects, isDisabledFirst);
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public MeasureWorkoutAdapterSpinner(Context context, Measure[] objects, boolean isDisabledFirst, boolean isCenter) {
         super(context, objects, isDisabledFirst);
         setTextViewInCenter(isCenter);
