@@ -109,15 +109,26 @@ class SettingsDao{
         $stmt->bind_param($param , $val, $id_user);
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
         $stmt->close();
-
+        if($type!=LOCATION){
+          $stmt = getConnection()->prepare("SELECT id_".$type.", name FROM ".$type."  WHERE id_".$type."=?");
+          if(!$stmt) throw new Exception("$type select : Preparazione fallita. Errore: ". getErrorConnection());
+          $stmt->bind_param("i", $val);
+          if(!$stmt->execute()) throw new Exception("$type : Select fallito. Errore: ". getErrorConnection());
+          $result = $stmt->get_result();
+          $value_update = $result->fetch_assoc();
+          $stmt->close();
+        }
         commitTransaction();
+
       }
     }catch (Exception $e) {
       rollbackTransaction();
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    return true;
+    if($type==LOCATION)
+      return array(UPDATE => true);
+    return array(UPDATE => true) + array($type => $value_update);
   }
 
   private function updateUnitMeasure($type, $id_unit, $id_user){
@@ -133,6 +144,15 @@ class SettingsDao{
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
         $stmt->close();
 
+
+        $stmt = getConnection()->prepare("SELECT id_unit_".$type." as id_unit, unit FROM unit_measure_".$type."  WHERE id_unit_".$type."=?");
+        if(!$stmt) throw new Exception("$type select : Preparazione fallita. Errore: ". getErrorConnection());
+        $stmt->bind_param("i", $id_unit);
+        if(!$stmt->execute()) throw new Exception("$type : Select fallito. Errore: ". getErrorConnection());
+        $result = $stmt->get_result();
+        $value_update = $result->fetch_assoc();
+        $stmt->close();
+
         commitTransaction();
       }
     }catch (Exception $e) {
@@ -140,7 +160,7 @@ class SettingsDao{
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    return true;
+    return array(UPDATE => true) + array($type => $value_update);
   }
 
 }

@@ -43,10 +43,15 @@ public class EnergyDialog extends MeasureDialog {
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {
-        onSelectCaloriesListener.setPositiveListener(isAvailable()? getValue(Measure.ENERGY) : NO_AVAILABLE);
+        onSelectCaloriesListener.setPositiveListener(isAvailable()? getValue(Measure.ENERGY) : NO_AVAILABLE,
+                isAvailable()?  getValueDouble() : 0.0);
+    }
+
+    private Double getValueDouble(){
+        return Double.valueOf( getValue(Measure.ENERGY).split(" ")[0]);
     }
 
     public interface OnSelectCaloriesListener{
-        void setPositiveListener(String calories);
+        void setPositiveListener(String caloriesStr, Double calories);
     }
 }

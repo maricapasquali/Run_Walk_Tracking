@@ -3,8 +3,8 @@ package com.run_walk_tracking_gps.gui;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
 
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
 
@@ -17,20 +17,21 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PhysicalDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PersonalDataFragment;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.model.User;
+import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
-import com.run_walk_tracking_gps.model.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -40,30 +41,11 @@ public class SignUpActivity extends CommonActivity
                                        PhysicalDataFragment.PhysicalDataListener,
                                        AccessDataFragment.AccessDataListener,
                                        Response.Listener<JSONObject>,
-                                        //Response.Listener<String>,
-        PersonalDataFragment.ImagePickerHandlerListener {
+                                       PersonalDataFragment.ImagePickerHandlerListener {
 
     private static final String TAG = SignUpActivity.class.getName();
 
-    private static final String KEY_IMG ="img_encode";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_LAST_NAME = "last_name";
-    private static final String KEY_DATE = "birth_date";
-    private static final String KEY_EMAIL = "email";
-    private static final String KEY_CITY = "city";
-    private static final String KEY_PHONE = "phone";
-
-    private static final String KEY_GENDER = "gender";
-    private static final String KEY_TARGET = "target";
-    private static final String KEY_HEIGHT = "height";
-    private static final String KEY_WEIGHT = "weight";
-
-    private static final String KEY_USERNAME ="username";
-    private static final String KEY_HASH_PASSWORD ="password";
-    private static final String KEY_LANGUAGE ="language";
-
     private static JSONObject user = new JSONObject();
-
 
     private final int PERSONAL_DATA = 0;
     private final int PHYSICAL_DATA = 1;
@@ -76,7 +58,7 @@ public class SignUpActivity extends CommonActivity
     private Bitmap bitmap;
 
     @Override
-    protected void initGui() {
+    protected void init() {
         setContentView(R.layout.activity_signup);
 
         getSupportActionBar().setTitle(getString(R.string.rec));
@@ -88,7 +70,6 @@ public class SignUpActivity extends CommonActivity
 
         addFragment(fragmentSignUp.get(PERSONAL_DATA), false);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -131,32 +112,29 @@ public class SignUpActivity extends CommonActivity
     protected void listenerAction() {
     }
 
-
-
     @Override
-    public void personalData(String name, String last_name, Date date_birth, String email, String city, String phone) {
+    public void personalData(User personalInfoUser) {
 
         try{
-            user.put(KEY_NAME, name);
-            user.put(KEY_LAST_NAME, last_name);
-            user.put(KEY_DATE, date_birth);
-            user.put(KEY_EMAIL, email);
-            user.put(KEY_CITY, city);
-            user.put(KEY_PHONE, phone);
+            user.put(FieldDataBase.NAME.toName(), personalInfoUser.getName())
+                .put(FieldDataBase.LAST_NAME.toName(), personalInfoUser.getLastName())
+                .put(FieldDataBase.BIRTH_DATE.toName(), personalInfoUser.getBirthDate())
+                .put(FieldDataBase.EMAIL.toName(), personalInfoUser.getEmail())
+                .put(FieldDataBase.CITY.toName(), personalInfoUser.getCity())
+                .put(FieldDataBase.PHONE.toName(), personalInfoUser.getPhone());
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());
         }
-
         Log.d(TAG, user.toString());
     }
 
     @Override
     public void physicalData(int gender, int target, double height, double weight) {
         try{
-            user.put(KEY_GENDER, getString(gender));
-            user.put(KEY_TARGET, EnumUtilities.getEnumFromStrId(Target.class, target));
-            user.put(KEY_HEIGHT, height);
-            user.put(KEY_WEIGHT, weight);
+            user.put(FieldDataBase.GENDER.toName(), EnumUtilities.getEnumFromStrId(Gender.class, gender))
+                .put(FieldDataBase.TARGET.toName(), EnumUtilities.getEnumFromStrId(Target.class, target))
+                .put(FieldDataBase.HEIGHT.toName(), height)
+                .put(FieldDataBase.WEIGHT.toName(), weight);
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());
         }
@@ -166,37 +144,40 @@ public class SignUpActivity extends CommonActivity
     @Override
     public void accessData(String username, String hash_password) {
         try{
-            user.put(KEY_USERNAME, username);
-            user.put(KEY_HASH_PASSWORD, hash_password);
-            user.put(KEY_LANGUAGE, Locale.getDefault().getDisplayLanguage());
+            user.put(FieldDataBase.USERNAME.toName(), username)
+                .put(FieldDataBase.PASSWORD.toName(), hash_password)
+                .put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
 
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());
         }
-
         Log.d(TAG, user.toString());
 
-// TODO: 10/17/2019  RICHIESTA AL DATABASE (anche username)
-        //if(!HttpRequest.requestStringToServerVolley(this, HttpRequest.SIGN_UP, Request.Method.POST, user, this))
-        /*if(!HttpRequest.requestJsonPostToServerVolley(this, HttpRequest.SIGN_UP, user,this))
-        {
+        if(!HttpRequest.requestSignUp(this, user,this)) {
             Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-        }*/
+        }
     }
-    /*@Override
-    public void onResponse(String response) {
-        Log.e(TAG, response);
-    }*/
+
     @Override
     public void onResponse(JSONObject response) {
-        Iterator<String> it = response.keys();
-        if(it.hasNext() && it.next().equals(HttpRequest.ERROR)){
-            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+
+        if(HttpRequest.someError(response)){
+            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             Log.e(TAG, response.toString());
         }
         else{
-        // TODO: 10/26/2019 NOTIFICA PUSH
-            Toast.makeText(this, "Registrazione avvenuta correttamente! Riceverai un email.", Toast.LENGTH_LONG).show();
+            // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GISTO
+            //Toast.makeText(this, getString(R.string.correctly_sign_up), Toast.LENGTH_LONG).show();
+            //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
+
+            try {
+                Intent intent = new Intent(this, TokenActivity.class);
+                intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
+                startActivity(intent);
+                finish();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -224,33 +205,16 @@ public class SignUpActivity extends CommonActivity
                     imageView.setImageURI(imageUri);
                     bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
-                    CompressionBitMap.create().execute(bitmap);
+                    CompressionBitMap.create(image_encode -> {
+                        try {
+                            user.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+                        } catch (JSONException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                        Log.e(TAG, user.toString());
+                    }).execute(bitmap);
 
                 }).setWithImageCrop(1,1);
         imagePicker.choosePicture(true);
-    }
-
-    private static class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
-        private CompressionBitMap(){}
-        public static CompressionBitMap create(){
-            return new CompressionBitMap();
-        }
-
-
-        @Override
-        protected String doInBackground(Bitmap... bitmaps) {
-            return BitmapUtilities.BitMapToString(bitmaps[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            try {
-                user.put(KEY_IMG, s);
-            } catch (JSONException e) {
-                Log.e(TAG, e.getMessage());
-            }
-            Log.e(TAG, user.toString());
-        }
     }
 }

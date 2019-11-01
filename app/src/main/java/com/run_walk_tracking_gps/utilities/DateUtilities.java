@@ -74,6 +74,24 @@ public class DateUtilities {
                 String.format(FORMAT_TIME, c.get(is24Hour ? Calendar.HOUR_OF_DAY :Calendar.HOUR), c.get(Calendar.MINUTE));
     }
 
+    // TODO: 10/15/2019 DA MIGLIORARE
+    public static Date parseStringWithTimeToDateString(String dateWithTime){
+        final Calendar c = Calendar.getInstance();
+
+        try {
+            String[] split = dateWithTime.split(" ");
+            Date date = parseShortToDate(split[0]);
+            c.setTime(date);
+            String[] split_time = split[1].split(":");
+            c.set(is24Hour ? Calendar.HOUR_OF_DAY :Calendar.HOUR, Integer.valueOf(split_time[0]));
+            c.set(Calendar.MINUTE, Integer.valueOf(split_time[1]));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return c.getTime();
+    }
+
     public static  String parseFullToString(Date date){
         if(date==null) return "";
         return DateFormat.getDateInstance(DateFormat.FULL, locale).format(date);

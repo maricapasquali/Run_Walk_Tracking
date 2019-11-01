@@ -10,21 +10,14 @@ class WeightDao {
         {
 
           startTransaction();
+          $date = formatDate($weight[DATE]);
 
           $stmt = getConnection()->prepare("INSERT INTO weight(id_user, date, value) VALUES (?, ?, ?)");
           if(!$stmt) throw new Exception("Weight : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("isd",$weight[ID_USER], $weight[DATE], $weight[VALUE]);
+          $stmt->bind_param("isd",$weight[ID_USER], $date, $weight[VALUE]);
           if(!$stmt->execute()) throw new Exception("Weight : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
-
-          $stmt = getConnection()->prepare("SELECT id_weight FROM weight WHERE id_user=? and date=? and value=?");
-          if(!$stmt) throw new Exception("Weight id : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("isd",$weight[ID_USER], $weight[DATE], $weight[VALUE]);
-          if(!$stmt->execute()) throw new Exception("Weight id : Inserimento fallito. Errore: ". getErrorConnection());
-          $stmt->bind_result($id);
-          $stmt->fetch();
-          $stmt->close();
-
+          $id = getConnection()->insert_id;
           commitTransaction();
         }
       }catch (Exception $e) {
@@ -35,9 +28,6 @@ class WeightDao {
       return array(ID_WEIGHT => $id) + $weight;
    }
 
-  /**
-   * ID ULTIMO PARAMETRO {id_weight}
-   */
    static function update($weight){
      try {
        if(connect())
@@ -46,17 +36,21 @@ class WeightDao {
          startTransaction();
 
          $keys = array();
+         $values = array();
          $typeParam ="";
          foreach ($weight as $key => $value) {
-           if($key!=ID_WEIGHT) array_push($keys, $key);
-
+           if($key!=ID_WEIGHT){
+             array_push($keys, $key);
+             array_push($values, $value);
+           }
            if($key==DATE) $typeParam.="s";
            else if($key==VALUE) $typeParam.="d";
          }
+         array_push($values, $weight[ID_WEIGHT]);
 
          $stmt = getConnection()->prepare("UPDATE weight SET " . join("=?,", $keys) ."=? WHERE id_weight=?");
          if(!$stmt) throw new Exception("Weight update : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param($typeParam."i" , ...array_values($weight));
+         $stmt->bind_param($typeParam."i" , ...array_values($values));
          if(!$stmt->execute()) throw new Exception("Weight : Update fallito. Errore: ". getErrorConnection());
          $stmt->close();
 

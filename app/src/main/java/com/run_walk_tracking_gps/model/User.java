@@ -1,7 +1,5 @@
 package com.run_walk_tracking_gps.model;
 
-
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,62 +11,34 @@ import java.util.Date;
 
 public class User implements Parcelable {
 
-    private int id;
-    private Uri img;
+    private int id_user;
+    private String username;
     private String name;
-    private String lastName;
+    private String last_name;
     private Gender gender;
-    private Date birthDate;
+    private Date birth_date;
     private String email;
     private String city;
-    private String tel;
-    private String height;
+    private String phone;
+    private double height;
 
     public User(){}
 
-    private User(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height) {
-        this.name = name;
-        this.lastName = lastName;
-        this.gender = gender;
-        this.birthDate = birthDate;
-        this.email = email;
-        this.city = city;
-        this.height = height;
-    }
-
-
     protected User(Parcel in) {
-        id = in.readInt();
-        img = Uri.parse(in.readString());
+        id_user = in.readInt();
+        username =  in.readString();
         name = in.readString();
+        last_name = in.readString();
         gender = Gender.valueOf(in.readString());
-        lastName = in.readString();
-        birthDate = new Date(in.readLong());
+        birth_date = new Date(in.readLong());
         email = in.readString();
         city = in.readString();
-        tel = in.readString();
-        height = in.readString();
+        phone = in.readString();
+        height = in.readDouble();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(img.toString());
-        dest.writeString(name);
-        dest.writeString(gender.name());
-        dest.writeString(lastName);
-        dest.writeLong(birthDate.getTime());
-        dest.writeString(email);
-        dest.writeString(city);
-        dest.writeString(tel);
-        dest.writeString(height);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
+    // TODO: 11/1/2019 CREATE UN COMPARATOR 
+    
     public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
@@ -81,16 +51,12 @@ public class User implements Parcelable {
         }
     };
 
-    public static User create(String name, String lastName, Gender gender, Date birthDate, String email, String city, String height){
-        return new User(name, lastName, gender, birthDate, email, city, height);
+    public int getIdUser() {
+        return id_user;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public Uri getImg() {
-        return img;
+    public String getUsername() {
+        return username;
     }
 
     public String getName() {
@@ -98,7 +64,7 @@ public class User implements Parcelable {
     }
 
     public String getLastName() {
-        return lastName;
+        return last_name;
     }
 
     public Gender getGender() {
@@ -106,11 +72,11 @@ public class User implements Parcelable {
     }
 
     public Date getBirthDate() {
-        return birthDate;
+        return birth_date;
     }
 
     public String getBirthDateString() {
-        return DateUtilities.parseToString(DateFormat.SHORT, birthDate);
+        return DateUtilities.parseToString(DateFormat.SHORT, birth_date);
     }
 
     public String getEmail() {
@@ -121,32 +87,32 @@ public class User implements Parcelable {
         return city;
     }
 
-    public String getTel() {
-        return tel;
+    public String getPhone() {
+        return phone;
     }
 
-    public String getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdUser(int id_user) {
+        this.id_user = id_user;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastName(String last_name) {
+        this.last_name = last_name;
     }
 
     public void setGender(Gender gender) {
         this.gender = gender;
     }
 
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthDate(Date birth_date) {
+        this.birth_date = birth_date;
     }
 
     public void setEmail(String email) {
@@ -157,31 +123,48 @@ public class User implements Parcelable {
         this.city = city;
     }
 
-    public void setHeight(String height) {
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setHeight(double height) {
         this.height = height;
     }
 
-    public void setImg(Uri img) {
-        this.img = img;
-    }
 
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
+
 
     @Override
     public String toString() {
 
-        return "User{ Id = " + id + '\'' +
-                ", pathImg='" + img + '\'' +
+        return "User{ id_user = " + id_user + '\'' +
                 ", name='" + name + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", last_name='" + last_name + '\'' +
                 ", gender=" + gender +
-                ", birthDate='" + birthDate + '\'' +
+                ", birth_date='" + birth_date + '\'' +
                 ", email='" + email + '\'' +
                 ", city='" + city + '\'' +
-                ", tel= '" + tel + '\'' +
+                ", phone= '" + phone + '\'' +
                 ", height='" + height + '\'' +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id_user);
+        dest.writeString(username);
+        dest.writeString(name);
+        dest.writeString(last_name);
+        dest.writeString(gender.toString());
+        dest.writeLong(birth_date.getTime());
+        dest.writeString(email);
+        dest.writeString(city);
+        dest.writeString(phone);
+        dest.writeDouble(height);
     }
 }

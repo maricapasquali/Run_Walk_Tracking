@@ -3,7 +3,7 @@ require_once("../utility.php");
 require_once("../dao/StatisticsDao.php");
 
 try{
-  $weight = $_GET;//bodyRequest();
+  $weight = bodyRequest();
 
   if(!isset($weight[ID_WEIGHT]))
   throw new Exception(URL_NOT_VALID);

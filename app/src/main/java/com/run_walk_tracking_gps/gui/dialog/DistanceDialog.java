@@ -43,11 +43,16 @@ public class DistanceDialog extends MeasureDialog {
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {
-        onSelectDistanceListener.setPositiveListener(isAvailable()? getValue(Measure.DISTANCE) : NO_AVAILABLE);
+        onSelectDistanceListener.setPositiveListener(isAvailable()? getValue(Measure.DISTANCE) : NO_AVAILABLE,
+                isAvailable()?  getValueDouble() : 0.0);
+    }
+
+    private Double getValueDouble(){
+        return Double.valueOf(getValue(Measure.DISTANCE).split(" ")[0]);
     }
 
     public interface OnSelectDistanceListener{
-        void setPositiveListener(String distance);
+        void setPositiveListener(String distanceStr, Double distance);
     }
 
 }

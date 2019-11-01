@@ -11,7 +11,7 @@ try{
 
    // NEL CASO SIA LA PRIMA VOLTA USA TOKEN INVIATO
    $result = UserDao::checkFirstLogin($user);
-   if($result) print json_encode(array(FIRST_LOGIN => $result));
+   if($result) print json_encode(array(FIRST_LOGIN => $result==1) + array(ID_USER =>$user[ID_USER]));
    else print json_encode(array(USER => $user,
                                 APP => array(SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))));
 }catch(Exception $e){
@@ -28,6 +28,7 @@ INPUT
 OUTPUT
 {
   "first_login": true
+  "id_user" : ....
 }
 
 o

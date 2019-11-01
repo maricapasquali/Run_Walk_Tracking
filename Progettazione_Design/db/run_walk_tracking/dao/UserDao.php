@@ -9,14 +9,14 @@ class UserDao {
 
           startTransaction();
 
-          $stmt = getConnection()->prepare("INSERT INTO user (name, last_name, gender, birth_date, email, phone, city_country, height)
+          $stmt = getConnection()->prepare("INSERT INTO user (name, last_name, gender, birth_date, email, phone, city, height)
                              VALUES (?, ?, ?, ?, ?, ?, ?, ? )");
           if(!$stmt) throw new Exception("User : Preparazione fallita. Errore: ". getErrorConnection());
           $stmt->bind_param("sssssssd", $name, $lastname, $gender, $birth_date, $email, $phone, $city, $height);
           $name = $user[NAME];
           $lastname = $user[LAST_NAME];
           $gender = $user[GENDER];
-          $birth_date = $user[BIRTH_DATE];
+          $birth_date = formatDate($user[BIRTH_DATE]);
           $email = $user[EMAIL];
           $phone = $user[PHONE];
           $city = $user[CITY];
@@ -24,13 +24,7 @@ class UserDao {
           if(!$stmt->execute()) throw new Exception("User : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
-          $stmt = getConnection()->prepare("SELECT id_user FROM user WHERE name=? and last_name=?");
-          if(!$stmt) throw new Exception("user id : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("ss", $name, $lastname);
-          if(!$stmt->execute()) throw new Exception("user id : Inserimento fallito. Errore: ". getErrorConnection());
-          $stmt->bind_result($id);
-          $stmt->fetch();
-          $stmt->close();
+          $id = getConnection()->insert_id;
 
           $stmt = getConnection()->prepare("INSERT INTO login(id_user, username, hash_password) VALUES (?, ?, ?)");
           if(!$stmt) throw new Exception("Login : Preparazione fallita. Errore: ". getErrorConnection());
@@ -40,10 +34,19 @@ class UserDao {
           if(!$stmt->execute()) throw new Exception("Login : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
+          $stmt = getConnection()->prepare("SELECT id_target FROM target WHERE name=?");
+          if(!$stmt) throw new Exception("Target find id: Preparazione fallita. Errore: ". getErrorConnection());
+          $stmt->bind_param("s", $name_target);
+          $name_target = $user[TARGET];
+          if(!$stmt->execute()) throw new Exception("Target find id: Selezione fallito. Errore: ". getErrorConnection());
+          $stmt->bind_result($id_target);
+          $stmt->fetch();
+          if($id_target==NULL) throw new Exception("Target ($name_target) NON ESISTENTE");
+          $stmt->close();
+
           $stmt = getConnection()->prepare("INSERT INTO target_default(id_user, target) VALUES (?, ?)");
           if(!$stmt) throw new Exception("Target : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("ii", $id,$target);
-          $target = $user[TARGET];
+          $stmt->bind_param("ii", $id, $id_target);
           if(!$stmt->execute()) throw new Exception("Target : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
@@ -81,6 +84,10 @@ class UserDao {
           if(!$stmt->execute()) throw new Exception("Token : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
+          // Invio email con token
+          $body = "Token: ".$token;
+          sendEmail($email, "Registrazione", $body);
+
           commitTransaction();
         }
       }catch (Exception $e) {
@@ -89,7 +96,7 @@ class UserDao {
         return;
       }
       closeConnection();
-      return array(TOKEN=>$token);
+      return array(ID_USER => $id, TOKEN=>$token);
    }
 
    static function checkCredential($username, $password){
@@ -120,7 +127,7 @@ class UserDao {
          $stmt->fetch();
          $stmt->close();
 
-         if($isCorrect==0) throw new Exception("User o Token non corretto");
+         if($isCorrect==0) throw new Exception("Token non corretto");
 
          $stmt = getConnection()->prepare("UPDATE login SET date = CURRENT_TIMESTAMP WHERE id_user=?");
          if(!$stmt) throw new Exception("Date login update : Preparazione fallita. Errore: ". getErrorConnection());
@@ -150,19 +157,21 @@ class UserDao {
      $user = array();
 
      if(connect()){
-        $stmt = getConnection()->prepare("SELECT u.*, l.username FROM user u JOIN login l on(u.id_user=l.id_user) WHERE u.id_user=?");
-        if(!$stmt) throw new Exception("user id : Preparazione fallita. Errore: ". getErrorConnection());
+        $stmt = getConnection()->prepare("SELECT u.*, l.username, i.img_encode FROM login l JOIN user u on(l.id_user=u.id_user)
+          LEFT JOIN profile_image i on (u.id_user=i.id_user) WHERE u.id_user=?");
+        if(!$stmt) throw new Exception("user from id : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("s", $id);
-        if(!$stmt->execute()) throw new Exception("Check : Selezione fallita. Errore: ". getErrorConnection());
+        if(!$stmt->execute()) throw new Exception("user from id : Selezione fallita. Errore: ". getErrorConnection());
         $result = $stmt->get_result();
         while($row = $result->fetch_assoc()){
           array_push($user, $row);
         }
         if(count($user)==0) throw new Exception("USER (id=$id) NON ESISTENTE");
         $stmt->close();
+
      }
      closeConnection();
-     return $user;
+     return $user[0];
    }
 
    static function getUserForUsername($username){
@@ -218,9 +227,6 @@ class UserDao {
      return true;
    }
 
-   /**
-   * ID ULTIMO PARAMETRO {id_user}
-   */
    static function update($user){
      try {
        if(connect()) {
@@ -229,10 +235,15 @@ class UserDao {
 
          $keys = array();
          $values = array();
+
          foreach ($user as $key => $value) {
-           if($key!=ID_USER && $key!=IMG) array_push($keys, $key);
-           if($key!=IMG) array_push($values, $value);
+           if($key!=ID_USER && $key!=IMG){
+             array_push($keys, $key);
+             array_push($values, $value);
+           }
          }
+         array_push($values, $user[ID_USER]);
+
 
          $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
          if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());

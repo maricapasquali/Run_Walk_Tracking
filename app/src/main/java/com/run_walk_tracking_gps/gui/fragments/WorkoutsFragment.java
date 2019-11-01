@@ -87,18 +87,6 @@ public class WorkoutsFragment extends Fragment {
                 workouts = getArguments().getParcelableArrayList(LIST_WORKOUT_KEY);
             }
             Log.d(TAG, "List Workouts = "+ workouts);
-        }else {
-            //ESEMPIO INIZIALIZZAIONE LISTA ALLENAMENTI
-            Calendar calendar = Calendar.getInstance();
-            for (int i=1; i<5; i++){
-                calendar.add(Calendar.DATE, -i);
-                Workout w = Workout.create(calendar.getTime(), "01:12:00", "5.38 Km", "300 Kcal");
-                w.setSport(i%2==0? Sport.RUN : Sport.WALK);
-                w.setId(i);
-                w.setMiddleSpeed("7 km/h");
-                workouts.add(w);
-            }
-            Log.d(TAG, "Lista = " );
         }
     }
 
@@ -133,8 +121,13 @@ public class WorkoutsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "OnResume");
+
+        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
+
         if(onManualAddClickedListener.newWorkout()!=null){
             workouts.add(0, onManualAddClickedListener.newWorkout());
+            workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+
             workoutsAdapter.notifyDataSetChanged();
             onManualAddClickedListener.resetNewWorkout();
 
@@ -142,16 +135,15 @@ public class WorkoutsFragment extends Fragment {
         }
         if(onWorkOutSelectedListener.workoutChanged()!=null){
             final Workout newW = onWorkOutSelectedListener.workoutChanged();
-            Log.d(TAG,"Before remove = " +  workouts);
-            workouts.stream().filter(w -> w.getId() == newW.getId())
+            workouts.stream().filter(w -> w.getIdWorkout() == newW.getIdWorkout())
                              .findFirst().ifPresent(w -> workouts.remove(w));
-            Log.d(TAG,"After remove = " +  workouts);
             workouts.add(newW);
             workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+
             workoutsAdapter.notifyDataSetChanged();
             onWorkOutSelectedListener.resetWorkoutChanged();
 
-            //Log.d(TAG, "Gui Update : Workout Changed = " +newW);
+            Log.d(TAG, "Gui Update : Workout Changed = " +newW);
         }
     }
 

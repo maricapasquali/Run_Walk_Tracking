@@ -51,12 +51,15 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".gui.SignUpActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".gui.TokenActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
@@ -66,17 +69,16 @@
         </activity>
         <activity
             android:name=".gui.ApplicationActivity"
-            android:launchMode="singleInstance"
+
             android:screenOrientation="portrait">
+         <!--   android:launchMode="singleInstance"-->
         </activity>
         <activity
             android:name=".gui.SettingActivity"
-            android:parentActivityName=".gui.ApplicationActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".gui.DetailsWorkoutActivity"
-            android:parentActivityName=".gui.ApplicationActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".gui.ModifyWorkoutActivity"
@@ -98,7 +100,6 @@
         </activity>
         <activity
             android:name=".gui.activity_of_settings.ModifyUserActivity"
-            android:parentActivityName=".gui.activity_of_settings.UserActivity"
             android:screenOrientation="portrait" >
 
         </activity>

@@ -1,11 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.maps.MapView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
 
@@ -29,6 +27,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
     private final static int REQUEST_MODIFY = 0;
 
+    private MapView summary_map;
 
     private ListView summary_workout;
     private ImageButton summary_ok;
@@ -39,12 +38,12 @@ public class DetailsWorkoutActivity extends  CommonActivity {
     private boolean isSummary = false;
     private Workout workout;
 
-
-
     @Override
-    protected void initGui() {
+    protected void init() {
         setContentView(R.layout.activity_details_workout);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        summary_map = findViewById(R.id.summary_map);
         summary_workout = findViewById(R.id.summary);
         summary_ok = findViewById(R.id.summary_ok);
 
@@ -66,6 +65,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
             if(workout!=null){
                 d = workout.toArrayString();
                 Log.d(TAG, workout.toString());
+                if(workout.getMapRoute()==null)summary_map.setVisibility(View.GONE);
 
                 summary_ok.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(R.string.detail_workout);
@@ -127,28 +127,27 @@ public class DetailsWorkoutActivity extends  CommonActivity {
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, getString(R.string.changed_workout), Toast.LENGTH_LONG).show();
                     Workout work = (Workout) data.getParcelableExtra(getString(R.string.changed_workout));
-                    isChangedWorkout = isChangedWorkout(work);
-                    Log.d(TAG, "isChangedWorkout= " + isChangedWorkout);
-                    if (isChangedWorkout) {
+                    isChangedWorkout = (work!=null);
+                    if(isChangedWorkout){
                         adapter.updateDetails(work);
                         workout = work;
                         Log.d(TAG, "Workout= " + workout);
                     }
+
                 }
                 break;
         }
     }
 
-
-    private boolean isChangedWorkout(Workout work){
-
+    /*private boolean isChangedWorkout(Workout work){
+        // TODO: 11/1/2019 USARE UN COMPARATOR
         return !(work.getDate().equals(workout.getDate()) &&
                  work.getSport().equals(workout.getSport()) &&
-                 work.getTime().equals(workout.getTime()) &&
-                 work.getDistance().equals(workout.getDistance()) &&
-                 work.getCalories().equals(workout.getCalories()) &&
-                 work.getMiddleSpeed().equals(workout.getMiddleSpeed()));
-    }
+                 work.getDistance()==workout.getDuration() &&
+                 work.getDistance()==workout.getDistance() &&
+                 work.getCalories()==workout.getCalories() &&
+                 work.getMiddleSpeed()==workout.getMiddleSpeed());
+    }*/
 
     @Override
     public void onBackPressed() {

@@ -132,27 +132,16 @@
                     android:padding="2dp"
                     app:srcCompat="@drawable/ic_location" />
 
-                <TextView
-                    android:id="@+id/setting_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:paddingStart="20dp"
-                    android:paddingTop="15dp"
-                    android:paddingEnd="0dp"
-                    android:paddingBottom="15dp"
-                    android:text="@string/location"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="18sp" />
-
                 <Switch
                     android:id="@+id/location_on_off"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:elevation="8dp"
-                    android:paddingStart="0dp"
+                    android:paddingStart="20dp"
                     android:paddingEnd="20dp"
+                    android:text="@string/location"
+                    android:textColor="@android:color/background_light"
                     android:textColorLink="@color/colorPrimaryDark"
                     android:textOff="@string/off"
                     android:textOn="@string/on"
@@ -407,6 +396,12 @@
 
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/snake"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"></LinearLayout>
     </RelativeLayout>
 
 

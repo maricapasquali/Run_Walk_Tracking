@@ -4,6 +4,8 @@
     <string name="ok">OK</string>
     <string name="cancel">Annulla</string>
 
+    <string name="loading">Caricamento...</string>
+
     <!-- BootApp -->
     <string name="rec">Iscriviti</string>
     <string name="login">Accedi</string>
@@ -13,6 +15,8 @@
     <string name="password">Password</string>
     <string name="forgot_password"><u><i>Password Dimenticata ?</i></u></string>
 
+    <!-- Token -->
+    <string name="token">Token</string>
     <!-- Sign Up -->
     <string name="forward">Avanti</string>
     <string name="personal_data">Dati personali</string>
@@ -44,6 +48,10 @@
 
     <string name="access_data">Dati di accesso</string>
     <string name="confirm_password">Conferma Password</string>
+
+    <!-- Mex -->
+    <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
+
 
     <!-- Home -->
     <string name="setting">Impostazioni</string>
@@ -87,8 +95,8 @@
     <string name="middle_speed">Velocità Media</string>
 
     <string name="time_workout">00:00</string>
-    <string name="distance_workout">0.00 Km</string>
-    <string name="calories_workout">0 Kcal</string>
+    <string name="distance_workout">0.00 </string>
+    <string name="calories_workout">0 </string>
 
 
     <string name="start">Inizia</string>
@@ -111,7 +119,7 @@
     <string name="new_workout_manual">Nuovo Allenamento Manuale</string>
     <string name="modify_workout">Modifica Allenamento</string>
     <string name="changed_workout">Allenamento Modificato</string>
-
+    <string name="user_info">Informazioni User</string>
 
     <!-- Riepilogo / Dettaglio Allenamento -->
 
@@ -176,6 +184,8 @@
     <!-- Messaggi di errore -->
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
     <string name="internet_not_available">Internet non attivo</string>
-
+    <string name="not_empty">\u0020 non può essere vuoto</string>
+    <string name="user_not_set">User non settato</string>
+    <string name="account_not_checked">Account non verificato!</string>
 
 </resources>

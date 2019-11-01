@@ -5,6 +5,7 @@ define("APP", "app");
 define("USER", "user");
 define("FIRST_LOGIN", "first_login");
 define("URL_NOT_VALID", "Url non valido");
+define("FILTER_NOT_VALID", "Filtro non valido");
 define("WORKOUTS", "workouts");
 define("WORKOUT", "workout");
 define("FILTER", "filter");
@@ -38,7 +39,7 @@ define("PASSWORD", "password");
 define("TOKEN", "token");
 // Workouts
 define("ID_WORKOUT", "id_workout");
-define("MAP_ROUTE", "MAP_ROUTE");
+define("MAP_ROUTE", "map_route");
 define("DATE", "date");
 define("DURATION", "duration");
 define("DISTANCE", "distance");
@@ -57,6 +58,11 @@ define("LOCATION", "location");
 define("UNIT_MEASURE", "unit_measure");
 define("ENERGY", "energy");
 
+define("UNIT_DISTANCE", "unit_distance");
+define("UNIT_WEIGHT", "unit_weight");
+define("UNIT_HEIGHT", "unit_height");
+
+
 
 function bodyRequest(){
   return json_decode(file_get_contents('php://input'), true);
@@ -68,6 +74,14 @@ function hashed_password($password){
 
 function current_date() {
   return date("Y-m-d H:i:s");
+}
+
+function formatDate($date){
+  return  date("Y-m-d", strtotime($date));
+}
+
+function formatDateWithTime($dateTime){
+  return  date("Y-m-d H:i:s", strtotime($dateTime));
 }
 
 function date_end_validity_link(){

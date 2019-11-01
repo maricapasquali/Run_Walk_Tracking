@@ -29,7 +29,7 @@ public class NewInformationActivity extends CommonActivity {
 
 
     @Override
-    protected void initGui() {
+    protected void init() {
         setContentView(R.layout.activity_add_info);
 
         getSupportActionBar().setTitle(title);

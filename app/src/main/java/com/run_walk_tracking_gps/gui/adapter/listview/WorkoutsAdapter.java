@@ -8,8 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.dialog.DurationDialog;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.utilities.DurationUtilities;
 
 import java.util.List;
 
@@ -50,12 +52,11 @@ public class WorkoutsAdapter extends ArrayAdapter<Workout> {
             viewHolder = (ListHolder) convertView.getTag();
         }
 
-
         viewHolder.date.setText(DateUtilities.parseFullToString(workout.getDate()));
-        viewHolder.time.setText(workout.getTime());
+        viewHolder.time.setText(DurationUtilities.format(workout.getDuration()));
 
-        viewHolder.distance.setText(workout.getDistance()==null ? ND : workout.getDistance());
-        viewHolder.calories.setText(workout.getCalories()==null ? ND : workout.getCalories());
+        viewHolder.distance.setText(workout.getDistance() > 0f ?  String.valueOf(workout.getDistance()): ND);
+        viewHolder.calories.setText(workout.getCalories() > 0f ? String.valueOf(workout.getCalories()): ND);
 
         return view;
     }

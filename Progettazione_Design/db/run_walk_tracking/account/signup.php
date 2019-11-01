@@ -44,6 +44,7 @@ INPUT
 
 OUTPUT
 {
+  "id_user" : .....
 	"token" : ".........."
 }
 */

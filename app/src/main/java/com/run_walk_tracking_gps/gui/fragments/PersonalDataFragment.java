@@ -26,6 +26,8 @@ import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.SignUpActivity;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.model.User;
+import com.run_walk_tracking_gps.model.UserBuilder;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
 import java.io.ByteArrayOutputStream;
@@ -96,12 +98,15 @@ public class PersonalDataFragment extends Fragment {
         super.onPause();
         Log.d(TAG,"onPause");
         try {
-            personalDataListener.personalData(name.getText().toString(),
-                                              last_name.getText().toString(),
-                                              DateUtilities.parseShortToDate(birthDate.getText().toString()) ,
-                                              email.getText().toString(),
-                                              city.getText().toString(),
-                                              phone.getText().toString());
+
+            personalDataListener.personalData(UserBuilder.create()
+                                                         .setName(name.getText().toString())
+                                                         .setLastName(last_name.getText().toString())
+                                                         .setBirthDate(birthDate.getText().toString())
+                                                         .setEmail(email.getText().toString())
+                                                         .setCity(city.getText().toString())
+                                                         .setPhone(phone.getText().toString())
+                                                         .build());
         } catch (ParseException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -137,6 +142,6 @@ public class PersonalDataFragment extends Fragment {
     }
 
     public interface PersonalDataListener{
-        void personalData(String name, String last_name, Date date_birth, String email, String city, String phone);
+        void personalData(User personalInfoUser);
     }
 }

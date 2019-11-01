@@ -6,12 +6,15 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
 
+import org.json.JSONException;
+
 public class HeightDialog extends MeasureDialog {
 
-    private static final int MAX_VALUES_INT_HEIGHT = 4;
+    private static final int MAX_VALUES_INT_HEIGHT = 10;
     private static final int MAX_VALUES_DEC_HEIGHT = 99;
 
     private OnSelectHeightListener onSelectHeightListener;
@@ -48,7 +51,16 @@ public class HeightDialog extends MeasureDialog {
 
     @Override
     protected void setUnit(TextView unit) {
-        unit.setText(MeasureUnit.METER.getStrId());
+        try {
+            if(!Preferences.isJustUserLogged(getContext()) || Preferences.getUnitHeightDefault(getContext()).equals(MeasureUnit.METER.toString()))
+                unit.setText(MeasureUnit.METER.getStrId());
+            else
+                unit.setText(MeasureUnit.FEET.getStrId());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     protected void setPositiveListener(DialogInterface dialog, int which){

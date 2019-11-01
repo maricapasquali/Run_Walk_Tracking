@@ -3,7 +3,7 @@
     <color name="colorPrimary">#FF9900</color>
     <color name="colorPrimaryOpaque">#4CFF9900</color>
     <color name="colorPrimaryDark">#B45F06</color>
-    <!--<color name="colorAccent">#D81B60</color>-->
+    <color name="colorAccent">#4CFF9900</color> <!--#D81B60-->
 
     <color name="divColor">#ffd966</color>
     <color name="startBtn">#009e0f</color>

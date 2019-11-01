@@ -1,72 +1,60 @@
 package com.run_walk_tracking_gps.model;
 
-import android.os.Build;
+
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.RequiresApi;
 
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DurationUtilities;
 
 import java.util.Date;
 
+
 public class Workout implements Parcelable {
 
-    private int id;
+    private static final String ND = "N.D.";
+
+    private int id_workout;
+
+    private String map_route;
+    private String date;
+    private int duration;
+    private double distance;
+    private double calories;
+    private double middle_speed;
     private Sport sport;
-    private Date date;
-    private String time;
-    private String distance = "N.D.";
-    private String calories = "N.D.";
-    private String middle_speed = "N.D.";
 
     public Workout(){}
 
-    private Workout(Date date, String time, String distance, String calories) {
-        this.date = date;
-        this.time = time;
-        this.distance = distance;
-        this.calories = calories;
+    private Workout (Workout w){
+        this.id_workout = w.id_workout;
+        this.map_route = w.map_route;
+        this.date = w.date;
+        this.duration = w.duration;
+        this.distance = w.distance;
+        this.calories = w.calories;
+        this.middle_speed = w.middle_speed;
+        this.sport = w.sport;
     }
 
-    public Workout(Sport sport) {
-        this.setSport(sport);
-    }
-
-    private Workout(Sport sport, Date date, String time, String distance, String calories, String middle_speed) {
-        this.sport = sport;
-        this.date = date;
-        this.time = time;
-        this.distance = distance;
-        this.calories = calories;
-        this.middle_speed = middle_speed;
+    public Workout clone(){
+        return new Workout(this);
     }
 
     protected Workout(Parcel in) {
-        id = in.readInt();
-        date = new Date(in.readLong());
+        id_workout = in.readInt();
+        map_route = in.readString();
         sport = Sport.valueOf(in.readString());
-        time = in.readString();
-        distance = in.readString();
-        calories = in.readString();
-        middle_speed = in.readString();
+        date = in.readString();
+        duration = in.readInt();
+        distance = in.readDouble();
+        calories = in.readDouble();
+        middle_speed = in.readDouble();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeLong(date.getTime());
-        dest.writeString(sport.name());
-        dest.writeString(time);
-        dest.writeString(distance);
-        dest.writeString(calories);
-        dest.writeString(middle_speed);
-    }
+    // TODO: 11/1/2019 CREATE UN COMPARATOR
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
     public static final Creator<Workout> CREATOR = new Creator<Workout>() {
         @Override
@@ -80,94 +68,117 @@ public class Workout implements Parcelable {
         }
     };
 
-    public static Workout create(Date date, String time, String distance, String calories) {
-        return new Workout(date, time, distance, calories);
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public static Workout create(Sport sport, Date date, String time, String distance, String calories, String middle_speed) {
-        return new Workout(sport, date, time, distance, calories, middle_speed);
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id_workout);
+        dest.writeString(map_route);
+        dest.writeString(sport.toString());
+        dest.writeString(date);
+        dest.writeInt(duration);
+        dest.writeDouble(distance);
+        dest.writeDouble(calories);
+        dest.writeDouble(middle_speed);
     }
 
-    public int getId() {
-        return id;
+    public int getIdWorkout() {
+        return id_workout;
+    }
+
+    public String getMapRoute() {
+        return map_route;
+    }
+
+    public Date getDate() {
+        return DateUtilities.parseStringWithTimeToDateString(date);
     }
 
     public Sport getSport() {
         return sport;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-
     public String getDateString() {
-        return DateUtilities.parseShortToString(this.date);
+        return this.date;
     }
 
-    public String getTime() {
-        return time;
+    public int getDuration() {
+        return duration;
     }
 
-    public String getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    public String getCalories() {
+    public double getCalories() {
         return calories;
     }
 
-    public String getMiddleSpeed() {
+    public double getMiddleSpeed() {
         return middle_speed;
     }
 
-
-    public void setId(int id) {
-        this.id = id;
+    public void setIdWorkout(int id_workout) {
+        this.id_workout = id_workout;
     }
+
+    public void setMapRoute(String map_route) {
+        this.map_route = map_route;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+
 
     public void setSport(Sport sport) {
         this.sport = sport;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public void setDistance(String distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    public void setCalories(String calories) {
+    public void setCalories(double calories) {
         this.calories = calories;
     }
 
-    public void setMiddleSpeed(String middle_speed) {
+    public void setMiddleSpeed(double middle_speed) {
         this.middle_speed = middle_speed;
     }
 
-
     public String[] toArrayString() {
-        return new String[]{this.getDateString(), this.sport.toString(), this.time, this.distance, this.calories, this.middle_speed};
+        return new String[]{this.date, sport.toString() ,
+                DurationUtilities.format(this.duration),
+                this.distance>0 ?String.valueOf(this.distance) : ND,
+                this.calories>0 ?String.valueOf(this.calories) : ND,
+                this.middle_speed>0 ?String.valueOf(this.middle_speed) : ND,
+                };
     }
 
     public boolean isMinimalSet(){
-        return this.date!=null && this.sport!=null && this.time!=null;
+        return this.date!=null && this.sport!=null && this.duration!=0;
     }
 
     @Override
     public String toString() {
-        return "Workout{ Id=" + id +
-                ", sport='" + sport +'\''+
-                ", date='" + date + '\'' +
-                ", time='" + time + '\'' +
-                ", distance='" + distance + '\'' +
-                ", calories='" + calories + '\'' +
-                ", middle_speed='" + middle_speed + '\'' +
-                '}';
+
+        return "Workout{ id_workout='" + id_workout +'\''+
+                    ", map_route='" + map_route +'\''+
+                    ", sport='" + sport +'\''+
+                    ", date='" + getDate() + '\'' +
+                    ", time='" + duration + '\'' +
+                    ", distance='" + distance + '\'' +
+                    ", calories='" + calories + '\'' +
+                    ", middle_speed='" + middle_speed + '\'' +
+                    '}';
     }
 }

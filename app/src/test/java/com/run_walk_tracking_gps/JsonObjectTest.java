@@ -1,5 +1,7 @@
 package com.run_walk_tracking_gps;
 
+import com.run_walk_tracking_gps.model.enumerations.Gender;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +77,9 @@ public class JsonObjectTest {
     public void convertStringToJson(){
 
         try {
+            System.err.print(
+                    Gender.FEMALE.toString()
+            );
             object = new JSONObject(stringJson);
             System.out.print("\n\n" +object.toString() + "\n\n");
             Assert.assertEquals(VALUE_CONVERT, object.get(KEY_CONVERT));

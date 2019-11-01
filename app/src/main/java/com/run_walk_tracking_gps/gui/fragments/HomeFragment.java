@@ -11,11 +11,9 @@ import android.content.Intent;
 
 import android.location.LocationManager;
 
-import android.os.Build;
 import android.os.Bundle;
 
 
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -27,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,10 +40,14 @@ import com.google.android.gms.location.LocationServices;
 
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.dialog.MapTypeDialog;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+
+import org.json.JSONObject;
 
 import java.util.Calendar;
 
@@ -108,6 +111,30 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         unlock_screen = rootView.findViewById(R.id.unlock_screen);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        TextView sport = rootView.findViewById(R.id.sport);
+        TextView distance_workout = rootView.findViewById(R.id.distance_workout);
+        TextView energy_workout = rootView.findViewById(R.id.calories_workout);
+
+        try {
+            final String id_user = Preferences.getIdUserLogged(getContext());
+            final JSONObject jsonApp = Preferences.getAppJsonUserLogged(getContext(), id_user);
+
+            JSONObject settings = (JSONObject)jsonApp.get(FieldDataBase.SETTINGS.toName());
+            JSONObject s_sport = (JSONObject)settings.get(FieldDataBase.SPORT.toName());
+            JSONObject s_unit_measure = (JSONObject)settings.get(FieldDataBase.UNIT_MEASURE.toName());
+
+            String s_energy = (String)((JSONObject)s_unit_measure.get(FieldDataBase.ENERGY.toName())).get(FieldDataBase.UNIT.toName());
+            String s_distance = (String)((JSONObject)s_unit_measure.get(FieldDataBase.DISTANCE.toName())).get(FieldDataBase.UNIT.toName());
+
+            sport.setText(Sport.valueOf((String)s_sport.get(FieldDataBase.NAME.toName())).getStrId());
+            energy_workout.setText(energy_workout.getText() +getString(R.string.space)+ s_energy);
+            distance_workout.setText(distance_workout.getText() +getString(R.string.space)+ s_distance);
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
 
         //initialize map
         initMapView(savedInstanceState);
@@ -174,11 +201,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
             inWorkout = false;
             // Esempio Workout
 
-            final Workout workout = Workout.create(Calendar.getInstance().getTime(), "01:00:00", "20 Km", "400 Kcal");
+            /*final Workout workout = Workout.create(Calendar.getInstance().getTime(), "01:00:00", "20 Km", "400 Kcal");
             workout.setMiddleSpeed("9.0 Km/h");
             workout.setSport(Sport.RUN);
 
-            onStopWorkoutClickListener.OnStopWorkoutClick(workout);
+            onStopWorkoutClickListener.OnStopWorkoutClick(workout);*/
         });
     }
 
@@ -263,6 +290,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         mapView.onResume();
         super.onResume();
 
+        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI 
+        
         if(requestPermissions)
         {
             mapView.getMapAsync(this);

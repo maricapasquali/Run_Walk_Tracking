@@ -30,11 +30,4 @@ public enum MeasureUnit
     public int getStrId() {
         return this.strId;
     }
-
-    /**
-     * 1 Mile = 1.61 Km
-     * 1 Pound = 0.45 Kg
-     * 1 Feet = 0,3048 m
-     * 1 Inch = 2.54 cm
-     */
 }

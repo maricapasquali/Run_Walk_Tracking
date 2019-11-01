@@ -5,7 +5,7 @@ import com.run_walk_tracking_gps.gui.CommonActivity;
 
 public class InfoActivity extends CommonActivity {
     @Override
-    protected void initGui() {
+    protected void init() {
         setContentView(R.layout.activity_info);
         getSupportActionBar().setTitle(R.string.info);
     }

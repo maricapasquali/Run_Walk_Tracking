@@ -22,7 +22,7 @@ public abstract class CommonActivity extends AppCompatActivity {
 
         //hideNavigationBar();
         //fullScreenMode();
-        initGui();
+        init();
         listenerAction();
     }
 
@@ -41,7 +41,7 @@ public abstract class CommonActivity extends AppCompatActivity {
         //show the activity in full screen
     }
 
-    protected abstract void initGui();
+    protected abstract void init();
 
     protected abstract void listenerAction();
 

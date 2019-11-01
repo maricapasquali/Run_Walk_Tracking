@@ -58,7 +58,7 @@ public class DateTimePickerDialog {
 
     private TimePickerDialog createTimePicker(Context context, OnSelectDateTime onSelectDateTime){
         return new TimePickerDialog(context, (timePicker, hourOfDay, minute) -> {
-            calendar.set(is24HourView ? Calendar.HOUR_OF_DAY :Calendar.HOUR, hourOfDay);
+            calendar.set(is24HourView ? Calendar.HOUR_OF_DAY : Calendar.HOUR, hourOfDay);
             calendar.set(Calendar.MINUTE, minute);
 
             onSelectDateTime.setTextView(DateUtilities.parseShortToString(calendar.getTime()), calendar);

@@ -2,21 +2,24 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
+
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
@@ -26,9 +29,15 @@ import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
         HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
@@ -47,25 +56,39 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private Workout newWorkout;
     private Workout workoutChanged;
 
+    private ArrayList<Workout> workouts;
 
     @Override
-    protected void initGui() {
+    protected void init() {
         Log.d(TAG,"OnCreate");
         setContentView(R.layout.activity_application);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
         getSupportActionBar().setIcon(R.drawable.ic_runtracking_light);
-
-
         navigationBarBottom = findViewById(R.id.nav_bar);
 
         addFragment(new HomeFragment(), false);
         selectActiveFragment(HomeFragment.class);
+
+        try {
+            // REQUEST ALL WORKOUTS
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)));
+            if(!HttpRequest.requestWorkouts(this, bodyJson , response -> {
+                // TODO: 11/1/2019 CONTROLLO ERROR  REQUEST
+                try {
+                    workouts = new Gson().fromJson(response.get("workouts").toString(), new TypeToken<List<Workout>>(){}.getType());
+                    Log.e(TAG, workouts.toString());
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            })){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    private Date date(String string) throws ParseException {
-        return DateUtilities.parseShortToDate(string);
-    }
 
     @Override
     protected void listenerAction() {
@@ -74,8 +97,8 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                  Log.d(TAG, "onSelectNavigationBottom");
                  switch (menuItem.getItemId()) {
                      case R.id.workouts:
-                         addFragment(new WorkoutsFragment(), false);
-                         //addFragment(WorkoutsFragment.createWithArgument(workouts),false);
+                         //addFragment(new WorkoutsFragment(), false);
+                         addFragment(WorkoutsFragment.createWithArgument(workouts),false);
                          break;
                      case R.id.home:
                          addFragment(new HomeFragment(),false);
@@ -103,14 +126,13 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     }
 
     private void setTitleAndLogoActionBar(final Class fragment_class) {
-        if(getSupportActionBar()!=null){
+        if(getSupportActionBar()!= null){
             getSupportActionBar().setLogo(fragment_class==HomeFragment.class ? R.drawable.ic_runtracking_light : 0);
             getSupportActionBar().setTitle(fragment_class==HomeFragment.class ? R.string.app_name :
                     fragment_class==WorkoutsFragment.class? R.string.workouts :
                             R.string.statistics);
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -123,7 +145,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         switch (item.getItemId()){
             case R.id.setting:
                 Intent intent = new Intent(this, SettingActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivityForResult(intent, REQUEST_SETTINGS);
                 break;
         }
@@ -202,6 +223,9 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     }
 
     // StatisticsFragment Listener
+    private Date date(String string) throws ParseException {
+        return DateUtilities.parseShortToDate(string);
+    }
     @Override
     public ArrayList<StatisticsData> onChangeFilters(Measure measure, FilterTime filterTime) {
         // RICHIESTA AL DATABASE IN BASE A 'measure' e 'filterTime'
@@ -222,7 +246,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                     s.add(new StatisticsData(date("07/09/2019"), 7.0));
                     break;
             }
-
         }catch (ParseException e){
             Log.e(TAG, e.getMessage());
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -282,7 +305,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
             case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
-
                 }
         }
     }

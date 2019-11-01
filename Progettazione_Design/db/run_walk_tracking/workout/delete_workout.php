@@ -3,7 +3,7 @@ require_once("../utility.php");
 require_once("../dao/WorkoutDao.php");
 
 try{
-  $workout = $_GET;//bodyRequest();
+  $workout = bodyRequest();
 
   if(!isset($workout[ID_WORKOUT]))
   throw new Exception(URL_NOT_VALID);

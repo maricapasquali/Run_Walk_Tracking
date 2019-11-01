@@ -4,22 +4,37 @@ import android.app.Activity;
 import android.content.Intent;
 
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
-
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import android.widget.Switch;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.internal.bind.SqlDateTypeAdapter;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
 import com.run_walk_tracking_gps.gui.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.model.User;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.sql.SQLData;
+import java.sql.SQLInput;
+import java.util.stream.Stream;
 
 
 public class SettingActivity extends CommonActivity {
@@ -30,7 +45,6 @@ public class SettingActivity extends CommonActivity {
     private Spinner target;
 
     private LinearLayout profile;
-    private LinearLayout location;
     private Switch locationOnOff;
     private LinearLayout unit;
     private LinearLayout language;
@@ -41,24 +55,27 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout info;
     private LinearLayout exit;
 
+    private String id_user;
+
+    private JSONObject appJson;
+    private JSONObject settingsJson;
+
     @Override
-    protected void initGui() {
+    protected void init() {
         setContentView(R.layout.activity_setting);
         getSupportActionBar().setTitle(getString(R.string.setting));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // sport
         sport = findViewById(R.id.setting_spinner_sport);
         final SportAdapterSpinner spinnerAdapterSport = new SportAdapterSpinner(this, false);
         sport.setAdapter(spinnerAdapterSport);
-
-
         // target
         target = findViewById(R.id.setting_spinner_target);
         final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this, false);
         target.setAdapter(spinnerAdapterTarget);
 
         profile = findViewById(R.id.profile);
-        location = findViewById(R.id.location);
         locationOnOff = findViewById(R.id.location_on_off);
         unit = findViewById(R.id.unit);
         language = findViewById(R.id.language);
@@ -68,15 +85,24 @@ public class SettingActivity extends CommonActivity {
 
         info = findViewById(R.id.info);
         exit = findViewById(R.id.exit);
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home: onBackPressed();
-                break;
+        try{
+
+            id_user = Preferences.getIdUserLogged(this);
+            appJson = Preferences.getAppJsonUserLogged(this, id_user);
+            settingsJson = Preferences.getSettingsJsonUserLogged(this, id_user);
+
+            int sport_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.SPORT.toName())).get(FieldDataBase.ID_SPORT.toName()) -1;
+            int target_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.TARGET.toName())).get(FieldDataBase.ID_TARGET.toName()) -1;
+            boolean location_default = (boolean) settingsJson.get(FieldDataBase.LOCATION.toName());
+
+            sport.setSelection(sport_default);
+            target.setSelection(target_default);
+            locationOnOff.setChecked(location_default);
+
+        }catch (Exception e){
+            Log.e(TAG, e.getMessage());
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -87,10 +113,66 @@ public class SettingActivity extends CommonActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void listenerAction() {
 
-        location.setOnClickListener(v -> Toast.makeText(this, getString(R.string.location), Toast.LENGTH_SHORT).show());
-        locationOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> Toast.makeText(this,getString(isChecked ?  R.string.on : R.string.off), Toast.LENGTH_SHORT).show());
+        sport.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onChangeSpinnerSelection(FieldDataBase.SPORT.toName(), position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onChangeSpinnerSelection(FieldDataBase.TARGET.toName(), position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        locationOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            try {
+                JSONObject bodyJson = new JSONObject();
+                bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
+                        .put(FieldDataBase.FILTER.toName(), FieldDataBase.LOCATION.toName())
+                        .put(FieldDataBase.VALUE.toName(), isChecked);
+
+                if(!HttpRequest.requestUpdateSetting(this, bodyJson, response -> {
+                    try {
+                        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.ERROR)) || !(boolean)response.get("update")){
+                            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
+                        }else {
+                            ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
+                            Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                })){
+                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        });
+
         language.setOnClickListener(v -> Toast.makeText(this, getString(R.string.language), Toast.LENGTH_SHORT).show());
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
         coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
@@ -100,13 +182,90 @@ public class SettingActivity extends CommonActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
         });
+        profile.setOnClickListener(v ->{
+            try {
 
-        profile.setOnClickListener(v -> startActivity(new Intent(this, UserActivity.class)));
+                // TODO: 10/17/2019  RICHIESTA AL DATABASE (anche username)
+                final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)));
+                if(!HttpRequest.requestUserInformation(this, bodyJson, response -> {
+
+                    if(HttpRequest.someError(response))
+                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                    else {
+                        try {
+                            final  JSONObject userInfo = (JSONObject) response.get("user");
+
+                            final String img_encode = userInfo.getString(FieldDataBase.IMG_ENCODE.toName());
+                            User user = new Gson().fromJson(userInfo.toString(), User.class);
+
+                            // TODO: 10/31/2019 SALVARE NELLE SHARED PREFERENCES
+                            if(!img_encode.equals("null")){
+                                Preferences.setImageProfile(this, user.getIdUser(), img_encode);
+                            }
+                            Log.d(TAG, userInfo.toString());
+
+                            final Intent intent = new Intent(this, UserActivity.class);
+                            intent.putExtra(getString(R.string.user_info), user);
+                            startActivity(intent);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })){
+                    Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        });
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
+
+
         exit.setOnClickListener(v -> {
+
+            Preferences.unSetUserLogged(this);
+
             final Intent intent = new Intent(this, BootAppActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
+    }
+
+    private void onChangeSpinnerSelection(String type, int position){
+        try {
+            int id = position +1;
+            int s_default = (int) ((JSONObject)settingsJson.get(type)).get("id_"+type);
+            Log.d(TAG, "Selected " + type + " = " + id + ", Default = " + s_default);
+            if(id != s_default){
+                // request update
+                JSONObject bodyJson = new JSONObject();
+                bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
+                        .put(FieldDataBase.FILTER.toName(), type)
+                        .put(FieldDataBase.VALUE.toName(), id);
+
+                if(!HttpRequest.requestUpdateSetting(SettingActivity.this, bodyJson, response -> {
+                    try {
+                        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.ERROR)) || !(boolean)response.get("update")){
+                            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
+                        }else {
+
+                            settingsJson.put(type, (JSONObject)response.get(type));
+                            appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
+                            Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                })){
+                    Toast.makeText(SettingActivity.this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

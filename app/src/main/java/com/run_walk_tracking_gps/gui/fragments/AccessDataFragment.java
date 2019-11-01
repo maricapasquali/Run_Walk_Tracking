@@ -12,12 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.R;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 public class AccessDataFragment extends Fragment {
 
@@ -53,7 +49,7 @@ public class AccessDataFragment extends Fragment {
         login = view.findViewById(R.id.signup_login);
 
         login.setOnClickListener(v ->{
-            final String hash_password = md5(password.getText().toString());
+            final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
             Log.d(TAG, hash_password);
             accessDataListener.accessData(username.getText().toString(), hash_password);
         });
@@ -62,25 +58,7 @@ public class AccessDataFragment extends Fragment {
         return view;
     }
 
-    private String md5(String password){
-        try {
-            // Static getInstance method is called with hashing MD5
-            MessageDigest md = MessageDigest.getInstance("MD5");
 
-            // digest() method is called to calculate message digest
-            //  of an input digest() return array of byte
-            byte[] messageDigest = md.digest(password.getBytes());
-
-            // Convert byte array into signum representation
-            BigInteger no = new BigInteger(1, messageDigest);
-
-            // Convert message digest into hex value
-            return no.toString(16);
-
-        } catch (NoSuchAlgorithmException e) {// For specifying wrong message digest algorithms
-            throw new RuntimeException(e);
-        }
-    }
 
 
     public interface AccessDataListener{

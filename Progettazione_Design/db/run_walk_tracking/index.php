@@ -58,37 +58,6 @@ print json_encode(UserDao::getUserForId($_GET['id']));
 //print json_encode(array("update weight"=>SettingsDao::updateUnitWeightFor(1,27)));
 //print json_encode(array("update height"=>SettingsDao::updateUnitHeightFor(1,27)));
 
-// SMS
-// TODO: da rivedere o togliere
-/*
-$token = "your.token"; // https://secure.smsfactor.com/token.html;
-$content = "Test API";
-$numbers = array('0601020304','0704030201');
-$sender = "PHP";
-$recipients = array();
-foreach ($numbers as $n) {
-  $recipients[] = array('value' => $n);
-}
-
-$postdata = array(
-  'sms' => array(
-   'message' => array(
-    'text' => $content,
-    'sender' => $sender
-   ),
-   'recipients' => array('gsm' => $recipients)
-  )
-);
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://api.smsfactor.com/send");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postdata));
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Accept: application/json', 'Authorization: Bearer ' . $token));
-$response = curl_exec($ch);
-curl_close($ch);*/
-
 print "BENVENUTO";
 
 }catch(Exception $e){

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.utilities.DurationUtilities;
 
 
 public class DurationDialog extends MeasureDialog {
@@ -53,11 +54,15 @@ public class DurationDialog extends MeasureDialog {
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {
-        onSelectDurationListener.setPositiveListener(getValue(Measure.DURATION));
+        onSelectDurationListener.setPositiveListener(getValue(Measure.DURATION), getValueInt());
+    }
+
+    private Integer getValueInt(){
+        return DurationUtilities.stringToSeconds(getValue(Measure.DURATION));
     }
 
     public interface OnSelectDurationListener{
-        void setPositiveListener(String duration);
+        void setPositiveListener(String durationStr, Integer duration);
     }
 
 }
