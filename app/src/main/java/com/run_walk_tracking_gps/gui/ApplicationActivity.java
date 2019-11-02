@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 
 public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
         HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
-        StatisticsFragment.OnChangeFiltersListener, StatisticsFragment.OnAddWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
+        StatisticsFragment.OnAddWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
 
     private final static String TAG = ApplicationActivity.class.getName();
     private final static int REQUEST_SETTINGS = 1;
@@ -108,10 +108,13 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                         Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                     }else{
 
+                        // TODO: 11/2/2019 MIGLIORARE
                         JSONArray array = (JSONArray)response.get("weights");
                         for(int i=0; i<array.length(); i++){
                             JSONObject s = (JSONObject)array.get(i);
-                            statisticsWeight.add(new StatisticsData(DateUtilities.parseShortToDate((s.getString("date"))), s.getDouble("weight")));
+                            StatisticsData statisticsData = new StatisticsData(DateUtilities.parseShortToDate((s.getString("date"))), s.getDouble("weight"));
+                            statisticsData.setId(s.getInt(FieldDataBase.ID_WEIGHT.toName()));
+                            statisticsWeight.add(statisticsData);
                         }
                     }
                 } catch (JSONException e) {
@@ -135,14 +138,13 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                  Log.d(TAG, "onSelectNavigationBottom");
                  switch (menuItem.getItemId()) {
                      case R.id.workouts:
-                         //addFragment(new WorkoutsFragment(), false);
                          addFragment(WorkoutsFragment.createWithArgument(workouts),false);
                          break;
                      case R.id.home:
                          addFragment(new HomeFragment(),false);
                          break;
                      case R.id.statistics:
-                         addFragment(new StatisticsFragment(), false);
+                         addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
                          break;
                  }
              }
@@ -214,7 +216,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     }
 
     // LISTENER FRAGMENTS
-
     // WorkoutsFragment Listener
     @Override
     public void onWorkOutSelected(Workout workout) {
@@ -260,8 +261,9 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         newWorkout = null;
     }
 
+    // Delete Workout Listener
     @Override
-    public int id_workout_deleted() {
+    public int idWorkoutDeleted() {
         return id_workout_delete;
     }
 
@@ -271,29 +273,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     }
 
     // StatisticsFragment Listener
-    @Override
-    public ArrayList<StatisticsData> onChangeFilters(Measure measure, FilterTime filterTime) {
-
-        switch (measure){
-            case WEIGHT:
-                return statisticsWeight;
-
-            case MIDDLE_SPEED:
-                return  workouts.stream().filter(w -> w.getMiddleSpeed()>0).collect(ArrayList::new,
-                        (s, w)-> s.add(new StatisticsData(w.getDate(), w.getMiddleSpeed())), ArrayList::addAll);
-            case ENERGY:
-                return workouts.stream().filter(w -> w.getCalories()>0).collect(ArrayList::new,
-                            (s, w)-> s.add(new StatisticsData(w.getDate(), w.getCalories())), ArrayList::addAll);
-
-            case DISTANCE:
-                return  workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
-                            (s, w)-> s.add(new StatisticsData(w.getDate(), w.getDistance())), ArrayList::addAll);
-
-        }
-        return null;
-    }
-
-
     @Override
     public void onAddWeight() {
         final Intent intent = new Intent(this, NewWeightActivity.class);
@@ -314,6 +293,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         switch (requestCode){
             case REQUEST_CHANGED_DETAILS:
                 if(resultCode==Activity.RESULT_OK){
+                    
                     workoutChanged = (Workout)data.getParcelableExtra(getString(R.string.changed_workout));
                     if(workoutChanged!=null){
                         Toast.makeText(this, R.string.changed_workout, Toast.LENGTH_LONG).show();
@@ -332,6 +312,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                     Toast.makeText(this, getString(R.string.summary_workout), Toast.LENGTH_LONG).show();
                     final Workout newAutoWorkout = (Workout) data.getParcelableExtra(getString(R.string.new_workout));
                     workouts.add(0,newAutoWorkout);
+                    workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
                     selectActiveFragment(WorkoutsFragment.class);
                     Log.d(TAG, "New Auto Workout = " + newAutoWorkout);
                 }
@@ -357,6 +338,4 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 }
         }
     }
-
-
 }

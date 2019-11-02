@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -19,6 +20,9 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.ApplicationActivity;
 import com.run_walk_tracking_gps.gui.adapter.spinner.FilterWorkoutAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.listview.WorkoutsAdapter;
+import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
+import com.run_walk_tracking_gps.gui.enumeration.Measure;
+import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 
@@ -39,6 +43,7 @@ public class WorkoutsFragment extends Fragment {
 
     private WorkoutsAdapter workoutsAdapter;
 
+
     private OnWorkOutSelectedListener onWorkOutSelectedListener;
     private OnManualAddClickedListener onManualAddClickedListener;
     private OnDeleteWorkoutClickedListener onDeleteWorkoutClickedListener;
@@ -50,18 +55,11 @@ public class WorkoutsFragment extends Fragment {
     }
 
 
-    public static WorkoutsFragment createWithArgument(ArrayList<Workout> workouts){
-        final WorkoutsFragment workoutsFragment = new WorkoutsFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(LIST_WORKOUT_KEY, workouts);
-        workoutsFragment.setArguments(args);
-        return workoutsFragment;
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.d(TAG, "onAttach");
+
 
         try {
             onWorkOutSelectedListener = (OnWorkOutSelectedListener) context;
@@ -82,6 +80,14 @@ public class WorkoutsFragment extends Fragment {
         catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnDeleteWorkoutClickedListener");
         }
+    }
+
+    public static WorkoutsFragment createWithArgument(ArrayList<Workout> workouts){
+        final WorkoutsFragment workoutsFragment = new WorkoutsFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(LIST_WORKOUT_KEY, workouts);
+        workoutsFragment.setArguments(args);
+        return workoutsFragment;
     }
 
     @Override
@@ -108,6 +114,19 @@ public class WorkoutsFragment extends Fragment {
         filter = view.findViewById(R.id.filter_workouts);
         filter.setAdapter(new FilterWorkoutAdapterSpinner(getContext(), false, true));
 
+        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                final FilterTime filterTimeSelected = (FilterTime) parent.getAdapter().getItem(position);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         // list workouts
         workoutsView = view.findViewById(R.id.list_workouts);
         workoutsAdapter = new WorkoutsAdapter(getContext(), workouts);
@@ -125,6 +144,7 @@ public class WorkoutsFragment extends Fragment {
         return view;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -133,13 +153,13 @@ public class WorkoutsFragment extends Fragment {
         // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
 
         if(onManualAddClickedListener.newWorkout()!=null){
-            workouts.add(0, onManualAddClickedListener.newWorkout());
+            final Workout newW = onManualAddClickedListener.newWorkout();
+            workouts.add(0, newW);
             workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-
             workoutsAdapter.notifyDataSetChanged();
             onManualAddClickedListener.resetNewWorkout();
 
-            Log.d(TAG, "Gui Update : New Manual Workout = " +onManualAddClickedListener.newWorkout());
+            Log.d(TAG, "Gui Update : New Manual Workout = " +newW);
         }
         if(onWorkOutSelectedListener.workoutChanged()!=null){
             final Workout newW = onWorkOutSelectedListener.workoutChanged();
@@ -154,10 +174,11 @@ public class WorkoutsFragment extends Fragment {
             Log.d(TAG, "Gui Update : Workout Changed = " +newW);
         }
 
-        if(onDeleteWorkoutClickedListener.id_workout_deleted()>0){
-            final int id_workout_deleted = onDeleteWorkoutClickedListener.id_workout_deleted();
+        if(onDeleteWorkoutClickedListener.idWorkoutDeleted()>0){
+            final int id_workout_deleted = onDeleteWorkoutClickedListener.idWorkoutDeleted();
             workouts.stream().filter(w -> w.getIdWorkout() == id_workout_deleted)
                     .findFirst().ifPresent(w -> workouts.remove(w));
+
             workoutsAdapter.notifyDataSetChanged();
             onDeleteWorkoutClickedListener.resetWorkoutDelete();
             Log.d(TAG, "Gui Update : Workout Deleted = " +id_workout_deleted);
@@ -168,7 +189,6 @@ public class WorkoutsFragment extends Fragment {
         void onWorkOutSelected(Workout workout);
         Workout workoutChanged();
         void resetWorkoutChanged();
-
     }
 
     public interface OnManualAddClickedListener{
@@ -178,7 +198,7 @@ public class WorkoutsFragment extends Fragment {
     }
 
     public interface OnDeleteWorkoutClickedListener{
-        int id_workout_deleted();
+        int idWorkoutDeleted();
         void resetWorkoutDelete();
     }
 }

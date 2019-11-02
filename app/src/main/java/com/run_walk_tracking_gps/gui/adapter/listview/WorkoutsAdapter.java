@@ -25,6 +25,12 @@ public class WorkoutsAdapter extends ArrayAdapter<Workout> {
         ND = context.getString(R.string.no_available_abbr);
     }
 
+    public void updateWorkouts(List<Workout> list){
+        this.clear();
+        this.addAll(list);
+        this.notifyDataSetChanged();
+    }
+
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

@@ -26,6 +26,7 @@ import com.run_walk_tracking_gps.gui.adapter.listview.StatisticsDataAdapter;
 import com.run_walk_tracking_gps.gui.adapter.spinner.FilterWorkoutAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.MeasureWorkoutAdapterSpinner;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
+import com.run_walk_tracking_gps.model.Workout;
 
 import java.util.ArrayList;
 
@@ -34,22 +35,51 @@ public class StatisticsFragment extends Fragment {
     private static final String TAG = StatisticsFragment.class.getName();
 
     private static final String LIST_WEIGHT_KEY = "All Weight";
+    private static final String LIST_WORKOUT_KEY = "All Workouts";
 
     private Spinner spinner_measure;
     private Spinner spinner_time;
     private ListView list_data_filtered;
     private FloatingActionButton add_weight;
 
-    private boolean isFirstQuery = true;
-
-    private ArrayList<StatisticsData> statisticsData = new ArrayList<>();
-    private OnAddWeightListener onAddWeightListener;
-    private OnChangeFiltersListener onChangeFiltersListener;
-
     private StatisticsDataAdapter statisticsDataAdapter ;
+
+    private ArrayList<StatisticsData> weights = new ArrayList<>();
+    private ArrayList<Workout> workouts = new ArrayList<>();
+
+    private OnAddWeightListener onAddWeightListener;
+
 
     public StatisticsFragment() {
         super();
+    }
+
+    public static Fragment createWithArgument(ArrayList<Workout> workouts, ArrayList<StatisticsData> statisticsWeight) {
+        final StatisticsFragment statisticsFragment = new StatisticsFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(LIST_WORKOUT_KEY, workouts);
+        args.putParcelableArrayList(LIST_WEIGHT_KEY, statisticsWeight);
+        statisticsFragment.setArguments(args);
+        return statisticsFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
+
+        Bundle args = getArguments();
+        if(args!=null){
+            if(args.getParcelableArrayList(LIST_WORKOUT_KEY)!=null) {
+                workouts = getArguments().getParcelableArrayList(LIST_WORKOUT_KEY);
+            }
+
+            if(args.getParcelableArrayList(LIST_WEIGHT_KEY)!=null) {
+                weights = getArguments().getParcelableArrayList(LIST_WEIGHT_KEY);
+            }
+            Log.d(TAG, "List Workouts = "+ workouts);
+            Log.d(TAG, "List Weights = "+ weights);
+        }
     }
 
     @Override
@@ -59,12 +89,6 @@ public class StatisticsFragment extends Fragment {
             onAddWeightListener = (OnAddWeightListener)context;
         }catch (ClassCastException e){
             throw new ClassCastException(context.toString() + " must implement OnAddWeightListener");
-        }
-
-        try{
-            onChangeFiltersListener = (OnChangeFiltersListener)context;
-        }catch (ClassCastException e){
-            throw new ClassCastException(context.toString() + " must implement OnChangeMeasureListener");
         }
     }
 
@@ -83,7 +107,8 @@ public class StatisticsFragment extends Fragment {
         list_data_filtered = view.findViewById(R.id.list_data_filtered);
         add_weight = view.findViewById(R.id.add_weight);
 
-        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), statisticsData, (Measure)spinner_measure.getSelectedItem());
+
+        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics(), (Measure)spinner_measure.getSelectedItem());
         list_data_filtered.setAdapter(statisticsDataAdapter);
 
         // filter measure
@@ -92,24 +117,28 @@ public class StatisticsFragment extends Fragment {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                        Log.d(TAG, "measure Filter : onItemSelected");
-                        final Measure measureSelected = (Measure) parent.getAdapter().getItem(position);
-                        switch (measureSelected) {
-                            case WEIGHT:
-                                add_weight.setVisibility(View.VISIBLE);
-                                break;
-                            default:
-                                add_weight.setVisibility(View.GONE);
-                                break;
-                        }
+                    Log.d(TAG, "measure Filter : onItemSelected");
+                    final Measure measureSelected = (Measure) parent.getAdapter().getItem(position);
+                    final FilterTime filterTimeSelected = (FilterTime) spinner_time.getSelectedItem();
 
-                        if(!isFirstQuery) updateGui(measureSelected,(FilterTime) spinner_time.getSelectedItem());
+                    switch (measureSelected) {
+                        case WEIGHT:
+                            add_weight.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            add_weight.setVisibility(View.GONE);
+                            break;
+                    }
+
+                    update(measureSelected, filterTimeSelected);
+
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
             });
+
 
         // filter time
         spinner_time.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -119,11 +148,7 @@ public class StatisticsFragment extends Fragment {
                         Log.d(TAG, "Time Filter : onItemSelected");
                         final FilterTime filterTimeSelected = (FilterTime) parent.getAdapter().getItem(position);
                         final Measure measureSelected = (Measure) spinner_measure.getSelectedItem();
-
-                        if(!isFirstQuery){
-                            updateGui(measureSelected,filterTimeSelected);
-                        }
-                        if(isFirstQuery) isFirstQuery = false;
+                        update(measureSelected, filterTimeSelected);
                 }
 
                 @Override
@@ -133,20 +158,53 @@ public class StatisticsFragment extends Fragment {
 
         add_weight.setOnClickListener(v-> onAddWeightListener.onAddWeight());
 
-        if(isFirstQuery){
-            final Measure measureSelected = (Measure) spinner_measure.getSelectedItem();
-            final FilterTime filterTimeSelected = (FilterTime) spinner_time.getSelectedItem();
-            updateGui(measureSelected,filterTimeSelected);
-        }
 
         return view;
     }
 
-    // LISTENER CHE CHIEDERE ALL'ACTIVITY DI FARE QUERY COL LA MISURA SELEZIONATA
-    private void updateGui(Measure measure, FilterTime filterTime){
-        Log.d(TAG, "updateGui");
-        statisticsData = onChangeFiltersListener.onChangeFilters(measure, filterTime);
-        statisticsDataAdapter.updateStatisticsData(statisticsData, measure);
+    private void update(Measure measure, FilterTime filterTime){
+        Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
+
+        switch (filterTime){
+            case ALL: statisticsDataAdapter.updateStatisticsData(getStatistics(measure), measure);
+                break;
+            default: statisticsDataAdapter.updateStatisticsData(new ArrayList<>(), measure);
+                break;
+        }
+
+    }
+
+    private ArrayList<StatisticsData> middleSpeedStatistics(){
+        return workouts.stream().filter(w -> w.getMiddleSpeed()>0).collect(ArrayList::new,
+                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getMiddleSpeed())), ArrayList::addAll);
+    }
+
+    private ArrayList<StatisticsData> weightsStatistics(){
+        return weights;
+    }
+
+    private ArrayList<StatisticsData> energyStatistics(){
+        return  workouts.stream().filter(w -> w.getCalories()>0).collect(ArrayList::new,
+                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getCalories())), ArrayList::addAll);
+    }
+
+    private ArrayList<StatisticsData> distanceStatistics(){
+        return   workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
+                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getDistance())), ArrayList::addAll);
+    }
+
+    private ArrayList<StatisticsData> getStatistics(Measure measure){
+        switch (measure){
+            case WEIGHT:
+                return weightsStatistics();
+            case MIDDLE_SPEED:
+                return middleSpeedStatistics();
+            case ENERGY:
+               return energyStatistics();
+            case DISTANCE:
+              return distanceStatistics();
+        }
+        return null;
     }
 
     @Override
@@ -157,9 +215,11 @@ public class StatisticsFragment extends Fragment {
         // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
 
         if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.WEIGHT && onAddWeightListener.newWeight()!=null){
-            statisticsData.add(0,onAddWeightListener.newWeight());
-            statisticsDataAdapter.updateStatisticsData(statisticsData, Measure.WEIGHT);
+            weights.add(0, onAddWeightListener.newWeight());
+            statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
         }
+
+
     }
 
     public interface OnAddWeightListener{
@@ -167,7 +227,4 @@ public class StatisticsFragment extends Fragment {
         StatisticsData newWeight();
     }
 
-    public interface OnChangeFiltersListener{
-        ArrayList<StatisticsData> onChangeFilters(Measure measure, FilterTime filterTime);
-    }
 }
