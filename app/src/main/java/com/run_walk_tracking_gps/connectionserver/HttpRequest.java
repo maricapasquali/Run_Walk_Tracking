@@ -54,6 +54,9 @@ public class HttpRequest {
     private static final String USER = ACCOUNT + "profile.php?"+  FieldDataBase.ID_USER.toName()+"=";
     private static final String UPDATE_USER_INFO = ACCOUNT + "update_profile.php";
     private static final String DELETE_USER = ACCOUNT + "delete_account.php";
+    private static final String UPDATE_PASSWORD = ACCOUNT + "";
+
+    private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
 
     // SETTINGS
     private static final String UPDATE_SETTING = SETTINGS + "update_setting.php";
@@ -114,16 +117,22 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_USER_INFO, bodyJson,responseJsonListener);
     }
 
+    public static boolean requestForgotPassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+            throws NullPointerException, IllegalArgumentException{
+        check(bodyJson, FieldDataBase.fieldRequiredForForgotPassword());
+        return HttpRequest.requestJsonPostToServerVolley(context, FORGOT_PASSWORD, bodyJson,responseJsonListener);
+    }
+
+    // NON ANCORA IMPLEMENTATO IL PHP
     public static boolean requestUpdatePassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
         check(bodyJson,  FieldDataBase.fieldRequiredForUpdatePassword());
-        return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_USER_INFO, bodyJson,responseJsonListener);
+        return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_PASSWORD, bodyJson,responseJsonListener);
     }
 
     public static boolean requestDeleteUser(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-
-        check(bodyJson,  FieldDataBase.fieldRequiredForDeleteUser());
+        check(bodyJson, FieldDataBase.fieldRequiredForDeleteUser());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_USER, bodyJson,responseJsonListener);
     }
 
@@ -164,7 +173,6 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_WORKOUT, bodyJson,responseJsonListener);
     }
 
-
     // STATISTICS
     public static boolean requestStatistics(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, JSONException {
@@ -175,6 +183,7 @@ public class HttpRequest {
                 ALL_STATISTICS + "?" +  FieldDataBase.ID_USER.toName() + "=" + id_user + "&" +  FieldDataBase.FILTER.toName() + "=" + filter,
                 bodyJson,responseJsonListener);
     }
+
     public static boolean requestNewWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
         check(bodyJson,  FieldDataBase.fieldRequiredForNewWeight());

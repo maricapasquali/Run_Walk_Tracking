@@ -11,8 +11,8 @@ try{
   )
   throw new Exception(URL_NOT_VALID);
 
-  print json_encode(array(WEIGHT =>WeightDao::create($new_weight)));
-
+  //print json_encode(array(WEIGHT =>WeightDao::create($new_weight)));
+  print json_encode(WeightDao::create($new_weight));
 
 }catch(Exception $e){
   print json_errors($e->getMessage());

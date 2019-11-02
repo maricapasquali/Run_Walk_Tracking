@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class StatisticsData implements Parcelable{
 
+    private int id;
     private Date date;
     private Double data;
 
@@ -20,12 +21,14 @@ public class StatisticsData implements Parcelable{
     }
 
     protected StatisticsData(Parcel in) {
+        id = in.readInt();
         date = new Date(in.readLong());
         data = in.readDouble();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeLong(date.getTime());
         dest.writeDouble(data);
     }
@@ -47,6 +50,13 @@ public class StatisticsData implements Parcelable{
         }
     };
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public void setDate(Date key) {
         this.date = key;
@@ -71,6 +81,6 @@ public class StatisticsData implements Parcelable{
 
     @Override
     public String toString() {
-        return "StatisticsData [ Date = " +this.date +", Value = " +this.data+ " ]";
+        return "StatisticsData [ Id = "+this.id+", Date = " +this.date +", Value = " +this.data+ " ]";
     }
 }

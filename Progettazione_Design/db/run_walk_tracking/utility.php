@@ -88,8 +88,9 @@ function date_end_validity_link(){
   return date('Y-m-d H:i:s',strtotime('+30 minutes',strtotime(current_date())));
 }
 
-define('_EMAIL_REDIRECT_', 'email_redirect@localhost.com');
 
+
+define('_EMAIL_REDIRECT_', 'email_redirect@localhost.com');
 function sendEmail($to_email, $subject, $body){
      $to_email = _EMAIL_REDIRECT_; // TODO: COMMENTARE QUESTA RIGA o MOFICARE _EMAIL_REDIRECT_
      $headers = "Content-Type: text/html; charset=ISO-8859-1\r\n";

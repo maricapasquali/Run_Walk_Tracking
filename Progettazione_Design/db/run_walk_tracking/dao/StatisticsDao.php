@@ -8,8 +8,8 @@ class StatisticsDao{
 
     if(connect()){
 
-      $sql = ($type==WEIGHT ? "SELECT date, value as weight FROM weight WHERE id_user=? ORDER BY date DESC;" :
-      "SELECT date, $type FROM workout WHERE id_user=? and $type is not null ORDER BY date DESC;");
+      $sql = ($type==WEIGHT ? "SELECT DATE_FORMAT(date,'%d/%m/%Y') as date, value as weight FROM weight WHERE id_user=? ORDER BY UNIX_TIMESTAMP(date)  DESC;" :
+      "SELECT date, $type FROM workout WHERE id_user=? and $type is not null ORDER BY UNIX_TIMESTAMP(date) DESC;");
 
        $stmt = getConnection()->prepare($sql);
        if(!$stmt) throw new Exception("Statistics : Preparazione fallita. Errore: ". getErrorConnection());

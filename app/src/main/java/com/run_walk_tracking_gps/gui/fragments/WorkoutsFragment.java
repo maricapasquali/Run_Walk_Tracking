@@ -41,6 +41,7 @@ public class WorkoutsFragment extends Fragment {
 
     private OnWorkOutSelectedListener onWorkOutSelectedListener;
     private OnManualAddClickedListener onManualAddClickedListener;
+    private OnDeleteWorkoutClickedListener onDeleteWorkoutClickedListener;
     private ArrayList<Workout> workouts = new ArrayList<>();
 
 
@@ -73,6 +74,13 @@ public class WorkoutsFragment extends Fragment {
         }
         catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnManualAddClickedListener");
+        }
+
+        try {
+            onDeleteWorkoutClickedListener =(OnDeleteWorkoutClickedListener)context;
+        }
+        catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnDeleteWorkoutClickedListener");
         }
     }
 
@@ -145,6 +153,15 @@ public class WorkoutsFragment extends Fragment {
 
             Log.d(TAG, "Gui Update : Workout Changed = " +newW);
         }
+
+        if(onDeleteWorkoutClickedListener.id_workout_deleted()>0){
+            final int id_workout_deleted = onDeleteWorkoutClickedListener.id_workout_deleted();
+            workouts.stream().filter(w -> w.getIdWorkout() == id_workout_deleted)
+                    .findFirst().ifPresent(w -> workouts.remove(w));
+            workoutsAdapter.notifyDataSetChanged();
+            onDeleteWorkoutClickedListener.resetWorkoutDelete();
+            Log.d(TAG, "Gui Update : Workout Deleted = " +id_workout_deleted);
+        }
     }
 
     public interface OnWorkOutSelectedListener{
@@ -158,5 +175,10 @@ public class WorkoutsFragment extends Fragment {
         void onManualAddClickedListener();
         Workout newWorkout();
         void resetNewWorkout();
+    }
+
+    public interface OnDeleteWorkoutClickedListener{
+        int id_workout_deleted();
+        void resetWorkoutDelete();
     }
 }

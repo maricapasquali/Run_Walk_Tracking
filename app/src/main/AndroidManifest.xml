@@ -63,6 +63,9 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".gui.ForgotPassword"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".gui.LoginActivity"
             android:parentActivityName=".gui.BootAppActivity"
             android:screenOrientation="portrait">
@@ -85,7 +88,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".gui.NewManualWorkoutActivity"
-            android:parentActivityName=".gui.ApplicationActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".gui.activity_of_settings.MeasureUnitActivity"

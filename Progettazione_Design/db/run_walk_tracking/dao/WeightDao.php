@@ -25,7 +25,7 @@ class WeightDao {
         throw new Exception($e->getMessage());
       }
       closeConnection();
-      return array(ID_WEIGHT => $id) + $weight;
+      return array(ID_WEIGHT => $id);//+ $weight;
    }
 
    static function update($weight){

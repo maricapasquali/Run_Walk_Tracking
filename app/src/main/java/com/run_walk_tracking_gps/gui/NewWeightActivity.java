@@ -12,8 +12,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.adapter.listview.NewWeightAdapter;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
@@ -22,7 +26,10 @@ import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
 
-public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener, Response.Listener<JSONObject> {
 
     private final static String TAG = NewWeightActivity.class.getName();
 
@@ -67,14 +74,39 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
             if(!statisticsData.isSet())
                 throw new NullPointerException("Weight data doesn't correctly set !! " + statisticsData);
 
-            // save and send
-            final Intent newWeightIntent = new Intent();
-            newWeightIntent.putExtra(getString(R.string.new_weight), statisticsData);
-            setResult(RESULT_OK, newWeightIntent);
-            finish();
+
+            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)))
+                    .put(FieldDataBase.VALUE.toName(), statisticsData.getStatisticData())
+                    .put(FieldDataBase.DATE.toName(), statisticsData.getDate());
+
+            if(!HttpRequest.requestNewWeight(this, bodyJson, this)){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            }
+
         }catch (NullPointerException e){
             Log.e(TAG, e.getMessage());
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }catch (JSONException je){
+            je.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onResponse(JSONObject response) {
+        try {
+            if(HttpRequest.someError(response)){
+                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+            }else {
+                int id_statistics = response.getInt(FieldDataBase.ID_WEIGHT.toName());
+                statisticsData.setId(id_statistics);
+                // save and send
+                final Intent newWeightIntent = new Intent();
+                newWeightIntent.putExtra(getString(R.string.new_weight), statisticsData);
+                setResult(RESULT_OK, newWeightIntent);
+                finish();
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
         }
     }
 

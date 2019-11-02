@@ -23,7 +23,7 @@ import java.util.Locale;
 public class HttpRequestVolleyTest {
 
     private static final String TAG = HttpRequestVolleyTest.class.getName();
-
+/*
     @Test
     public void requestSignUpVolley(){
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -309,4 +309,5 @@ public class HttpRequestVolleyTest {
             Log.d(TAG, response.toString());
         }
     }
+    */
 }

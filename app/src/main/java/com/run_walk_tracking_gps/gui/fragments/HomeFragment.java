@@ -45,12 +45,13 @@ import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.model.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 
 import org.json.JSONObject;
 
 import java.util.Calendar;
-
+import java.util.stream.Stream;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -200,12 +201,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         stop.setOnClickListener(v ->{
             inWorkout = false;
             // Esempio Workout
-
-            /*final Workout workout = Workout.create(Calendar.getInstance().getTime(), "01:00:00", "20 Km", "400 Kcal");
-            workout.setMiddleSpeed("9.0 Km/h");
-            workout.setSport(Sport.RUN);
-
-            onStopWorkoutClickListener.OnStopWorkoutClick(workout);*/
+            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create()
+                                                                        .setMapRoute("not null")
+                                                                        .setDate(Calendar.getInstance().getTime())
+                                                                        .setCalories(400)
+                                                                        .setDuration(3600)
+                                                                        .setDistance(20)
+                                                                        .setMiddleSpeed(9.0)
+                                                                        .setSport(Sport.RUN)
+                                                                        .build());
         });
     }
 

@@ -48,6 +48,9 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
 
         forgotPassword.setOnClickListener(v ->{
             Toast.makeText(this,getString(R.string.forgot_password) , Toast.LENGTH_LONG).show();
+            final Intent intent = new Intent(this, ForgotPassword.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
         });
 
         login.setOnClickListener(v ->{

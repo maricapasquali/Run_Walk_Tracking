@@ -17,6 +17,11 @@
 
     <!-- Token -->
     <string name="token">Token</string>
+    
+    <!-- Forgot Paasword -->
+    <string name="reset_password">Ripristina password</string>
+    <string name="password_request_success">Riceverai un\'email con il link.</string>
+    
     <!-- Sign Up -->
     <string name="forward">Avanti</string>
     <string name="personal_data">Dati personali</string>
@@ -127,6 +132,8 @@
 
     <string name="modify">Modifica</string>
     <string name="delete">Elimina</string>
+    <string name="delete_workout">Allenamento Eliminato</string>
+    <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
 
     <string name="all"> Tutti </string>
     <string name="year"> Anno </string>

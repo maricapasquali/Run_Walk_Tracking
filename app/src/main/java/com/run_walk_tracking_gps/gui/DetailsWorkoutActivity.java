@@ -1,8 +1,10 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,12 +17,20 @@ import android.widget.Toast;
 
 
 import com.google.android.gms.maps.MapView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
 
 import com.run_walk_tracking_gps.model.Workout;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
+import java.util.List;
 
 public class DetailsWorkoutActivity extends  CommonActivity {
     private final static String TAG = DetailsWorkoutActivity.class.getName();
@@ -82,7 +92,6 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
     @Override
     protected void listenerAction() {
-
         summary_ok.setOnClickListener(v ->saveWorkout());
     }
 
@@ -105,7 +114,38 @@ public class DetailsWorkoutActivity extends  CommonActivity {
                 break;
 
             case R.id.summary_cancel_workout:
-                Toast.makeText(this, getString(R.string.delete), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.delete_workout_mex)
+                        .setPositiveButton(R.string.delete, (dialog, id) -> {
+
+                            try{
+                                JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WORKOUT.toName(), workout.getIdWorkout());
+
+                                if(!HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
+
+                                    try {
+                                        if(HttpRequest.someError(response)){
+                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                                        }else{
+                                            if(response.getBoolean("delete")){
+                                                final Intent resultIntent = new Intent();
+                                                resultIntent.putExtra(getString(R.string.delete_workout), workout.getIdWorkout());
+                                                setResult(Activity.RESULT_OK, resultIntent);
+                                                finish();
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        Log.e(TAG, e.getMessage());
+                                    }
+                                })){
+                                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                                }
+
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null).create().show();
                 break;
 
             case android.R.id.home:
@@ -115,7 +155,6 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 
 
     @Override
@@ -139,20 +178,10 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         }
     }
 
-    /*private boolean isChangedWorkout(Workout work){
-        // TODO: 11/1/2019 USARE UN COMPARATOR
-        return !(work.getDate().equals(workout.getDate()) &&
-                 work.getSport().equals(workout.getSport()) &&
-                 work.getDistance()==workout.getDuration() &&
-                 work.getDistance()==workout.getDistance() &&
-                 work.getCalories()==workout.getCalories() &&
-                 work.getMiddleSpeed()==workout.getMiddleSpeed());
-    }*/
-
     @Override
     public void onBackPressed() {
         if(isSummary){
-            // SALVARE WORKOUT
+            // TODO: 11/2/2019 REQUEST INSERT AUTO-WORKOUT
             saveWorkout();
         }
         if(isChangedWorkout){

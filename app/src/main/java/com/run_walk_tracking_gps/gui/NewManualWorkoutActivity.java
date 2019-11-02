@@ -55,7 +55,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
         switch (title){
             case DATE:
                 DateTimePickerDialog.create(NewManualWorkoutActivity.this, (date, calendar) -> {
-                    workout.setDate(date);
+                    workout.setDate(calendar.getTime());
                     detail.setText(date);
                 }).show();
                 break;
@@ -86,6 +86,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 }).show();
                 break;
         }
+        // TODO: 10/17/2019 RICALCOLARE VELOCITA SE CAMBIATE DURATA E/O DISTANZA
     }
 
     @Override

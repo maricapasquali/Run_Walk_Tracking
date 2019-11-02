@@ -51,6 +51,10 @@ public enum FieldDataBase {
         return unmodifiableList(Stream.of(ID_USER,PASSWORD));
     }
 
+    public static List< String> fieldRequiredForForgotPassword(){
+        return unmodifiableList(Stream.of(EMAIL));
+    }
+
     public static List< String> fieldSupportedForUpdateUserInformation(){
         return unmodifiableList(Stream.of(ID_USER,  IMG_ENCODE,  NAME,  LAST_NAME,  GENDER,
                  BIRTH_DATE,  EMAIL,  CITY,  PHONE, HEIGHT));

@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.model;
 
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,7 +8,6 @@ import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.utilities.DurationUtilities;
 
 import java.util.Date;
-
 
 public class Workout implements Parcelable {
 
@@ -101,9 +99,6 @@ public class Workout implements Parcelable {
         return sport;
     }
 
-    public String getDateString() {
-        return this.date;
-    }
 
     public int getDuration() {
         return duration;
@@ -129,11 +124,9 @@ public class Workout implements Parcelable {
         this.map_route = map_route;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDate(Date date) {
+        this.date = DateUtilities.parseShortToString(date);
     }
-
-
 
     public void setSport(Sport sport) {
         this.sport = sport;

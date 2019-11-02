@@ -43,9 +43,8 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
             }
             else{
                 try {
-                    JSONObject bodyJson = new JSONObject();
-                    bodyJson.put(FieldDataBase.ID_USER.toName(), id_user);
-                    bodyJson.put(FieldDataBase.TOKEN.toName(), token.getText().toString());
+                    JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
+                                                          .put(FieldDataBase.TOKEN.toName(), token.getText().toString());
 
                     if(!HttpRequest.requestFirstSignIn(this, bodyJson, this )){
                         Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();

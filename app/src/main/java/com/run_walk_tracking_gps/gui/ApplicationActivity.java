@@ -29,6 +29,7 @@ import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,10 +39,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
         HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
-        StatisticsFragment.OnChangeFiltersListener, StatisticsFragment.OnAddWeightListener{
+        StatisticsFragment.OnChangeFiltersListener, StatisticsFragment.OnAddWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
 
     private final static String TAG = ApplicationActivity.class.getName();
     private final static int REQUEST_SETTINGS = 1;
@@ -55,8 +59,10 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private StatisticsData newWeight;
     private Workout newWorkout;
     private Workout workoutChanged;
+    private int id_workout_delete;
 
     private ArrayList<Workout> workouts;
+    private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
     @Override
     protected void init() {
@@ -72,23 +78,55 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         try {
             // REQUEST ALL WORKOUTS
             JSONObject bodyJson = new JSONObject();
-            bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)));
+            int id_user = Integer.valueOf(Preferences.getIdUserLogged(this));
+
+            bodyJson.put(FieldDataBase.ID_USER.toName(), id_user);
             if(!HttpRequest.requestWorkouts(this, bodyJson , response -> {
                 // TODO: 11/1/2019 CONTROLLO ERROR  REQUEST
                 try {
-                    workouts = new Gson().fromJson(response.get("workouts").toString(), new TypeToken<List<Workout>>(){}.getType());
-                    Log.e(TAG, workouts.toString());
+                    if(HttpRequest.someError(response)){
+                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                    }else{
+                        workouts = new Gson().fromJson(response.get("workouts").toString(), new TypeToken<List<Workout>>(){}.getType());
+                        Log.e(TAG, workouts.toString());
+                    }
+
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
                 }
             })){
                 Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
             }
+
+            // REQUEST STATISTICS WEIGHT
+            bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
+                                       .put(FieldDataBase.FILTER.toName(), FieldDataBase.WEIGHT.toName());
+            if(!HttpRequest.requestStatistics(this, bodyJson, response -> {
+                try {
+                    //Log.e(TAG, response.toString());
+                    if(HttpRequest.someError(response)){
+                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                    }else{
+
+                        JSONArray array = (JSONArray)response.get("weights");
+                        for(int i=0; i<array.length(); i++){
+                            JSONObject s = (JSONObject)array.get(i);
+                            statisticsWeight.add(new StatisticsData(DateUtilities.parseShortToDate((s.getString("date"))), s.getDouble("weight")));
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            })){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-
 
     @Override
     protected void listenerAction() {
@@ -222,36 +260,39 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         newWorkout = null;
     }
 
-    // StatisticsFragment Listener
-    private Date date(String string) throws ParseException {
-        return DateUtilities.parseShortToDate(string);
+    @Override
+    public int id_workout_deleted() {
+        return id_workout_delete;
     }
+
+    @Override
+    public void resetWorkoutDelete() {
+       id_workout_delete = 0;
+    }
+
+    // StatisticsFragment Listener
     @Override
     public ArrayList<StatisticsData> onChangeFilters(Measure measure, FilterTime filterTime) {
-        // RICHIESTA AL DATABASE IN BASE A 'measure' e 'filterTime'
 
-        //ESEMPIO DI RICHIESTA (con filterTime = ALL)
-        final ArrayList<StatisticsData> s = new ArrayList<>();
-        try{
-            switch (measure){
-                case WEIGHT:
-                    s.add(new StatisticsData(date("10/09/2019"), 55.0));
-                    s.add(new StatisticsData(date("09/09/2019"), 56.0));
-                    s.add(new StatisticsData(date("08/09/2019"), 56.4));
-                    s.add(new StatisticsData(date("07/09/2019"), 55.4));
-                    break;
-                case MIDDLE_SPEED:
-                    s.add(new StatisticsData(date("10/09/2019"), 6.0));
-                    s.add(new StatisticsData(date("08/09/2019"), 8.0));
-                    s.add(new StatisticsData(date("07/09/2019"), 7.0));
-                    break;
-            }
-        }catch (ParseException e){
-            Log.e(TAG, e.getMessage());
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        switch (measure){
+            case WEIGHT:
+                return statisticsWeight;
+
+            case MIDDLE_SPEED:
+                return  workouts.stream().filter(w -> w.getMiddleSpeed()>0).collect(ArrayList::new,
+                        (s, w)-> s.add(new StatisticsData(w.getDate(), w.getMiddleSpeed())), ArrayList::addAll);
+            case ENERGY:
+                return workouts.stream().filter(w -> w.getCalories()>0).collect(ArrayList::new,
+                            (s, w)-> s.add(new StatisticsData(w.getDate(), w.getCalories())), ArrayList::addAll);
+
+            case DISTANCE:
+                return  workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
+                            (s, w)-> s.add(new StatisticsData(w.getDate(), w.getDistance())), ArrayList::addAll);
+
         }
-        return s;
+        return null;
     }
+
 
     @Override
     public void onAddWeight() {
@@ -273,18 +314,26 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         switch (requestCode){
             case REQUEST_CHANGED_DETAILS:
                 if(resultCode==Activity.RESULT_OK){
-                    Toast.makeText(this, getString(R.string.changed_workout), Toast.LENGTH_LONG).show();
                     workoutChanged = (Workout)data.getParcelableExtra(getString(R.string.changed_workout));
-                    Log.d(TAG, "Workout changed = " +workoutChanged);
+                    if(workoutChanged!=null){
+                        Toast.makeText(this, R.string.changed_workout, Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Workout changed = " +workoutChanged);
+                    }
+
+                    id_workout_delete = data.getIntExtra(getString(R.string.delete_workout), 0);
+                    if(id_workout_delete>0){
+                        Toast.makeText(this, R.string.delete_workout, Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Workout deleted = " +id_workout_delete);
+                    }
                 }
                 break;
             case REQUEST_SUMMARY:
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, getString(R.string.summary_workout), Toast.LENGTH_LONG).show();
                     final Workout newAutoWorkout = (Workout) data.getParcelableExtra(getString(R.string.new_workout));
-                    Log.d(TAG, "New Auto Workout = " + newAutoWorkout);
-                    // TODO: 10/17/2019 RICHIEDE DATABASE
+                    workouts.add(0,newAutoWorkout);
                     selectActiveFragment(WorkoutsFragment.class);
+                    Log.d(TAG, "New Auto Workout = " + newAutoWorkout);
                 }
                 break;
             case REQUEST_NEW_WORKOUT:
@@ -308,5 +357,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 }
         }
     }
+
 
 }
