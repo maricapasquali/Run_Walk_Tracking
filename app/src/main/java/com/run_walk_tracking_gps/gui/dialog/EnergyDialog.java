@@ -6,8 +6,11 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+
+import org.json.JSONException;
 
 public class EnergyDialog extends MeasureDialog {
 
@@ -17,7 +20,7 @@ public class EnergyDialog extends MeasureDialog {
     private OnSelectCaloriesListener onSelectCaloriesListener;
 
     private EnergyDialog(Context context, OnSelectCaloriesListener onSelectCaloriesListener) {
-        super(context);
+        super(context, Measure.ENERGY);
         this.onSelectCaloriesListener = onSelectCaloriesListener;
     }
 
@@ -36,10 +39,6 @@ public class EnergyDialog extends MeasureDialog {
         titleDialog.setText(R.string.calories);
     }
 
-    @Override
-    protected void setUnit(TextView unit) {
-        unit.setText(MeasureUnit.KILO_CALORIES.getStrId());
-    }
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {

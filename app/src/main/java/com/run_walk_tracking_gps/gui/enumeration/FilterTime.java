@@ -5,8 +5,7 @@ import com.run_walk_tracking_gps.R;
 public enum FilterTime {
     ALL(R.string.all),
     YEAR(R.string.year),
-    MONTH(R.string.month),
-    WEEK(R.string.week);
+    MONTH(R.string.month);
 
     private final int strId;
 

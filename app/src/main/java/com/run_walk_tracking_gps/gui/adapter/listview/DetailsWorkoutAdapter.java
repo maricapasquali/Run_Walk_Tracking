@@ -12,9 +12,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+
+import org.json.JSONException;
 
 import java.util.Arrays;
 
@@ -107,8 +110,10 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
                     null,null,null);
 
         }else{
+            // TODO: 11/3/2019 GESTIONE CONVERSIONE
 
-            viewHolder.details.setText(detailsWorkout[position]);
+            viewHolder.details.setText(Workout.valueStr(context, infoWorkouts[position], detailsWorkout[position]));
+
 
             viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
                         context.getDrawable(infoWorkouts[position].getIconId()),

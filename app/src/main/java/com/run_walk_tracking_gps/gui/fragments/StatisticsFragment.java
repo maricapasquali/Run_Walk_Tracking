@@ -12,11 +12,13 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 
@@ -47,7 +49,7 @@ public class StatisticsFragment extends Fragment {
     private ArrayList<StatisticsData> weights = new ArrayList<>();
     private ArrayList<Workout> workouts = new ArrayList<>();
 
-    private OnAddWeightListener onAddWeightListener;
+    private OnWeightListener onWeightListener;
 
 
     public StatisticsFragment() {
@@ -86,9 +88,9 @@ public class StatisticsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            onAddWeightListener = (OnAddWeightListener)context;
+            onWeightListener = (OnWeightListener)context;
         }catch (ClassCastException e){
-            throw new ClassCastException(context.toString() + " must implement OnAddWeightListener");
+            throw new ClassCastException(context.toString() + " must implement onWeightListener");
         }
     }
 
@@ -106,6 +108,18 @@ public class StatisticsFragment extends Fragment {
 
         list_data_filtered = view.findViewById(R.id.list_data_filtered);
         add_weight = view.findViewById(R.id.add_weight);
+
+        list_data_filtered.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if(((Measure)spinner_measure.getSelectedItem()).equals(Measure.WEIGHT) && position > 0){
+                    Log.d(TAG,  "DEEP TOUCH :  " + (StatisticsData)parent.getAdapter().getItem(position));
+                    onWeightListener.modifyWeight((StatisticsData)parent.getAdapter().getItem(position));
+                }
+
+                return false;
+            }
+        });
 
 
         statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics(), (Measure)spinner_measure.getSelectedItem());
@@ -156,7 +170,7 @@ public class StatisticsFragment extends Fragment {
                 }
             });
 
-        add_weight.setOnClickListener(v-> onAddWeightListener.onAddWeight());
+        add_weight.setOnClickListener(v-> onWeightListener.onAddWeight());
 
 
         return view;
@@ -173,6 +187,8 @@ public class StatisticsFragment extends Fragment {
         }
 
     }
+
+    // TODO: 11/3/2019 GESTIONE CONVERSIONE
 
     private ArrayList<StatisticsData> middleSpeedStatistics(){
         return workouts.stream().filter(w -> w.getMiddleSpeed()>0).collect(ArrayList::new,
@@ -213,18 +229,50 @@ public class StatisticsFragment extends Fragment {
         Log.d(TAG, "OnResume");
 
         // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
+        if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.WEIGHT){
+            if(onWeightListener.newWeight()!=null){
+                weights.add(0, onWeightListener.newWeight());
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+            }
 
-        if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.WEIGHT && onAddWeightListener.newWeight()!=null){
-            weights.add(0, onAddWeightListener.newWeight());
-            statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+            if(onWeightListener.changedWeight()!=null){
+                StatisticsData changedWeight = onWeightListener.changedWeight();
+                Log.e(TAG, "Before : " +weights.toString());
+                weights.stream().filter(w -> w.getId() == changedWeight.getId())
+                        .findFirst().ifPresent(w -> weights.remove(w));
+                Log.e(TAG, "After : " +weights.toString());
+                weights.add(changedWeight);
+                weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+                onWeightListener.resetChangedWeight();
+            }
+
+            if(onWeightListener.deletedWeight()>0){
+                int id_changed_weight = onWeightListener.deletedWeight();
+                weights.stream().filter(w -> w.getId() == id_changed_weight)
+                        .findFirst().ifPresent(w -> weights.remove(w));
+
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+                onWeightListener.resetDeletedWeight();
+            }
         }
 
 
     }
 
-    public interface OnAddWeightListener{
+    public interface OnWeightListener{
         void onAddWeight();
         StatisticsData newWeight();
+
+        void modifyWeight(StatisticsData statisticsData);
+        StatisticsData changedWeight();
+        void resetChangedWeight();
+
+        int deletedWeight();
+        void resetDeletedWeight();
     }
+
+
 
 }

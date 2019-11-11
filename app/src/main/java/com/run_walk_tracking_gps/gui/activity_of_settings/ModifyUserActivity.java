@@ -92,6 +92,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 city.setText(user.getCity());
                 tel.setText(user.getPhone());
 
+                // TODO: 11/3/2019 GESTIONE CONVERSIONE
                 String unit_height = Preferences.getUnitHeightDefault(this);
                 try {
                     double height_value = user.getHeight();
@@ -131,7 +132,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 user.setCity(city.getText().toString());
                 user.setPhone(tel.getText().toString());
 
-                // TODO: 10/31/2019  REQUEST UPDATE USER
+                // REQUEST UPDATE USER
                 try {
                     JSONObject bodyJson = new JSONObject(new Gson().toJson(user));
                     bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);

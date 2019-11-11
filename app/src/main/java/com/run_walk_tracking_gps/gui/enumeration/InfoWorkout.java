@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui.enumeration;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -41,4 +42,5 @@ public enum InfoWorkout {
     public static InfoWorkout[] infoWorkoutNoSpeed() {
         return new ArrayList<>(Arrays.asList(values())).stream().filter(i -> i != MIDDLE_SPEED).toArray(InfoWorkout[]::new);
     }
+
 }

@@ -18,6 +18,7 @@ import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
+import com.run_walk_tracking_gps.utilities.MeasureUtilities;
 
 import org.json.JSONException;
 
@@ -59,17 +60,8 @@ public class UserActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         if(getIntent()!=null){
-            try {
-                unit_height = Preferences.getUnitHeightDefault(this);
-
-                setGui(getIntent().getParcelableExtra(getString(R.string.user_info)));
-                getSupportActionBar().setTitle(user.getUsername());
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }catch (NullPointerException n){
-                Log.e(TAG, getString(R.string.user_not_set));
-            }
+            setGui(getIntent().getParcelableExtra(getString(R.string.user_info)));
+            getSupportActionBar().setTitle(user.getUsername());
         }
 
     }
@@ -127,13 +119,13 @@ public class UserActivity extends CommonActivity {
         email.setText(user.getEmail());
         city.setText(user.getCity());
         tel.setText(user.getPhone());
-        // TODO: 10/31/2019 CONTROLLO SE L'UNITA DI MISURA PREDEFINITA E' IL METRO ALTRIMENTI CONVERTO IL NUMERO s_height IN FT
+        // TODO: 10/31/2019 GESTIONE CONVERSIONE
         try {
             double height_value = user.getHeight();
             if(!Preferences.getUnitHeightDefault(this).equals(getString(MeasureUnit.METER.getStrId()))){
                 height_value = ConversionUnitUtilities.meterToFeet(height_value);
             }
-            height.setText(new StringBuilder(height_value +getString(R.string.space)+ unit_height));
+            height.setText(MeasureUtilities.heightStr(this, height_value));
         } catch (JSONException e) {
             e.printStackTrace();
         }

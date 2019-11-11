@@ -7,8 +7,11 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+
+import org.json.JSONException;
 
 import static java.lang.String.format;
 
@@ -22,7 +25,7 @@ public class WeightDialog extends MeasureDialog {
 
 
     private WeightDialog(Context context, OnSelectWeightListener onSelectWeightListener) {
-        super(context);
+        super(context, Measure.WEIGHT);
         this.onSelectWeightListener = onSelectWeightListener;
     }
 
@@ -42,10 +45,6 @@ public class WeightDialog extends MeasureDialog {
         titleDialog.setText(R.string.weight);
     }
 
-    @Override
-    protected void setUnit(TextView unit) {
-        unit.setText(MeasureUnit.KILOGRAM.getStrId());
-    }
 
     protected void setPositiveListener(DialogInterface dialog, int which){
         onSelectWeightListener.setPositiveListener(getValue(Measure.WEIGHT), getValueDouble());

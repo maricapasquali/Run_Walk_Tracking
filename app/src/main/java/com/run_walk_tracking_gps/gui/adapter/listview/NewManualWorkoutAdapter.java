@@ -19,7 +19,7 @@ public class NewManualWorkoutAdapter extends NewInformationAdapter<InfoWorkout> 
 
 
     @Override
-    protected void addInfo(TextView title, TextView detail, InfoWorkout item) {
+    protected void addInfo(TextView title, TextView detail, InfoWorkout item,int position) {
         title.setText(item.getStrId());
         if(item.getIconId()!=0)
             detail.setCompoundDrawablesWithIntrinsicBounds(getContext().getDrawable(item.getIconId()), null, null, null);

@@ -138,7 +138,6 @@
     <string name="all"> Tutti </string>
     <string name="year"> Anno </string>
     <string name="month"> Mese </string>
-    <string name="week"> Settimana </string>
 
     <string name="detail_workout">Dettaglio</string>
 
@@ -177,6 +176,10 @@
 
     <string name="new_weight">Nuovo Peso</string>
 
+    <string name="modify_weight">Modifica Peso</string>
+    <string name="delete_weight">Elimina Peso</string>
+
+    <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
     <string name="changed_profile">Profilo Modificato</string>
 
 

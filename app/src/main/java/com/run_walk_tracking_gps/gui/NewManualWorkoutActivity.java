@@ -76,6 +76,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             case DISTANCE:
                 DistanceDialog.create(NewManualWorkoutActivity.this, (distanceStr, distance) -> {
                     workout.setDistance(distance);
+                    // TODO: 11/3/2019 GESTIONE CONVERSIONE
                     detail.setText(distanceStr);
                 }).show();
                 break;
@@ -86,7 +87,6 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 }).show();
                 break;
         }
-        // TODO: 10/17/2019 RICALCOLARE VELOCITA SE CAMBIATE DURATA E/O DISTANZA
     }
 
     @Override
@@ -101,6 +101,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                                                         .put(FieldDataBase.DATE.toName(), workout.getDate());
             if(workout.getDistance()>0) bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance());
             if(workout.getCalories()>0) bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories());
+            if(workout.getMiddleSpeed()>0) bodyJson.put(FieldDataBase.MIDDLE_SPEED.toName(), workout.getMiddleSpeed());
 
 
             if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){

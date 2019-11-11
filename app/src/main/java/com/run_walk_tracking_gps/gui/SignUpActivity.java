@@ -57,12 +57,16 @@ public class SignUpActivity extends CommonActivity
     private ImagePicker imagePicker;
     private Bitmap bitmap;
 
+    private OnCheckListener onCheckListener;
+
     @Override
     protected void init() {
         setContentView(R.layout.activity_signup);
 
         getSupportActionBar().setTitle(getString(R.string.rec));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        onCheckListener = (OnCheckListener) getApplicationContext();
 
         fragmentSignUp.add(PERSONAL_DATA, new PersonalDataFragment());
         fragmentSignUp.add(PHYSICAL_DATA, new PhysicalDataFragment());
@@ -82,16 +86,20 @@ public class SignUpActivity extends CommonActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.next_signup:
-                //Log.d(TAG, "Next : Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
-                switch (fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
-                    case PERSONAL_DATA:
-                        addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
-                        break;
+                try{
+                    //Log.d(TAG, "Next : Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
+                    switch(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
+                        case PERSONAL_DATA:
+                            addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
+                            break;
+                        case PHYSICAL_DATA:
+                            addFragment(fragmentSignUp.get(ACCESS_DATA), true);
+                            next.setVisible(false);
+                            break;
+                    }
 
-                    case PHYSICAL_DATA:
-                        addFragment(fragmentSignUp.get(ACCESS_DATA), true);
-                        next.setVisible(false);
-                        break;
+                }catch (Exception e){
+                    Toast.makeText(this, "Campi non settati" , Toast.LENGTH_LONG).show();
                 }
                 break;
             case android.R.id.home:
@@ -166,7 +174,7 @@ public class SignUpActivity extends CommonActivity
             Log.e(TAG, response.toString());
         }
         else{
-            // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GISTO
+            // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GIUSTO
             //Toast.makeText(this, getString(R.string.correctly_sign_up), Toast.LENGTH_LONG).show();
             //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
 
@@ -217,4 +225,9 @@ public class SignUpActivity extends CommonActivity
                 }).setWithImageCrop(1,1);
         imagePicker.choosePicture(true);
     }
+
+    public interface OnCheckListener {
+        boolean check();
+    }
+
 }

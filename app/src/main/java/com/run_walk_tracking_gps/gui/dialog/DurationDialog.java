@@ -21,7 +21,7 @@ public class DurationDialog extends MeasureDialog {
     private OnSelectDurationListener onSelectDurationListener;
 
     private DurationDialog(Context context, OnSelectDurationListener onSelectDurationListener) {
-        super(context);
+        super(context, Measure.DURATION);
         this.onSelectDurationListener = onSelectDurationListener;
     }
 
@@ -43,14 +43,6 @@ public class DurationDialog extends MeasureDialog {
         titleDialog.setText(R.string.time);
     }
 
-    @Override
-    protected void setUnit(TextView unit) {
-        final View view = getTheView();
-        final TextView separation = view.findViewById(R.id.separation);
-        separation.setText(MeasureUnit.HOURS.getStrId());
-
-        unit.setText(MeasureUnit.MINUTES.getStrId());
-    }
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {

@@ -15,12 +15,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.adapter.spinner.GenderAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
 import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
+import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
+import com.run_walk_tracking_gps.utilities.MeasureUtilities;
+
+import org.json.JSONException;
 
 public class PhysicalDataFragment extends Fragment {
 
@@ -52,8 +57,7 @@ public class PhysicalDataFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_signup_2, container, false);
 
-        // TODO: 10/5/2019 --  GUI -- FIX BUG:
-        // TODO: AL PRIMO CLICK IL DropDownView (DIALOG SPINNER) MOSTRA L'ICONA DELLA DESCRIZIONE
+        // TODO: 10/5/2019 --  GUI -- FIX BUG: AL PRIMO CLICK IL DropDownView (DIALOG SPINNER) MOSTRA L'ICONA DELLA DESCRIZIONE
 
         // gender
         gender = view.findViewById(R.id.signup_profile_gender);
@@ -88,6 +92,22 @@ public class PhysicalDataFragment extends Fragment {
         if(target!=null)target.setAdapter(spinnerTargetAdapter);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+        try {
+            if(heightValue>0)
+               height.setText(MeasureUtilities.heightStr(getContext(),heightValue));
+
+            if(weightValue>0)
+                weight.setText(MeasureUtilities.weightStr(getContext(),weightValue));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

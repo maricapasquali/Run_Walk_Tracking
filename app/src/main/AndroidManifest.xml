@@ -107,7 +107,11 @@
         </activity>
         <activity
             android:name=".gui.NewWeightActivity"
-            android:screenOrientation="portrait">
+            >
+        </activity>
+
+        <activity android:name=".gui.ModifyWeightActivity" android:screenOrientation="portrait">
+
         </activity>
         <activity
             android:name=".gui.activity_of_settings.InfoActivity"

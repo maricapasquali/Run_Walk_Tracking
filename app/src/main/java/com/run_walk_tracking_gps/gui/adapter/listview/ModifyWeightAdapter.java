@@ -1,24 +1,26 @@
 package com.run_walk_tracking_gps.gui.adapter.listview;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
 
+import java.util.List;
 
-public class NewWeightAdapter extends NewInformationAdapter<InfoWeight> {
+public class ModifyWeightAdapter extends NewWeightAdapter{
 
-    private final String TAG = NewWeightAdapter.class.getName();
+    private List<String> modifyWeight;
 
-    public NewWeightAdapter(Context context) {
-        super(context, InfoWeight.values());
+    public ModifyWeightAdapter(Context _context_, List<String> modifyWeight) {
+        super(_context_);
+        this.modifyWeight = modifyWeight;
     }
+
 
     @Override
     protected void addInfo(TextView title, TextView detail, InfoWeight item, int position) {
         title.setText(item.getStrId());
         detail.setCompoundDrawablesWithIntrinsicBounds(getContext().getDrawable(item.getIconId()), null, null, null);
+        detail.setText(modifyWeight.get(position));
     }
 }

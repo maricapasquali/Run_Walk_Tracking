@@ -29,19 +29,19 @@ public class StatisticsDataAdapter extends BaseAdapter {
     private Context context;
     private List<StatisticsData> data_filtered;
 
-    private String unitMeasure;
+    private Measure measure;
 
 
     public StatisticsDataAdapter(Context context, List<StatisticsData> map, Measure measure){
         this.context = context;
         this.data_filtered = map;
-        this.setUnitMeasure(measure);
+        this.measure=measure;
     }
 
     public void updateStatisticsData(List<StatisticsData> list, Measure measure){
         this.data_filtered.clear();
         this.data_filtered.addAll(list);
-        this.setUnitMeasure(measure);
+        this.measure = measure;
         this.notifyDataSetChanged();
     }
 
@@ -52,7 +52,7 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return data_filtered.get(position-1);
     }
 
     @Override
@@ -97,23 +97,13 @@ public class StatisticsDataAdapter extends BaseAdapter {
             final TextView text_data_filtered = convertView.findViewById(R.id.statistics_data);
             final TextView date = convertView.findViewById(R.id.statistics_date);
 
-            String val_y = data_filtered.get(position-1).getStatisticData()+
-                    context.getString(R.string.space)+
-                    unitMeasure;
-            text_data_filtered.setText(val_y);
-            date.setText(DateUtilities.parseFullToString(data_filtered.get(position-1).getDate()));
+            // TODO: 11/3/2019 GESTIONE CONVERSIONE
+            
+            text_data_filtered.setText(data_filtered.get(position-1).getStatisticDataStr(context,measure));
+            date.setText(data_filtered.get(position-1).getDateStr());
         }
 
         return convertView;
-    }
-
-
-    private int unitMeasure(Measure measure){
-        return measure.getMeasureUnit()[0].getStrId();
-    }
-
-    private void setUnitMeasure(Measure measure) {
-        this.unitMeasure = context.getString(unitMeasure(measure));
     }
 
 }

@@ -75,7 +75,7 @@ public enum FieldDataBase {
     }
 
     public static List< String> fieldSupportedForNewWorkout(){
-        return unmodifiableList(Stream.of(ID_USER, DATE, SPORT, DURATION, MAP_ROUTE, DISTANCE,  CALORIES));
+        return unmodifiableList(Stream.of(ID_USER, DATE, SPORT, DURATION, MAP_ROUTE, DISTANCE, CALORIES, MIDDLE_SPEED));
     }
 
     public static List< String> fieldSupportedForUpdateWorkout(){

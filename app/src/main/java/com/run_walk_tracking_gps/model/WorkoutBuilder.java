@@ -44,11 +44,6 @@ public class WorkoutBuilder {
         return this;
     }
 
-    public WorkoutBuilder setMiddleSpeed(double middleSpeed) {
-        workout.setMiddleSpeed(middleSpeed);
-        return this;
-    }
-
     public WorkoutBuilder setSport(Sport sport){
         workout.setSport(sport);
         return this;

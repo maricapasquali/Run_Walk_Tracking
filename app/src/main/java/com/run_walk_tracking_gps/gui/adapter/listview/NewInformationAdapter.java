@@ -73,11 +73,11 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
             viewHolder = (ListHolder) convertView.getTag();
         }
 
-        addInfo(viewHolder.title, viewHolder.detail, info.get(position));
+        addInfo(viewHolder.title, viewHolder.detail, info.get(position), position);
         return view;
     }
 
-    protected abstract void addInfo(TextView title, TextView detail, T item);
+    protected abstract void addInfo(TextView title, TextView detail, T item, int position);
 
 
     private class ListHolder {

@@ -3,6 +3,10 @@ package com.run_walk_tracking_gps;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
+
+import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -4,6 +4,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 
 import java.util.Calendar;
@@ -74,7 +75,7 @@ public class DateUtilities {
                 String.format(FORMAT_TIME, c.get(is24Hour ? Calendar.HOUR_OF_DAY :Calendar.HOUR), c.get(Calendar.MINUTE));
     }
 
-    // TODO: 10/15/2019 DA MIGLIORARE
+    // TODO: 10/15/2019 MIGLIORARE
     public static Date parseStringWithTimeToDateString(String dateWithTime){
         final Calendar c = Calendar.getInstance();
 
@@ -90,6 +91,10 @@ public class DateUtilities {
         }
 
         return c.getTime();
+    }
+
+    public static String getMonth(int month){
+        return (new DateFormatSymbols().getMonths()[month-1]).toUpperCase();
     }
 
     public static  String parseFullToString(Date date){

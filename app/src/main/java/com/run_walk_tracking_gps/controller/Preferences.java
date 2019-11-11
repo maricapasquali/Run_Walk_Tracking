@@ -86,6 +86,13 @@ public class Preferences {
         return getUnitDefault(context, FieldDataBase.DISTANCE.toName());
     }
 
+    public static String getUnitEnergyDefault(Context context) throws JSONException{
+        return getUnitDefault(context, FieldDataBase.ENERGY.toName());
+    }
+
+    public static String getUnitMiddleSpeedDefault(Context context) throws JSONException{
+        return getUnitDefault(context, FieldDataBase.DISTANCE.toName())+"/h";
+    }
 
     public static void writeSettingsIntoSharedPreferences(Context context, JSONObject json) throws JSONException {
         final String id_user = String.valueOf((int) ((JSONObject) json.get("user")).get("id_user"));

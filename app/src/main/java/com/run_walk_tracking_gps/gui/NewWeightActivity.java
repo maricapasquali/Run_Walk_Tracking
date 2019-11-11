@@ -62,6 +62,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 WeightDialog.create(NewWeightActivity.this, (weightString, weight)-> {
                     detail.setText(weightString);
                     statisticsData.setStatisticData(weight);
+                    // TODO: 11/3/2019 GESTIONE CONVERSIONE
                 }).show();
                 break;
         }

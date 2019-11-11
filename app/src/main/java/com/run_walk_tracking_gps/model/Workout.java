@@ -1,11 +1,19 @@
 package com.run_walk_tracking_gps.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
+import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.utilities.DurationUtilities;
+import com.run_walk_tracking_gps.utilities.MeasureUtilities;
+
+import org.json.JSONException;
 
 import java.util.Date;
 
@@ -99,9 +107,12 @@ public class Workout implements Parcelable {
         return sport;
     }
 
-
     public int getDuration() {
         return duration;
+    }
+
+    public String getDurationStr(){
+        return DurationUtilities.format(this.duration);
     }
 
     public double getDistance() {
@@ -113,7 +124,7 @@ public class Workout implements Parcelable {
     }
 
     public double getMiddleSpeed() {
-        return middle_speed;
+       return middle_speed;
     }
 
     public void setIdWorkout(int id_workout) {
@@ -134,18 +145,20 @@ public class Workout implements Parcelable {
 
     public void setDuration(int duration) {
         this.duration = duration;
+        setMiddleSpeed();
     }
 
     public void setDistance(double distance) {
         this.distance = distance;
+        setMiddleSpeed();
+    }
+
+    private void setMiddleSpeed(){
+        this.middle_speed = (duration>0f ? this.distance/((double) this.duration/3600) : 0f);
     }
 
     public void setCalories(double calories) {
         this.calories = calories;
-    }
-
-    public void setMiddleSpeed(double middle_speed) {
-        this.middle_speed = middle_speed;
     }
 
     public String[] toArrayString() {
@@ -159,6 +172,42 @@ public class Workout implements Parcelable {
 
     public boolean isMinimalSet(){
         return this.date!=null && this.sport!=null && this.duration!=0;
+    }
+
+    public static String valueStr(Context context, InfoWorkout infoWorkout, String detailsWorkout){
+        String valueStr = null;
+        try {
+            double valueDouble = Double.valueOf(detailsWorkout);
+            if(valueDouble==0) throw new NullPointerException();
+
+            switch (infoWorkout) {
+                case CALORIES:
+                    if (available(detailsWorkout))
+                        valueStr = MeasureUtilities.energySpeedStr(context, valueDouble);
+                    break;
+                case DISTANCE:
+                    if (Workout.available(detailsWorkout))
+                        valueStr = MeasureUtilities.distanceStr(context, valueDouble);
+                    break;
+                case MIDDLE_SPEED:
+                    if (Workout.available(detailsWorkout))
+                        valueStr = MeasureUtilities.middleSpeedStr(context, valueDouble);
+                    break;
+            }
+
+        } catch (JSONException je) {
+            je.printStackTrace();
+        }catch (NullPointerException e){
+            return ND;
+        }catch (NumberFormatException n){
+            return detailsWorkout;
+        }
+
+        return valueStr;
+    }
+
+    private static boolean available(String available){
+        return !available.equals(ND);
     }
 
     @Override

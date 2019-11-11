@@ -185,7 +185,6 @@ public class SettingActivity extends CommonActivity {
         profile.setOnClickListener(v ->{
             try {
 
-                // TODO: 10/17/2019  RICHIESTA AL DATABASE (anche username)
                 final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)));
                 if(!HttpRequest.requestUserInformation(this, bodyJson, response -> {
 
@@ -198,7 +197,7 @@ public class SettingActivity extends CommonActivity {
                             final String img_encode = userInfo.getString(FieldDataBase.IMG_ENCODE.toName());
                             User user = new Gson().fromJson(userInfo.toString(), User.class);
 
-                            // TODO: 10/31/2019 SALVARE NELLE SHARED PREFERENCES
+                            // SALVATO NELLE SHARED PREFERENCES
                             if(!img_encode.equals("null")){
                                 Preferences.setImageProfile(this, user.getIdUser(), img_encode);
                             }

@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -75,7 +76,7 @@ public class EnumUtilities {
        return values.stream().toArray(Integer[]::new);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+     @RequiresApi(api = Build.VERSION_CODES.N)
     public static Enum<?> getEnumFromStrId(Class<?> enumeration, int strId){
         Enum genEnum =null;
         try {

@@ -20,12 +20,12 @@ public class HeightDialog extends MeasureDialog {
     private OnSelectHeightListener onSelectHeightListener;
 
     private HeightDialog(Context context, OnSelectHeightListener onSelectHeightListener) {
-        super(context);
+        super(context, Measure.HEIGHT);
         this.onSelectHeightListener = onSelectHeightListener;
     }
 
     private HeightDialog(Context context, String valueStr, OnSelectHeightListener onSelectHeightListener) {
-        super(context);
+        super(context, Measure.HEIGHT);
         this.onSelectHeightListener = onSelectHeightListener;
         super.setCurrentValue(Measure.HEIGHT, valueStr);
     }
@@ -47,20 +47,6 @@ public class HeightDialog extends MeasureDialog {
     @Override
     protected void setTitleDialog(TextView titleDialog) {
         titleDialog.setText(R.string.height);
-    }
-
-    @Override
-    protected void setUnit(TextView unit) {
-        try {
-            if(!Preferences.isJustUserLogged(getContext()) || Preferences.getUnitHeightDefault(getContext()).equals(MeasureUnit.METER.toString()))
-                unit.setText(MeasureUnit.METER.getStrId());
-            else
-                unit.setText(MeasureUnit.FEET.getStrId());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
     }
 
     protected void setPositiveListener(DialogInterface dialog, int which){

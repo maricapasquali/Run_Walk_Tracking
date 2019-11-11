@@ -1,38 +1,25 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 
-import android.util.Base64;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.SignUpActivity;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.UserBuilder;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 
-import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
-import java.util.Date;
 
 
 public class PersonalDataFragment extends Fragment {
@@ -50,6 +37,8 @@ public class PersonalDataFragment extends Fragment {
     private ImagePickerHandlerListener imagePickerHandlerListener;
     private PersonalDataListener personalDataListener;
 
+    private User user;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -64,7 +53,6 @@ public class PersonalDataFragment extends Fragment {
             throw new ClassCastException(context.toString() + " must implement ImagePickerHandlerListener");
         }
     }
-
 
     @Nullable
     @Override
@@ -94,19 +82,27 @@ public class PersonalDataFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+        if(user!=null) birthDate.setText(user.getBirthDateString());
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG,"onPause");
         try {
 
-            personalDataListener.personalData(UserBuilder.create()
-                                                         .setName(name.getText().toString())
-                                                         .setLastName(last_name.getText().toString())
-                                                         .setBirthDate(birthDate.getText().toString())
-                                                         .setEmail(email.getText().toString())
-                                                         .setCity(city.getText().toString())
-                                                         .setPhone(phone.getText().toString())
-                                                         .build());
+            user = UserBuilder.create()
+                              .setName(name.getText().toString())
+                              .setLastName(last_name.getText().toString())
+                              .setBirthDate(birthDate.getText().toString())
+                              .setEmail(email.getText().toString())
+                              .setCity(city.getText().toString())
+                              .setPhone(phone.getText().toString())
+                              .build();
+            personalDataListener.personalData(user);
         } catch (ParseException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -135,7 +131,6 @@ public class PersonalDataFragment extends Fragment {
         super.onDetach();
         Log.d(TAG,"onDestroy");
     }
-
 
     public interface ImagePickerHandlerListener{
         void imagePickerHandler(ImageView imageView);

@@ -24,8 +24,6 @@ import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
@@ -33,19 +31,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
         HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
-        StatisticsFragment.OnAddWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
+        StatisticsFragment.OnWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
 
     private final static String TAG = ApplicationActivity.class.getName();
     private final static int REQUEST_SETTINGS = 1;
@@ -53,6 +45,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private final static int REQUEST_SUMMARY = 3;
     private final static int REQUEST_NEW_WORKOUT = 4;
     private final static int REQUEST_NEW_WEIGHT = 5;
+    private final static int REQUEST_MODIFY_WEIGHT = 6;
 
     private BottomNavigationView navigationBarBottom;
 
@@ -60,6 +53,9 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private Workout newWorkout;
     private Workout workoutChanged;
     private int id_workout_delete;
+
+    private StatisticsData statisticsData;
+    private int id_weight_delete;
 
     private ArrayList<Workout> workouts;
     private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
@@ -82,12 +78,13 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
 
             bodyJson.put(FieldDataBase.ID_USER.toName(), id_user);
             if(!HttpRequest.requestWorkouts(this, bodyJson , response -> {
-                // TODO: 11/1/2019 CONTROLLO ERROR  REQUEST
+
                 try {
                     if(HttpRequest.someError(response)){
                         Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                     }else{
-                        workouts = new Gson().fromJson(response.get("workouts").toString(), new TypeToken<List<Workout>>(){}.getType());
+                        workouts = new Gson().fromJson(response.get("workouts").toString(),
+                                new TypeToken<List<Workout>>(){}.getType());
                         Log.e(TAG, workouts.toString());
                     }
 
@@ -285,6 +282,34 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         return newWeight;
     }
 
+    @Override
+    public void modifyWeight(StatisticsData statisticsData) {
+        final Intent intent = new Intent(this, ModifyWeightActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        intent.putExtra(getString(R.string.modify_weight),statisticsData);
+        startActivityForResult(intent, REQUEST_MODIFY_WEIGHT);
+    }
+
+    @Override
+    public StatisticsData changedWeight() {
+        return statisticsData;
+    }
+
+    @Override
+    public void resetChangedWeight() {
+        statisticsData =null;
+    }
+
+    @Override
+    public int deletedWeight() {
+        return id_weight_delete;
+    }
+
+    @Override
+    public void resetDeletedWeight() {
+        id_weight_delete=0;
+    }
+
     //Results
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -332,10 +357,27 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                     Log.d(TAG, "New Weight = " + newWeight);
                 }
                 break;
+
+            case REQUEST_MODIFY_WEIGHT:
+                if(resultCode==Activity.RESULT_OK) {
+                    statisticsData = (StatisticsData)data.getParcelableExtra(getString(R.string.modify_weight));
+                    if(statisticsData!=null){
+                        Toast.makeText(this, R.string.modify_weight, Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Workout changed = " +statisticsData);
+                    }
+
+                    id_weight_delete = data.getIntExtra(getString(R.string.delete_weight), 0);
+                    if(id_weight_delete>0){
+                        Toast.makeText(this, R.string.delete_weight, Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Workout deleted = " +id_weight_delete);
+                    }
+
+                }
             case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
                 }
+                break;
         }
     }
 }

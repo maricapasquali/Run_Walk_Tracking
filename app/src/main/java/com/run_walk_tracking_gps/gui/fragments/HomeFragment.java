@@ -123,14 +123,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
 
             JSONObject settings = (JSONObject)jsonApp.get(FieldDataBase.SETTINGS.toName());
             JSONObject s_sport = (JSONObject)settings.get(FieldDataBase.SPORT.toName());
-            JSONObject s_unit_measure = (JSONObject)settings.get(FieldDataBase.UNIT_MEASURE.toName());
 
-            String s_energy = (String)((JSONObject)s_unit_measure.get(FieldDataBase.ENERGY.toName())).get(FieldDataBase.UNIT.toName());
-            String s_distance = (String)((JSONObject)s_unit_measure.get(FieldDataBase.DISTANCE.toName())).get(FieldDataBase.UNIT.toName());
+            String s_energy = Preferences.getUnitEnergyDefault(getContext());
+            String s_distance = Preferences.getUnitDistanceDefault(getContext());
 
             sport.setText(Sport.valueOf((String)s_sport.get(FieldDataBase.NAME.toName())).getStrId());
-            energy_workout.setText(energy_workout.getText() +getString(R.string.space)+ s_energy);
-            distance_workout.setText(distance_workout.getText() +getString(R.string.space)+ s_distance);
+            energy_workout.setText(new StringBuilder(energy_workout.getText() +getString(R.string.space)+ s_energy));
+            distance_workout.setText(new StringBuilder(distance_workout.getText() +getString(R.string.space)+ s_distance));
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -205,9 +204,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
                                                                         .setMapRoute("not null")
                                                                         .setDate(Calendar.getInstance().getTime())
                                                                         .setCalories(400)
-                                                                        .setDuration(3600)
                                                                         .setDistance(20)
-                                                                        .setMiddleSpeed(9.0)
+                                                                        .setDuration(3600)
                                                                         .setSport(Sport.RUN)
                                                                         .build());
         });

@@ -6,8 +6,11 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+
+import org.json.JSONException;
 
 public class DistanceDialog extends MeasureDialog {
 
@@ -17,7 +20,7 @@ public class DistanceDialog extends MeasureDialog {
     private OnSelectDistanceListener onSelectDistanceListener;
 
     private DistanceDialog(Context context, OnSelectDistanceListener onSelectDistanceListener) {
-        super(context);
+        super(context, Measure.DISTANCE);
         this.onSelectDistanceListener = onSelectDistanceListener;
     }
 
@@ -36,10 +39,6 @@ public class DistanceDialog extends MeasureDialog {
         titleDialog.setText(R.string.distance);
     }
 
-    @Override
-    protected void setUnit(TextView unit) {
-        unit.setText(MeasureUnit.KILOMETER.getStrId());
-    }
 
     @Override
     protected void setPositiveListener(DialogInterface dialog, int which) {

@@ -107,6 +107,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     DistanceDialog.create(ModifyWorkoutActivity.this, (distanceStr, distance)  -> {
                         detail.setText(distanceStr);
                         workout.setDistance(distance);
+                        // TODO: 11/3/2019 GESTIONE CONVERSIONE
                     }).show();
                     break;
                 case CALORIES:
@@ -116,8 +117,6 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     }).show();
                     break;
             }
-
-            // TODO: 10/17/2019 RICALCOLARE VELOCITA SE CAMBIATE DURATA E/O DISTANZA
         });
 
     }

@@ -1,7 +1,16 @@
 package com.run_walk_tracking_gps.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.gui.enumeration.Measure;
+import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.utilities.DateUtilities;
+
+import org.json.JSONException;
 
 import java.util.Date;
 import java.util.Map;
@@ -18,6 +27,15 @@ public class StatisticsData implements Parcelable{
     public StatisticsData(final Date date, final Double statisticData) {
         this.date = date;
         this.data = statisticData;
+    }
+
+    private StatisticsData(StatisticsData statisticData) {
+        this(statisticData.date, statisticData.data);
+        this.id=statisticData.getId();
+    }
+
+    public StatisticsData clone(){
+        return new StatisticsData(this);
     }
 
     protected StatisticsData(Parcel in) {
@@ -70,8 +88,34 @@ public class StatisticsData implements Parcelable{
         return date;
     }
 
+    public String getDateStr(){
+        return DateUtilities.parseFullToString(date);
+    }
+
     public Double getStatisticData() {
         return data;
+    }
+
+    public String getStatisticDataStr(Context context, Measure measure)  {
+        StringBuilder stringBuilder = new StringBuilder(data + context.getString(R.string.space));
+        try {
+            switch (measure){
+                case DISTANCE:
+                    stringBuilder.append(Preferences.getUnitDistanceDefault(context));
+                    break;
+                case MIDDLE_SPEED: stringBuilder.append(Preferences.getUnitMiddleSpeedDefault(context));
+                    break;
+                case ENERGY: stringBuilder.append(Preferences.getUnitEnergyDefault(context));
+                    break;
+                case WEIGHT:
+                    stringBuilder.append(Preferences.getUnitWeightDefault(context));
+                    break;
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        return stringBuilder.toString();
     }
 
     public boolean isSet() {
