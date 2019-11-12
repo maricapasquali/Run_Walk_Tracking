@@ -54,6 +54,7 @@ public class HttpRequest {
     private static final String USER = ACCOUNT + "profile.php?"+  FieldDataBase.ID_USER.toName()+"=";
     private static final String UPDATE_USER_INFO = ACCOUNT + "update_profile.php";
     private static final String DELETE_USER = ACCOUNT + "delete_account.php";
+    private static final String IMG_ACCOUNT = ACCOUNT + "img_profile.php";
     private static final String UPDATE_PASSWORD = ACCOUNT + "";
 
     private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
@@ -107,6 +108,12 @@ public class HttpRequest {
 
         final int id_user = (Integer) bodyJson.get(FieldDataBase.ID_USER.toName());
         return HttpRequest.requestJsonGetToServerVolley(context, USER + id_user, bodyJson,responseJsonListener);
+    }
+
+    public static boolean requestImgProfile(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+            throws NullPointerException, IllegalArgumentException {
+        check(bodyJson,  FieldDataBase.fieldRequiredForImgProfile());
+        return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context,IMG_ACCOUNT, Request.Method.POST, bodyJson,responseJsonListener);
     }
 
     public static boolean requestUpdateUserInformation(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
@@ -245,6 +252,23 @@ public class HttpRequest {
         return requestJsonToServerVolley(context, url, Request.Method.POST, bodyJson, listenerResponse);
     }
 
+    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
+                                                     Response.Listener<JSONObject> listenerResponse){
+        final AtomicBoolean errRequest = new AtomicBoolean(false);
+        if(!isNetWorkAvailable(context)) return false;
+
+        final RequestQueue queue = Volley.newRequestQueue(context);
+        final JsonObjectRequest stringRequest = new JsonObjectRequest(method, url, bodyJson,
+                listenerResponse,
+                error -> {
+                    Log.e(TAG, error.toString());
+                    Toast.makeText(context, errRequest.toString(), Toast.LENGTH_LONG).show();
+                    errRequest.set(true);
+                });
+
+        queue.add(stringRequest);
+        return !errRequest.get();
+    }
 
     private static boolean requestJsonToServerVolley(final Context context, final String url, final int method, final JSONObject bodyJson,
                                                      Response.Listener<JSONObject> listenerResponse){

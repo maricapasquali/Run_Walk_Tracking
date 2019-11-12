@@ -1,10 +1,14 @@
 package com.run_walk_tracking_gps.utilities;
 
+import android.support.v4.util.Pair;
+
 import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
+import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,5 +41,30 @@ public class FilterUtilities {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
+    }
+
+    public static List<StatisticsData> createListFilteredStatisticsData(List<StatisticsData> statisticsData, FilterTime filter) {
+        Pair<Date, Date> range = null;
+        if(statisticsData.size()>0){
+            Date lastInsert = statisticsData.get(0).getDate();
+            switch (filter) {
+                case WEEK:
+                    range = DateUtilities.getRangeLastWeek(lastInsert);
+                    System.out.println(range);
+                    break;
+
+                case MONTH:
+                    range = DateUtilities.getRangeLastMonth(lastInsert);
+                    break;
+
+                case YEAR:
+                    range = DateUtilities.getRangeLastYear(lastInsert);
+                    break;
+            }
+        }
+
+        Pair<Date, Date> finalRange = range;
+        return range==null ? statisticsData :
+                statisticsData.stream().filter(s -> DateUtilities.isIntoRange(s.getDate(), finalRange)).collect(Collectors.toList());
     }
 }

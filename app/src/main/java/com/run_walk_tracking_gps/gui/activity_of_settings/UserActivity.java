@@ -130,8 +130,9 @@ public class UserActivity extends CommonActivity {
             e.printStackTrace();
         }
 
-        String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), "");
-        if(!img_encode.equals("null")) img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+        String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), null);
+        Log.e(TAG, "IMAGE ENCODE = " + img_encode);
+        if(img_encode!=null) img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
         this.user = user;
         Log.d(TAG, "User = " + user);

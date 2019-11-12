@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
+import android.support.v4.util.Pair;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -59,6 +58,31 @@ public class DateUtilities {
         return parseToDate(DateFormat.SHORT, stringDate);
     }
 
+    public static Pair<Date, Date> getRangeLastWeek( Date lastInsert){
+        return getRangeOne(Calendar.DAY_OF_MONTH, lastInsert);
+    }
+
+    public static Pair<Date, Date> getRangeLastMonth( Date lastInsert){
+        return getRangeOne(Calendar.MONTH, lastInsert);
+    }
+
+    public static Pair<Date, Date> getRangeLastYear( Date lastInsert) {
+        return getRangeOne(Calendar.YEAR, lastInsert);
+    }
+
+    public static boolean isIntoRange(Date d1, Pair<Date, Date> range){
+        return d1.compareTo(range.first)>=0 && d1.compareTo(range.second)<=0;
+    }
+
+    private static Pair<Date, Date> getRangeOne(int filter, Date lastInsert) {
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone), locale);
+        //final Date today = calendar.getTime();
+        calendar.setTime(lastInsert);
+        calendar.add(filter, filter==Calendar.DAY_OF_MONTH ? -7 : -1);
+        final Date ago = calendar.getTime();
+        return Pair.create(ago, lastInsert);
+    }
+
     // TODO: 10/15/2019 DA RIGUARDARE PER TIME FORMAT
 
     /**
@@ -110,4 +134,6 @@ public class DateUtilities {
     public static String parseToString(int style, Date date) {
         return DateFormat.getDateInstance(style, locale).format(date);
     }
+
+
 }

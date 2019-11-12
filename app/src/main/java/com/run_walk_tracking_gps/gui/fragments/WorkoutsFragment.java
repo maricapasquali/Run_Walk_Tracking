@@ -19,7 +19,7 @@ import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.adapter.listview.WorkoutsFilterAdapter;
-import com.run_walk_tracking_gps.gui.adapter.spinner.FilterWorkoutAdapterSpinner;
+import com.run_walk_tracking_gps.gui.adapter.spinner.FilterAdapterSpinner;
 import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.FilterUtilities;
@@ -103,7 +103,7 @@ public class WorkoutsFragment extends Fragment {
 
         // Filter
         filter = view.findViewById(R.id.filter_workouts);
-        filter.setAdapter(new FilterWorkoutAdapterSpinner(getContext(), false, true));
+        filter.setAdapter(new FilterAdapterSpinner(getContext(),  true));
         filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

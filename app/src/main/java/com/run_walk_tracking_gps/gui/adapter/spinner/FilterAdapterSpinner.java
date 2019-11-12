@@ -9,15 +9,11 @@ import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
-public class FilterWorkoutAdapterSpinner extends CustomSpinnerAdapter<FilterTime> {
+public class FilterAdapterSpinner extends CustomSpinnerAdapter<FilterTime> {
 
-    public FilterWorkoutAdapterSpinner(Context context, boolean isDisabledFirst) {
-        super(context, FilterTime.values(), isDisabledFirst);
-    }
-
-    public FilterWorkoutAdapterSpinner(Context context, boolean isDisabledFirst, boolean isCenter) {
-        super(context, FilterTime.values(), isDisabledFirst);
-        setTextViewInCenter(isCenter);
+    public FilterAdapterSpinner(Context context, boolean isWorkouts) {
+        super(context, isWorkouts ? FilterTime.valuesWorkouts() : FilterTime.values(), false);
+        setTextViewInCenter(true);
     }
 
     @Override

@@ -2,33 +2,30 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
 import com.run_walk_tracking_gps.gui.adapter.listview.StatisticsDataAdapter;
-import com.run_walk_tracking_gps.gui.adapter.spinner.FilterWorkoutAdapterSpinner;
+import com.run_walk_tracking_gps.gui.adapter.spinner.FilterAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.MeasureWorkoutAdapterSpinner;
 import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.utilities.FilterUtilities;
 
 import java.util.ArrayList;
 
@@ -104,21 +101,18 @@ public class StatisticsFragment extends Fragment {
         spinner_measure = view.findViewById(R.id.statistics_filter_data);
         spinner_measure.setAdapter(new MeasureWorkoutAdapterSpinner(getContext(), Measure.getMeasureStatistics(), false, true));
         spinner_time = view.findViewById(R.id.statistics_filter_time);
-        spinner_time.setAdapter(new FilterWorkoutAdapterSpinner(getContext(), false, true));
+        spinner_time.setAdapter(new FilterAdapterSpinner(getContext(), false));
 
         list_data_filtered = view.findViewById(R.id.list_data_filtered);
         add_weight = view.findViewById(R.id.add_weight);
 
-        list_data_filtered.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if(((Measure)spinner_measure.getSelectedItem()).equals(Measure.WEIGHT) && position > 0){
-                    Log.d(TAG,  "DEEP TOUCH :  " + (StatisticsData)parent.getAdapter().getItem(position));
-                    onWeightListener.modifyWeight((StatisticsData)parent.getAdapter().getItem(position));
-                }
-
-                return false;
+        list_data_filtered.setOnItemLongClickListener((parent, view1, position, id) -> {
+            if(((Measure)spinner_measure.getSelectedItem()).equals(Measure.WEIGHT) && position > 0){
+                Log.d(TAG,  "DEEP TOUCH :  " + (StatisticsData)parent.getAdapter().getItem(position));
+                onWeightListener.modifyWeight((StatisticsData)parent.getAdapter().getItem(position));
             }
+
+            return false;
         });
 
 
@@ -145,7 +139,6 @@ public class StatisticsFragment extends Fragment {
                     }
 
                     update(measureSelected, filterTimeSelected);
-
                 }
 
                 @Override
@@ -179,13 +172,9 @@ public class StatisticsFragment extends Fragment {
     private void update(Measure measure, FilterTime filterTime){
         Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
 
-        switch (filterTime){
-            case ALL: statisticsDataAdapter.updateStatisticsData(getStatistics(measure), measure);
-                break;
-            default: statisticsDataAdapter.updateStatisticsData(new ArrayList<>(), measure);
-                break;
-        }
-
+        statisticsDataAdapter.updateStatisticsData(
+                FilterUtilities.createListFilteredStatisticsData(getStatistics(measure), filterTime),
+                measure);
     }
 
     // TODO: 11/3/2019 GESTIONE CONVERSIONE
@@ -205,7 +194,7 @@ public class StatisticsFragment extends Fragment {
     }
 
     private ArrayList<StatisticsData> distanceStatistics(){
-        return   workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
+        return workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
                 (s, w)-> s.add(new StatisticsData(w.getDate(), w.getDistance())), ArrayList::addAll);
     }
 
@@ -272,7 +261,4 @@ public class StatisticsFragment extends Fragment {
         int deletedWeight();
         void resetDeletedWeight();
     }
-
-
-
 }

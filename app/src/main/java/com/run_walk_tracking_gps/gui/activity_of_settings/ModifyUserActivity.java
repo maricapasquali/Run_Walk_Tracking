@@ -80,8 +80,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 Log.d(TAG, user.toString());
 
 
-                String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), "");
-                img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+                String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), null);
+                if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
                 name.setText(user.getName());
                 lastName.setText(user.getLastName());
@@ -138,6 +138,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                     bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
                     bodyJson.remove(FieldDataBase.USERNAME.toName());
 
+                    Log.e(TAG, bodyJson.toString());
                     if(!HttpRequest.requestUpdateUserInformation(this, bodyJson,this)){
                         Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
                     }

@@ -61,7 +61,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                     final JSONObject bodyJson = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText().toString())
                                                                 .put(FieldDataBase.PASSWORD.toName(), hash_password);
 
-                    // TODO: 10/31/2019 richiedere anche le info del profilo
+                    // TODO: 10/31/2019 REQUEST IMAGE PROFILE
                     if(!HttpRequest.requestSignIn(this, bodyJson, this)){
                         Snackbar.make(findViewById(R.id.snake), R.string.internet_not_available, Snackbar.LENGTH_INDEFINITE).show();
                     }

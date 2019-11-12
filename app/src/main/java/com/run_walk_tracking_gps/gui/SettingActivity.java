@@ -192,17 +192,8 @@ public class SettingActivity extends CommonActivity {
                         Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                     else {
                         try {
-                            final  JSONObject userInfo = (JSONObject) response.get("user");
-
-                            final String img_encode = userInfo.getString(FieldDataBase.IMG_ENCODE.toName());
+                            final JSONObject userInfo = (JSONObject) response.get("user");
                             User user = new Gson().fromJson(userInfo.toString(), User.class);
-
-                            // SALVATO NELLE SHARED PREFERENCES
-                            if(!img_encode.equals("null")){
-                                Preferences.setImageProfile(this, user.getIdUser(), img_encode);
-                            }
-                            Log.d(TAG, userInfo.toString());
-
                             final Intent intent = new Intent(this, UserActivity.class);
                             intent.putExtra(getString(R.string.user_info), user);
                             startActivity(intent);
@@ -220,7 +211,6 @@ public class SettingActivity extends CommonActivity {
 
         });
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
-
 
         exit.setOnClickListener(v -> {
 

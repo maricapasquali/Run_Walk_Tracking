@@ -57,7 +57,6 @@ public class SignUpActivity extends CommonActivity
     private ImagePicker imagePicker;
     private Bitmap bitmap;
 
-    private OnCheckListener onCheckListener;
 
     @Override
     protected void init() {
@@ -66,7 +65,6 @@ public class SignUpActivity extends CommonActivity
         getSupportActionBar().setTitle(getString(R.string.rec));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        onCheckListener = (OnCheckListener) getApplicationContext();
 
         fragmentSignUp.add(PERSONAL_DATA, new PersonalDataFragment());
         fragmentSignUp.add(PHYSICAL_DATA, new PhysicalDataFragment());
@@ -224,10 +222,6 @@ public class SignUpActivity extends CommonActivity
 
                 }).setWithImageCrop(1,1);
         imagePicker.choosePicture(true);
-    }
-
-    public interface OnCheckListener {
-        boolean check();
     }
 
 }

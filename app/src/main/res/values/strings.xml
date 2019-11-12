@@ -138,6 +138,7 @@
     <string name="all"> Tutti </string>
     <string name="year"> Anno </string>
     <string name="month"> Mese </string>
+    <string name="week"> Settimana </string>
 
     <string name="detail_workout">Dettaglio</string>
 

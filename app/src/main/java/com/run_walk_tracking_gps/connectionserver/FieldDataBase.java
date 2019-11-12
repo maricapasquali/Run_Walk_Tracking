@@ -20,6 +20,8 @@ public enum FieldDataBase {
     UNIT_MEASURE, UNIT_DISTANCE, UNIT_WEIGHT, UNIT_HEIGHT, ID_UNIT, UNIT,
     SETTINGS;
 
+
+
     public String toName() {
         return this.toString().toLowerCase();
     }
@@ -44,6 +46,10 @@ public enum FieldDataBase {
     }
 
     public static List< String> fieldRequiredForUserInformation(){
+        return unmodifiableList(Stream.of(ID_USER));
+    }
+
+    public static List<String> fieldRequiredForImgProfile() {
         return unmodifiableList(Stream.of(ID_USER));
     }
 
