@@ -99,6 +99,10 @@ public class DateUtilities {
                 String.format(FORMAT_TIME, c.get(is24Hour ? Calendar.HOUR_OF_DAY :Calendar.HOUR), c.get(Calendar.MINUTE));
     }
 
+    public static String parseShortToStringNoTime(Date date){
+        return parseToString(DateFormat.SHORT, date);
+    }
+
     // TODO: 10/15/2019 MIGLIORARE
     public static Date parseStringWithTimeToDateString(String dateWithTime){
         final Calendar c = Calendar.getInstance();

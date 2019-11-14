@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps;
 
 import com.run_walk_tracking_gps.model.enumerations.Gender;
+import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,6 +84,25 @@ public class JsonObjectTest {
             object = new JSONObject(stringJson);
             System.out.print("\n\n" +object.toString() + "\n\n");
             Assert.assertEquals(VALUE_CONVERT, object.get(KEY_CONVERT));
+        }catch (JSONException e){
+            System.err.print(e.getMessage());
+        }
+
+    }
+
+
+    @Test
+    public void mergeJSONObjects(){
+
+        try {
+            JSONObject json1 = new JSONObject().put(KEY_NAME, VALUE_NAME)
+                    .put(KEY_LAST_NAME, VALUE_LAST_NAME)
+                    .put(KEY_GENDER, VALUE_GENDER);
+            JSONObject json2 = new JSONObject().put("ciao", 12);
+
+            JSONObject merge = JSONUtilities.merge(json1, json2);
+            json1.put("ciao", 12);
+            Assert.assertTrue(json1.toString().equals(merge.toString()));
         }catch (JSONException e){
             System.err.print(e.getMessage());
         }

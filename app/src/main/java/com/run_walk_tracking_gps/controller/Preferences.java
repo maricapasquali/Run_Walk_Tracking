@@ -2,10 +2,12 @@ package com.run_walk_tracking_gps.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.model.enumerations.Sport;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,8 +49,18 @@ public class Preferences {
         return context.getSharedPreferences(PREFERENCE_USER_IMAGE, Context.MODE_PRIVATE);
     }
 
-    public static void setImageProfile(Context context, int id_user, String image_encode){
-        getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
+    public static void writeImageIntoSharedPreferences(Context context, int id_user, String image_encode){
+        if(image_encode!=null)
+            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
+    }
+
+    public static void writeImageIntoSharedPreferences(Context context, JSONObject response) throws JSONException {
+        JSONObject user = ((JSONObject)response.get("user"));
+        String image_encode = user.getString(FieldDataBase.IMG_ENCODE.toName());
+        int id_user = (int)user.get(FieldDataBase.ID_USER.toName());
+
+        if(!image_encode.equals("null") || !image_encode.equals(getSharedPreferencesImagesUser(context).getString(String.valueOf(id_user), "null")))
+            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
     }
 
     // SETTING
@@ -94,8 +106,16 @@ public class Preferences {
         return getUnitDefault(context, FieldDataBase.DISTANCE.toName())+"/h";
     }
 
+    public static String getNameSportDefault(Context context) throws JSONException {
+        final String id_user = getIdUserLogged(context);
+        final JSONObject jsonApp = getAppJsonUserLogged(context, id_user);
+        JSONObject settings = (JSONObject)jsonApp.get(FieldDataBase.SETTINGS.toName());
+        JSONObject s_sport = (JSONObject)settings.get(FieldDataBase.SPORT.toName());
+        return context.getString(Sport.valueOf((String)s_sport.get(FieldDataBase.NAME.toName())).getStrId());
+    }
+
     public static void writeSettingsIntoSharedPreferences(Context context, JSONObject json) throws JSONException {
-        final String id_user = String.valueOf((int) ((JSONObject) json.get("user")).get("id_user"));
+        final String id_user = String.valueOf((int) ((JSONObject) json.get("user")).get(FieldDataBase.ID_USER.toName()));
 
         // MEMORIZZO ID DELL'USER CHE HA EFFETTUATO L'ACCESSO
         final boolean isJustLogged = Preferences.isJustUserLogged(context);

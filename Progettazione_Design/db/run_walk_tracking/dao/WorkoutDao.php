@@ -3,8 +3,6 @@ require_once("DaoFactory.php");
 
 class WorkoutDao {
 
-// TODO: CALCOLARE LA VELOCITA SE INSERITO SIA 'DURATION' CHE 'DISTANCE', OPPURE SE UNO DEI DUE (O ENTRAMBI ) E' STATO AGGIORNATO
-
    static function create($workout){
       try {
         if(connect())

@@ -41,19 +41,20 @@ class WeightDao {
          foreach ($weight as $key => $value) {
            if($key!=ID_WEIGHT){
              array_push($keys, $key);
-             array_push($values, $value);
+             array_push($values, $key==DATE ? formatDate($value) : $value);
            }
            if($key==DATE) $typeParam.="s";
            else if($key==VALUE) $typeParam.="d";
          }
          array_push($values, $weight[ID_WEIGHT]);
 
+
          $stmt = getConnection()->prepare("UPDATE weight SET " . join("=?,", $keys) ."=? WHERE id_weight=?");
          if(!$stmt) throw new Exception("Weight update : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param($typeParam."i" , ...array_values($values));
          if(!$stmt->execute()) throw new Exception("Weight : Update fallito. Errore: ". getErrorConnection());
          $stmt->close();
-
+         
          commitTransaction();
        }
      }catch (Exception $e) {

@@ -12,7 +12,7 @@ try{
    // NEL CASO SIA LA PRIMA VOLTA USA TOKEN INVIATO
    $result = UserDao::checkFirstLogin($user);
    if($result) print json_encode(array(FIRST_LOGIN => $result==1) + array(ID_USER =>$user[ID_USER]));
-   else print json_encode(array(USER => $user,
+   else print json_encode(array(USER => $user+UserDao::getImageProfileForIdUser($user[ID_USER]),
                                 APP => array(SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))));
 }catch(Exception $e){
   print json_errors($e->getMessage());

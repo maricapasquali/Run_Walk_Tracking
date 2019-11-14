@@ -1,31 +1,32 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.adapter.spinner.GenderAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
 import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
-import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.MeasureUtilities;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
+
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PhysicalDataFragment extends Fragment {
 
@@ -33,14 +34,16 @@ public class PhysicalDataFragment extends Fragment {
 
 
     private Spinner gender;
-    private TextView weight;
-    private TextView height;
+    private EditText weight;
+    private EditText height;
     private Spinner target;
-
 
     private double weightValue;
     private double heightValue;
+
     private PhysicalDataListener physicalDataListener;
+
+    private boolean isOk = true;
 
     @Override
     public void onAttach(Context context) {
@@ -68,20 +71,22 @@ public class PhysicalDataFragment extends Fragment {
     // weight
         weight = view.findViewById(R.id.signup_profile_weight);
         weight.setOnClickListener(v -> {
-            WeightDialog.create(view.getContext(), (weightString, weight) -> {
-                ((TextView)v).setText(weightString);
-                Log.d(TAG,getString(R.string.weight) +" : " +weight);
-                weightValue = weight;
+            WeightDialog.create(view.getContext(), (weightMeasure) -> {
+               if(weightMeasure!=null){
+                   ((TextView)v).setText(weightMeasure.toString(getContext()));
+                   weightValue = weightMeasure.getValue();
+               }
             }).show();
         });
 
     // height
         height = view.findViewById(R.id.signup_profile_height);
         height.setOnClickListener(v->{
-            HeightDialog.create(view.getContext(), (heightString, height) -> {
-                ((TextView)v).setText(heightString);
-                Log.d(TAG,getString(R.string.height) +" : " +height);
-                heightValue = height;
+            HeightDialog.create(view.getContext(), (heightMeasure) -> {
+                if(heightMeasure!=null){
+                    ((TextView)v).setText(heightMeasure.toString(getContext()));
+                    heightValue = heightMeasure.getValue();
+                }
             }).show();
 
         });
@@ -91,6 +96,9 @@ public class PhysicalDataFragment extends Fragment {
         final TargetAdapterSpinner spinnerTargetAdapter = new TargetAdapterSpinner(view.getContext(), true);
         if(target!=null)target.setAdapter(spinnerTargetAdapter);
 
+
+        Log.e(TAG, "Gender = " +gender.getSelectedItem().equals(R.string.gender));
+
         return view;
     }
 
@@ -98,28 +106,46 @@ public class PhysicalDataFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
-        try {
-            if(heightValue>0)
-               height.setText(MeasureUtilities.heightStr(getContext(),heightValue));
+        if(!isOk){
+            // TODO: 11/13/2019 SISTEMARE ERROR STRING
+            if(TextUtils.isEmpty(weight.getText()) || weightValue==0)
+                weight.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(height.getText()) || heightValue==0)
+                height.setError("Nome non vuoto");
+            //if(gender.getSelectedItem().equals(R.string.gender)) ((TextView)gender.getSelectedView()).setError("Nome non vuoto");
+            //if(target.getSelectedItem().equals(R.string.target)) ((TextView)target.getSelectedView()).setError("Nome non vuoto");
+        }
+    }
 
-            if(weightValue>0)
-                weight.setText(MeasureUtilities.weightStr(getContext(),weightValue));
+    private boolean isSetAll(){
+        return isOk = (!gender.getSelectedItem().equals(R.string.gender) &&
+                !target.getSelectedItem().equals(R.string.target) &&
+                !TextUtils.isEmpty(weight.getText()) && weightValue>0 &&
+                !TextUtils.isEmpty(height.getText()) &&  heightValue>0);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+
+            JSONObject physicalData= null;
+            //if(isSetAll()){
+                physicalData = new JSONObject().put(FieldDataBase.GENDER.toName(), EnumUtilities.getEnumFromStrId(Gender.class, (int)gender.getSelectedItem()))
+                        .put(FieldDataBase.TARGET.toName(), EnumUtilities.getEnumFromStrId(Target.class, (int) target.getSelectedItem()))
+                        .put(FieldDataBase.HEIGHT.toName(), heightValue)
+                        .put(FieldDataBase.WEIGHT.toName(), weightValue);
+            //}
+
+            physicalDataListener.physicalData(physicalData);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        physicalDataListener.physicalData((int)gender.getSelectedItem(),(int)target.getSelectedItem(),
-                heightValue, weightValue);
-    }
-
     public interface PhysicalDataListener{
-        void physicalData(int gender, int target, double height, double weight);
+        void physicalData(JSONObject jsonPhysical);
     }
 
 }

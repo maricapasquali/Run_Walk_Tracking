@@ -2,7 +2,9 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,7 +16,7 @@ import android.widget.Toast;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
@@ -44,6 +46,7 @@ public class UserActivity extends CommonActivity {
 
     private User user;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init() {
         setContentView(R.layout.activity_profile);
@@ -93,6 +96,7 @@ public class UserActivity extends CommonActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -110,6 +114,7 @@ public class UserActivity extends CommonActivity {
     protected void listenerAction() {
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
         name.setText(user.getName());
         lastName.setText(user.getLastName());
@@ -122,7 +127,7 @@ public class UserActivity extends CommonActivity {
         // TODO: 10/31/2019 GESTIONE CONVERSIONE
         try {
             double height_value = user.getHeight();
-            if(!Preferences.getUnitHeightDefault(this).equals(getString(MeasureUnit.METER.getStrId()))){
+            if(!Preferences.getUnitHeightDefault(this).equals(getString(Measure.Unit.METER.getStrId()))){
                 height_value = ConversionUnitUtilities.meterToFeet(height_value);
             }
             height.setText(MeasureUtilities.heightStr(this, height_value));
@@ -132,7 +137,7 @@ public class UserActivity extends CommonActivity {
 
         String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), null);
         Log.e(TAG, "IMAGE ENCODE = " + img_encode);
-        if(img_encode!=null) img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+        if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
         this.user = user;
         Log.d(TAG, "User = " + user);

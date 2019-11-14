@@ -27,10 +27,13 @@ import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.dialog.EnergyDialog;
+import com.run_walk_tracking_gps.gui.dialog.MeasureDialog;
 import com.run_walk_tracking_gps.gui.dialog.SportDialog;
 
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
+import com.run_walk_tracking_gps.model.WorkoutBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,9 +47,8 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     private ListView details_workout;
     private ImageButton summary_ok;
 
-
     private Workout oldWorkout;
-    private Workout workout = new Workout();
+    private Workout workout;
 
     @Override
     protected void init() {
@@ -62,8 +64,11 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
         if(getIntent()!=null){
             oldWorkout = getIntent().getParcelableExtra(getString(R.string.modify_workout));
             if(oldWorkout!=null){
-                Log.d(TAG, oldWorkout.toString());
+                oldWorkout.setContext(this);
                 workout = oldWorkout.clone();
+
+                Log.d(TAG,"OLD " + oldWorkout.toString());
+                Log.d(TAG,"CLONE " + workout.toString());
 
                 final DetailsWorkoutAdapter adapter = new DetailsWorkoutAdapter(this, oldWorkout.toArrayString(), true);
                 details_workout.setAdapter(adapter);
@@ -98,22 +103,35 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     break;
 
                 case TIME:
-                    DurationDialog.create(ModifyWorkoutActivity.this, (durationStr, duration) -> {
-                        detail.setText(durationStr);
-                        workout.setDuration(duration);
+                    DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
+                        if (durationMeasure!=null){
+                            detail.setText(durationMeasure.toString(this));
+                            workout.setDuration(durationMeasure.getValue().intValue());
+                        }
                     }).show();
                     break;
                 case DISTANCE:
-                    DistanceDialog.create(ModifyWorkoutActivity.this, (distanceStr, distance)  -> {
-                        detail.setText(distanceStr);
-                        workout.setDistance(distance);
+                    DistanceDialog.create(ModifyWorkoutActivity.this, (distanceMeasure)  -> {
+                        if(distanceMeasure==null){
+                            detail.setText(R.string.no_available_abbr);
+                            workout.setDistance(0.0);
+                        }else{
+                            detail.setText(distanceMeasure.toString(this));
+                            workout.setDistance(distanceMeasure.getValue());
+                        }
                         // TODO: 11/3/2019 GESTIONE CONVERSIONE
                     }).show();
                     break;
                 case CALORIES:
-                    EnergyDialog.create(ModifyWorkoutActivity.this,(caloriesStr, calories) ->{
-                        detail.setText(caloriesStr);
-                        workout.setCalories(calories);
+                    EnergyDialog.create(ModifyWorkoutActivity.this,(caloriesMeasure) ->{
+
+                        if(caloriesMeasure==null){
+                            detail.setText(R.string.no_available_abbr);
+                            workout.setCalories(0.0);
+                        }else{
+                            detail.setText(caloriesMeasure.toString(this));
+                            workout.setCalories(caloriesMeasure.getValue());
+                        }
                     }).show();
                     break;
             }
@@ -142,28 +160,28 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
 
     private void saveWorkoutChanged(){
         try {
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WORKOUT.toName(), workout.getIdWorkout());
 
+            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WORKOUT.toName(), workout.getIdWorkout());
             if(!workout.getDate().equals(oldWorkout.getDate())){
                 bodyJson.put(FieldDataBase.DATE.toName(), workout.getDate());
             }
             if(!workout.getSport().equals(oldWorkout.getSport())){
                 bodyJson.put(FieldDataBase.SPORT.toName(), workout.getSport());
             }
-            if(workout.getDuration()!=oldWorkout.getDuration()){
-                bodyJson.put(FieldDataBase.DURATION.toName(), workout.getDuration());
+            if(!workout.getDuration().getValue().equals(oldWorkout.getDuration().getValue())){
+                bodyJson.put(FieldDataBase.DURATION.toName(), workout.getDuration().getValue());
             }
-            if(workout.getDistance()!=oldWorkout.getDistance()){
-                bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance());
+            if(!workout.getDistance().getValue().equals(oldWorkout.getDistance().getValue())){
+                bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance().getValue());
             }
-            if(workout.getCalories()!=oldWorkout.getCalories()){
-                bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories());
+            if(!workout.getCalories().getValue().equals(oldWorkout.getCalories().getValue())){
+                bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories().getValue());
             }
-            if(workout.getMiddleSpeed()!=oldWorkout.getMiddleSpeed()){
-                bodyJson.put(FieldDataBase.MIDDLE_SPEED.toName(), workout.getMiddleSpeed());
+            if(!workout.getMiddleSpeed().getValue().equals(oldWorkout.getMiddleSpeed().getValue())){
+                bodyJson.put(FieldDataBase.MIDDLE_SPEED.toName(), workout.getMiddleSpeed().getValue());
             }
-            //Log.e(TAG, "Changed = "+workout + ", old = " + oldWorkout);
-            Log.e(TAG, bodyJson.toString());
+
+            Log.d(TAG, bodyJson.toString());
             if(!HttpRequest.requestUpdateWorkout(this, bodyJson, this))
             {
                 Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();

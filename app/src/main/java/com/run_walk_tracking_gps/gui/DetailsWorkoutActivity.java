@@ -25,6 +25,7 @@ import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
 
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.model.WorkoutBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,9 +60,10 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
 
         String[] d = null;
-        workout = getIntent().getParcelableExtra(getString(R.string.summary_workout));
+        workout = (Workout)getIntent().getParcelableExtra(getString(R.string.summary_workout));
         if(workout!=null){ // SUMMARY_DETAILS
             isSummary = true;
+            workout.setContext(this);
             Log.d(TAG, workout.toString());
             d = workout.toArrayString();
 
@@ -70,9 +72,9 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
         }
         else { // DETAILS
-
-            workout = getIntent().getParcelableExtra(getString(R.string.detail_workout));
+            workout = (Workout)getIntent().getParcelableExtra(getString(R.string.detail_workout));
             if(workout!=null){
+                workout.setContext(this);
                 d = workout.toArrayString();
                 Log.d(TAG, workout.toString());
                 if(workout.getMapRoute()==null)summary_map.setVisibility(View.GONE);
@@ -168,6 +170,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
                     Workout work = (Workout) data.getParcelableExtra(getString(R.string.changed_workout));
                     isChangedWorkout = (work!=null);
                     if(isChangedWorkout){
+                        work.setContext(this);
                         adapter.updateDetails(work);
                         workout = work;
                         Log.d(TAG, "Workout= " + workout);

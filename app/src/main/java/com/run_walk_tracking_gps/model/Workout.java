@@ -5,62 +5,104 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
-import com.run_walk_tracking_gps.utilities.DurationUtilities;
-import com.run_walk_tracking_gps.utilities.MeasureUtilities;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Workout implements Parcelable {
 
-    private static final String ND = "N.D.";
+public class Workout implements Parcelable, Cloneable{
+
+    private Context context;
 
     private int id_workout;
-
     private String map_route;
-    private String date;
-    private int duration;
-    private double distance;
-    private double calories;
-    private double middle_speed;
+    private Date date;
+    private ArrayList<Measure> parameters;
     private Sport sport;
 
-    public Workout(){}
+    private static String ND;
 
-    private Workout (Workout w){
+    public Workout(Context context){
+        this.context = context;
+        ND = context.getString(R.string.no_available_abbr);
+        parameters = new ArrayList<>();
+        parameters.add(Measure.create(context, Measure.Type.DURATION));
+        parameters.add(Measure.create(context, Measure.Type.DISTANCE));
+        parameters.add(Measure.create(context, Measure.Type.ENERGY));
+        parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
+    }
+
+    private Workout(Workout w){
+        this.context = w.context;
         this.id_workout = w.id_workout;
         this.map_route = w.map_route;
         this.date = w.date;
-        this.duration = w.duration;
-        this.distance = w.distance;
-        this.calories = w.calories;
-        this.middle_speed = w.middle_speed;
+        this.parameters = w.parameters.stream().map(Measure::clone).collect(Collectors.toCollection(ArrayList::new));
         this.sport = w.sport;
     }
 
-    public Workout clone(){
+    public Workout clone() {
         return new Workout(this);
     }
 
+    // TODO: 11/14/2019 MIGLIORARE
+    public static ArrayList<Workout> createList(Context context,JSONArray workouts) {
+        final ArrayList<Workout> workoutsList = (ArrayList<Workout>) Stream.generate(() -> new Workout(context))
+                .limit(workouts.length())
+                .collect(Collectors.toList());
+        for (int i = 0; i < workouts.length(); i++){
+
+            try {
+                JSONObject w = (JSONObject)workouts.get(i);
+                workoutsList.get(i).setIdWorkout(w.getInt("id_workout"));
+                String map = w.getString("map_route");
+                if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
+                workoutsList.get(i).setDate(w.getString("date"));
+                workoutsList.get(i).setDuration(w.getInt("duration"));
+                workoutsList.get(i).setDistance(w.getDouble("distance"));
+                workoutsList.get(i).setCalories(w.getDouble("calories"));
+                workoutsList.get(i).setSport(Sport.valueOf(w.getString("sport")));
+                workoutsList.get(i).setMiddleSpeed(w.getDouble("middle_speed"));
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+
+        return workoutsList;
+    }
+
+
+// START - Parcelable IMPLEMENTATION
     protected Workout(Parcel in) {
         id_workout = in.readInt();
         map_route = in.readString();
+        date = new Date(in.readLong());
+        parameters = new ArrayList<>();
+        in.readTypedList(parameters, Measure.CREATOR);
         sport = Sport.valueOf(in.readString());
-        date = in.readString();
-        duration = in.readInt();
-        distance = in.readDouble();
-        calories = in.readDouble();
-        middle_speed = in.readDouble();
     }
 
-    // TODO: 11/1/2019 CREATE UN COMPARATOR
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id_workout);
+        dest.writeString(map_route);
+        dest.writeLong(date.getTime());
+        dest.writeTypedList(parameters);
+        dest.writeString(sport.toString());
+    }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
     public static final Creator<Workout> CREATOR = new Creator<Workout>() {
         @Override
@@ -74,21 +116,10 @@ public class Workout implements Parcelable {
         }
     };
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+// END - Parcelable IMPLEMENTATION
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id_workout);
-        dest.writeString(map_route);
-        dest.writeString(sport.toString());
-        dest.writeString(date);
-        dest.writeInt(duration);
-        dest.writeDouble(distance);
-        dest.writeDouble(calories);
-        dest.writeDouble(middle_speed);
+    public Context getContext() {
+        return context;
     }
 
     public int getIdWorkout() {
@@ -100,31 +131,35 @@ public class Workout implements Parcelable {
     }
 
     public Date getDate() {
-        return DateUtilities.parseStringWithTimeToDateString(date);
+        return date;
+    }
+
+    private String getDateStr() {
+        return DateUtilities.parseShortToString(date);
     }
 
     public Sport getSport() {
         return sport;
     }
 
-    public int getDuration() {
-        return duration;
+    public Measure getDuration() {
+        return parameters.get(0);
     }
 
-    public String getDurationStr(){
-        return DurationUtilities.format(this.duration);
+    public Measure getDistance() {
+        return parameters.get(1);
     }
 
-    public double getDistance() {
-        return distance;
+    public Measure getCalories() {
+        return parameters.get(2);
     }
 
-    public double getCalories() {
-        return calories;
+    public Measure getMiddleSpeed() {
+        return parameters.get(3);
     }
 
-    public double getMiddleSpeed() {
-       return middle_speed;
+    public void setContext(Context context){
+        this.context = context;
     }
 
     public void setIdWorkout(int id_workout) {
@@ -136,78 +171,53 @@ public class Workout implements Parcelable {
     }
 
     public void setDate(Date date) {
-        this.date = DateUtilities.parseShortToString(date);
+        this.date = date;
+    }
+
+    public void setDate(String date) {
+        this.date = DateUtilities.parseStringWithTimeToDateString(date);
     }
 
     public void setSport(Sport sport) {
         this.sport = sport;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setDuration(Integer duration) {
+        getDuration().setValue(Double.valueOf(duration));
         setMiddleSpeed();
     }
 
-    public void setDistance(double distance) {
-        this.distance = distance;
+    public void setDistance(Double distance) {
+        getDistance().setValue(distance);
         setMiddleSpeed();
     }
 
     private void setMiddleSpeed(){
-        this.middle_speed = (duration>0f ? this.distance/((double) this.duration/3600) : 0f);
+        int duration = getDuration().getValue().intValue();
+        double distance = Measure.isNullOrEmpty(getDistance()) ? 0d : getDistance().getValue();
+
+        setMiddleSpeed(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d));
     }
 
-    public void setCalories(double calories) {
-        this.calories = calories;
+    private void setMiddleSpeed(Double middleSpeed) {
+        getMiddleSpeed().setValue(middleSpeed);
+    }
+
+    public void setCalories(Double calories) {
+        getCalories().setValue(calories);
     }
 
     public String[] toArrayString() {
-        return new String[]{this.date, sport.toString() ,
-                DurationUtilities.format(this.duration),
-                this.distance>0 ?String.valueOf(this.distance) : ND,
-                this.calories>0 ?String.valueOf(this.calories) : ND,
-                this.middle_speed>0 ?String.valueOf(this.middle_speed) : ND,
+        return new String[]{getDateStr(), sport.toString() ,
+                getDuration().toString(context),
+                Measure.isNullOrEmpty(getDistance()) ? ND : getDistance().toString(context),
+                Measure.isNullOrEmpty(getCalories()) ? ND : getCalories().toString(context),
+                Measure.isNullOrEmpty(getMiddleSpeed()) ? ND : getMiddleSpeed().toString(context)
                 };
     }
 
     public boolean isMinimalSet(){
-        return this.date!=null && this.sport!=null && this.duration!=0;
-    }
-
-    public static String valueStr(Context context, InfoWorkout infoWorkout, String detailsWorkout){
-        String valueStr = null;
-        try {
-            double valueDouble = Double.valueOf(detailsWorkout);
-            if(valueDouble==0) throw new NullPointerException();
-
-            switch (infoWorkout) {
-                case CALORIES:
-                    if (available(detailsWorkout))
-                        valueStr = MeasureUtilities.energySpeedStr(context, valueDouble);
-                    break;
-                case DISTANCE:
-                    if (Workout.available(detailsWorkout))
-                        valueStr = MeasureUtilities.distanceStr(context, valueDouble);
-                    break;
-                case MIDDLE_SPEED:
-                    if (Workout.available(detailsWorkout))
-                        valueStr = MeasureUtilities.middleSpeedStr(context, valueDouble);
-                    break;
-            }
-
-        } catch (JSONException je) {
-            je.printStackTrace();
-        }catch (NullPointerException e){
-            return ND;
-        }catch (NumberFormatException n){
-            return detailsWorkout;
-        }
-
-        return valueStr;
-    }
-
-    private static boolean available(String available){
-        return !available.equals(ND);
+        return this.date!=null && this.sport!=null && !Measure.isNullOrEmpty(getDuration());
     }
 
     @Override
@@ -216,11 +226,11 @@ public class Workout implements Parcelable {
         return "Workout{ id_workout='" + id_workout +'\''+
                     ", map_route='" + map_route +'\''+
                     ", sport='" + sport +'\''+
-                    ", date='" + getDate() + '\'' +
-                    ", time='" + duration + '\'' +
-                    ", distance='" + distance + '\'' +
-                    ", calories='" + calories + '\'' +
-                    ", middle_speed='" + middle_speed + '\'' +
+                    ", date='" + getDateStr() + '\'' +
+                    ", duration='" + getDuration().toString(context)  + '\'' +
+                    ", distance='" + getDistance().toString(context)  + '\'' +
+                    ", calories='" + getCalories().toString(context)  + '\'' +
+                    ", middleSpeed='" + getMiddleSpeed().toString(context)  + '\'' +
                     '}';
     }
 }

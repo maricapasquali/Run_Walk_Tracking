@@ -18,19 +18,15 @@ import com.run_walk_tracking_gps.gui.adapter.listview.ModifyWeightAdapter;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
 import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 
-public class ModifyWeightActivity extends CommonActivity implements  Response.Listener<JSONObject>{
+public class ModifyWeightActivity extends CommonActivity implements Response.Listener<JSONObject>{
 
     private static final String TAG = ModifyWeightActivity.class.getName();
 
@@ -52,16 +48,11 @@ public class ModifyWeightActivity extends CommonActivity implements  Response.Li
         if(getIntent()!=null){
             oldStatisticsData = getIntent().getParcelableExtra(getString(R.string.modify_weight));
             if(oldStatisticsData!=null){
-                adapter = new ModifyWeightAdapter(this, Arrays.asList(
-                        oldStatisticsData.getStatisticDataStr(this, Measure.WEIGHT),
-                        DateUtilities.parseToString(DateFormat.SHORT, oldStatisticsData.getDate()))
-                ) ;
-
+                adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString(this)) ;
                 listView.setAdapter(adapter);
                 statisticsData = oldStatisticsData.clone();
             }
         }
-
     }
 
     @Override
@@ -76,12 +67,13 @@ public class ModifyWeightActivity extends CommonActivity implements  Response.Li
                             (date, calendar) -> {
                                 detail.setText(date);
                                 statisticsData.setDate(calendar.getTime());
+                                Log.e(TAG, statisticsData.getDateStr());
                             }, false).show();
                     break;
                 case WEIGHT:
-                    WeightDialog.create(ModifyWeightActivity.this, (weightString, weight)-> {
-                        detail.setText(weightString);
-                        statisticsData.setStatisticData(weight);
+                    WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
+                        detail.setText(weightMeasure.toString(this));
+                        statisticsData.setValue(weightMeasure.getValue());
                         // TODO: 11/3/2019 GESTIONE CONVERSIONE
                     }).show();
                     break;
@@ -106,12 +98,14 @@ public class ModifyWeightActivity extends CommonActivity implements  Response.Li
                         if(!statisticsData.isSet())
                             throw new NullPointerException("Weight data doesn't correctly set !! " + statisticsData);
 
-                        if(!statisticsData.getStatisticData().equals(oldStatisticsData.getStatisticData())){
-                            bodyJson.put(FieldDataBase.VALUE.toName(), statisticsData.getStatisticData());
+                        if(!statisticsData.getValue().equals(oldStatisticsData.getValue())){
+                            bodyJson.put(FieldDataBase.VALUE.toName(), statisticsData.getValue());
                         }
+
                         if(!statisticsData.getDate().equals(oldStatisticsData.getDate())){
                             bodyJson.put(FieldDataBase.DATE.toName(), statisticsData.getDate());
                         }
+                        Log.e(TAG, bodyJson.toString());
 
                         if(!HttpRequest.requestUpdateWeight(this, bodyJson, this))
                         {

@@ -23,6 +23,7 @@ import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
+import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.StatisticsData;
@@ -83,9 +84,8 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                     if(HttpRequest.someError(response)){
                         Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                     }else{
-                        workouts = new Gson().fromJson(response.get("workouts").toString(),
-                                new TypeToken<List<Workout>>(){}.getType());
-                        Log.e(TAG, workouts.toString());
+                        workouts = Workout.createList(this, (JSONArray)response.get("workouts"));
+                        Log.d(TAG, workouts.toString());
                     }
 
                 } catch (JSONException e) {
@@ -109,10 +109,13 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                         JSONArray array = (JSONArray)response.get("weights");
                         for(int i=0; i<array.length(); i++){
                             JSONObject s = (JSONObject)array.get(i);
-                            StatisticsData statisticsData = new StatisticsData(DateUtilities.parseShortToDate((s.getString("date"))), s.getDouble("weight"));
+                            StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(this)
+                                    .setDate(s.getString("date")).setValue(s.getDouble("weight")).build();
                             statisticsData.setId(s.getInt(FieldDataBase.ID_WEIGHT.toName()));
                             statisticsWeight.add(statisticsData);
                         }
+                        Log.d(TAG, statisticsWeight.toString());
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -321,6 +324,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                     
                     workoutChanged = (Workout)data.getParcelableExtra(getString(R.string.changed_workout));
                     if(workoutChanged!=null){
+                        workoutChanged.setContext(this);
                         Toast.makeText(this, R.string.changed_workout, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout changed = " +workoutChanged);
                     }
@@ -336,6 +340,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, getString(R.string.summary_workout), Toast.LENGTH_LONG).show();
                     final Workout newAutoWorkout = (Workout) data.getParcelableExtra(getString(R.string.new_workout));
+                    newAutoWorkout.setContext(this);
                     workouts.add(0,newAutoWorkout);
                     workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
                     selectActiveFragment(WorkoutsFragment.class);
@@ -346,6 +351,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, getString(R.string.new_workout_manual), Toast.LENGTH_LONG).show();
                     newWorkout = (Workout) data.getParcelableExtra(getString(R.string.new_workout_manual));
+                    newWorkout.setContext(this);
                     Log.d(TAG, "New Manual Workout = " + newWorkout);
                 }
                 break;
@@ -371,7 +377,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                         Toast.makeText(this, R.string.delete_weight, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout deleted = " +id_weight_delete);
                     }
-
                 }
             case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {

@@ -21,6 +21,7 @@ public class BitmapUtilities {
      * @return a encoding Base64 and compressing string
      */
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String BitMapToString(Bitmap bitmap){
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.WEBP,100, bos);
@@ -62,6 +63,7 @@ public class BitmapUtilities {
      * @return bitmap (from given string)
      */
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static Bitmap StringToBitMap(String encodedString){
         byte[] b = Base64.getDecoder().decode(encodedString);
         byte[] decompress = decompress(b);

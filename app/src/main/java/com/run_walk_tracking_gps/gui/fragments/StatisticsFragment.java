@@ -18,12 +18,13 @@ import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
 
+import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
 import com.run_walk_tracking_gps.gui.adapter.listview.StatisticsDataAdapter;
 import com.run_walk_tracking_gps.gui.adapter.spinner.FilterAdapterSpinner;
 import com.run_walk_tracking_gps.gui.adapter.spinner.MeasureWorkoutAdapterSpinner;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.FilterUtilities;
 
@@ -75,6 +76,7 @@ public class StatisticsFragment extends Fragment {
 
             if(args.getParcelableArrayList(LIST_WEIGHT_KEY)!=null) {
                 weights = getArguments().getParcelableArrayList(LIST_WEIGHT_KEY);
+
             }
             Log.d(TAG, "List Workouts = "+ workouts);
             Log.d(TAG, "List Weights = "+ weights);
@@ -99,7 +101,7 @@ public class StatisticsFragment extends Fragment {
 
         // filter measure
         spinner_measure = view.findViewById(R.id.statistics_filter_data);
-        spinner_measure.setAdapter(new MeasureWorkoutAdapterSpinner(getContext(), Measure.getMeasureStatistics(), false, true));
+        spinner_measure.setAdapter(new MeasureWorkoutAdapterSpinner(getContext(), Measure.Type.getMeasureStatistics(), false, true));
         spinner_time = view.findViewById(R.id.statistics_filter_time);
         spinner_time.setAdapter(new FilterAdapterSpinner(getContext(), false));
 
@@ -107,7 +109,7 @@ public class StatisticsFragment extends Fragment {
         add_weight = view.findViewById(R.id.add_weight);
 
         list_data_filtered.setOnItemLongClickListener((parent, view1, position, id) -> {
-            if(((Measure)spinner_measure.getSelectedItem()).equals(Measure.WEIGHT) && position > 0){
+            if(((Measure.Type)spinner_measure.getSelectedItem()).equals(Measure.Type.WEIGHT) && position > 0){
                 Log.d(TAG,  "DEEP TOUCH :  " + (StatisticsData)parent.getAdapter().getItem(position));
                 onWeightListener.modifyWeight((StatisticsData)parent.getAdapter().getItem(position));
             }
@@ -116,7 +118,7 @@ public class StatisticsFragment extends Fragment {
         });
 
 
-        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics(), (Measure)spinner_measure.getSelectedItem());
+        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics(), (Measure.Type)spinner_measure.getSelectedItem());
         list_data_filtered.setAdapter(statisticsDataAdapter);
 
         // filter measure
@@ -126,7 +128,7 @@ public class StatisticsFragment extends Fragment {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                     Log.d(TAG, "measure Filter : onItemSelected");
-                    final Measure measureSelected = (Measure) parent.getAdapter().getItem(position);
+                    final Measure.Type measureSelected = (Measure.Type) parent.getAdapter().getItem(position);
                     final FilterTime filterTimeSelected = (FilterTime) spinner_time.getSelectedItem();
 
                     switch (measureSelected) {
@@ -154,7 +156,7 @@ public class StatisticsFragment extends Fragment {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         Log.d(TAG, "Time Filter : onItemSelected");
                         final FilterTime filterTimeSelected = (FilterTime) parent.getAdapter().getItem(position);
-                        final Measure measureSelected = (Measure) spinner_measure.getSelectedItem();
+                        final Measure.Type measureSelected = (Measure.Type) spinner_measure.getSelectedItem();
                         update(measureSelected, filterTimeSelected);
                 }
 
@@ -169,9 +171,8 @@ public class StatisticsFragment extends Fragment {
         return view;
     }
 
-    private void update(Measure measure, FilterTime filterTime){
+    private void update(Measure.Type measure, FilterTime filterTime){
         Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
-
         statisticsDataAdapter.updateStatisticsData(
                 FilterUtilities.createListFilteredStatisticsData(getStatistics(measure), filterTime),
                 measure);
@@ -180,8 +181,9 @@ public class StatisticsFragment extends Fragment {
     // TODO: 11/3/2019 GESTIONE CONVERSIONE
 
     private ArrayList<StatisticsData> middleSpeedStatistics(){
-        return workouts.stream().filter(w -> w.getMiddleSpeed()>0).collect(ArrayList::new,
-                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getMiddleSpeed())), ArrayList::addAll);
+        return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getMiddleSpeed())).collect(ArrayList::new,
+                (s, w)-> s.add(StatisticsBuilder.createStatisticMiddleSpeed(getContext())
+                        .setDate(w.getDate()).setValue(w.getMiddleSpeed().getValue()).build()), ArrayList::addAll);
     }
 
     private ArrayList<StatisticsData> weightsStatistics(){
@@ -189,16 +191,20 @@ public class StatisticsFragment extends Fragment {
     }
 
     private ArrayList<StatisticsData> energyStatistics(){
-        return  workouts.stream().filter(w -> w.getCalories()>0).collect(ArrayList::new,
-                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getCalories())), ArrayList::addAll);
+        return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getCalories())).collect(ArrayList::new,
+                (s, w)-> s.add(StatisticsBuilder.createStatisticEnergy(getContext())
+                        .setDate(w.getDate()).setValue(w.getCalories().getValue()).build()), ArrayList::addAll);
     }
 
     private ArrayList<StatisticsData> distanceStatistics(){
-        return workouts.stream().filter(w -> w.getDistance()>0).collect(ArrayList::new,
-                (s, w)-> s.add(new StatisticsData(w.getDate(), w.getDistance())), ArrayList::addAll);
+        return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getDistance())).collect(ArrayList::new,
+                (s, w)-> s.add(StatisticsBuilder.createStatisticDistance(getContext())
+                        .setDate(w.getDate()).setValue(w.getDistance().getValue()).build()), ArrayList::addAll);
+
     }
 
-    private ArrayList<StatisticsData> getStatistics(Measure measure){
+
+    private ArrayList<StatisticsData> getStatistics(Measure.Type measure){
         switch (measure){
             case WEIGHT:
                 return weightsStatistics();
@@ -218,10 +224,10 @@ public class StatisticsFragment extends Fragment {
         Log.d(TAG, "OnResume");
 
         // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
-        if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.WEIGHT){
+        if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.Type.WEIGHT){
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
             }
 
             if(onWeightListener.changedWeight()!=null){
@@ -233,7 +239,7 @@ public class StatisticsFragment extends Fragment {
                 weights.add(changedWeight);
                 weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
                 onWeightListener.resetChangedWeight();
             }
 
@@ -242,7 +248,7 @@ public class StatisticsFragment extends Fragment {
                 weights.stream().filter(w -> w.getId() == id_changed_weight)
                         .findFirst().ifPresent(w -> weights.remove(w));
 
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
                 onWeightListener.resetDeletedWeight();
             }
         }

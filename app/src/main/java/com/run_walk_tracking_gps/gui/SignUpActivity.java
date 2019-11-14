@@ -8,6 +8,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
 
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 
 
 import com.android.volley.Response;
+import com.google.gson.Gson;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
@@ -28,6 +31,7 @@ import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,16 +89,19 @@ public class SignUpActivity extends CommonActivity
         switch (item.getItemId()){
             case R.id.next_signup:
                 try{
-                    //Log.d(TAG, "Next : Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
-                    switch(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
-                        case PERSONAL_DATA:
-                            addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
-                            break;
-                        case PHYSICAL_DATA:
-                            addFragment(fragmentSignUp.get(ACCESS_DATA), true);
-                            next.setVisible(false);
-                            break;
-                    }
+
+                       //Log.d(TAG, "Next : Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
+                       switch(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
+                           case PERSONAL_DATA:
+                               addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
+                               break;
+                           case PHYSICAL_DATA:
+                               addFragment(fragmentSignUp.get(ACCESS_DATA), true);
+                               next.setVisible(false);
+                               break;
+                       }
+
+
 
                 }catch (Exception e){
                     Toast.makeText(this, "Campi non settati" , Toast.LENGTH_LONG).show();
@@ -119,48 +126,46 @@ public class SignUpActivity extends CommonActivity
     }
 
     @Override
-    public void personalData(User personalInfoUser) {
-
-        try{
-            user.put(FieldDataBase.NAME.toName(), personalInfoUser.getName())
-                .put(FieldDataBase.LAST_NAME.toName(), personalInfoUser.getLastName())
-                .put(FieldDataBase.BIRTH_DATE.toName(), personalInfoUser.getBirthDate())
-                .put(FieldDataBase.EMAIL.toName(), personalInfoUser.getEmail())
-                .put(FieldDataBase.CITY.toName(), personalInfoUser.getCity())
-                .put(FieldDataBase.PHONE.toName(), personalInfoUser.getPhone());
-        }catch (JSONException je){
-            Log.e(TAG, je.getMessage());
+    public void personalData(JSONObject personalInfoUser) {
+        try {
+            user = personalInfoUser;
+            Log.d(TAG, user.toString());
+        }catch (NullPointerException e){
+            getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
-        Log.d(TAG, user.toString());
+
     }
 
     @Override
-    public void physicalData(int gender, int target, double height, double weight) {
+    public void physicalData(JSONObject jsonPhysical) {
         try{
-            user.put(FieldDataBase.GENDER.toName(), EnumUtilities.getEnumFromStrId(Gender.class, gender))
-                .put(FieldDataBase.TARGET.toName(), EnumUtilities.getEnumFromStrId(Target.class, target))
-                .put(FieldDataBase.HEIGHT.toName(), height)
-                .put(FieldDataBase.WEIGHT.toName(), weight);
-        }catch (JSONException je){
-            Log.e(TAG, je.getMessage());
+            user = JSONUtilities.merge(user, jsonPhysical);
+            Log.d(TAG, user.toString());
         }
-        Log.d(TAG, user.toString());
+        catch (JSONException e) {
+            e.printStackTrace();
+        }catch (NullPointerException e){
+            getSupportFragmentManager().popBackStack(fragmentSignUp.get(ACCESS_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            next.setVisible(true);
+        }
+
     }
 
     @Override
-    public void accessData(String username, String hash_password) {
+    public void accessData(JSONObject jsonAccess) {
         try{
-            user.put(FieldDataBase.USERNAME.toName(), username)
-                .put(FieldDataBase.PASSWORD.toName(), hash_password)
-                .put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
+            user = JSONUtilities.merge(user, jsonAccess);
+            user.put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
+            Log.d(TAG, user.toString());
+
+           /* if(!HttpRequest.requestSignUp(this, user,this)) {
+                Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+            }*/
 
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());
-        }
-        Log.d(TAG, user.toString());
-
-        if(!HttpRequest.requestSignUp(this, user,this)) {
-            Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+        }catch (NullPointerException e){
+            Log.e(TAG, e.getMessage());
         }
     }
 

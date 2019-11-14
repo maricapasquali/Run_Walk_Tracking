@@ -156,14 +156,12 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
         }
 
         vH.date.setText(DateUtilities.parseFullToString(workout.getDate()));
-        vH.time.setText(workout.getDurationStr());
+        vH.time.setText(workout.getDuration().toString(context));
 
         // TODO: 11/3/2019 GESTIRE CONVERSIONE
 
-        vH.distance.setText(Workout.valueStr(context, InfoWorkout.DISTANCE,
-                String.valueOf(workout.getDistance())));
-        vH.calories.setText(Workout.valueStr(context, InfoWorkout.CALORIES,
-                String.valueOf(workout.getCalories())));
+        vH.distance.setText(workout.getDistance().toString(context));
+        vH.calories.setText(workout.getCalories().toString(context));
         return view;
     }
 

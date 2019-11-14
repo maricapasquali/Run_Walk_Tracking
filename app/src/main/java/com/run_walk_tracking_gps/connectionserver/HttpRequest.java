@@ -10,10 +10,16 @@ import android.widget.Toast;
 
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -54,7 +60,7 @@ public class HttpRequest {
     private static final String USER = ACCOUNT + "profile.php?"+  FieldDataBase.ID_USER.toName()+"=";
     private static final String UPDATE_USER_INFO = ACCOUNT + "update_profile.php";
     private static final String DELETE_USER = ACCOUNT + "delete_account.php";
-    private static final String IMG_ACCOUNT = ACCOUNT + "img_profile.php";
+    private static final String DATA_AFTER_ACCESS = ACCOUNT + "data_after_access.php";
     private static final String UPDATE_PASSWORD = ACCOUNT + "";
 
     private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
@@ -110,10 +116,10 @@ public class HttpRequest {
         return HttpRequest.requestJsonGetToServerVolley(context, USER + id_user, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestImgProfile(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDataAfterAccess(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
         check(bodyJson,  FieldDataBase.fieldRequiredForImgProfile());
-        return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context,IMG_ACCOUNT, Request.Method.POST, bodyJson,responseJsonListener);
+        return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context, DATA_AFTER_ACCESS, Request.Method.POST, bodyJson,responseJsonListener);
     }
 
     public static boolean requestUpdateUserInformation(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
@@ -243,53 +249,51 @@ public class HttpRequest {
     private static boolean requestJsonGetToServerVolley(final Context context, final String url, final JSONObject bodyJson,
                                                        Response.Listener<JSONObject> listenerResponse){
 
-        return requestJsonToServerVolley(context, url, Request.Method.GET, bodyJson, listenerResponse);
+        return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.GET, bodyJson, listenerResponse);
     }
 
     private static boolean requestJsonPostToServerVolley(final Context context, final String url, final JSONObject bodyJson,
                                                         Response.Listener<JSONObject> listenerResponse){
 
-        return requestJsonToServerVolley(context, url, Request.Method.POST, bodyJson, listenerResponse);
+        return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
     }
+
 
     private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
                                                      Response.Listener<JSONObject> listenerResponse){
-        final AtomicBoolean errRequest = new AtomicBoolean(false);
-        if(!isNetWorkAvailable(context)) return false;
+        return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, false);
+    }
 
-        final RequestQueue queue = Volley.newRequestQueue(context);
-        final JsonObjectRequest stringRequest = new JsonObjectRequest(method, url, bodyJson,
-                listenerResponse,
-                error -> {
-                    Log.e(TAG, error.toString());
-                    Toast.makeText(context, errRequest.toString(), Toast.LENGTH_LONG).show();
-                    errRequest.set(true);
-                });
-
-        queue.add(stringRequest);
-        return !errRequest.get();
+    private static boolean requestJsonToServerVolleyWithProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
+                                                     Response.Listener<JSONObject> listenerResponse){
+        return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, true);
     }
 
     private static boolean requestJsonToServerVolley(final Context context, final String url, final int method, final JSONObject bodyJson,
-                                                     Response.Listener<JSONObject> listenerResponse){
+                                                     Response.Listener<JSONObject> listenerResponse, final boolean withProgressBar){
         final AtomicBoolean errRequest = new AtomicBoolean(false);
         if(!isNetWorkAvailable(context)) return false;
 
         final RequestQueue queue = Volley.newRequestQueue(context);
-        final JsonObjectRequest stringRequest = new JsonObjectRequest(method, url, bodyJson,
+        final JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, bodyJson,
                 listenerResponse,
                 error -> {
                     Log.e(TAG, error.toString());
-                    Toast.makeText(context, errRequest.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show();
                     errRequest.set(true);
+                    queue.stop();
                 });
 
-        queue.add(stringRequest);
-        RequestDialog progressDialog = RequestDialog.create(context);
-        progressDialog.show();
-        queue.addRequestFinishedListener((RequestQueue.RequestFinishedListener<String>) request -> {
-            if (progressDialog.isShowing()) progressDialog.dismiss();
-        });
+        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(jsonRequest);
+        if(withProgressBar){
+            RequestDialog progressDialog = RequestDialog.create(context);
+            progressDialog.show();
+            queue.addRequestFinishedListener((RequestQueue.RequestFinishedListener<String>) request -> {
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+            });
+        }
+
         return !errRequest.get();
     }
 /*

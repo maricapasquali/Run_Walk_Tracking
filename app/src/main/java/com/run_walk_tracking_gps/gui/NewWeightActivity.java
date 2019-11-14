@@ -23,6 +23,7 @@ import com.run_walk_tracking_gps.gui.adapter.listview.NewWeightAdapter;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 
 import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
 
@@ -33,10 +34,15 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
     private final static String TAG = NewWeightActivity.class.getName();
 
-    private StatisticsData statisticsData = new StatisticsData();
+    private StatisticsData statisticsData;
 
     public NewWeightActivity() {
         super(R.string.weight);
+    }
+
+    @Override
+    protected void setModel() {
+        statisticsData = StatisticsData.create(Measure.create(this, Measure.Type.WEIGHT));
     }
 
     @Override
@@ -59,9 +65,9 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                         }, false).show();
                 break;
             case WEIGHT:
-                WeightDialog.create(NewWeightActivity.this, (weightString, weight)-> {
-                    detail.setText(weightString);
-                    statisticsData.setStatisticData(weight);
+                WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {
+                    detail.setText(weightMeasure.toString(this));
+                    statisticsData.setValue(weightMeasure.getValue());
                     // TODO: 11/3/2019 GESTIONE CONVERSIONE
                 }).show();
                 break;
@@ -77,7 +83,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
 
             final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)))
-                    .put(FieldDataBase.VALUE.toName(), statisticsData.getStatisticData())
+                    .put(FieldDataBase.VALUE.toName(), statisticsData.getValue())
                     .put(FieldDataBase.DATE.toName(), statisticsData.getDate());
 
             if(!HttpRequest.requestNewWeight(this, bodyJson, this)){
@@ -110,5 +116,6 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
             Log.e(TAG, e.getMessage());
         }
     }
+
 
 }

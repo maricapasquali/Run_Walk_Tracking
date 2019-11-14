@@ -61,7 +61,6 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                     final JSONObject bodyJson = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText().toString())
                                                                 .put(FieldDataBase.PASSWORD.toName(), hash_password);
 
-                    // TODO: 10/31/2019 REQUEST IMAGE PROFILE
                     if(!HttpRequest.requestSignIn(this, bodyJson, this)){
                         Snackbar.make(findViewById(R.id.snake), R.string.internet_not_available, Snackbar.LENGTH_INDEFINITE).show();
                     }
@@ -86,7 +85,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                     intent = new Intent(this, TokenActivity.class);
                     intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
                 } else {
-
+                    Preferences.writeImageIntoSharedPreferences(this, response);
                     Preferences.writeSettingsIntoSharedPreferences(this, response);
                     intent = new Intent(this, ApplicationActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

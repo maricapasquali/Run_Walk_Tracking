@@ -48,6 +48,7 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
@@ -63,6 +64,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     private static final int MAP_TYPE_DEFAULT = GoogleMap.MAP_TYPE_NORMAL;
 
     private View rootView;
+    private TextView sport;
     private ImageView myLocation;
     private ImageView typeMap;
     private MapView mapView;
@@ -113,21 +115,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
-        TextView sport = rootView.findViewById(R.id.sport);
+        sport = rootView.findViewById(R.id.sport);
         TextView distance_workout = rootView.findViewById(R.id.distance_workout);
         TextView energy_workout = rootView.findViewById(R.id.calories_workout);
 
         try {
-            final String id_user = Preferences.getIdUserLogged(getContext());
-            final JSONObject jsonApp = Preferences.getAppJsonUserLogged(getContext(), id_user);
-
-            JSONObject settings = (JSONObject)jsonApp.get(FieldDataBase.SETTINGS.toName());
-            JSONObject s_sport = (JSONObject)settings.get(FieldDataBase.SPORT.toName());
-
+            String s_sport = Preferences.getNameSportDefault(getContext());
             String s_energy = Preferences.getUnitEnergyDefault(getContext());
             String s_distance = Preferences.getUnitDistanceDefault(getContext());
 
-            sport.setText(Sport.valueOf((String)s_sport.get(FieldDataBase.NAME.toName())).getStrId());
+            sport.setText(s_sport);
             energy_workout.setText(new StringBuilder(energy_workout.getText() +getString(R.string.space)+ s_energy));
             distance_workout.setText(new StringBuilder(distance_workout.getText() +getString(R.string.space)+ s_distance));
 
@@ -200,7 +197,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         stop.setOnClickListener(v ->{
             inWorkout = false;
             // Esempio Workout
-            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create()
+            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
                                                                         .setMapRoute("not null")
                                                                         .setDate(Calendar.getInstance().getTime())
                                                                         .setCalories(400)
@@ -292,7 +289,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         mapView.onResume();
         super.onResume();
 
-        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI 
+        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
+        try {
+            String sport_name = Preferences.getNameSportDefault(getContext());
+            if(!sport.getText().equals(sport_name)) sport.setText(sport_name);
+        }catch (JSONException e){
+            Log.e(TAG, e.getMessage());
+        }
         
         if(requestPermissions)
         {
@@ -315,7 +318,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     }
 
     // Exception
-
     private class NoGPSException extends Exception{
         private final static String NO_GPS = "No GPS";
         private final String NO_GPS_MEX = getString(R.string.gps_disabled);

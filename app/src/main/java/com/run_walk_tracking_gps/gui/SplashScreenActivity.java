@@ -1,10 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -28,18 +26,16 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        new Handler().postDelayed(() -> {
+        //new Handler().postDelayed(() -> {
 
             //SharedPreferences sharedPreferences = Preferences.getSharedPreferencesUserLogged(this);
             if(Preferences.isJustUserLogged(this)){
                 id_user = Integer.valueOf(Preferences.getIdUserLogged(this));
 
-                // TODO: 10/30/2019 REQUEST SETTINGS(STORAGE INTO SHARED_PREFERENCE)
-
                 try {
                     // REQUEST IMAGE PROFILE
                     JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user);
-                    if(!HttpRequest.requestImgProfile(this, bodyJson, this)){
+                    if(!HttpRequest.requestDataAfterAccess(this, bodyJson, this)){
                         Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -52,7 +48,7 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 finish();
             }
 
-        }, TIMEOUT);
+       // }, TIMEOUT);
     }
 
 
@@ -64,11 +60,10 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
             }else {
 
-                String img = response.getString(FieldDataBase.IMG_ENCODE.toName());
-                if(img!=null)
-                    Preferences.setImageProfile(this, id_user, img);
+                Log.e(TAG, response.toString());
+                Preferences.writeImageIntoSharedPreferences(this, response);
+                Preferences.writeSettingsIntoSharedPreferences(this, response);
 
-                Log.e(TAG, img);
                 intent = new Intent(this, ApplicationActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);

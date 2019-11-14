@@ -112,7 +112,7 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         }else{
             // TODO: 11/3/2019 GESTIONE CONVERSIONE
 
-            viewHolder.details.setText(Workout.valueStr(context, infoWorkouts[position], detailsWorkout[position]));
+            viewHolder.details.setText(detailsWorkout[position]); //Workout.valueStr(context, infoWorkouts[position], detailsWorkout[position]));
 
 
             viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(

@@ -157,8 +157,7 @@ class UserDao {
      $user = array();
 
      if(connect()){
-        $stmt = getConnection()->prepare("SELECT u.*, l.username, i.img_encode FROM login l JOIN user u on(l.id_user=u.id_user)
-          LEFT JOIN profile_image i on (u.id_user=i.id_user) WHERE u.id_user=?");
+        $stmt = getConnection()->prepare("SELECT u.*, l.username FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
         if(!$stmt) throw new Exception("user from id : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("s", $id);
         if(!$stmt->execute()) throw new Exception("user from id : Selezione fallita. Errore: ". getErrorConnection());
@@ -189,6 +188,21 @@ class UserDao {
      }
      closeConnection();
      return array(ID_USER=>$id_user);
+   }
+
+
+  static function getImageProfileForIdUser($id){
+        if(connect()){
+           $stmt = getConnection()->prepare("SELECT img_encode FROM profile_image WHERE id_user=?");
+           if(!$stmt) throw new Exception("user image id : Preparazione fallita. Errore: ". getErrorConnection());
+           $stmt->bind_param("i", $id);
+           if(!$stmt->execute()) throw new Exception("user image : Selezione fallita. Errore: ". getErrorConnection());
+           $stmt->bind_result($image);
+           $stmt->fetch();
+           $stmt->close();
+        }
+        closeConnection();
+        return array(IMG=>$image);
    }
 
    static function requestForgotPassword($email, $c_key, $end_validity){

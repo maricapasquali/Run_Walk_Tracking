@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +14,17 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.UserBuilder;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 
@@ -29,7 +36,7 @@ public class PersonalDataFragment extends Fragment {
     private ImageView img;
     private EditText name ;
     private EditText last_name ;
-    private TextView birthDate;
+    private EditText birthDate;
     private EditText email ;
     private EditText city ;
     private EditText phone ;
@@ -37,7 +44,7 @@ public class PersonalDataFragment extends Fragment {
     private ImagePickerHandlerListener imagePickerHandlerListener;
     private PersonalDataListener personalDataListener;
 
-    private User user;
+    private boolean isOk = true;
 
     @Override
     public void onAttach(Context context) {
@@ -67,7 +74,6 @@ public class PersonalDataFragment extends Fragment {
         city = view.findViewById(R.id.signup_profile_city);
         phone = view.findViewById(R.id.signup_profile_tel);
 
-
         birthDate.setOnClickListener(v ->{
             final TextView  birthText = (TextView)v;
             DateTimePickerDialog.create(getContext(), birthText.getText().toString(),
@@ -85,7 +91,31 @@ public class PersonalDataFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
-        if(user!=null) birthDate.setText(user.getBirthDateString());
+
+        if(!isOk){
+            // TODO: 11/13/2019 SISTEMARE ERROR STRING
+            if(TextUtils.isEmpty(name.getText()))
+                name.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(birthDate.getText()))
+                birthDate.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(last_name.getText()))
+                last_name.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(email.getText()))
+                email.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(city.getText()))
+                city.setError("Nome non vuoto");
+            if(TextUtils.isEmpty(phone.getText()))
+                phone.setError("Nome non vuoto");
+        }
+    }
+
+    private boolean isSetAll(){
+        return isOk = (!TextUtils.isEmpty(name.getText()) &&
+                !TextUtils.isEmpty(last_name.getText()) &&
+                !TextUtils.isEmpty(birthDate.getText()) &&
+                !TextUtils.isEmpty(email.getText()) &&
+                !TextUtils.isEmpty(city.getText()) &&
+                !TextUtils.isEmpty(phone.getText()));
     }
 
     @Override
@@ -93,18 +123,26 @@ public class PersonalDataFragment extends Fragment {
         super.onPause();
         Log.d(TAG,"onPause");
         try {
+            JSONObject userJson = null;
+           // if(isSetAll()){
+                userJson = new JSONObject(new Gson().toJson(UserBuilder.create()
+                                                                        .setName(name.getText().toString())
+                                                                        .setLastName(last_name.getText().toString())
+                                                                        .setBirthDate(birthDate.getText().toString())
+                                                                        .setEmail(email.getText().toString())
+                                                                        .setCity(city.getText().toString())
+                                                                        .setPhone(phone.getText().toString())
+                                                                        .build()));
+                userJson.remove(FieldDataBase.ID_USER.toName());
+                userJson.remove(FieldDataBase.HEIGHT.toName());
+            //}
 
-            user = UserBuilder.create()
-                              .setName(name.getText().toString())
-                              .setLastName(last_name.getText().toString())
-                              .setBirthDate(birthDate.getText().toString())
-                              .setEmail(email.getText().toString())
-                              .setCity(city.getText().toString())
-                              .setPhone(phone.getText().toString())
-                              .build();
-            personalDataListener.personalData(user);
+            personalDataListener.personalData(userJson);
+
         } catch (ParseException e) {
             Log.e(TAG, e.getMessage());
+        } catch (JSONException es){
+            Log.e(TAG, es.getMessage());
         }
     }
 
@@ -137,6 +175,6 @@ public class PersonalDataFragment extends Fragment {
     }
 
     public interface PersonalDataListener{
-        void personalData(User personalInfoUser);
+        void personalData(JSONObject personalInfoUser);
     }
 }

@@ -167,6 +167,8 @@
 
     <string name="kilometer_per_hour">Km/h</string>
     <string name="mile_per_hour">mi/h</string>
+
+    <string name="second">s</string>
     <!-- User -->
     <string name="change_password">Cambia Password</string>
     <string name="save">Salva</string>

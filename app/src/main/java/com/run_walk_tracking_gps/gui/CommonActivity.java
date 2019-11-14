@@ -56,9 +56,17 @@ public abstract class CommonActivity extends AppCompatActivity {
         final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction()
                 .replace(container, fragment, tag);
 
-        if(toStack) fragmentTransaction.addToBackStack(null);
+        if(toStack) fragmentTransaction.addToBackStack(fragment.getClass().getName());
         fragmentTransaction.commit();
 
+    }
+
+    protected FragmentTransaction getFragmentTransactionWithoutCommit(final Fragment fragment, final int container,final boolean toStack, final String tag) {
+        final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction()
+                .replace(container, fragment, tag);
+
+        if(toStack) fragmentTransaction.addToBackStack(null);
+        return fragmentTransaction;
     }
 
 }

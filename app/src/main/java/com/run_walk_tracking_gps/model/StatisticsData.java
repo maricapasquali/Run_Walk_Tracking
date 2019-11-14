@@ -4,51 +4,57 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
-import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
-import org.json.JSONException;
-
+import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 public class StatisticsData implements Parcelable{
 
     private int id;
     private Date date;
-    private Double data;
+    private Measure measure;
 
-    public StatisticsData() {
+    private StatisticsData(StatisticsData statisticsData) {
+        this.id = statisticsData.id;
+        this.date = statisticsData.date;
+        this.measure = statisticsData.measure.clone();
     }
 
-    public StatisticsData(final Date date, final Double statisticData) {
-        this.date = date;
-        this.data = statisticData;
+    private StatisticsData(Measure measure) {
+        this.measure = measure;
     }
 
-    private StatisticsData(StatisticsData statisticData) {
-        this(statisticData.date, statisticData.data);
-        this.id=statisticData.getId();
+    private StatisticsData(Context context, Measure.Type measure){
+        this.measure = Measure.create(context, measure);
+    }
+
+    public static StatisticsData create(Measure measure){
+        return new StatisticsData(measure);
+    }
+
+    public static StatisticsData create(Context context, Measure.Type measure){
+        return new StatisticsData(context, measure);
     }
 
     public StatisticsData clone(){
         return new StatisticsData(this);
     }
 
+// START - Parcelable IMPLEMENTATION
     protected StatisticsData(Parcel in) {
         id = in.readInt();
         date = new Date(in.readLong());
-        data = in.readDouble();
+        measure = in.readParcelable(Measure.class.getClassLoader());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeLong(date.getTime());
-        dest.writeDouble(data);
+        dest.writeParcelable(measure, 0);
     }
 
     @Override
@@ -68,20 +74,14 @@ public class StatisticsData implements Parcelable{
         }
     };
 
+// END - Parcelable IMPLEMENTATION
+
+    public Measure getMeasure() {
+        return measure;
+    }
+
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setDate(Date key) {
-        this.date = key;
-    }
-
-    public void setStatisticData(Double value) {
-        this.data = value;
     }
 
     public Date getDate() {
@@ -92,39 +92,37 @@ public class StatisticsData implements Parcelable{
         return DateUtilities.parseFullToString(date);
     }
 
-    public Double getStatisticData() {
-        return data;
+    public Double getValue() {
+        return measure.getValue();
     }
 
-    public String getStatisticDataStr(Context context, Measure measure)  {
-        StringBuilder stringBuilder = new StringBuilder(data + context.getString(R.string.space));
-        try {
-            switch (measure){
-                case DISTANCE:
-                    stringBuilder.append(Preferences.getUnitDistanceDefault(context));
-                    break;
-                case MIDDLE_SPEED: stringBuilder.append(Preferences.getUnitMiddleSpeedDefault(context));
-                    break;
-                case ENERGY: stringBuilder.append(Preferences.getUnitEnergyDefault(context));
-                    break;
-                case WEIGHT:
-                    stringBuilder.append(Preferences.getUnitWeightDefault(context));
-                    break;
-            }
-        }catch (JSONException e){
-            e.printStackTrace();
-        }
 
-        return stringBuilder.toString();
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setDate(String date) throws ParseException {
+        this.date = DateUtilities.parseShortToDate(date);
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setValue(Double value) {
+        this.measure.setValue(value);
+    }
+
+    public List<String> toArrayListString(Context context){
+        return Arrays.asList(getMeasure().toString(context), DateUtilities.parseShortToStringNoTime(date));
     }
 
     public boolean isSet() {
-        return data!=null && date!=null;
+        return !Measure.isNullOrEmpty(measure) && date!=null;
     }
-
 
     @Override
     public String toString() {
-        return "StatisticsData [ Id = "+this.id+", Date = " +this.date +", Value = " +this.data+ " ]";
+        return "StatisticsData [ Id = "+this.id+", Date = " +getDateStr() +", Value = " +this.measure.getValue()+ " ]";
     }
 }

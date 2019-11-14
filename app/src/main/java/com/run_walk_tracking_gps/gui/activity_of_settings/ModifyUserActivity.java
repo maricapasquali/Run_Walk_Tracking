@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
@@ -17,7 +19,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.google.gson.Gson;
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -58,6 +60,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
     private boolean isMeterUnit;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init() {
         setContentView(R.layout.activity_modify_profile);
@@ -96,7 +99,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 String unit_height = Preferences.getUnitHeightDefault(this);
                 try {
                     double height_value = user.getHeight();
-                    isMeterUnit = Preferences.getUnitHeightDefault(this).equals(getString(MeasureUnit.METER.getStrId()));
+                    isMeterUnit = Preferences.getUnitHeightDefault(this).equals(
+                            getString(Measure.Unit.METER.getStrId()));
                     if(!isMeterUnit){
                         height_value = ConversionUnitUtilities.meterToFeet(height_value);
                     }
@@ -204,10 +208,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
         height.setOnClickListener(v ->{
             final TextView h = ((TextView) v);
-            HeightDialog.create(this, h.getText().toString(),  (heightString, height) -> {
-                h .setText(heightString);
+            HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
+                h .setText(heightMeasure.toString(this));
                 // Conversione del valore 'height' se != METER
-                user.setHeight(isMeterUnit? height : ConversionUnitUtilities.feetToMeter(height));
+                user.setHeight(isMeterUnit? heightMeasure.getValue() : ConversionUnitUtilities.feetToMeter(heightMeasure.getValue()));
                 
             }).create().show();
         });
@@ -231,8 +235,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             if(HttpRequest.someError(response) || !(boolean)response.get("update")){
                 Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             }else {
-                if(this.image_encode!=null)
-                    Preferences.setImageProfile(this, user.getIdUser(), image_encode);
+                Preferences.writeImageIntoSharedPreferences(this, user.getIdUser(), image_encode);
 
                 final Intent returnIntent = new Intent();
                 returnIntent.putExtra(getString(R.string.changed_profile), user);

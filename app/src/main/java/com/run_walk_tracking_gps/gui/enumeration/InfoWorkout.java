@@ -1,10 +1,7 @@
 package com.run_walk_tracking_gps.gui.enumeration;
 
-import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.model.Measure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,18 +10,28 @@ import java.util.Arrays;
 public enum InfoWorkout {
 
     DATE(R.string.date, R.drawable.ic_calendar),
-    SPORT(R.string.sport, 0),
-    TIME(Measure.DURATION.getStrId(), Measure.DURATION.getIconId()),
-    DISTANCE(Measure.DISTANCE.getStrId(), Measure.DISTANCE.getIconId()),
-    CALORIES(Measure.ENERGY.getStrId(), Measure.ENERGY.getIconId()),
-    MIDDLE_SPEED(Measure.MIDDLE_SPEED.getStrId(),Measure.MIDDLE_SPEED.getIconId());
+    SPORT(R.string.sport),
+    TIME(Measure.Type.DURATION),
+    DISTANCE(Measure.Type.DISTANCE),
+    CALORIES(Measure.Type.ENERGY),
+    MIDDLE_SPEED(Measure.Type.MIDDLE_SPEED);
 
     private final int strId;
     private final int iconId;
 
+    InfoWorkout(int strId) {
+        this.strId = strId;
+        this.iconId = 0;
+    }
+
     InfoWorkout(int strId, int iconId) {
         this.strId = strId;
         this.iconId = iconId;
+    }
+
+    InfoWorkout(Measure.Type measure) {
+        this.strId = measure.getStrId();
+        this.iconId = measure.getIconId();
     }
 
     public int getStrId() {

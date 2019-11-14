@@ -129,8 +129,10 @@
                 android:text="@string/birth_date" />
 
 
-            <TextView
+            <EditText
                 android:id="@+id/signup_profile_birth_date"
+                android:focusable="false"
+                android:textCursorDrawable="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/signup_profile_birth_date_title"

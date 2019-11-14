@@ -1,5 +1,7 @@
 package com.run_walk_tracking_gps.model;
 
+import android.content.Context;
+
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import java.util.Date;
 
@@ -7,12 +9,12 @@ public class WorkoutBuilder {
 
     private Workout workout;
 
-    private WorkoutBuilder(){
-        workout = new Workout();
+    private WorkoutBuilder(Context context){
+        workout = new Workout(context);
     }
 
-    public static WorkoutBuilder create(){
-        return new WorkoutBuilder();
+    public static WorkoutBuilder create(Context context){
+        return new WorkoutBuilder(context);
     }
 
     public Workout build(){

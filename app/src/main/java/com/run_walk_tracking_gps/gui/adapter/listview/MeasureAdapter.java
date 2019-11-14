@@ -8,23 +8,20 @@ import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
-import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
+import com.run_walk_tracking_gps.model.Measure;
 
-import java.util.List;
 import java.util.Map;
 
-public class MeasureAdapter extends ArrayAdapter<Measure> {
+public class MeasureAdapter extends ArrayAdapter<Measure.Type> {
 
     private static RadioGroup.OnCheckedChangeListener listener;
 
-    private Map<Measure, Integer> defaultMeasure;
+    private Map<Measure.Type, Integer> defaultMeasure;
 
-    public MeasureAdapter(Context context, RadioGroup.OnCheckedChangeListener listener, Map<Measure, Integer> defaultMeasure) {
-        super(context, R.layout.custom_item_measure_unit, Measure.getMeasureChangeable());
+    public MeasureAdapter(Context context, RadioGroup.OnCheckedChangeListener listener, Map<Measure.Type, Integer> defaultMeasure) {
+        super(context, R.layout.custom_item_measure_unit, Measure.Type.getMeasureChangeable());
         MeasureAdapter.listener = listener;
         this.defaultMeasure = defaultMeasure;
     }
@@ -32,7 +29,7 @@ public class MeasureAdapter extends ArrayAdapter<Measure> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        final Measure measure = getItem(position);
+        final Measure.Type measure = getItem(position);
         final ListHolder viewHolder;
         final View view;
 
@@ -60,7 +57,7 @@ public class MeasureAdapter extends ArrayAdapter<Measure> {
         viewHolder.textViewMeasure.setText(measure.getStrId());
         viewHolder.textViewMeasure.setCompoundDrawablesWithIntrinsicBounds(
                 getContext().getDrawable(measure.getIconId()), null, null, null);
-        final MeasureUnit[] measureUnits = measure.getMeasureUnit();
+        final Measure.Unit[] measureUnits = measure.getMeasureUnit();
         if(measureUnits.length==2){
             viewHolder.unit_1.setText(measureUnits[0].getStrId());
             viewHolder.unit_2.setText(measureUnits[1].getStrId());

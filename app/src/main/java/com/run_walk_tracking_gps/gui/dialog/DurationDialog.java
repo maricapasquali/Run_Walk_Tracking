@@ -1,16 +1,11 @@
 package com.run_walk_tracking_gps.gui.dialog;
 
 import android.content.Context;
-import android.content.DialogInterface;
-
-import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
-import com.run_walk_tracking_gps.gui.enumeration.MeasureUnit;
-import com.run_walk_tracking_gps.utilities.DurationUtilities;
+import com.run_walk_tracking_gps.model.Measure;
 
 
 public class DurationDialog extends MeasureDialog {
@@ -18,15 +13,12 @@ public class DurationDialog extends MeasureDialog {
     private static final int MAX_VALUES_HOURS = 23;
     private static final int MAX_VALUES_MIN = 59;
 
-    private OnSelectDurationListener onSelectDurationListener;
-
-    private DurationDialog(Context context, OnSelectDurationListener onSelectDurationListener) {
-        super(context, Measure.DURATION);
-        this.onSelectDurationListener = onSelectDurationListener;
+    private DurationDialog(Context context, OnSelectedListener onSelectedListener) {
+        super(context, Measure.Type.DURATION, onSelectedListener);
     }
 
-    public static DurationDialog create(Context context, OnSelectDurationListener onSelectDurationListener)    {
-        return new  DurationDialog(context, onSelectDurationListener);
+    public static DurationDialog create(Context context, OnSelectedListener onSelectedListener)    {
+        return new  DurationDialog(context, onSelectedListener);
     }
 
     @Override
@@ -34,27 +26,13 @@ public class DurationDialog extends MeasureDialog {
         integer.setMaxValue(MAX_VALUES_HOURS);
         decimal.setMaxValue(MAX_VALUES_MIN);
 
-        integer.setFormatter(i -> String.format(FORMAT_NUMBER_DOUBLE, i));
-        decimal.setFormatter(i -> String.format(FORMAT_NUMBER_DOUBLE, i));
+        integer.setFormatter(i -> String.format(Measure.Format.FORMAT_NUMBER_DOUBLE, i));
+        decimal.setFormatter(i -> String.format(Measure.Format.FORMAT_NUMBER_DOUBLE, i));
     }
 
     @Override
     protected void setTitleDialog(TextView titleDialog) {
         titleDialog.setText(R.string.time);
-    }
-
-
-    @Override
-    protected void setPositiveListener(DialogInterface dialog, int which) {
-        onSelectDurationListener.setPositiveListener(getValue(Measure.DURATION), getValueInt());
-    }
-
-    private Integer getValueInt(){
-        return DurationUtilities.stringToSeconds(getValue(Measure.DURATION));
-    }
-
-    public interface OnSelectDurationListener{
-        void setPositiveListener(String durationStr, Integer duration);
     }
 
 }

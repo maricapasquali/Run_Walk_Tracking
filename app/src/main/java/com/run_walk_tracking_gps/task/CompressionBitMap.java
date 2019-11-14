@@ -2,6 +2,8 @@ package com.run_walk_tracking_gps.task;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
@@ -16,6 +18,7 @@ public class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected String doInBackground(Bitmap... bitmaps) {
         return BitmapUtilities.BitMapToString(bitmaps[0]);

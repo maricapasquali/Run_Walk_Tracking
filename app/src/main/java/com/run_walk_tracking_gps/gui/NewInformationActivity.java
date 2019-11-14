@@ -14,7 +14,7 @@ import android.widget.ListView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.adapter.listview.NewInformationAdapter;
 
-public class NewInformationActivity extends CommonActivity {
+public abstract class NewInformationActivity extends CommonActivity {
 
     private int title;
 
@@ -49,9 +49,11 @@ public class NewInformationActivity extends CommonActivity {
             throw new NullPointerException("Adapter must be other than null");
 
         listView.setAdapter(adapter);
-
+        setModel();
     }
 
+
+    protected abstract void setModel();
 
     @Override
     protected void listenerAction() {

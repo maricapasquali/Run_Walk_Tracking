@@ -1,8 +1,7 @@
 package com.run_walk_tracking_gps.gui.adapter.listview;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,8 @@ import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 
 import java.util.Date;
 import java.util.List;
@@ -29,16 +27,16 @@ public class StatisticsDataAdapter extends BaseAdapter {
     private Context context;
     private List<StatisticsData> data_filtered;
 
-    private Measure measure;
+    private Measure.Type measure;
 
 
-    public StatisticsDataAdapter(Context context, List<StatisticsData> map, Measure measure){
+    public StatisticsDataAdapter(Context context, List<StatisticsData> map, Measure.Type measure){
         this.context = context;
         this.data_filtered = map;
         this.measure=measure;
     }
 
-    public void updateStatisticsData(List<StatisticsData> list, Measure measure){
+    public void updateStatisticsData(List<StatisticsData> list, Measure.Type measure){
         this.data_filtered.clear();
         this.data_filtered.addAll(list);
         this.measure = measure;
@@ -70,7 +68,8 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
             final LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
 
-            data_filtered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate())).forEach(data -> series.appendData(new DataPoint(data.getDate(),data.getStatisticData()),true, getCount()-1));
+            data_filtered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate())).forEach(data ->
+                    series.appendData(new DataPoint(data.getDate(),data.getValue()),true, getCount()-1));
             graphView.addSeries(series);
 
 
@@ -99,7 +98,7 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
             // TODO: 11/3/2019 GESTIONE CONVERSIONE
             
-            text_data_filtered.setText(data_filtered.get(position-1).getStatisticDataStr(context,measure));
+            text_data_filtered.setText(data_filtered.get(position-1).getMeasure().toString(context));
             date.setText(data_filtered.get(position-1).getDateStr());
         }
 

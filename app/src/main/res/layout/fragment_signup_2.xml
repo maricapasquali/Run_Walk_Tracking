@@ -77,8 +77,10 @@
                 android:text="@string/height" />
 
 
-            <TextView
+            <EditText
                 android:id="@+id/signup_profile_height"
+                android:focusable="false"
+                android:textCursorDrawable="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/signup_profile_height_title"
@@ -114,8 +116,10 @@
                 android:text="@string/weight" />
 
 
-            <TextView
+            <EditText
                 android:id="@+id/signup_profile_weight"
+                android:focusable="false"
+                android:textCursorDrawable="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/signup_profile_weight_title"

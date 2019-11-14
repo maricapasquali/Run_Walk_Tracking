@@ -14,9 +14,9 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.gui.enumeration.Measure;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.model.Measure;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,10 +58,10 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
             weight = (int)((JSONObject)unit_measure.get(FieldDataBase.WEIGHT.toName())).get(FieldDataBase.ID_UNIT.toName());
             height = (int)((JSONObject)unit_measure.get(FieldDataBase.HEIGHT.toName())).get(FieldDataBase.ID_UNIT.toName());
 
-            Map<Measure, Integer> map = new HashMap<>();
-            map.put(Measure.DISTANCE, distance);
-            map.put(Measure.WEIGHT, weight);
-            map.put(Measure.HEIGHT, height);
+            Map<Measure.Type, Integer> map = new HashMap<>();
+            map.put(Measure.Type.DISTANCE, distance);
+            map.put(Measure.Type.WEIGHT, weight);
+            map.put(Measure.Type.HEIGHT, height);
 
             final MeasureAdapter adapter = new MeasureAdapter(this,this, map);
             measure_unit.setAdapter(adapter);
@@ -86,13 +86,13 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
             default: throw new IllegalArgumentException();
         }
         String measure = ((TextView)((RelativeLayout)group.getParent()).getChildAt(0)).getText().toString();
-        if(measure.equals(getString(Measure.DISTANCE.getStrId()))) {
+        if(measure.equals(getString(Measure.Type.DISTANCE.getStrId()))) {
             filter = FieldDataBase.UNIT_DISTANCE.toName();
             is_default = distance==id_unit;
-        }else if(measure.equals(getString(Measure.WEIGHT.getStrId()))){
+        }else if(measure.equals(getString(Measure.Type.WEIGHT.getStrId()))){
             filter = FieldDataBase.UNIT_WEIGHT.toName();
             is_default = weight==id_unit;
-        }else if(measure.equals(getString(Measure.HEIGHT.getStrId()))){
+        }else if(measure.equals(getString(Measure.Type.HEIGHT.getStrId()))){
             filter = FieldDataBase.UNIT_HEIGHT.toName();
             is_default = height==id_unit;
         }
