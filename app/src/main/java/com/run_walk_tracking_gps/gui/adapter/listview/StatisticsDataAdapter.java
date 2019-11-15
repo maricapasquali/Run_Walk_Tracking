@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -20,37 +21,33 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 public class StatisticsDataAdapter extends BaseAdapter {
 
     private final static String TAG = StatisticsDataAdapter.class.getName();
 
     private Context context;
-    private List<StatisticsData> data_filtered;
+    private List<StatisticsData> statisticsFiltered;
 
-    private Measure.Type measure;
-
-
-    public StatisticsDataAdapter(Context context, List<StatisticsData> map, Measure.Type measure){
+    public StatisticsDataAdapter(Context context, List<StatisticsData> list){
         this.context = context;
-        this.data_filtered = map;
-        this.measure=measure;
+        this.statisticsFiltered = list;
     }
 
-    public void updateStatisticsData(List<StatisticsData> list, Measure.Type measure){
-        this.data_filtered.clear();
-        this.data_filtered.addAll(list);
-        this.measure = measure;
+    public void updateStatisticsData(List<StatisticsData> list){
+        this.statisticsFiltered.clear();
+        this.statisticsFiltered.addAll(list);
         this.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return data_filtered.size()+1;
+        return statisticsFiltered.size()+1;
     }
 
     @Override
     public Object getItem(int position) {
-        return data_filtered.get(position-1);
+        return statisticsFiltered.get(position-1);
     }
 
     @Override
@@ -68,7 +65,7 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
             final LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
 
-            data_filtered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate())).forEach(data ->
+            statisticsFiltered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate())).forEach(data ->
                     series.appendData(new DataPoint(data.getDate(),data.getValue()),true, getCount()-1));
             graphView.addSeries(series);
 
@@ -79,9 +76,9 @@ public class StatisticsDataAdapter extends BaseAdapter {
             graphView.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
 
             // set manual x bounds to have nice steps
-            final List<Date> x = data_filtered.stream().map(StatisticsData::getDate).collect(Collectors.toList());
+            final List<Date> x = statisticsFiltered.stream().map(StatisticsData::getDate).collect(Collectors.toList());
             if(!x.isEmpty()){
-                graphView.getViewport().setMinX(x.get(data_filtered.size()-1).getTime());
+                graphView.getViewport().setMinX(x.get(statisticsFiltered.size()-1).getTime());
                 graphView.getViewport().setMaxX(x.get(0).getTime());
                 graphView.getViewport().setXAxisBoundsManual(true);
 
@@ -93,13 +90,11 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
             convertView = LayoutInflater.from(context).inflate(R.layout.custom_item_statistics_filtered, null);
 
-            final TextView text_data_filtered = convertView.findViewById(R.id.statistics_data);
+            final TextView text_statisticsFiltered = convertView.findViewById(R.id.statistics_data);
             final TextView date = convertView.findViewById(R.id.statistics_date);
 
-            // TODO: 11/3/2019 GESTIONE CONVERSIONE
-            
-            text_data_filtered.setText(data_filtered.get(position-1).getMeasure().toString(context));
-            date.setText(data_filtered.get(position-1).getDateStr());
+            text_statisticsFiltered.setText(statisticsFiltered.get(position-1).getMeasure().toString(context));
+            date.setText(statisticsFiltered.get(position-1).getDateStr());
         }
 
         return convertView;

@@ -1,8 +1,10 @@
 package com.run_walk_tracking_gps.gui.dialog;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.NumberPicker;
@@ -28,6 +30,7 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
     private OnSelectedListener onSelectedListener;
     private Measure measure;
 
+    @SuppressLint("DefaultLocale")
     protected MeasureDialog(Context context, Measure.Type measure, OnSelectedListener onSelectedListener) {
         super(context);
 
@@ -70,6 +73,7 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
+
         onSelectedListener.setPositiveListener(getMeasureValue());
     }
 

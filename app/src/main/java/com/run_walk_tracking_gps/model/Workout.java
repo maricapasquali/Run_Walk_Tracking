@@ -13,10 +13,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 public class Workout implements Parcelable, Cloneable{
 
@@ -66,11 +68,13 @@ public class Workout implements Parcelable, Cloneable{
                 String map = w.getString("map_route");
                 if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
                 workoutsList.get(i).setDate(w.getString("date"));
-                workoutsList.get(i).setDuration(w.getInt("duration"));
-                workoutsList.get(i).setDistance(w.getDouble("distance"));
-                workoutsList.get(i).setCalories(w.getDouble("calories"));
+                workoutsList.get(i).getDuration().setValue((double)w.getInt("duration"));
+                workoutsList.get(i).getDistance().setValue(w.getDouble("distance"));
+                workoutsList.get(i).getCalories().setValue(w.getDouble("calories"));
                 workoutsList.get(i).setSport(Sport.valueOf(w.getString("sport")));
-                workoutsList.get(i).setMiddleSpeed(w.getDouble("middle_speed"));
+                double duration = workoutsList.get(i).getDuration().getValue();
+                double distance = workoutsList.get(i).getDistance().getValue();
+                workoutsList.get(i).setMiddleSpeed(distance, duration);
             }catch (JSONException e){
                 e.printStackTrace();
             }
@@ -79,6 +83,15 @@ public class Workout implements Parcelable, Cloneable{
         return workoutsList;
     }
 
+    private void setMiddleSpeed(double distance,double duration){
+        getMiddleSpeed().setValue(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d));
+    }
+
+    public void setMiddleSpeed(){
+        double duration = getDuration().getValue();
+        double distance = getDistance().getValue();
+        setMiddleSpeed(distance,duration);
+    }
 
 // START - Parcelable IMPLEMENTATION
     protected Workout(Parcel in) {
@@ -160,6 +173,7 @@ public class Workout implements Parcelable, Cloneable{
 
     public void setContext(Context context){
         this.context = context;
+        this.parameters.forEach(p -> p.setContext(context));
     }
 
     public void setIdWorkout(int id_workout) {
@@ -181,16 +195,16 @@ public class Workout implements Parcelable, Cloneable{
     public void setSport(Sport sport) {
         this.sport = sport;
     }
+    /*
+        public void setDuration(Integer duration) {
+            getDuration().setValue(Double.valueOf(duration));
+            //setMiddleSpeed();
+        }
 
-    public void setDuration(Integer duration) {
-        getDuration().setValue(Double.valueOf(duration));
-        setMiddleSpeed();
-    }
-
-    public void setDistance(Double distance) {
-        getDistance().setValue(distance);
-        setMiddleSpeed();
-    }
+        public void setDistance(Double distance) {
+            getDistance().setValue(distance);
+            setMiddleSpeed();
+        }
 
     private void setMiddleSpeed(){
         int duration = getDuration().getValue().intValue();
@@ -205,15 +219,18 @@ public class Workout implements Parcelable, Cloneable{
 
     public void setCalories(Double calories) {
         getCalories().setValue(calories);
-    }
+    } */
 
-    public String[] toArrayString() {
-        return new String[]{getDateStr(), sport.toString() ,
-                getDuration().toString(context),
-                Measure.isNullOrEmpty(getDistance()) ? ND : getDistance().toString(context),
-                Measure.isNullOrEmpty(getCalories()) ? ND : getCalories().toString(context),
-                Measure.isNullOrEmpty(getMiddleSpeed()) ? ND : getMiddleSpeed().toString(context)
-                };
+    // TODO: 11/15/2019 MIGLIORARE
+    public LinkedHashMap<Workout.Info, Object> details(final boolean withMiddleSpeed){
+        final LinkedHashMap<Workout.Info, Object> map = new LinkedHashMap<>();
+        map.put(Info.DATE, this.getDateStr());
+        map.put(Info.SPORT, this.getSport());
+        map.put(Info.TIME, this.getDuration().toString(context));
+        map.put(Info.DISTANCE,this.getDistance().toString(context) );
+        map.put(Info.CALORIES, this.getCalories().toString(context));
+        if(withMiddleSpeed) map.put(Info.MIDDLE_SPEED, this.getMiddleSpeed().toString(context));
+        return map;
     }
 
     public boolean isMinimalSet(){
@@ -233,4 +250,54 @@ public class Workout implements Parcelable, Cloneable{
                     ", middleSpeed='" + getMiddleSpeed().toString(context)  + '\'' +
                     '}';
     }
+
+    public enum Info {
+
+        DATE(R.string.date, R.drawable.ic_calendar),
+        SPORT(R.string.sport),
+        TIME(Measure.Type.DURATION),
+        DISTANCE(Measure.Type.DISTANCE),
+        CALORIES(Measure.Type.ENERGY),
+        MIDDLE_SPEED(Measure.Type.MIDDLE_SPEED);
+
+        private final int strId;
+        private final int iconId;
+
+        Info(int strId) {
+            this.strId = strId;
+            this.iconId = 0;
+        }
+
+        Info(int strId, int iconId) {
+            this.strId = strId;
+            this.iconId = iconId;
+        }
+
+        Info(Measure.Type measure) {
+            this.strId = measure.getStrId();
+            this.iconId = measure.getIconId();
+        }
+
+        public int getStrId() {
+            return this.strId;
+        }
+
+        public int getIconId() {
+            return this.iconId;
+        }
+
+        public static boolean isSport(Info info) {
+            return info.equals(SPORT);
+        }
+
+        public static Info[] infoWorkoutNoSpeed() {
+            return new ArrayList<>(Arrays.asList(values())).stream().filter(i -> i != MIDDLE_SPEED).toArray(Info[]::new);
+        }
+
+        public static boolean valuesNotRequired(Info item) {
+            return item.equals(Info.DISTANCE) || item.equals(Info.CALORIES);
+        }
+
+    }
+
 }

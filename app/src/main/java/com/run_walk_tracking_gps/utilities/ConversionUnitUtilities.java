@@ -15,8 +15,16 @@ public class ConversionUnitUtilities {
         return NumberUtilities.round2(km / KM_TO_MI);
     }
 
+    public static double mileToKilometer(double mi){
+        return NumberUtilities.round2(mi * KM_TO_MI);
+    }
+
     public static double kilogramToPound(double kg){
-        return NumberUtilities.round2(kg * KG_TO_LB);
+        return NumberUtilities.round1(kg * KG_TO_LB);
+    }
+
+    public static Double poundToKilogram(double lb) {
+        return NumberUtilities.round1(lb / KG_TO_LB);
     }
 
     public static double meterToFeet(double m){
@@ -32,4 +40,7 @@ public class ConversionUnitUtilities {
     }
 
 
+    public static Double mileForHoursToKilometerForHours(double mi_h) {
+        return mileToKilometer(mi_h);
+    }
 }

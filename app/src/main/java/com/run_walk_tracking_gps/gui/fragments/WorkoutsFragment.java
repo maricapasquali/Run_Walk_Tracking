@@ -146,14 +146,14 @@ public class WorkoutsFragment extends Fragment {
                     return false;
                 });
                 break;
-                default:
-                    workoutsViewExpandable.setGroupIndicator(getDefaultGroupIndicator());
-                    workoutsViewExpandable.setOnGroupClickListener(null);
-                    workoutsViewExpandable.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-                        onWorkOutSelectedListener.onWorkOutSelected(workouts.get(childPosition));
-                        return false;
-                    });
-                    break;
+            default:
+                workoutsViewExpandable.setGroupIndicator(getDefaultGroupIndicator());
+                workoutsViewExpandable.setOnGroupClickListener(null);
+                workoutsViewExpandable.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+                    onWorkOutSelectedListener.onWorkOutSelected(workouts.get(childPosition));
+                    return false;
+                });
+                break;
         }
     }
 

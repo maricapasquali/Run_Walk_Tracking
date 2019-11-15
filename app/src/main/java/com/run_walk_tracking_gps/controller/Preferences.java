@@ -80,7 +80,7 @@ public class Preferences {
         return (JSONObject) Preferences.getAppJsonUserLogged(context, id_user).get(FieldDataBase.SETTINGS.toName());
     }
 
-    private static String getUnitDefault(Context context, String measure) throws JSONException{
+    public static String getUnitDefault(Context context, String measure) throws JSONException{
         JSONObject settings = Preferences.getSettingsJsonUserLogged(context, Preferences.getIdUserLogged(context));
         return (String) ((JSONObject)((JSONObject)settings.get(FieldDataBase.UNIT_MEASURE.toName()))
                 .get(measure)).get(FieldDataBase.UNIT.toName());

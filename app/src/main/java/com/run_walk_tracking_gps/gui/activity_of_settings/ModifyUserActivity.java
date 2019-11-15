@@ -17,9 +17,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
-import com.google.gson.Gson;
+
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -27,12 +27,10 @@ import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
-import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,11 +52,9 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     private TextView height;
 
     private ImagePicker imagePicker;
+    private User oldUser;
     private User user;
-
-    private String image_encode;
-
-    private boolean isMeterUnit;
+    private String image_encode = null;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -78,44 +74,25 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         height = findViewById(R.id.modify_profile_height);
 
         if(getIntent()!=null){
-            try {
-                user = (User)getIntent().getParcelableExtra(getString(R.string.profile));
-                Log.d(TAG, user.toString());
+            oldUser = (User)getIntent().getParcelableExtra(getString(R.string.profile));
+            oldUser.setContext(this);
+            Log.d(TAG, oldUser.toString());
 
+            String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
+            if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
-                String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), null);
-                if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+            name.setText(oldUser.getName());
+            lastName.setText(oldUser.getLastName());
+            gender.setText(oldUser.getGender().getStrId());
+            gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(oldUser.getGender().getIconId()), null, null, null);
+            birthDate.setText(oldUser.getBirthDateString());
+            email.setText(oldUser.getEmail());
+            city.setText(oldUser.getCity());
+            tel.setText(oldUser.getPhone());
 
-                name.setText(user.getName());
-                lastName.setText(user.getLastName());
-                gender.setText(user.getGender().getStrId());
-                gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(user.getGender().getIconId()), null, null, null);
-                birthDate.setText(user.getBirthDateString());
-                email.setText(user.getEmail());
-                city.setText(user.getCity());
-                tel.setText(user.getPhone());
+            height.setText(oldUser.getHeight().toString());
 
-                // TODO: 11/3/2019 GESTIONE CONVERSIONE
-                String unit_height = Preferences.getUnitHeightDefault(this);
-                try {
-                    double height_value = user.getHeight();
-                    isMeterUnit = Preferences.getUnitHeightDefault(this).equals(
-                            getString(Measure.Unit.METER.getStrId()));
-                    if(!isMeterUnit){
-                        height_value = ConversionUnitUtilities.meterToFeet(height_value);
-                    }
-                    height.setText(new StringBuilder(height_value +getString(R.string.space)+ unit_height));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (NullPointerException n){
-                Log.e(TAG, getString(R.string.user_not_set));
-
-            }
-
+            user = oldUser.clone();
         }
     }
 
@@ -124,6 +101,47 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         getMenuInflater().inflate(R.menu.menu_modify_profile, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+    private void saveUserChanged(){
+        try {
+
+            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), user.getIdUser());
+            if(!user.getName().equals(oldUser.getName())){
+                bodyJson.put(FieldDataBase.NAME.toName(), user.getName());
+            }
+            if(!user.getLastName().equals(oldUser.getLastName())){
+                bodyJson.put(FieldDataBase.LAST_NAME.toName(), user.getLastName());
+            }
+            if(!user.getGender().equals(oldUser.getGender())){
+                bodyJson.put(FieldDataBase.GENDER.toName(), user.getGender());
+            }
+            if(!user.getBirthDate().equals(oldUser.getBirthDate())){
+                bodyJson.put(FieldDataBase.BIRTH_DATE.toName(), user.getBirthDate());
+            }
+            if(!user.getEmail().equals(oldUser.getEmail())){
+                bodyJson.put(FieldDataBase.EMAIL.toName(), user.getEmail());
+            }
+            if(!user.getCity().equals(oldUser.getCity())){
+                bodyJson.put(FieldDataBase.CITY.toName(), user.getCity());
+            }
+            if(!user.getPhone().equals(oldUser.getPhone())){
+                bodyJson.put(FieldDataBase.PHONE.toName(), user.getPhone());
+            }
+            if(!user.getHeight().getValue().equals(oldUser.getHeight().getValue())){
+                bodyJson.put(FieldDataBase.HEIGHT.toName(), user.getHeight().getValue());
+            }
+
+            if(image_encode!=null) bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+
+            Log.d(TAG, bodyJson.toString());
+            if(!HttpRequest.requestUpdateUserInformation(this, bodyJson,this)){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -137,20 +155,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 user.setPhone(tel.getText().toString());
 
                 // REQUEST UPDATE USER
-                try {
-                    JSONObject bodyJson = new JSONObject(new Gson().toJson(user));
-                    bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
-                    bodyJson.remove(FieldDataBase.USERNAME.toName());
-
-                    Log.e(TAG, bodyJson.toString());
-                    if(!HttpRequest.requestUpdateUserInformation(this, bodyJson,this)){
-                        Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                    }
-
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-
+                saveUserChanged();
             }
             break;
             case android.R.id.home:
@@ -167,7 +172,6 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             imagePicker = new ImagePicker(this,
                     null ,
                     imageUri -> {
-                      
                         img.setImageURI(imageUri);
                         Bitmap bitmap = ((BitmapDrawable) img.getDrawable()).getBitmap();
 
@@ -209,10 +213,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         height.setOnClickListener(v ->{
             final TextView h = ((TextView) v);
             HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
-                h .setText(heightMeasure.toString(this));
-                // Conversione del valore 'height' se != METER
-                user.setHeight(isMeterUnit? heightMeasure.getValue() : ConversionUnitUtilities.feetToMeter(heightMeasure.getValue()));
-                
+                if(heightMeasure!=null){
+                    h.setText(heightMeasure.toString(this));
+                    user.getHeight().setValueFromGui(heightMeasure.getValueToGui());
+                }
             }).create().show();
         });
     }

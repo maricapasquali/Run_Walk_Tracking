@@ -17,21 +17,16 @@ import android.widget.Toast;
 
 
 import com.google.android.gms.maps.MapView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
 
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.model.WorkoutBuilder;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class DetailsWorkoutActivity extends  CommonActivity {
     private final static String TAG = DetailsWorkoutActivity.class.getName();
@@ -59,13 +54,12 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         summary_ok = findViewById(R.id.summary_ok);
 
 
-        String[] d = null;
         workout = (Workout)getIntent().getParcelableExtra(getString(R.string.summary_workout));
         if(workout!=null){ // SUMMARY_DETAILS
             isSummary = true;
             workout.setContext(this);
             Log.d(TAG, workout.toString());
-            d = workout.toArrayString();
+
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -75,7 +69,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
             workout = (Workout)getIntent().getParcelableExtra(getString(R.string.detail_workout));
             if(workout!=null){
                 workout.setContext(this);
-                d = workout.toArrayString();
+
                 Log.d(TAG, workout.toString());
                 if(workout.getMapRoute()==null)summary_map.setVisibility(View.GONE);
 
@@ -83,13 +77,10 @@ public class DetailsWorkoutActivity extends  CommonActivity {
                 getSupportActionBar().setTitle(R.string.detail_workout);
             }
         }
-
-        Log.d(TAG, "workout back = " + Arrays.toString(d));
-        if(d!=null){
-            adapter = new DetailsWorkoutAdapter(this, d);
-            summary_workout.setAdapter(adapter);
-        }
-
+       if(workout!=null){
+           adapter = new DetailsWorkoutAdapter(this, workout.details(true));
+           summary_workout.setAdapter(adapter);
+       }
     }
 
     @Override

@@ -157,7 +157,7 @@ class UserDao {
      $user = array();
 
      if(connect()){
-        $stmt = getConnection()->prepare("SELECT u.*, l.username FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
+        $stmt = getConnection()->prepare("SELECT u.*, DATE_FORMAT(u.birth_date,'%d/%m/%Y') as birth_date, l.username FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
         if(!$stmt) throw new Exception("user from id : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("s", $id);
         if(!$stmt->execute()) throw new Exception("user from id : Selezione fallita. Errore: ". getErrorConnection());

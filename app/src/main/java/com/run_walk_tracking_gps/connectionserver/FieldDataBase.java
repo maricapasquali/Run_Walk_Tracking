@@ -13,7 +13,7 @@ public enum FieldDataBase {
     USERNAME, PASSWORD,
     SPORT, TARGET, LANGUAGE, WEIGHT, LOCATION, ENERGY,
     ID_WEIGHT, ID_TARGET,
-    ID_WORKOUT , DURATION , ID_SPORT , MAP_ROUTE , DISTANCE , CALORIES,MIDDLE_SPEED,
+    ID_WORKOUT , DURATION , ID_SPORT , MAP_ROUTE , DISTANCE , CALORIES,
     DATE ,
     VALUE ,
     FILTER,
@@ -81,12 +81,12 @@ public enum FieldDataBase {
     }
 
     public static List< String> fieldSupportedForNewWorkout(){
-        return unmodifiableList(Stream.of(ID_USER, DATE, SPORT, DURATION, MAP_ROUTE, DISTANCE, CALORIES, MIDDLE_SPEED));
+        return unmodifiableList(Stream.of(ID_USER, DATE, SPORT, DURATION, MAP_ROUTE, DISTANCE, CALORIES));
     }
 
     public static List< String> fieldSupportedForUpdateWorkout(){
         return unmodifiableList(Stream.of(ID_WORKOUT,  DATE,  SPORT,  DURATION,  MAP_ROUTE,
-                 DISTANCE,  CALORIES, MIDDLE_SPEED));
+                 DISTANCE,  CALORIES));
     }
 
     public static List< String> fieldRequiredForDeleteWorkout(){

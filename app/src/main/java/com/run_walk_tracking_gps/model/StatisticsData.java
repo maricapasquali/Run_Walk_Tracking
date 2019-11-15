@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.run_walk_tracking_gps.gui.ApplicationActivity;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
 import java.text.ParseException;
@@ -96,7 +97,6 @@ public class StatisticsData implements Parcelable{
         return measure.getValue();
     }
 
-
     public void setId(int id) {
         this.id = id;
     }
@@ -124,5 +124,9 @@ public class StatisticsData implements Parcelable{
     @Override
     public String toString() {
         return "StatisticsData [ Id = "+this.id+", Date = " +getDateStr() +", Value = " +this.measure.getValue()+ " ]";
+    }
+
+    public void setContext(Context context) {
+        this.measure.setContext(context);
     }
 }

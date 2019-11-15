@@ -1,10 +1,7 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,31 +11,24 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.google.android.gms.maps.MapView;
-import com.google.gson.Gson;
+
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.dialog.EnergyDialog;
-import com.run_walk_tracking_gps.gui.dialog.MeasureDialog;
 import com.run_walk_tracking_gps.gui.dialog.SportDialog;
-
-import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
-import com.run_walk_tracking_gps.model.WorkoutBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Method;
+import java.util.Map;
 
 public class ModifyWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>  {
 
@@ -70,7 +60,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                 Log.d(TAG,"OLD " + oldWorkout.toString());
                 Log.d(TAG,"CLONE " + workout.toString());
 
-                final DetailsWorkoutAdapter adapter = new DetailsWorkoutAdapter(this, oldWorkout.toArrayString(), true);
+                final DetailsWorkoutAdapter adapter = new DetailsWorkoutAdapter(this, oldWorkout.details(false));
                 details_workout.setAdapter(adapter);
             }
         }
@@ -79,9 +69,9 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     @Override
     protected void listenerAction() {
         details_workout.setOnItemClickListener((parent, view, position, id) -> {
-            final InfoWorkout info = (InfoWorkout)parent.getAdapter().getItem(position);
-            Toast.makeText(ModifyWorkoutActivity.this,
-                    "Item = " + parent.getAdapter().getItem(position), Toast.LENGTH_LONG).show();
+            final Map.Entry<Workout.Info, Object> entry = (Map.Entry<Workout.Info, Object>)parent.getAdapter().getItem(position);
+            final Workout.Info info = entry.getKey();
+            Log.d(TAG,"Item = " + entry);
 
             final TextView detail = (TextView)view.findViewById(R.id.detail_description);
 
@@ -106,7 +96,8 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
                         if (durationMeasure!=null){
                             detail.setText(durationMeasure.toString(this));
-                            workout.setDuration(durationMeasure.getValue().intValue());
+                            workout.getDuration().setValue(durationMeasure.getValue());
+                            workout.setMiddleSpeed();
                         }
                     }).show();
                     break;
@@ -114,12 +105,12 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     DistanceDialog.create(ModifyWorkoutActivity.this, (distanceMeasure)  -> {
                         if(distanceMeasure==null){
                             detail.setText(R.string.no_available_abbr);
-                            workout.setDistance(0.0);
+                            workout.getDistance().setValue(0d);
                         }else{
                             detail.setText(distanceMeasure.toString(this));
-                            workout.setDistance(distanceMeasure.getValue());
+                            workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
+                            workout.setMiddleSpeed();
                         }
-                        // TODO: 11/3/2019 GESTIONE CONVERSIONE
                     }).show();
                     break;
                 case CALORIES:
@@ -127,10 +118,10 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
 
                         if(caloriesMeasure==null){
                             detail.setText(R.string.no_available_abbr);
-                            workout.setCalories(0.0);
+                            workout.getCalories().setValue(0d);
                         }else{
                             detail.setText(caloriesMeasure.toString(this));
-                            workout.setCalories(caloriesMeasure.getValue());
+                            workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
                         }
                     }).show();
                     break;
@@ -176,9 +167,6 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
             }
             if(!workout.getCalories().getValue().equals(oldWorkout.getCalories().getValue())){
                 bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories().getValue());
-            }
-            if(!workout.getMiddleSpeed().getValue().equals(oldWorkout.getMiddleSpeed().getValue())){
-                bodyJson.put(FieldDataBase.MIDDLE_SPEED.toName(), workout.getMiddleSpeed().getValue());
             }
 
             Log.d(TAG, bodyJson.toString());

@@ -48,6 +48,7 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
         if(getIntent()!=null){
             oldStatisticsData = getIntent().getParcelableExtra(getString(R.string.modify_weight));
             if(oldStatisticsData!=null){
+                oldStatisticsData.setContext(this);
                 adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString(this)) ;
                 listView.setAdapter(adapter);
                 statisticsData = oldStatisticsData.clone();
@@ -73,8 +74,7 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                 case WEIGHT:
                     WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
                         detail.setText(weightMeasure.toString(this));
-                        statisticsData.setValue(weightMeasure.getValue());
-                        // TODO: 11/3/2019 GESTIONE CONVERSIONE
+                        statisticsData.getMeasure().setValueFromGui(weightMeasure.getValueToGui());
                     }).show();
                     break;
             }

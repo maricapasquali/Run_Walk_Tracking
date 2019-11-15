@@ -22,7 +22,6 @@ import com.run_walk_tracking_gps.gui.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.dialog.SportDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +50,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
 
     @Override
     public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
-        final InfoWorkout title =(InfoWorkout) parent.getAdapter().getItem(position);
+        final Workout.Info title =(Workout.Info) parent.getAdapter().getItem(position);
         final TextView detail = view.findViewById(R.id.detail_description);
 
         switch (title){
@@ -72,32 +71,33 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             case TIME:
                 DurationDialog.create(NewManualWorkoutActivity.this, (durationMeasure) -> {
                    if(durationMeasure!=null){
-                       workout.setDuration(durationMeasure.getValue().intValue());
+                       workout.getDuration().setValue(durationMeasure.getValue());
                        detail.setText(durationMeasure.toString(this));
                    }
+                   workout.setMiddleSpeed();
                 }).show();
                 break;
             case DISTANCE:
                 DistanceDialog.create(NewManualWorkoutActivity.this, (distanceMeasure) -> {
                     if(distanceMeasure==null){
                         detail.setText(R.string.no_available_abbr);
-                        workout.setDistance(0d);
+                        workout.getDistance().setValue(0d);
                     }else{
                         detail.setText(distanceMeasure.toString(this));
-                        workout.setDistance(distanceMeasure.getValue());
-                    }
-                    // TODO: 11/3/2019 GESTIONE CONVERSIONE
+                        workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
 
+                    }
+                    workout.setMiddleSpeed();
                 }).show();
                 break;
             case CALORIES:
                 EnergyDialog.create(NewManualWorkoutActivity.this, (caloriesMeasure)  -> {
                     if(caloriesMeasure==null){
                         detail.setText(R.string.no_available_abbr);
-                        workout.setCalories(0d);
+                        workout.getCalories().setValue(0d);
                     }else{
                         detail.setText(caloriesMeasure.toString(this));
-                        workout.setCalories(caloriesMeasure.getValue());
+                        workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
                     }
                 }).show();
                 break;
@@ -114,11 +114,10 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
 
             final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)))
                                                         .put(FieldDataBase.SPORT.toName(), workout.getSport())
-                                                        .put(FieldDataBase.DURATION.toName(), workout.getDuration())
+                                                        .put(FieldDataBase.DURATION.toName(), workout.getDuration().getValue())
                                                         .put(FieldDataBase.DATE.toName(), workout.getDate());
-            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance());
-            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories());
-            if(!Measure.isNullOrEmpty(workout.getMiddleSpeed())) bodyJson.put(FieldDataBase.MIDDLE_SPEED.toName(), workout.getMiddleSpeed());
+            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance().getValue());
+            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories().getValue());
 
 
             if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){

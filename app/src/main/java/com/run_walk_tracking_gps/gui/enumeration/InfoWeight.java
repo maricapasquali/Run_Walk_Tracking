@@ -1,11 +1,12 @@
 package com.run_walk_tracking_gps.gui.enumeration;
 
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.Workout;
 
 public enum  InfoWeight {
 
     WEIGHT(Measure.Type.WEIGHT),
-    DATE(InfoWorkout.DATE);
+    DATE(Workout.Info.DATE);
 
     private final int strId;
     private final int iconId;
@@ -20,7 +21,7 @@ public enum  InfoWeight {
         this.iconId = measure.getIconId();
     }
 
-    InfoWeight(InfoWorkout infoWorkout) {
+    InfoWeight(Workout.Info infoWorkout) {
         this.strId = infoWorkout.getStrId();
         this.iconId = infoWorkout.getIconId();
     }

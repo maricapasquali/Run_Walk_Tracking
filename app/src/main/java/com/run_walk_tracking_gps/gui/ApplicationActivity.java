@@ -14,8 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
@@ -25,7 +23,6 @@ import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
 import org.json.JSONArray;
@@ -34,7 +31,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
         HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
@@ -360,6 +356,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, getString(R.string.new_weight), Toast.LENGTH_LONG).show();
                     newWeight = (StatisticsData) data.getParcelableExtra(getString(R.string.new_weight));
+                    newWeight.setContext(this);
                     Log.d(TAG, "New Weight = " + newWeight);
                 }
                 break;
@@ -368,6 +365,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 if(resultCode==Activity.RESULT_OK) {
                     statisticsData = (StatisticsData)data.getParcelableExtra(getString(R.string.modify_weight));
                     if(statisticsData!=null){
+                        statisticsData.setContext(this);
                         Toast.makeText(this, R.string.modify_weight, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout changed = " +statisticsData);
                     }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Ott 25, 2019 alle 14:13
+-- Creato il: Nov 15, 2019 alle 21:24
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -21,8 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `run_walk_tracking`
 --
-CREATE DATABASE IF NOT EXISTS `run_walk_tracking` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `run_walk_tracking`;
 
 -- --------------------------------------------------------
 
@@ -274,7 +272,7 @@ CREATE TABLE `user` (
   `gender` varchar(10) NOT NULL,
   `birth_date` date NOT NULL,
   `email` varchar(50) NOT NULL,
-  `city_country` varchar(30) NOT NULL,
+  `city` varchar(30) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `height` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -328,9 +326,8 @@ CREATE TABLE `workout` (
   `map_route` longblob DEFAULT NULL,
   `date` datetime NOT NULL,
   `duration` int(10) UNSIGNED NOT NULL,
-  `distance` float DEFAULT NULL,
-  `calories` float DEFAULT NULL,
-  `middle_speed` float DEFAULT NULL,
+  `distance` float NOT NULL DEFAULT 0,
+  `calories` float NOT NULL DEFAULT 0,
   `id_sport` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -449,8 +446,7 @@ ALTER TABLE `unit_measure_weight`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `SID_User_ID` (`name`,`last_name`),
-  ADD UNIQUE KEY `ID_User_IND` (`id_user`),
-  ADD UNIQUE KEY `SID_User_IND` (`name`,`last_name`);
+  ADD UNIQUE KEY `ID_User_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `verify_registration`
@@ -484,37 +480,37 @@ ALTER TABLE `workout`
 -- AUTO_INCREMENT per la tabella `sport`
 --
 ALTER TABLE `sport`
-  MODIFY `id_sport` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_sport` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `target`
 --
 ALTER TABLE `target`
-  MODIFY `id_target` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_target` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `unit_measure_distance`
 --
 ALTER TABLE `unit_measure_distance`
-  MODIFY `id_unit_distance` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_unit_distance` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `unit_measure_energy`
 --
 ALTER TABLE `unit_measure_energy`
-  MODIFY `id_unit_energy` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_unit_energy` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT per la tabella `unit_measure_height`
 --
 ALTER TABLE `unit_measure_height`
-  MODIFY `id_unit_height` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_unit_height` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `unit_measure_weight`
 --
 ALTER TABLE `unit_measure_weight`
-  MODIFY `id_unit_weight` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_unit_weight` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `user`

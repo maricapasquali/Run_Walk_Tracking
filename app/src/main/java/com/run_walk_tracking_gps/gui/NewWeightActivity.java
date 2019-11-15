@@ -66,9 +66,10 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 break;
             case WEIGHT:
                 WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {
-                    detail.setText(weightMeasure.toString(this));
-                    statisticsData.setValue(weightMeasure.getValue());
-                    // TODO: 11/3/2019 GESTIONE CONVERSIONE
+                   if(weightMeasure!=null){
+                       detail.setText(weightMeasure.toString(this));
+                       statisticsData.getMeasure().setValueFromGui(weightMeasure.getValueToGui());
+                   }
                 }).show();
                 break;
         }

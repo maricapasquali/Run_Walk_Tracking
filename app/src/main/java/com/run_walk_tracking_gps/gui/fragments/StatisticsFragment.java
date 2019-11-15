@@ -118,7 +118,7 @@ public class StatisticsFragment extends Fragment {
         });
 
 
-        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics(), (Measure.Type)spinner_measure.getSelectedItem());
+        statisticsDataAdapter = new StatisticsDataAdapter(getContext(), middleSpeedStatistics());
         list_data_filtered.setAdapter(statisticsDataAdapter);
 
         // filter measure
@@ -174,11 +174,8 @@ public class StatisticsFragment extends Fragment {
     private void update(Measure.Type measure, FilterTime filterTime){
         Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
         statisticsDataAdapter.updateStatisticsData(
-                FilterUtilities.createListFilteredStatisticsData(getStatistics(measure), filterTime),
-                measure);
+                FilterUtilities.createListFilteredStatisticsData(getStatistics(measure), filterTime));
     }
-
-    // TODO: 11/3/2019 GESTIONE CONVERSIONE
 
     private ArrayList<StatisticsData> middleSpeedStatistics(){
         return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getMiddleSpeed())).collect(ArrayList::new,
@@ -227,7 +224,7 @@ public class StatisticsFragment extends Fragment {
         if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.Type.WEIGHT){
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights);
             }
 
             if(onWeightListener.changedWeight()!=null){
@@ -239,7 +236,7 @@ public class StatisticsFragment extends Fragment {
                 weights.add(changedWeight);
                 weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetChangedWeight();
             }
 
@@ -248,7 +245,7 @@ public class StatisticsFragment extends Fragment {
                 weights.stream().filter(w -> w.getId() == id_changed_weight)
                         .findFirst().ifPresent(w -> weights.remove(w));
 
-                statisticsDataAdapter.updateStatisticsData(weights, Measure.Type.WEIGHT);
+                statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetDeletedWeight();
             }
         }

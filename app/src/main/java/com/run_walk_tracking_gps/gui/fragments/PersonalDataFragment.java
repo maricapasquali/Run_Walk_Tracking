@@ -14,19 +14,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
-import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.UserBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.ParseException;
 
 
 public class PersonalDataFragment extends Fragment {
@@ -44,6 +39,7 @@ public class PersonalDataFragment extends Fragment {
     private ImagePickerHandlerListener imagePickerHandlerListener;
     private PersonalDataListener personalDataListener;
 
+    private UserBuilder userBuilder = UserBuilder.create();
     private boolean isOk = true;
 
     @Override
@@ -66,6 +62,7 @@ public class PersonalDataFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_signup_1, container, false);
 
+
         img = view.findViewById(R.id.signup_profile_img);
         name = view.findViewById(R.id.signup_profile_name);
         last_name = view.findViewById(R.id.signup_profile_lastname);
@@ -79,6 +76,7 @@ public class PersonalDataFragment extends Fragment {
             DateTimePickerDialog.create(getContext(), birthText.getText().toString(),
                     (date, calendar) -> {
                 birthText.setText(date);
+                userBuilder.setBirthDate(calendar.getTime());
             },false ).show();
         });
 
@@ -124,23 +122,21 @@ public class PersonalDataFragment extends Fragment {
         Log.d(TAG,"onPause");
         try {
             JSONObject userJson = null;
-           // if(isSetAll()){
-                userJson = new JSONObject(new Gson().toJson(UserBuilder.create()
-                                                                        .setName(name.getText().toString())
-                                                                        .setLastName(last_name.getText().toString())
-                                                                        .setBirthDate(birthDate.getText().toString())
-                                                                        .setEmail(email.getText().toString())
-                                                                        .setCity(city.getText().toString())
-                                                                        .setPhone(phone.getText().toString())
-                                                                        .build()));
+            if(isSetAll()){
+                userJson = userBuilder.setName(name.getText().toString())
+                                      .setLastName(last_name.getText().toString())
+                                      .setEmail(email.getText().toString())
+                                      .setCity(city.getText().toString())
+                                      .setPhone(phone.getText().toString())
+                                      .build()
+                                      .toJson();
+
                 userJson.remove(FieldDataBase.ID_USER.toName());
                 userJson.remove(FieldDataBase.HEIGHT.toName());
-            //}
+            }
 
             personalDataListener.personalData(userJson);
 
-        } catch (ParseException e) {
-            Log.e(TAG, e.getMessage());
         } catch (JSONException es){
             Log.e(TAG, es.getMessage());
         }

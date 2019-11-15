@@ -49,6 +49,5 @@ dependencies {
     // Json
     testImplementation 'org.json:json:20140107'
 
-    // GJSON
-    implementation 'com.google.code.gson:gson:2.8.2'
+
 }

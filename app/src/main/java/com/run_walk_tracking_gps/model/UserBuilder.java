@@ -1,8 +1,16 @@
 package com.run_walk_tracking_gps.model;
 
+import android.content.Context;
+
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.ParseException;
+import java.util.Date;
 
 public class UserBuilder {
 
@@ -12,8 +20,16 @@ public class UserBuilder {
         user = new User();
     }
 
+    private UserBuilder(Context context,JSONObject userJson) throws JSONException {
+        user = new User(context, userJson);
+    }
+
     public static UserBuilder create(){
         return new UserBuilder();
+    }
+
+    public static UserBuilder create(Context context,JSONObject userJson) throws JSONException {
+        return new UserBuilder(context, userJson);
     }
 
     public User build(){
@@ -25,8 +41,8 @@ public class UserBuilder {
         return this;
     }
 
-    public UserBuilder setLastName(String lastname){
-        user.setLastName(lastname);
+    public UserBuilder setLastName(String lastName){
+        user.setLastName(lastName);
         return this;
     }
 
@@ -45,8 +61,8 @@ public class UserBuilder {
         return this;
     }
 
-    public UserBuilder setBirthDate(String birthDate) throws ParseException {
-        user.setBirthDate(DateUtilities.parseShortToDate(birthDate));
+    public UserBuilder setBirthDate(Date birthDate)  {
+        user.setBirthDate(birthDate);
         return this;
     }
 

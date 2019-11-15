@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 
 import com.android.volley.Response;
-import com.google.gson.Gson;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
@@ -26,10 +25,6 @@ import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PhysicalDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PersonalDataFragment;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.model.User;
-import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
@@ -158,9 +153,9 @@ public class SignUpActivity extends CommonActivity
             user.put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
             Log.d(TAG, user.toString());
 
-           /* if(!HttpRequest.requestSignUp(this, user,this)) {
+            if(!HttpRequest.requestSignUp(this, user,this)) {
                 Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-            }*/
+            }
 
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());

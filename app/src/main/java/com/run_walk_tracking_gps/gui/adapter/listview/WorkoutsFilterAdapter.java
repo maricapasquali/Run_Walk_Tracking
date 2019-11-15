@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
@@ -157,8 +156,6 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
 
         vH.date.setText(DateUtilities.parseFullToString(workout.getDate()));
         vH.time.setText(workout.getDuration().toString(context));
-
-        // TODO: 11/3/2019 GESTIRE CONVERSIONE
 
         vH.distance.setText(workout.getDistance().toString(context));
         vH.calories.setText(workout.getCalories().toString(context));

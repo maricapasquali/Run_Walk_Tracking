@@ -5,6 +5,14 @@ import java.math.RoundingMode;
 
 public class NumberUtilities {
     public static Double round2(final double val) {
-        return new BigDecimal(val).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return round_n(2, val);
+    }
+
+    public static Double round1(final double val) {
+        return round_n(1, val);
+    }
+
+    private static Double round_n(final int scale, final double val) {
+        return new BigDecimal(val).setScale(scale, RoundingMode.HALF_UP).doubleValue();
     }
 }

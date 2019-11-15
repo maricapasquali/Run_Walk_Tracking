@@ -130,12 +130,12 @@ public class PhysicalDataFragment extends Fragment {
         try {
 
             JSONObject physicalData= null;
-            //if(isSetAll()){
+            if(isSetAll()){
                 physicalData = new JSONObject().put(FieldDataBase.GENDER.toName(), EnumUtilities.getEnumFromStrId(Gender.class, (int)gender.getSelectedItem()))
                         .put(FieldDataBase.TARGET.toName(), EnumUtilities.getEnumFromStrId(Target.class, (int) target.getSelectedItem()))
                         .put(FieldDataBase.HEIGHT.toName(), heightValue)
                         .put(FieldDataBase.WEIGHT.toName(), weightValue);
-            //}
+            }
 
             physicalDataListener.physicalData(physicalData);
 

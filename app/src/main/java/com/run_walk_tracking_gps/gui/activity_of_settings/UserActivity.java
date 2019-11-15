@@ -31,8 +31,6 @@ public class UserActivity extends CommonActivity {
 
     private static final int REQUEST_MODIFY_PROFILE = 11;
 
-    private static String unit_height ;
-
     private ImageView img;
     private TextView name;
     private TextView lastName;
@@ -42,7 +40,6 @@ public class UserActivity extends CommonActivity {
     private TextView city;
     private TextView tel;
     private TextView height;
-
 
     private User user;
 
@@ -105,7 +102,6 @@ public class UserActivity extends CommonActivity {
                 if(resultCode== Activity.RESULT_OK){
                     setGui((User) data.getParcelableExtra(getString(R.string.changed_profile)));
                 }
-
                 break;
         }
     }
@@ -116,6 +112,7 @@ public class UserActivity extends CommonActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
+        user.setContext(this);
         name.setText(user.getName());
         lastName.setText(user.getLastName());
         gender.setText(user.getGender().getStrId());
@@ -124,18 +121,10 @@ public class UserActivity extends CommonActivity {
         email.setText(user.getEmail());
         city.setText(user.getCity());
         tel.setText(user.getPhone());
-        // TODO: 10/31/2019 GESTIONE CONVERSIONE
-        try {
-            double height_value = user.getHeight();
-            if(!Preferences.getUnitHeightDefault(this).equals(getString(Measure.Unit.METER.getStrId()))){
-                height_value = ConversionUnitUtilities.meterToFeet(height_value);
-            }
-            height.setText(MeasureUtilities.heightStr(this, height_value));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-        String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()), null);
+        height.setText(user.getHeight().toString(this));
+
+        String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
         Log.e(TAG, "IMAGE ENCODE = " + img_encode);
         if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 

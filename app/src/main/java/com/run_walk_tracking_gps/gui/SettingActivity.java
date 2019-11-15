@@ -16,8 +16,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.bind.SqlDateTypeAdapter;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
@@ -28,6 +26,7 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.User;
+import com.run_walk_tracking_gps.model.UserBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -193,9 +192,8 @@ public class SettingActivity extends CommonActivity {
                     else {
                         try {
                             final JSONObject userInfo = (JSONObject) response.get("user");
-                            User user = new Gson().fromJson(userInfo.toString(), User.class);
                             final Intent intent = new Intent(this, UserActivity.class);
-                            intent.putExtra(getString(R.string.user_info), user);
+                            intent.putExtra(getString(R.string.user_info), UserBuilder.create(this, userInfo).build());
                             startActivity(intent);
 
                         } catch (JSONException e) {

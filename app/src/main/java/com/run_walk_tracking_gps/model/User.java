@@ -1,12 +1,17 @@
 package com.run_walk_tracking_gps.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 public class User implements Parcelable {
@@ -20,10 +25,65 @@ public class User implements Parcelable {
     private String email;
     private String city;
     private String phone;
-    private double height;
+    private Measure height;
 
-    public User(){}
+    public User(){
+    }
 
+    private User(User user){
+        this.id_user = user.id_user;
+        this.name = user.name;
+        this.last_name = user.last_name;
+        this.gender = user.gender;
+        this.birth_date = user.birth_date;
+        this.email = user.email;
+        this.city = user.city;
+        this.phone = user.phone;
+        this.height = user.height.clone();
+    }
+
+    // TODO: 11/15/2019 MIGLIORARE
+    public JSONObject toJson() throws JSONException {
+        JSONObject userJson = new JSONObject();
+
+        userJson.put("name", this.name)
+                .put("last_name", this.last_name)
+                .put("birth_date", this.birth_date)
+                .put("email", this.email)
+                .put("city", this.city)
+                .put("phone", this.phone);
+
+        return userJson;
+    }
+
+    public User clone(){
+        return new User(this);
+    }
+
+    // TODO: 11/15/2019 MIGLIORARE
+    public User(Context context, JSONObject userJson) throws JSONException {
+        id_user = userJson.getInt("id_user");
+        username = userJson.getString("username");
+        name = userJson.getString("name");
+        last_name = userJson.getString("last_name");
+        gender = Gender.valueOf(userJson.getString("gender"));
+        try {
+            birth_date = DateUtilities.parseShortToDate(userJson.getString("birth_date"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        email = userJson.getString("email");
+        city = userJson.getString("city");
+        phone = userJson.getString("phone");
+        height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble("height"));
+    }
+
+    public void setContext(Context context){
+        this.height.setContext(context);
+    }
+
+
+// START - Parcelable IMPLEMENTATION
     protected User(Parcel in) {
         id_user = in.readInt();
         username =  in.readString();
@@ -34,11 +94,9 @@ public class User implements Parcelable {
         email = in.readString();
         city = in.readString();
         phone = in.readString();
-        height = in.readDouble();
+        height = in.readParcelable(Measure.class.getClassLoader());
     }
 
-    // TODO: 11/1/2019 CREATE UN COMPARATOR 
-    
     public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
@@ -50,6 +108,28 @@ public class User implements Parcelable {
             return new User[size];
         }
     };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id_user);
+        dest.writeString(username);
+        dest.writeString(name);
+        dest.writeString(last_name);
+        dest.writeString(gender.toString());
+        dest.writeLong(birth_date.getTime());
+        dest.writeString(email);
+        dest.writeString(city);
+        dest.writeString(phone);
+        dest.writeParcelable(height, 0);
+    }
+
+// END - Parcelable IMPLEMENTATION
+
 
     public int getIdUser() {
         return id_user;
@@ -91,7 +171,7 @@ public class User implements Parcelable {
         return phone;
     }
 
-    public double getHeight() {
+    public Measure getHeight() {
         return height;
     }
 
@@ -127,12 +207,6 @@ public class User implements Parcelable {
         this.phone = phone;
     }
 
-    public void setHeight(double height) {
-        this.height = height;
-    }
-
-
-
 
     @Override
     public String toString() {
@@ -149,22 +223,4 @@ public class User implements Parcelable {
                 '}';
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id_user);
-        dest.writeString(username);
-        dest.writeString(name);
-        dest.writeString(last_name);
-        dest.writeString(gender.toString());
-        dest.writeLong(birth_date.getTime());
-        dest.writeString(email);
-        dest.writeString(city);
-        dest.writeString(phone);
-        dest.writeDouble(height);
-    }
 }

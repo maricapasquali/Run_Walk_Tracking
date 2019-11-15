@@ -2,8 +2,6 @@ package com.run_walk_tracking_gps.gui.adapter.listview;
 
 import android.content.Context;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,65 +10,39 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 
-import org.json.JSONException;
-
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class DetailsWorkoutAdapter extends BaseAdapter {
 
     private final static String TAG = DetailsWorkoutAdapter.class.getName();
 
     private Context context;
+    private Map<Workout.Info, Object> details;
 
-    private InfoWorkout[] infoWorkouts;
-
-    private String[] detailsWorkout ;
-
-
-    public DetailsWorkoutAdapter(Context context, String[] details) {
+    public DetailsWorkoutAdapter(Context context, Map<Workout.Info, Object> map){
         this.context = context;
-        this.infoWorkouts = InfoWorkout.values();
-        this.detailsWorkout = details;
-
-        Log.d(TAG, Arrays.toString(infoWorkouts));
-        Log.d(TAG, Arrays.toString(detailsWorkout));
+        this.details = map;
     }
-
-
-    public DetailsWorkoutAdapter(Context context, String[] details, boolean isModify) {
-        this.context = context;
-        this.infoWorkouts = isModify? InfoWorkout.infoWorkoutNoSpeed() :InfoWorkout.values();
-        this.detailsWorkout = details;
-
-        Log.d(TAG, Arrays.toString(infoWorkouts));
-        Log.d(TAG, Arrays.toString(detailsWorkout));
-    }
-
-    public void updateDetails(InfoWorkout info, String detail){
-        int index = Arrays.asList(infoWorkouts).indexOf(info);
-        detailsWorkout[index] = detail;
-        notifyDataSetChanged();
-    }
-
 
     public void updateDetails(Workout workout){
-        detailsWorkout = workout.toArrayString();
+        details = workout.details(true);
         this.notifyDataSetChanged();
     }
 
+
     @Override
     public int getCount() {
-        return infoWorkouts.length;
+        return details.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return infoWorkouts[position];
+        return new ArrayList<>(details.entrySet()).get(position) ;
     }
 
     @Override
@@ -98,28 +70,27 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
             viewHolder = (ListHolder) convertView.getTag();
         }
 
-        viewHolder.infoWorkout.setText(infoWorkouts[position].getStrId());
+        final Map.Entry<Workout.Info, Object> entry = (Map.Entry<Workout.Info, Object>)getItem(position);
 
-        if(InfoWorkout.isSport(infoWorkouts[position]))
-        {
-            final Sport specificSport = Sport.valueOf(detailsWorkout[position]);
+        final Workout.Info info = entry.getKey();
+        viewHolder.infoWorkout.setText(info.getStrId());
 
-            viewHolder.details.setText(specificSport.getStrId());
+        final Object det = entry.getValue();
+
+        if(Workout.Info.isSport(info)){
+            Sport sport = ((Sport)det);
+            viewHolder.details.setText(sport.getStrId());
             viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(specificSport.getIconId()),
+                    context.getDrawable(sport.getIconId()),
+                    null,null,null);
+        }
+        else{
+            viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
+                    context.getDrawable(info.getIconId()),
                     null,null,null);
 
-        }else{
-            // TODO: 11/3/2019 GESTIONE CONVERSIONE
-
-            viewHolder.details.setText(detailsWorkout[position]); //Workout.valueStr(context, infoWorkouts[position], detailsWorkout[position]));
-
-
-            viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
-                        context.getDrawable(infoWorkouts[position].getIconId()),
-                        null,null,null);
+            viewHolder.details.setText((String)det);
         }
-
         return view;
     }
 

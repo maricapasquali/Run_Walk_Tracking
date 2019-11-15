@@ -1,30 +1,26 @@
 package com.run_walk_tracking_gps.gui.adapter.listview;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWorkout;
+import com.run_walk_tracking_gps.model.Workout;
 
-public class NewManualWorkoutAdapter extends NewInformationAdapter<InfoWorkout> {
+public class NewManualWorkoutAdapter extends NewInformationAdapter<Workout.Info> {
 
     private final String TAG = NewManualWorkoutAdapter.class.getName();
 
     public NewManualWorkoutAdapter(Context context) {
-        super(context, InfoWorkout.infoWorkoutNoSpeed());
+        super(context, Workout.Info.infoWorkoutNoSpeed());
     }
 
 
     @Override
-    protected void addInfo(TextView title, TextView detail, InfoWorkout item,int position) {
+    protected void addInfo(TextView title, TextView detail, Workout.Info item, int position) {
         title.setText(item.getStrId());
         if(item.getIconId()!=0)
             detail.setCompoundDrawablesWithIntrinsicBounds(getContext().getDrawable(item.getIconId()), null, null, null);
-        if(item==InfoWorkout.DISTANCE || item==InfoWorkout.CALORIES) {
-            detail.setText(R.string.no_available_abbr);
-        }
+
+        if(Workout.Info.valuesNotRequired(item)) detail.setText(R.string.no_available_abbr);
     }
 }
