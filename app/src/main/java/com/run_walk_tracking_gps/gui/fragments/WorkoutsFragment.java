@@ -142,7 +142,7 @@ public class WorkoutsFragment extends Fragment {
             case ALL:
                 workoutsViewExpandable.setGroupIndicator(null);
                 workoutsViewExpandable.setOnGroupClickListener((parent, v, groupPosition, id) -> {
-                    onWorkOutSelectedListener.onWorkOutSelected(workouts.get(groupPosition));
+                    onWorkOutSelectedListener.onWorkOutSelected((Workout) parent.getExpandableListAdapter().getGroup(groupPosition));
                     return false;
                 });
                 break;
@@ -150,7 +150,7 @@ public class WorkoutsFragment extends Fragment {
                 workoutsViewExpandable.setGroupIndicator(getDefaultGroupIndicator());
                 workoutsViewExpandable.setOnGroupClickListener(null);
                 workoutsViewExpandable.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-                    onWorkOutSelectedListener.onWorkOutSelected(workouts.get(childPosition));
+                    onWorkOutSelectedListener.onWorkOutSelected((Workout) parent.getExpandableListAdapter().getChild(groupPosition, childPosition));
                     return false;
                 });
                 break;
@@ -162,9 +162,9 @@ public class WorkoutsFragment extends Fragment {
         super.onResume();
         Log.d(TAG, "OnResume");
 
-        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
-
         FilterTime filterTime = (FilterTime) filter.getSelectedItem();
+        workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
+
         if(onManualAddClickedListener.newWorkout()!=null){
             final Workout newW = onManualAddClickedListener.newWorkout();
             workouts.add(0, newW);

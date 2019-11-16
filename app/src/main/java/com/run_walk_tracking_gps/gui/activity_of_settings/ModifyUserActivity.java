@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 
+import com.android.volley.toolbox.RequestFuture;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
@@ -131,17 +132,21 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 bodyJson.put(FieldDataBase.HEIGHT.toName(), user.getHeight().getValue());
             }
 
+            // TODO: 11/16/2019 FARE IN MODO CHE SE CLICCO SALVA PRIMA CHE LA COMPRESSIONE SIA FINITA,
+            // TODO:  LA RICHIESTA VENGA RITARDATA IL TEMPO NECESSARIO ALLA  FINE DELLA COMPRESSIONE
             if(image_encode!=null) bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
 
             Log.d(TAG, bodyJson.toString());
+
             if(!HttpRequest.requestUpdateUserInformation(this, bodyJson,this)){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
             }
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -156,6 +161,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
                 // REQUEST UPDATE USER
                 saveUserChanged();
+
             }
             break;
             case android.R.id.home:
@@ -178,6 +184,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                         CompressionBitMap.create(image_encode -> {
                             this.image_encode = image_encode;
                             Log.e(TAG, image_encode);
+                            Toast.makeText(this, R.string.uploadImageOk, Toast.LENGTH_LONG).show();
                         }).execute(bitmap);
 
                     }).setWithImageCrop(1,1);
@@ -214,7 +221,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             final TextView h = ((TextView) v);
             HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
                 if(heightMeasure!=null){
-                    h.setText(heightMeasure.toString(this));
+                    h.setText(heightMeasure.toString());
                     user.getHeight().setValueFromGui(heightMeasure.getValueToGui());
                 }
             }).create().show();
@@ -247,7 +254,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 finish();
             }
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+            //Log.e(TAG, e.getMessage());
         }
     }
 }

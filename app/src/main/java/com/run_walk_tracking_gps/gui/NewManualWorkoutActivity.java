@@ -72,7 +72,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 DurationDialog.create(NewManualWorkoutActivity.this, (durationMeasure) -> {
                    if(durationMeasure!=null){
                        workout.getDuration().setValue(durationMeasure.getValue());
-                       detail.setText(durationMeasure.toString(this));
+                       detail.setText(durationMeasure.toString());
                    }
                    workout.setMiddleSpeed();
                 }).show();
@@ -83,7 +83,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                         detail.setText(R.string.no_available_abbr);
                         workout.getDistance().setValue(0d);
                     }else{
-                        detail.setText(distanceMeasure.toString(this));
+                        detail.setText(distanceMeasure.toString());
                         workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
 
                     }
@@ -96,7 +96,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                         detail.setText(R.string.no_available_abbr);
                         workout.getCalories().setValue(0d);
                     }else{
-                        detail.setText(caloriesMeasure.toString(this));
+                        detail.setText(caloriesMeasure.toString());
                         workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
                     }
                 }).show();

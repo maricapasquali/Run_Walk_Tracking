@@ -11,6 +11,9 @@ import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 
 import org.json.JSONException;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 public class Measure implements Parcelable {
@@ -120,6 +123,7 @@ public class Measure implements Parcelable {
     private Measure(Context context, Measure.Type type){
         this.context = context;
         this.type = type;
+        this.value = 0d;
         try{
             switch (type){
                 case HEIGHT:
@@ -368,7 +372,7 @@ public class Measure implements Parcelable {
         return null;
     }
 
-    public String toString(Context context) {
+    private String toString(Context context) {
         if(this.type.equals(Type.DURATION))
             return DurationUtilities.format(this.value.intValue());
 
@@ -381,8 +385,21 @@ public class Measure implements Parcelable {
 
     @Override
     public String toString() {
-        if(context!=null) return toString(context);
+        if(context!=null)
+            return toString(context);
         return "context not set";
+    }
+
+
+    public String toString(boolean isHome) {
+        if(isHome)
+        {
+            if(this.type.equals(Type.DURATION))
+                return DurationUtilities.formatHome(this.value.intValue());
+            return getValueToGui() + context.getString(R.string.space) + context.getString(getUnit().getStrId());
+
+        }
+        return toString();
     }
 
     private static class DurationUtilities {
@@ -404,12 +421,23 @@ public class Measure implements Parcelable {
             }
         }
 
-        @SuppressLint("DefaultLocale")
-        private static String format(int seconds){
+        private static List<Integer> time(int seconds){
             int hours = seconds / 3600;
             int minutes = (seconds /60) % 60;
             int sec = seconds%60;
-            return String.format(Measure.Format.FORMAT_DURATION, hours, minutes, sec);
+            return Arrays.asList(hours, minutes, sec);
+        }
+
+        @SuppressLint("DefaultLocale")
+        private static String format(int seconds){
+            final List<Integer> time = time(seconds);
+            return String.format(Measure.Format.FORMAT_DURATION, time.get(0), time.get(1), time.get(2));
+        }
+
+        @SuppressLint("DefaultLocale")
+        private static String formatHome(int seconds){
+            final List<Integer> time = time(seconds);
+            return String.format(Measure.Format.FORMAT_DURATION_HOME, time.get(0), time.get(1));
         }
     }
 
@@ -417,10 +445,9 @@ public class Measure implements Parcelable {
         public static final String FORMAT_NUMBER_DOUBLE ="%02d";
         public static final String FORMAT_NUMBER_SINGLE ="%d";
 
-
-        private final static String FORMAT_DURATION = "%02d:%02d:%02d";
-
-        private final static String FORMAT_DURATION_NO_SEC = "%02d:%02d:00";
+        private final static String FORMAT_DURATION = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE;
+        private final static String FORMAT_DURATION_HOME = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE;
+        private final static String FORMAT_DURATION_NO_SEC = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE+":00";
         private final static String FORMAT_WEIGHT = FORMAT_NUMBER_SINGLE+"."+FORMAT_NUMBER_SINGLE;
         private final static String FORMAT = FORMAT_NUMBER_SINGLE+"."+FORMAT_NUMBER_DOUBLE;
     }

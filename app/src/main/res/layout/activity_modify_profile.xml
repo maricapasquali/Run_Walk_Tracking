@@ -309,5 +309,11 @@
                 android:textColor="@android:color/background_light" />
         </RelativeLayout>
 
+        <LinearLayout
+            android:id="@+id/snake"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
     </LinearLayout>
 </ScrollView>

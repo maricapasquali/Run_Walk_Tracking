@@ -200,5 +200,6 @@
     <string name="not_empty">\u0020 non può essere vuoto</string>
     <string name="user_not_set">User non settato</string>
     <string name="account_not_checked">Account non verificato!</string>
+    <string name="uploadImageOk">Compressione Immagine Finita</string>
 
 </resources>

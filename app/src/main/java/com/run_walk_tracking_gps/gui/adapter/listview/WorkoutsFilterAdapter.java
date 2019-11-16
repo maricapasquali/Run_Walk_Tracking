@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.adapter.listview;
 
 import android.content.Context;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +67,13 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
      * recuperare l'etichetta all'indice corretto della lista. */
     @Override
     public Object getGroup(int groupPosition) {
-        return labels.get(groupPosition);
+        switch (filterTime){
+            case ALL:
+                return workouts.get(groupPosition).get(0);
+            default:
+                return labels.get(groupPosition);
+        }
+
     }
 
     /* Questo metodo deve restituire l'oggetto che rappresenta un figlio di un gruppo, infatti
@@ -141,6 +149,8 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
         final ListHolderChild vH;
         final Workout workout = (Workout)getChild(groupPosition, childPosition);
 
+        Log.e(TAG, workout.toString());
+
         if(convertView==null){
             view = LayoutInflater.from(context).inflate(R.layout.custom_item_workouts, null);
             final TextView date = view.findViewById(R.id.workout_date);
@@ -155,10 +165,10 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
         }
 
         vH.date.setText(DateUtilities.parseFullToString(workout.getDate()));
-        vH.time.setText(workout.getDuration().toString(context));
+        vH.time.setText(workout.getDuration().toString());
 
-        vH.distance.setText(workout.getDistance().toString(context));
-        vH.calories.setText(workout.getCalories().toString(context));
+        vH.distance.setText(workout.getDistance().toString());
+        vH.calories.setText(workout.getCalories().toString());
         return view;
     }
 

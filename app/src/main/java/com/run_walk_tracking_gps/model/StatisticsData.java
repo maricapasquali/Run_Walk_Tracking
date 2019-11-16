@@ -113,8 +113,8 @@ public class StatisticsData implements Parcelable{
         this.measure.setValue(value);
     }
 
-    public List<String> toArrayListString(Context context){
-        return Arrays.asList(getMeasure().toString(context), DateUtilities.parseShortToStringNoTime(date));
+    public List<String> toArrayListString(){
+        return Arrays.asList(getMeasure().toString(), DateUtilities.parseShortToStringNoTime(date));
     }
 
     public boolean isSet() {

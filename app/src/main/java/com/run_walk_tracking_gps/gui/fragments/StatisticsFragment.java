@@ -220,8 +220,11 @@ public class StatisticsFragment extends Fragment {
         super.onResume();
         Log.d(TAG, "OnResume");
 
-        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
-        if(spinner_measure!=null && spinner_measure.getSelectedItem()==Measure.Type.WEIGHT){
+        Measure.Type measureSelected = (Measure.Type)spinner_measure.getSelectedItem();
+        statisticsDataAdapter.updateStatisticsData(getStatistics(measureSelected));
+
+
+        if(spinner_measure!=null && measureSelected.equals(Measure.Type.WEIGHT)){
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
                 statisticsDataAdapter.updateStatisticsData(weights);

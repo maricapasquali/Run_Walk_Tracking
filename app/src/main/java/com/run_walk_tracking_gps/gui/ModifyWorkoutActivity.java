@@ -95,7 +95,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                 case TIME:
                     DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
                         if (durationMeasure!=null){
-                            detail.setText(durationMeasure.toString(this));
+                            detail.setText(durationMeasure.toString());
                             workout.getDuration().setValue(durationMeasure.getValue());
                             workout.setMiddleSpeed();
                         }
@@ -107,7 +107,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                             detail.setText(R.string.no_available_abbr);
                             workout.getDistance().setValue(0d);
                         }else{
-                            detail.setText(distanceMeasure.toString(this));
+                            detail.setText(distanceMeasure.toString());
                             workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
                             workout.setMiddleSpeed();
                         }
@@ -120,7 +120,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                             detail.setText(R.string.no_available_abbr);
                             workout.getCalories().setValue(0d);
                         }else{
-                            detail.setText(caloriesMeasure.toString(this));
+                            detail.setText(caloriesMeasure.toString());
                             workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
                         }
                     }).show();

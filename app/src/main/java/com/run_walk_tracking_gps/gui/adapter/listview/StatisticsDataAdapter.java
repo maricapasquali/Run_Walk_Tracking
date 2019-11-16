@@ -93,7 +93,7 @@ public class StatisticsDataAdapter extends BaseAdapter {
             final TextView text_statisticsFiltered = convertView.findViewById(R.id.statistics_data);
             final TextView date = convertView.findViewById(R.id.statistics_date);
 
-            text_statisticsFiltered.setText(statisticsFiltered.get(position-1).getMeasure().toString(context));
+            text_statisticsFiltered.setText(statisticsFiltered.get(position-1).getMeasure().toString());
             date.setText(statisticsFiltered.get(position-1).getDateStr());
         }
 

@@ -122,7 +122,7 @@ public class UserActivity extends CommonActivity {
         city.setText(user.getCity());
         tel.setText(user.getPhone());
 
-        height.setText(user.getHeight().toString(this));
+        height.setText(user.getHeight().toString());
 
         String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
         Log.e(TAG, "IMAGE ENCODE = " + img_encode);

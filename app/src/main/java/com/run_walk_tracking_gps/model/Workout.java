@@ -33,13 +33,13 @@ public class Workout implements Parcelable, Cloneable{
     private static String ND;
 
     public Workout(Context context){
-        this.context = context;
         ND = context.getString(R.string.no_available_abbr);
         parameters = new ArrayList<>();
         parameters.add(Measure.create(context, Measure.Type.DURATION));
         parameters.add(Measure.create(context, Measure.Type.DISTANCE));
         parameters.add(Measure.create(context, Measure.Type.ENERGY));
         parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
+        setContext(context);
     }
 
     private Workout(Workout w){
@@ -172,7 +172,6 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     public void setContext(Context context){
-        this.context = context;
         this.parameters.forEach(p -> p.setContext(context));
     }
 
@@ -226,10 +225,10 @@ public class Workout implements Parcelable, Cloneable{
         final LinkedHashMap<Workout.Info, Object> map = new LinkedHashMap<>();
         map.put(Info.DATE, this.getDateStr());
         map.put(Info.SPORT, this.getSport());
-        map.put(Info.TIME, this.getDuration().toString(context));
-        map.put(Info.DISTANCE,this.getDistance().toString(context) );
-        map.put(Info.CALORIES, this.getCalories().toString(context));
-        if(withMiddleSpeed) map.put(Info.MIDDLE_SPEED, this.getMiddleSpeed().toString(context));
+        map.put(Info.TIME, this.getDuration().toString());
+        map.put(Info.DISTANCE,this.getDistance().toString() );
+        map.put(Info.CALORIES, this.getCalories().toString());
+        if(withMiddleSpeed) map.put(Info.MIDDLE_SPEED, this.getMiddleSpeed().toString());
         return map;
     }
 
@@ -244,10 +243,10 @@ public class Workout implements Parcelable, Cloneable{
                     ", map_route='" + map_route +'\''+
                     ", sport='" + sport +'\''+
                     ", date='" + getDateStr() + '\'' +
-                    ", duration='" + getDuration().toString(context)  + '\'' +
-                    ", distance='" + getDistance().toString(context)  + '\'' +
-                    ", calories='" + getCalories().toString(context)  + '\'' +
-                    ", middleSpeed='" + getMiddleSpeed().toString(context)  + '\'' +
+                    ", duration='" + getDuration().toString()  + '\'' +
+                    ", distance='" + getDistance().toString()  + '\'' +
+                    ", calories='" + getCalories().toString()  + '\'' +
+                    ", middleSpeed='" + getMiddleSpeed().toString()  + '\'' +
                     '}';
     }
 

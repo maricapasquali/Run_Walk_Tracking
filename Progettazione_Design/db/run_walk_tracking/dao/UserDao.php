@@ -258,16 +258,29 @@ class UserDao {
          }
          array_push($values, $user[ID_USER]);
 
+         if(count($value)>1){
+           $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
+           if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());
+           $stmt->bind_param(str_repeat('s', count($keys))."i", ...$values);
 
-         $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
-         if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param(str_repeat('s', count($keys))."i", ...$values);
-
-         if(!$stmt->execute()) throw new Exception("User : Update fallito. Errore: ". getErrorConnection());
-         $stmt->close();
+           if(!$stmt->execute()) throw new Exception("User : Update fallito. Errore: ". getErrorConnection());
+           $stmt->close();
+         }
 
          if(isset($user[IMG])){
-           $stmt = getConnection()->prepare("UPDATE profile_image SET img_encode=? WHERE id_user=?");
+
+           $stmt = getConnection()->prepare("SELECT count(*) FROM profile_image WHERE id_user=?");
+           if(!$stmt) throw new Exception("Check image : Preparazione fallita. Errore: ". getErrorConnection());
+           $stmt->bind_param("i", $user[ID_USER]);
+           if(!$stmt->execute()) throw new Exception("Check image : Selezione fallito. Errore: ". getErrorConnection());
+           $stmt->bind_result($row);
+           $stmt->fetch();
+           $stmt->close();
+
+           $sql = $row==0 ? "INSERT INTO profile_image (img_encode, id_user) VALUES (?, ?)"
+                          : "UPDATE profile_image SET img_encode=? WHERE id_user=?";
+
+           $stmt = getConnection()->prepare($sql);
            if(!$stmt) throw new Exception("User Img update : Preparazione fallita. Errore: ". getErrorConnection());
            $stmt->bind_param("si", $user[IMG], $user[ID_USER]);
 

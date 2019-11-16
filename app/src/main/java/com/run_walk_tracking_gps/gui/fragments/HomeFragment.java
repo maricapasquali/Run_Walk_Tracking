@@ -44,6 +44,7 @@ import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
@@ -51,7 +52,10 @@ import com.run_walk_tracking_gps.model.enumerations.Sport;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback ,
@@ -75,6 +79,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     private FloatingActionButton block_screen;
     private FloatingActionButton unlock_screen;
 
+    private TextView workout_duration;
+    private TextView workout_distance;
+    private TextView workout_energy;
+
     private GoogleMap map;
     private boolean requestPermissions=false;
     private FusedLocationProviderClient fusedLocationClient;
@@ -82,6 +90,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     private OnStopWorkoutClickListener onStopWorkoutClickListener;
 
     private boolean inWorkout = false;
+
+    private List<Measure> workoutMeasure = new ArrayList<>();
 
     public HomeFragment() {
         super();
@@ -116,18 +126,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         sport = rootView.findViewById(R.id.sport);
-        TextView distance_workout = rootView.findViewById(R.id.distance_workout);
-        TextView energy_workout = rootView.findViewById(R.id.calories_workout);
+        workout_distance = rootView.findViewById(R.id.distance_workout);
+        workout_energy = rootView.findViewById(R.id.calories_workout);
+        workout_duration = rootView.findViewById(R.id.time_workout);
 
+
+        workoutMeasure.add(Measure.create(getContext(), Measure.Type.DURATION));
+        workoutMeasure.add(Measure.create(getContext(), Measure.Type.DISTANCE));
+        workoutMeasure.add(Measure.create(getContext(), Measure.Type.ENERGY));
+
+        workout_duration.setText(workoutMeasure.get(0).toString(true));
+        workout_distance.setText(workoutMeasure.get(1).toString(true));
+        workout_energy.setText(workoutMeasure.get(2).toString(true));
         try {
             String s_sport = Preferences.getNameSportDefault(getContext());
-            String s_energy = Preferences.getUnitEnergyDefault(getContext());
-            String s_distance = Preferences.getUnitDistanceDefault(getContext());
-
             sport.setText(s_sport);
-            energy_workout.setText(new StringBuilder(energy_workout.getText() +getString(R.string.space)+ s_energy));
-            distance_workout.setText(new StringBuilder(distance_workout.getText() +getString(R.string.space)+ s_distance));
-
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -289,8 +302,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         mapView.onResume();
         super.onResume();
 
-        // TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI
         try {
+
+            workout_distance.setText(workoutMeasure.get(1).toString(true));
+            workout_energy.setText(workoutMeasure.get(2).toString(true));
+// TODO: 10/31/2019 RESET GUI SE SETTING SONO CAMBIATI (SPORT)
             String sport_name = Preferences.getNameSportDefault(getContext());
             if(!sport.getText().equals(sport_name)) sport.setText(sport_name);
         }catch (JSONException e){

@@ -214,6 +214,7 @@ public class SignUpActivity extends CommonActivity
                     CompressionBitMap.create(image_encode -> {
                         try {
                             user.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+                            Toast.makeText(this, R.string.uploadImageOk, Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             Log.e(TAG, e.getMessage());
                         }
