@@ -258,7 +258,8 @@ class UserDao {
          }
          array_push($values, $user[ID_USER]);
 
-         if(count($value)>1){
+    
+         if(count($values)>1){
            $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
            if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());
            $stmt->bind_param(str_repeat('s', count($keys))."i", ...$values);

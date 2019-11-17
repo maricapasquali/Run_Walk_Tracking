@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,10 +17,10 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.gui.adapter.spinner.GenderAdapterSpinner;
-import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
-import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
-import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.dialog.HeightDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
@@ -65,7 +66,7 @@ public class PhysicalDataFragment extends Fragment {
         // gender
         gender = view.findViewById(R.id.signup_profile_gender);
         final GenderAdapterSpinner spinnerGenderAdapter = new GenderAdapterSpinner(view.getContext(), true);
-        if(gender!=null)gender.setAdapter(spinnerGenderAdapter);
+        if(gender!=null) gender.setAdapter(spinnerGenderAdapter);
 
 
     // weight
@@ -106,14 +107,16 @@ public class PhysicalDataFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
+
         if(!isOk){
-            // TODO: 11/13/2019 SISTEMARE ERROR STRING
             if(TextUtils.isEmpty(weight.getText()) || weightValue==0)
-                weight.setError("Nome non vuoto");
+                weight.setError(getString(R.string.weight_not_empty));
             if(TextUtils.isEmpty(height.getText()) || heightValue==0)
-                height.setError("Nome non vuoto");
-            //if(gender.getSelectedItem().equals(R.string.gender)) ((TextView)gender.getSelectedView()).setError("Nome non vuoto");
-            //if(target.getSelectedItem().equals(R.string.target)) ((TextView)target.getSelectedView()).setError("Nome non vuoto");
+                height.setError(getString(R.string.height_not_empty));
+            if(gender.getSelectedItem().equals(R.string.gender))
+                new Handler().post(() -> ((TextView)gender.getSelectedView()).setError(getString(R.string.gender_not_empty)));
+            if(target.getSelectedItem().equals(R.string.target))
+                new Handler().post(() -> ((TextView)target.getSelectedView()).setError(getString(R.string.target_not_empty)));
         }
     }
 

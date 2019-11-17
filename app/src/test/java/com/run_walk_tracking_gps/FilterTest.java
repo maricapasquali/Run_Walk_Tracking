@@ -1,6 +1,6 @@
 package com.run_walk_tracking_gps;
 
-import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
+import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;

@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.gui.adapter.listview.MeasureAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
@@ -77,6 +77,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
+        // TODO: 11/17/2019 MIGLIORARE
         boolean is_default = true;
         int id_unit ;
         String filter = "";

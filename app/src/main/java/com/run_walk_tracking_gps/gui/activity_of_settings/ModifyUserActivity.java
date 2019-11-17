@@ -1,10 +1,7 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.content.Intent;
-
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
@@ -18,16 +15,16 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 
-import com.android.volley.toolbox.RequestFuture;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.gui.dialog.ChooseDialog;
-import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
-import com.run_walk_tracking_gps.gui.dialog.HeightDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.HeightDialog;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
@@ -37,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 public class ModifyUserActivity extends CommonActivity implements Response.Listener<JSONObject>{
 
@@ -56,6 +54,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     private User oldUser;
     private User user;
     private String image_encode = null;
+
+    private CompressionBitMap async =  null;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -103,7 +103,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void saveUserChanged(){
+    private void saveUserChanged(RequestDialog dialog){
         try {
 
             final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), user.getIdUser());
@@ -132,26 +132,35 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 bodyJson.put(FieldDataBase.HEIGHT.toName(), user.getHeight().getValue());
             }
 
-            // TODO: 11/16/2019 FARE IN MODO CHE SE CLICCO SALVA PRIMA CHE LA COMPRESSIONE SIA FINITA,
-            // TODO:  LA RICHIESTA VENGA RITARDATA IL TEMPO NECESSARIO ALLA  FINE DELLA COMPRESSIONE
-            if(image_encode!=null) bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+            if(async!=null){
+                this.image_encode = async.get();
+                if(image_encode!=null)
+                    bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+            }
 
             Log.d(TAG, bodyJson.toString());
 
-            if(!HttpRequest.requestUpdateUserInformation(this, bodyJson,this)){
-                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            if(!HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog)){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
             }
 
-
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.save_profile:{
+                Log.e(TAG, "SALVA MODIFICHE");
+                RequestDialog dialog = RequestDialog.create(ModifyUserActivity.this);
+                dialog.show();
                 Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
                 user.setName(name.getText().toString());
                 user.setLastName(lastName.getText().toString());
@@ -160,7 +169,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 user.setPhone(tel.getText().toString());
 
                 // REQUEST UPDATE USER
-                saveUserChanged();
+                saveUserChanged(dialog);
 
             }
             break;
@@ -179,13 +188,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                     null ,
                     imageUri -> {
                         img.setImageURI(imageUri);
-                        Bitmap bitmap = ((BitmapDrawable) img.getDrawable()).getBitmap();
-
-                        CompressionBitMap.create(image_encode -> {
-                            this.image_encode = image_encode;
-                            Log.e(TAG, image_encode);
-                            Toast.makeText(this, R.string.uploadImageOk, Toast.LENGTH_LONG).show();
-                        }).execute(bitmap);
+                        async = CompressionBitMap.create();
+                        async.execute(((BitmapDrawable) img.getDrawable()).getBitmap());
 
                     }).setWithImageCrop(1,1);
             imagePicker.choosePicture(true);

@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
 
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class SignUpActivity extends CommonActivity
                             implements PersonalDataFragment.PersonalDataListener,
@@ -54,8 +55,8 @@ public class SignUpActivity extends CommonActivity
     private List<Fragment> fragmentSignUp = new LinkedList<>();
 
     private ImagePicker imagePicker;
-    private Bitmap bitmap;
-
+    private Uri imageUri;
+    private CompressionBitMap async = null ;
 
     @Override
     protected void init() {
@@ -80,6 +81,11 @@ public class SignUpActivity extends CommonActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.next_signup:
@@ -95,8 +101,6 @@ public class SignUpActivity extends CommonActivity
                                next.setVisible(false);
                                break;
                        }
-
-
 
                 }catch (Exception e){
                     Toast.makeText(this, "Campi non settati" , Toast.LENGTH_LONG).show();
@@ -124,11 +128,20 @@ public class SignUpActivity extends CommonActivity
     public void personalData(JSONObject personalInfoUser) {
         try {
             user = personalInfoUser;
+            if(async!=null){
+                final String img_encode = async.get();
+                if(img_encode!=null)user.put(FieldDataBase.IMG_ENCODE.toName(),img_encode);
+            }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
             getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
     }
 
     @Override
@@ -143,7 +156,6 @@ public class SignUpActivity extends CommonActivity
             getSupportFragmentManager().popBackStack(fragmentSignUp.get(ACCESS_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
             next.setVisible(true);
         }
-
     }
 
     @Override
@@ -152,6 +164,7 @@ public class SignUpActivity extends CommonActivity
             user = JSONUtilities.merge(user, jsonAccess);
             user.put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
             Log.d(TAG, user.toString());
+
 
             if(!HttpRequest.requestSignUp(this, user,this)) {
                 Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
@@ -208,21 +221,20 @@ public class SignUpActivity extends CommonActivity
         imagePicker = new ImagePicker(this /*activity non null*/,
                 null /*fragment nullable*/,
                 imageUri -> { /*on image picked*/
+                    this.imageUri = imageUri;
                     imageView.setImageURI(imageUri);
-                    bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                    Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
-                    CompressionBitMap.create(image_encode -> {
-                        try {
-                            user.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
-                            Toast.makeText(this, R.string.uploadImageOk, Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            Log.e(TAG, e.getMessage());
-                        }
-                        Log.e(TAG, user.toString());
-                    }).execute(bitmap);
+                    async = CompressionBitMap.create();
+                    async.execute(bitmap);
 
                 }).setWithImageCrop(1,1);
         imagePicker.choosePicture(true);
+    }
+
+    @Override
+    public Uri getImageUri() {
+        return this.imageUri;
     }
 
 }

@@ -9,28 +9,19 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkError;
-import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.run_walk_tracking_gps.gui.dialog.RequestDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -122,12 +113,23 @@ public class HttpRequest {
         return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context, DATA_AFTER_ACCESS, Request.Method.POST, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestUpdateUserInformation(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDelayedUpdateUserInformation(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener,
+                                                              RequestDialog dialog)
             throws NullPointerException, IllegalArgumentException {
+
         final List<String> fieldSupported =  FieldDataBase.fieldSupportedForUpdateUserInformation();
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
         checkNotRequiredField(bodyJson::keys, s -> !fieldSupported.contains(s));
-        return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_USER_INFO, bodyJson,responseJsonListener);
+
+        final AtomicBoolean errRequest = new AtomicBoolean(false);
+        if(!isNetWorkAvailable(context)) return false;
+
+        final RequestQueue queue = createRequest(context, Request.Method.POST, UPDATE_USER_INFO,  bodyJson,  responseJsonListener, errRequest);
+        queue.addRequestFinishedListener((RequestQueue.RequestFinishedListener<String>) request -> {
+            if (dialog.isShowing()) dialog.dismiss();
+        });
+
+        return !errRequest.get();
     }
 
     public static boolean requestForgotPassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
@@ -274,18 +276,7 @@ public class HttpRequest {
         final AtomicBoolean errRequest = new AtomicBoolean(false);
         if(!isNetWorkAvailable(context)) return false;
 
-        final RequestQueue queue = Volley.newRequestQueue(context);
-        final JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, bodyJson,
-                listenerResponse,
-                error -> {
-                    Log.e(TAG, error.toString());
-                    Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show();
-                    errRequest.set(true);
-                    queue.stop();
-                });
-
-        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(jsonRequest);
+        final RequestQueue queue = createRequest(context, method, url,  bodyJson,  listenerResponse, errRequest);
         if(withProgressBar){
             RequestDialog progressDialog = RequestDialog.create(context);
             progressDialog.show();
@@ -295,6 +286,23 @@ public class HttpRequest {
         }
 
         return !errRequest.get();
+    }
+
+    private static  RequestQueue createRequest(Context context, int method, String url,  JSONObject bodyJson, Response.Listener<JSONObject>  responseJsonListener,
+                                       AtomicBoolean errRequest){
+        final RequestQueue queue = Volley.newRequestQueue(context);
+        final JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, bodyJson,
+                responseJsonListener,
+                error -> {
+                    Log.e(TAG, error.toString());
+                    Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show();
+                    errRequest.set(true);
+                    queue.stop();
+                });
+
+        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(jsonRequest);
+        return queue;
     }
 /*
     public static boolean requestStringToServerVolley(final Context context, final String url, final int method, final JSONObject jsonBody,

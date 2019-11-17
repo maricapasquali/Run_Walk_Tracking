@@ -131,8 +131,6 @@
 
             <EditText
                 android:id="@+id/signup_profile_birth_date"
-                android:focusable="false"
-                android:textCursorDrawable="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/signup_profile_birth_date_title"
@@ -141,14 +139,17 @@
                 android:background="@drawable/textview_rounded_corners_with_press_state"
                 android:drawableStart="@drawable/ic_calendar"
                 android:drawablePadding="20dp"
+                android:focusable="false"
                 android:gravity="center_vertical"
                 android:hint="@string/birth_date"
+                android:inputType="date"
                 android:paddingStart="15dp"
                 android:paddingTop="20dp"
                 android:paddingEnd="10dp"
                 android:paddingBottom="20dp"
                 android:textColor="@android:color/background_light"
                 android:textColorHint="@android:color/background_light"
+                android:textCursorDrawable="@null"
                 android:textSize="18sp" />
         </RelativeLayout>
 
@@ -181,7 +182,7 @@
                 android:drawablePadding="20dp"
                 android:gravity="center_vertical"
                 android:hint="@string/email"
-                android:inputType="textEmailSubject"
+                android:inputType="textEmailAddress"
                 android:paddingStart="15dp"
                 android:paddingTop="20dp"
                 android:paddingEnd="10dp"

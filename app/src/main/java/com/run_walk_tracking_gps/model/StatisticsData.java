@@ -129,4 +129,37 @@ public class StatisticsData implements Parcelable{
     public void setContext(Context context) {
         this.measure.setContext(context);
     }
+
+
+    public enum InfoWeight {
+
+        WEIGHT(Measure.Type.WEIGHT),
+        DATE(Workout.Info.DATE);
+
+        private final int strId;
+        private final int iconId;
+
+        InfoWeight(int strId, int iconId) {
+            this.strId = strId;
+            this.iconId = iconId;
+        }
+
+        InfoWeight(Measure.Type measure) {
+            this.strId = measure.getStrId();
+            this.iconId = measure.getIconId();
+        }
+
+        InfoWeight(Workout.Info infoWorkout) {
+            this.strId = infoWorkout.getStrId();
+            this.iconId = infoWorkout.getIconId();
+        }
+
+        public int getStrId() {
+            return this.strId;
+        }
+
+        public int getIconId() {
+            return this.iconId;
+        }
+    }
 }

@@ -4,9 +4,11 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.common.util.NumberUtils;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,7 +86,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private void setMiddleSpeed(double distance,double duration){
-        getMiddleSpeed().setValue(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d));
+        getMiddleSpeed().setValue(NumberUtilities.round2(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d)));
     }
 
     public void setMiddleSpeed(){

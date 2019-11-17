@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -20,7 +19,7 @@ import com.google.android.gms.maps.MapView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 
 import com.run_walk_tracking_gps.model.Workout;
 

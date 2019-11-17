@@ -8,7 +8,7 @@ import android.widget.ListView;
 
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.adapter.listview.NewInformationAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 
 public abstract class NewInformationActivity extends CommonActivity {
 

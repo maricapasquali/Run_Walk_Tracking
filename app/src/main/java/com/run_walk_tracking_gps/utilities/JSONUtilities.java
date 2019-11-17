@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 public class JSONUtilities {
 
     public static JSONObject merge(JSONObject json1, JSONObject json2) throws JSONException {
+        if(json1==null) json1 = new JSONObject();
         final JSONObject mergedJSON = new JSONObject(json1, getNames(json1::keys).toArray(String[]::new));
         getNames(json2::keys).forEach(n -> {
             try {

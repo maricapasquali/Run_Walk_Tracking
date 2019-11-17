@@ -17,12 +17,12 @@ import com.google.android.gms.maps.MapView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.gui.adapter.listview.DetailsWorkoutAdapter;
-import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
-import com.run_walk_tracking_gps.gui.dialog.DistanceDialog;
-import com.run_walk_tracking_gps.gui.dialog.DurationDialog;
-import com.run_walk_tracking_gps.gui.dialog.EnergyDialog;
-import com.run_walk_tracking_gps.gui.dialog.SportDialog;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
+import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.DurationDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
 import com.run_walk_tracking_gps.model.Workout;
 
 import org.json.JSONException;

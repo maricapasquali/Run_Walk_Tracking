@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,11 +16,14 @@ import android.widget.EditText;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.PasswordAuthentication;
 
 public class AccessDataFragment extends Fragment {
 
@@ -44,18 +48,17 @@ public class AccessDataFragment extends Fragment {
 
     private boolean isSetAll(){
         boolean isOk = true;
-        // TODO: 11/13/2019 SISTEMARE ERROR STRING
         if(TextUtils.isEmpty(username.getText())){
             isOk =false;
-            username.setError("Nome non vuoto");
+            username.setError(getString(R.string.username_not_empty));
         }
         if(TextUtils.isEmpty(password.getText()) ){
             isOk =false;
-            password.setError("Nome non vuoto");
+            password.setError(getString(R.string.password_not_empty));
         }
         if(TextUtils.isEmpty(conf_password.getText()) ){
             isOk =false;
-            conf_password.setError("Nome non vuoto");
+            conf_password.setError(getString(R.string.confirm_password_not_empty));
         }
         return isOk;
     }
@@ -75,21 +78,24 @@ public class AccessDataFragment extends Fragment {
             try {
 
                 final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
-                Log.d(TAG, hash_password);
+                final String hash_conf_password = CryptographicHashFunctions.md5(conf_password.getText().toString());
 
-                JSONObject accessData = null;
+
                 if(isSetAll()){
 
-                    // TODO: 11/13/2019 CONFRONTO PASSWORD E CONFERMA PASSWORD
+                    if(!hash_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(getContext());
 
-                    accessData = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText())
+                    final JSONObject accessData = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText())
                             .put(FieldDataBase.PASSWORD.toName(), hash_password);
 
-                }
+                    accessDataListener.accessData(accessData);
 
-                accessDataListener.accessData(accessData);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (PasswordNotCorrectException e) {
+                conf_password.setError(e.getMessage());
+                conf_password.setText("");
             }
         });
         return view;
@@ -105,4 +111,5 @@ public class AccessDataFragment extends Fragment {
     public interface AccessDataListener{
         void accessData(JSONObject jsonAccess);
     }
+
 }

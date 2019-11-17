@@ -21,10 +21,10 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.gui.enumeration.FilterTime;
-import com.run_walk_tracking_gps.gui.adapter.listview.StatisticsDataAdapter;
-import com.run_walk_tracking_gps.gui.adapter.spinner.FilterAdapterSpinner;
-import com.run_walk_tracking_gps.gui.adapter.spinner.MeasureWorkoutAdapterSpinner;
+import com.run_walk_tracking_gps.model.enumerations.FilterTime;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.StatisticsDataAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.FilterAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.MeasureWorkoutAdapterSpinner;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.FilterUtilities;
 
@@ -162,6 +162,7 @@ public class StatisticsFragment extends Fragment {
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
+
                 }
             });
 

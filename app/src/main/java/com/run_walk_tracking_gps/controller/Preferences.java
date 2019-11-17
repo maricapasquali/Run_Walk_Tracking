@@ -8,6 +8,8 @@ import android.util.Log;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.model.enumerations.Target;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,12 +108,28 @@ public class Preferences {
         return getUnitDefault(context, FieldDataBase.DISTANCE.toName())+"/h";
     }
 
-    public static String getNameSportDefault(Context context) throws JSONException {
+    private static String getNameDefault(Context context, FieldDataBase nameObject) throws JSONException {
         final String id_user = getIdUserLogged(context);
-        final JSONObject jsonApp = getAppJsonUserLogged(context, id_user);
-        JSONObject settings = (JSONObject)jsonApp.get(FieldDataBase.SETTINGS.toName());
-        JSONObject s_sport = (JSONObject)settings.get(FieldDataBase.SPORT.toName());
-        return context.getString(Sport.valueOf((String)s_sport.get(FieldDataBase.NAME.toName())).getStrId());
+        final JSONObject settings = getSettingsJsonUserLogged(context, id_user);
+        final String s = ((JSONObject)settings.get(nameObject.toName())).getString(FieldDataBase.NAME.toName());
+        int strId = 0;
+        switch (nameObject){
+            case SPORT:
+                strId = Sport.valueOf(s).getStrId();
+                break;
+            case TARGET :
+                strId = Target.valueOf(s).getStrId();
+                break;
+        }
+        return strId==0? null: context.getString(strId);
+    }
+
+    public static String getNameSportDefault(Context context) throws JSONException {
+        return getNameDefault(context, FieldDataBase.SPORT);
+    }
+
+    public static String getNameTargetDefault(Context context) throws JSONException {
+        return getNameDefault(context, FieldDataBase.TARGET);
     }
 
     public static void writeSettingsIntoSharedPreferences(Context context, JSONObject json) throws JSONException {

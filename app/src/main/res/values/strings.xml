@@ -15,10 +15,12 @@
     <string name="password">Password</string>
     <string name="forgot_password"><u><i>Password Dimenticata ?</i></u></string>
 
+    <string name="not_correct_password">Password non corretta</string>
+
     <!-- Token -->
     <string name="token">Token</string>
     
-    <!-- Forgot Paasword -->
+    <!-- Forgot Password -->
     <string name="reset_password">Ripristina password</string>
     <string name="password_request_success">Riceverai un\'email con il link.</string>
     
@@ -53,6 +55,25 @@
 
     <string name="access_data">Dati di accesso</string>
     <string name="confirm_password">Conferma Password</string>
+
+
+    <!-- Validazione Sign Up -->
+    <string name="name_not_empty">Nome non vuoto</string>
+    <string name="lastname_not_empty">Cognome non vuoto</string>
+    <string name="birth_date_not_empty">Data di Nascita non vuota</string>
+    <string name="email_not_empty">Email non valida</string>
+    <string name="tel_not_empty">Telefono non valido</string>
+    <string name="city_not_empty">Città non vuota</string>
+    <string name="gender_not_empty">Genere non vuoto</string>
+    <string name="target_not_empty">Obiettivo non vuoto</string>
+    <string name="weight_not_empty">Peso non vuoto</string>
+    <string name="height_not_empty">Altezza non vuoto</string>
+
+    <string name="username_not_empty">Username non vuoto</string>
+    <string name="password_not_empty">Password non vuota</string>
+    <string name="confirm_password_not_empty">Conferma Password non vuota</string>
+
+    <!-- Validazione Sign In -->
 
     <!-- Mex -->
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
@@ -184,6 +205,9 @@
 
     <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
     <string name="changed_profile">Profilo Modificato</string>
+
+
+    <string name="nothing_value">Nessun Valore</string>
 
 
     <string name="info_description">

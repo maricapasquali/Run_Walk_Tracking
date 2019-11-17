@@ -14,10 +14,9 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.gui.adapter.listview.ModifyWeightAdapter;
-import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
-import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
+import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
 import org.json.JSONException;
@@ -59,7 +58,7 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
     @Override
     protected void listenerAction() {
         listView.setOnItemClickListener((parent, view, position, id) ->{
-            final InfoWeight title =(InfoWeight) parent.getAdapter().getItem(position);
+            final StatisticsData.InfoWeight title =(StatisticsData.InfoWeight) parent.getAdapter().getItem(position);
             final TextView detail = view.findViewById(R.id.detail_description);
 
             switch (title){

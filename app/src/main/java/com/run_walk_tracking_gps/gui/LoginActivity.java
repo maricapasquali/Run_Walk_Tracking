@@ -99,20 +99,16 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
     }
 
     private boolean check(Editable user, Editable pass){
-        if(TextUtils.isEmpty(user) && TextUtils.isEmpty(pass)){
-            username.setError(getString(R.string.username)+ getString(R.string.not_empty));
-            password.setError(getString(R.string.password)+ getString(R.string.not_empty));
-            return false;
-        }
+        boolean isOk = true;
         if(TextUtils.isEmpty(user)){
-            username.setError(getString(R.string.username)+ getString(R.string.not_empty));
-            return false;
+            username.setError(getString(R.string.username_not_empty));
+            isOk = false;
         }
         if(TextUtils.isEmpty(pass)){
-            password.setError(getString(R.string.password)+ getString(R.string.not_empty));
-            return false;
+            password.setError(getString(R.string.password_not_empty));
+            isOk = false;
         }
-        return true;
+        return isOk;
     }
 
 }

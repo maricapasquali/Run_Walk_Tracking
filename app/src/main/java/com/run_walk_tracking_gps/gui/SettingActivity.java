@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 
 
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -19,20 +18,17 @@ import android.widget.Toast;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
-import com.run_walk_tracking_gps.gui.adapter.spinner.SportAdapterSpinner;
-import com.run_walk_tracking_gps.gui.adapter.spinner.TargetAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.UserBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.SQLData;
-import java.sql.SQLInput;
 import java.util.stream.Stream;
 
 

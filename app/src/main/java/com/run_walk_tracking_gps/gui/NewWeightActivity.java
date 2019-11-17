@@ -1,8 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import android.util.Log;
 import android.view.View;
@@ -18,14 +16,14 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.gui.adapter.listview.NewInformationAdapter;
-import com.run_walk_tracking_gps.gui.adapter.listview.NewWeightAdapter;
-import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.NewWeightAdapter;
+import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 
-import com.run_walk_tracking_gps.gui.dialog.WeightDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.gui.enumeration.InfoWeight;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,7 +51,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
     @Override
     public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
-        final InfoWeight title =(InfoWeight) parent.getAdapter().getItem(position);
+        final StatisticsData.InfoWeight title =(StatisticsData.InfoWeight) parent.getAdapter().getItem(position);
         final TextView detail = view.findViewById(R.id.detail_description);
 
         switch (title){

@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,7 +18,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.gui.dialog.DateTimePickerDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.UserBuilder;
 
 import org.json.JSONException;
@@ -77,6 +78,7 @@ public class PersonalDataFragment extends Fragment {
                     (date, calendar) -> {
                 birthText.setText(date);
                 userBuilder.setBirthDate(calendar.getTime());
+                birthDate.setError(null);
             },false ).show();
         });
 
@@ -89,23 +91,27 @@ public class PersonalDataFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
+        if(imagePickerHandlerListener.getImageUri()!=null)
+            img.setImageURI(imagePickerHandlerListener.getImageUri());
 
         if(!isOk){
-            // TODO: 11/13/2019 SISTEMARE ERROR STRING
             if(TextUtils.isEmpty(name.getText()))
-                name.setError("Nome non vuoto");
+                name.setError(getString(R.string.name_not_empty));
             if(TextUtils.isEmpty(birthDate.getText()))
-                birthDate.setError("Nome non vuoto");
+                birthDate.setError(getString(R.string.birth_date_not_empty));
             if(TextUtils.isEmpty(last_name.getText()))
-                last_name.setError("Nome non vuoto");
+                last_name.setError(getString(R.string.lastname_not_empty));
+
             if(TextUtils.isEmpty(email.getText()))
-                email.setError("Nome non vuoto");
+                email.setError(getString(R.string.email_not_empty));
+
             if(TextUtils.isEmpty(city.getText()))
-                city.setError("Nome non vuoto");
+                city.setError(getString(R.string.city_not_empty));
             if(TextUtils.isEmpty(phone.getText()))
-                phone.setError("Nome non vuoto");
+                phone.setError(getString(R.string.tel_not_empty));
         }
     }
+
 
     private boolean isSetAll(){
         return isOk = (!TextUtils.isEmpty(name.getText()) &&
@@ -120,16 +126,28 @@ public class PersonalDataFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG,"onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG,"onStop");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG,"onDestroyView");
         try {
             JSONObject userJson = null;
             if(isSetAll()){
                 userJson = userBuilder.setName(name.getText().toString())
-                                      .setLastName(last_name.getText().toString())
-                                      .setEmail(email.getText().toString())
-                                      .setCity(city.getText().toString())
-                                      .setPhone(phone.getText().toString())
-                                      .build()
-                                      .toJson();
+                        .setLastName(last_name.getText().toString())
+                        .setEmail(email.getText().toString())
+                        .setCity(city.getText().toString())
+                        .setPhone(phone.getText().toString())
+                        .build()
+                        .toJson();
 
                 userJson.remove(FieldDataBase.ID_USER.toName());
                 userJson.remove(FieldDataBase.HEIGHT.toName());
@@ -143,18 +161,6 @@ public class PersonalDataFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(TAG,"onStop");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.d(TAG,"onDestroyView");
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG,"onDestroy");
@@ -163,11 +169,12 @@ public class PersonalDataFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG,"onDestroy");
+        Log.d(TAG,"onDetach");
     }
 
     public interface ImagePickerHandlerListener{
         void imagePickerHandler(ImageView imageView);
+        Uri getImageUri();
     }
 
     public interface PersonalDataListener{
