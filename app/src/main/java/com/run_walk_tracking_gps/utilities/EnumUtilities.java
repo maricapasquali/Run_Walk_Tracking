@@ -15,7 +15,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EnumUtilities {
 
@@ -156,4 +158,11 @@ public class EnumUtilities {
 
         return iconId;
     }
+
+
+    public static Enum<?> getEnumFromString(Class<?> enumeration, Context context, String string){
+        return getEnumFromStrId(enumeration, Stream.of(valuesStrId(enumeration)).filter(i -> context.getString(i).equals(string)).findFirst()
+                .orElse(0));
+    }
+
 }

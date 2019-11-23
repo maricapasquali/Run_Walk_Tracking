@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -32,9 +33,14 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-public class ApplicationActivity extends CommonActivity implements WorkoutsFragment.OnWorkOutSelectedListener,
-        HomeFragment.OnStopWorkoutClickListener , WorkoutsFragment.OnManualAddClickedListener,
-        StatisticsFragment.OnWeightListener, WorkoutsFragment.OnDeleteWorkoutClickedListener {
+public class ApplicationActivity extends CommonActivity
+        implements  WorkoutsFragment.OnWorkOutSelectedListener,
+                    WorkoutsFragment.OnDeleteWorkoutClickedListener,
+                    WorkoutsFragment.OnManualAddClickedListener,
+                    HomeFragment.OnStopWorkoutClickListener ,
+                    HomeFragment.OnBlockScreenClickListener,
+                    StatisticsFragment.OnWeightListener
+                     {
 
     private final static String TAG = ApplicationActivity.class.getName();
     private final static int REQUEST_SETTINGS = 1;
@@ -45,6 +51,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
     private final static int REQUEST_MODIFY_WEIGHT = 6;
 
     private BottomNavigationView navigationBarBottom;
+    private Menu menuApp;
 
     private StatisticsData newWeight;
     private Workout newWorkout;
@@ -65,65 +72,17 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         getSupportActionBar().setIcon(R.drawable.ic_runtracking_light);
         navigationBarBottom = findViewById(R.id.nav_bar);
 
-        addFragment(new HomeFragment(), false);
-        selectActiveFragment(HomeFragment.class);
+        if(getIntent()!=null){
+            workouts = getIntent().getParcelableArrayListExtra(getString(R.string.workouts));
+            statisticsWeight = getIntent().getParcelableArrayListExtra(getString(R.string.weights));
+            if(workouts!=null && statisticsWeight!=null){
+                workouts.forEach(w -> w.setContext(this));
+                statisticsWeight.forEach(s -> s.setContext(this));
 
-        try {
-            // REQUEST ALL WORKOUTS
-            JSONObject bodyJson = new JSONObject();
-            int id_user = Integer.valueOf(Preferences.getIdUserLogged(this));
-
-            bodyJson.put(FieldDataBase.ID_USER.toName(), id_user);
-            if(!HttpRequest.requestWorkouts(this, bodyJson , response -> {
-
-                try {
-                    if(HttpRequest.someError(response)){
-                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                    }else{
-                        workouts = Workout.createList(this, (JSONArray)response.get("workouts"));
-                        Log.d(TAG, workouts.toString());
-                    }
-
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            })){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
+                selectActiveFragment(HomeFragment.class);
             }
-
-            // REQUEST STATISTICS WEIGHT
-            bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
-                                       .put(FieldDataBase.FILTER.toName(), FieldDataBase.WEIGHT.toName());
-            if(!HttpRequest.requestStatistics(this, bodyJson, response -> {
-                try {
-                    //Log.e(TAG, response.toString());
-                    if(HttpRequest.someError(response)){
-                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                    }else{
-
-                        // TODO: 11/2/2019 MIGLIORARE
-                        JSONArray array = (JSONArray)response.get("weights");
-                        for(int i=0; i<array.length(); i++){
-                            JSONObject s = (JSONObject)array.get(i);
-                            StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(this)
-                                    .setDate(s.getString("date")).setValue(s.getDouble("weight")).build();
-                            statisticsData.setId(s.getInt(FieldDataBase.ID_WEIGHT.toName()));
-                            statisticsWeight.add(statisticsData);
-                        }
-                        Log.d(TAG, statisticsWeight.toString());
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            })){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, statisticsWeight.toString()); Log.e(TAG, workouts.toString());
         }
     }
 
@@ -137,7 +96,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                          addFragment(WorkoutsFragment.createWithArgument(workouts),false);
                          break;
                      case R.id.home:
-                         addFragment(new HomeFragment(),false);
+                         addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
                          break;
                      case R.id.statistics:
                          addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
@@ -145,7 +104,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                  }
              }
             return true;
-
         });
     }
 
@@ -172,6 +130,7 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        menuApp = menu;
         getMenuInflater().inflate(R.menu.menu_application, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -200,15 +159,22 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
-        Log.d(TAG,"OnBack");
-        System.exit(0);
-        /*addFragment(new HomeFragment(), false);selectActiveFragment(HomeFragment.class);
-        if(getSupportFragmentManager().findFragmentById(R.id.container_fragments_application).getClass()==HomeFragment.class)
-        {
+        if(((HomeFragment)getSupportFragmentManager().findFragmentById(R.id.container_fragments_application)).isWorkoutRunning()){
+            moveTaskToBack(true);
+        }else{
             finish();
             System.exit(0);
-        }*/
+        }
+
+/*
+        addFragment(new HomeFragment(), false);
+        selectActiveFragment(HomeFragment.class);
+        if(getSupportFragmentManager().findFragmentById(R.id.container_fragments_application).getClass()==HomeFragment.class){
+            finish();
+            System.exit(0);
+        }
+*/
+
     }
 
     // LISTENER FRAGMENTS
@@ -237,6 +203,11 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
         intentSummary.putExtra(getString(R.string.summary_workout), workout);
         intentSummary.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivityForResult(intentSummary, REQUEST_SUMMARY);
+    }
+
+    @Override
+    public void onBlockScreenClickListener(boolean isClickable) {
+        menuApp.findItem(R.id.setting).setEnabled(isClickable);
     }
 
     // NewManualWorkoutActivity Listener
@@ -383,4 +354,6 @@ public class ApplicationActivity extends CommonActivity implements WorkoutsFragm
                 break;
         }
     }
-}
+
+
+ }

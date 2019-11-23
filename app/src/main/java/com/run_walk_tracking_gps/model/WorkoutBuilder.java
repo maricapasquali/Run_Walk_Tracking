@@ -32,7 +32,7 @@ public class WorkoutBuilder {
     }
 
     public WorkoutBuilder setDuration(int duration){
-        workout.getDuration().setValueFromGui((double)duration);
+        workout.getDuration().setValue((double)duration);
         return this;
     }
 
@@ -41,8 +41,13 @@ public class WorkoutBuilder {
         return this;
     }
 
+    public WorkoutBuilder setMiddleSpeed(){
+        workout.setMiddleSpeed();
+        return this;
+    }
+
     public WorkoutBuilder setCalories(double calories){
-        workout.getCalories().setValueFromGui(calories);
+        workout.getCalories().setValue(calories);
         return this;
     }
 

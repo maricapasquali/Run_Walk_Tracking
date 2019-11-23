@@ -20,7 +20,13 @@ public class BootAppActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
-        registration.setOnClickListener(v -> startActivity(new Intent(this, SignUpActivity.class)));
-        login.setOnClickListener(v -> startActivity(new Intent(this, LoginActivity.class)));
+        registration.setOnClickListener(v -> {
+            final Intent intent = new Intent(this, SignUpActivity.class);
+            startActivity(intent);
+        });
+        login.setOnClickListener(v -> {
+            final Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        });
     }
 }

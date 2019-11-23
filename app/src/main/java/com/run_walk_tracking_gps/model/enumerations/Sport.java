@@ -4,8 +4,11 @@ import android.content.Context;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
+
+import java.util.stream.Stream;
 
 public enum Sport {
 
@@ -36,5 +39,4 @@ public enum Sport {
         }
         return null;
     }
-
 }

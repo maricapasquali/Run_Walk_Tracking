@@ -56,7 +56,7 @@ public class SignUpActivity extends CommonActivity
 
     private ImagePicker imagePicker;
     private Uri imageUri;
-    private CompressionBitMap async = null ;
+    private CompressionBitMap async = null;
 
     @Override
     protected void init() {
@@ -78,11 +78,6 @@ public class SignUpActivity extends CommonActivity
         getMenuInflater().inflate(R.menu.menu_signup, menu);
         next = menu.findItem(R.id.next_signup);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -134,7 +129,7 @@ public class SignUpActivity extends CommonActivity
             }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
-            getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            //getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -165,10 +160,8 @@ public class SignUpActivity extends CommonActivity
             user.put(FieldDataBase.LANGUAGE.toName(), Locale.getDefault().getDisplayLanguage());
             Log.d(TAG, user.toString());
 
-
-            if(!HttpRequest.requestSignUp(this, user,this)) {
+            if(!HttpRequest.requestSignUp(this, user,this))
                 Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-            }
 
         }catch (JSONException je){
             Log.e(TAG, je.getMessage());
@@ -183,14 +176,12 @@ public class SignUpActivity extends CommonActivity
         if(HttpRequest.someError(response)){
             Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             Log.e(TAG, response.toString());
-        }
-        else{
+        } else{
             // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GIUSTO
             //Toast.makeText(this, getString(R.string.correctly_sign_up), Toast.LENGTH_LONG).show();
             //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
-
             try {
-                Intent intent = new Intent(this, TokenActivity.class);
+                final Intent intent = new Intent(this, TokenActivity.class);
                 intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
                 startActivity(intent);
                 finish();

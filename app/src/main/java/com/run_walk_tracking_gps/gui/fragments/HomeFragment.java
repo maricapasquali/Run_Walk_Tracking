@@ -2,18 +2,20 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 
 import android.app.Service;
 import android.content.Context;
 
 import android.content.Intent;
-
 import android.location.LocationManager;
 
+import android.os.Build;
 import android.os.Bundle;
 
 
+import android.os.ParcelUuid;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -21,10 +23,13 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,26 +45,30 @@ import com.google.android.gms.location.LocationServices;
 
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.exception.NoGPSException;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-
-import org.json.JSONException;
+import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
+import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+@SuppressLint("StaticFieldLeak")
 public class HomeFragment extends Fragment implements OnMapReadyCallback ,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback{
 
     private static final String TAG = HomeFragment.class.getName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
+
+    private static final String WEIGHT = Measure.Type.WEIGHT.toString();
 
     private static final int MAP_TYPE_DEFAULT = GoogleMap.MAP_TYPE_NORMAL;
 
@@ -69,9 +78,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     private ImageView typeMap;
     private MapView mapView;
     private FloatingActionButton start;
-    private FloatingActionButton pause;
-    private FloatingActionButton restart;
-    private FloatingActionButton stop;
+    private static FloatingActionButton pause;
+    private static FloatingActionButton restart;
+    private static FloatingActionButton stop;
     private FloatingActionButton block_screen;
     private FloatingActionButton unlock_screen;
 
@@ -84,10 +93,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
     private FusedLocationProviderClient fusedLocationClient;
 
     private OnStopWorkoutClickListener onStopWorkoutClickListener;
-
-    private boolean inWorkout = false;
+    private OnBlockScreenClickListener onBlockScreenClickListener;
 
     private List<Measure> workoutMeasure = new ArrayList<>();
+
+    private Workout workout;
+
+    private WorkoutServiceHandler workoutService;
 
     public HomeFragment() {
         super();
@@ -102,8 +114,60 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnStopWorkoutClickListener");
         }
+        try {
+            onBlockScreenClickListener = (OnBlockScreenClickListener) context;
+        }
+        catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnBlockScreenClickListener");
+        }
     }
 
+    public static HomeFragment createWithArgument(double w){
+        final HomeFragment homeFragment = new HomeFragment();
+        Bundle args = new Bundle();
+        args.putDouble(WEIGHT, w);
+        homeFragment.setArguments(args);
+        return homeFragment;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        final Bundle bundle = getArguments();
+        if(bundle!=null){
+            double weight = bundle.getDouble(WEIGHT);
+
+            try {
+                if(weight==0.0) throw new Exception(WEIGHT);
+                //Toast.makeText(getContext(), "Weight Fragment : "+ weight, Toast.LENGTH_LONG).show();
+                workoutService = WorkoutServiceHandler.createService(getContext(), weight , (sec, distance, energy) -> {
+
+                    workout_duration.setText(Measure.DurationUtilities.format(sec));
+                    workout.getDuration().setValue((double) sec);
+
+                    workout.getDistance().setValue(distance);
+                    workout_distance.setText(workout.getDistance().toString(true));
+
+                    workout.getCalories().setValue(energy);
+                    workout_energy.setText(workout.getCalories().toString(true));
+                    //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: "
+                    // + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public static List<FloatingActionButton> getControllerButton(){
+        return Arrays.asList(pause, restart, stop);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
@@ -139,7 +203,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         //initialize map
         initMapView(savedInstanceState);
         setListener();
+
+        workout = WorkoutBuilder.create(getContext()).build();
         return rootView;
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void startWorkoutUpdateGui(View v){
+        getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+        v.setVisibility(View.GONE);
+        block_screen.setVisibility(View.VISIBLE);
+        pause.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void pauseWorkoutUpdateGui(View v){
+        v.setVisibility(View.GONE);
+        block_screen.setVisibility(View.GONE);
+
+        restart.setVisibility(View.VISIBLE);
+        stop.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void restartWorkoutUpdateGui(View v){
+        v.setVisibility(View.GONE);
+        stop.setVisibility(View.GONE);
+
+        block_screen.setVisibility(View.VISIBLE);
+        pause.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
@@ -158,69 +250,62 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         });
 
         start.setOnClickListener(v ->{
-            getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
-            v.setVisibility(View.GONE);
-            inWorkout = true;
-
-            block_screen.setVisibility(View.VISIBLE);
-            pause.setVisibility(View.VISIBLE);
+            startWorkoutUpdateGui(v);
+            //START SERVICE
+            workoutService.start();
         });
 
         pause.setOnClickListener(v ->{
-            v.setVisibility(View.GONE);
-            block_screen.setVisibility(View.GONE);
-
-            restart.setVisibility(View.VISIBLE);
-            stop.setVisibility(View.VISIBLE);
+            pauseWorkoutUpdateGui(v);
+            //PAUSE SERVICE
+            workoutService.pause();
         });
 
         restart.setOnClickListener(v ->{
-            v.setVisibility(View.GONE);
-            stop.setVisibility(View.GONE);
+            restartWorkoutUpdateGui(v);
+            //RESTART SERVICE
+            workoutService.restart();
+        });
 
-            block_screen.setVisibility(View.VISIBLE);
-            pause.setVisibility(View.VISIBLE);
+        stop.setOnClickListener(v ->{
 
+            // STOP SERVICE
+            workoutService.stop();
+            // Auto - Workout
+            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
+                                                                        .setMapRoute("not null")
+                                                                        .setDate(Calendar.getInstance().getTime())
+                                                                        .setDistance(workout.getDistance().getValueToGui())
+                                                                        .setDuration(workout.getDuration().getValue().intValue())
+                                                                        .setCalories(workout.getCalories().getValueToGui())
+                                                                        .setMiddleSpeed()
+                                                                        .setSport(workout.getSport())
+                                                                        .build());
         });
 
         block_screen.setOnClickListener(v ->{
             v.setVisibility(View.GONE);
             pause.setVisibility(View.GONE);
-
             unlock_screen.setVisibility(View.VISIBLE);
+            setClickable(false);
+            // BLOCK (remove controller button) NOTIFICATION SERVICE
+            workoutService.block();
         });
 
         unlock_screen.setOnClickListener(v ->{
             v.setVisibility(View.GONE);
-
             pause.setVisibility(View.VISIBLE);
             block_screen.setVisibility(View.VISIBLE);
-        });
-
-        stop.setOnClickListener(v ->{
-            inWorkout = false;
-            // Esempio Workout
-            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
-                                                                        .setMapRoute("not null")
-                                                                        .setDate(Calendar.getInstance().getTime())
-                                                                        .setCalories(400)
-                                                                        .setDistance(20)
-                                                                        .setDuration(3600)
-                                                                        .setSport(Sport.RUN)
-                                                                        .build());
+            setClickable(true);
+            // UNBLOCK (add controller button) NOTIFICATION SERVICE
+            workoutService.unblock();
         });
     }
 
-    @SuppressLint("RestrictedApi")
-    private void resetView() {
-        restart.setVisibility(View.GONE);
-        stop.setVisibility(View.GONE);
-        block_screen.setVisibility(View.GONE);
-        unlock_screen.setVisibility(View.GONE);
-        pause.setVisibility(View.GONE);
-
-        getActivity().findViewById(R.id.nav_bar).setVisibility(View.VISIBLE);
-        start.setVisibility(View.VISIBLE);
+    private void setClickable(final boolean is){
+        myLocation.setClickable(is);
+        typeMap.setClickable(is);
+        onBlockScreenClickListener.onBlockScreenClickListener(is);
     }
 
     private void initMapView(Bundle savedInstanceState ) {
@@ -237,7 +322,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
             final LocationManager locationManager = (LocationManager) getActivity().getSystemService(Service.LOCATION_SERVICE);
 
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                throw new NoGPSException();
+                throw new NoGPSException(getContext());
 
 
             fusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), location -> {
@@ -256,7 +341,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
 
         } catch (NoGPSException ex) {
             requestPermissions = true;
-            ex.alert(getContext());
+            ex.alert();
         }
     }
 
@@ -296,12 +381,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         workout_energy.setText(workoutMeasure.get(2).toString(true));
         sport.setText(Sport.defaultForUser(getContext()));
 
-        if(requestPermissions)
-        {
+        if(isWorkoutRunning()){
+            workout_distance.setText(workout.getDistance().toString(true));
+            workout_energy.setText(workout.getCalories().toString(true));
+        }
+
+
+
+        if(requestPermissions){
             mapView.getMapAsync(this);
             requestPermissions = false;
         }
-        if(!inWorkout) resetView();
+    }
+
+    public boolean isWorkoutRunning(){
+        return workoutService.isRunning();
     }
 
     @Override
@@ -309,6 +403,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         Log.d(TAG, "onDestroy");
         super.onDestroy();
         mapView.onDestroy();
+        if(workoutService.isRunning()) workoutService.stop();
     }
 
     // COMMUNICATION WITH ACTIVITY
@@ -316,24 +411,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback ,
         void OnStopWorkoutClick(Workout workout);
     }
 
-    // Exception
-    private class NoGPSException extends Exception{
-        private final static String NO_GPS = "No GPS";
-        private final String NO_GPS_MEX = getString(R.string.gps_disabled);
-
-        private void alert(final Context context)
-        {
-            Log.d(TAG, NO_GPS);
-            new AlertDialog.Builder(context)
-                    .setMessage(NO_GPS_MEX)
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.yes), (dialog, id) ->
-                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
-                    .setNegativeButton(getString(R.string.no), (dialog, id) -> dialog.cancel())
-                    .create()
-                    .show();
-
-        }
-
+    public interface OnBlockScreenClickListener{
+        void onBlockScreenClickListener(boolean isClickable);
     }
+
+
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
+import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
 import org.json.JSONException;
 
@@ -224,7 +225,7 @@ public class Measure implements Parcelable {
     public Double getValue(){
         if(this.value==null)return 0d;
         reSetUnit();
-        return this.value;
+        return NumberUtilities.round2(this.value);
     }
 
 // GET TO GUI
@@ -317,11 +318,11 @@ public class Measure implements Parcelable {
                     break;
                 }
             }
-
         }catch (JSONException e){
             e.printStackTrace();
         }
     }
+
 // SET FROM DB
     public void setValue(Double value) {
         this.value = value;
@@ -395,20 +396,20 @@ public class Measure implements Parcelable {
         if(isHome)
         {
             if(this.type.equals(Type.DURATION))
-                return DurationUtilities.formatHome(this.value.intValue());
+                return DurationUtilities.format(this.value.intValue());
             return getValueToGui() + context.getString(R.string.space) + context.getString(getUnit().getStrId());
 
         }
         return toString();
     }
 
-    private static class DurationUtilities {
+    public static class DurationUtilities {
 
         private static double getSecond(int integer, int decimal){
             return (decimal*60)+(integer*3600);
         }
 
-        private static Integer stringToSeconds(String duration){
+        public static Integer toSeconds(String duration){
             try{
                 String[] split = duration.split(":");
                 int hours = Integer.valueOf(split[0]);
@@ -429,16 +430,11 @@ public class Measure implements Parcelable {
         }
 
         @SuppressLint("DefaultLocale")
-        private static String format(int seconds){
+        public static String format(int seconds){
             final List<Integer> time = time(seconds);
             return String.format(Measure.Format.FORMAT_DURATION, time.get(0), time.get(1), time.get(2));
         }
 
-        @SuppressLint("DefaultLocale")
-        private static String formatHome(int seconds){
-            final List<Integer> time = time(seconds);
-            return String.format(Measure.Format.FORMAT_DURATION_HOME, time.get(0), time.get(1));
-        }
     }
 
     public static class Format{

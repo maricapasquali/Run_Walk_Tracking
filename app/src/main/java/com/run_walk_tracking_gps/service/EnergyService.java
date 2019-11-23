@@ -1,0 +1,43 @@
+package com.run_walk_tracking_gps.service;
+
+import android.content.Context;
+
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
+
+import org.json.JSONException;
+
+public class EnergyService implements WorkoutServiceHandler.OnEnergyListener {
+
+    /**
+     * Corsa:     1,0 kcal x peso corporeo in kg x distanza percorsa in km
+     * Camminata: 0,5 kcal x peso corporeo in kg x distanza percorsa in km
+     */
+    private final double ENERGY_RUN  = 1.0;
+    private final double ENERGY_WALK = 0.5;
+
+    private Sport sport;
+    private double weight;
+
+    public EnergyService(Context context, double weightInKg){
+        super();
+        this.weight = weightInKg;
+        try {
+            this.sport = (Sport) EnumUtilities.getEnumFromString(Sport.class, context, Preferences.getNameSportDefault(context));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public double getEnergyInKcal(double km) {
+        switch (sport){
+            case RUN:
+                return ENERGY_RUN*weight*km;
+            case WALK:
+                return ENERGY_WALK*weight*km;
+        }
+        return 0;
+    }
+}

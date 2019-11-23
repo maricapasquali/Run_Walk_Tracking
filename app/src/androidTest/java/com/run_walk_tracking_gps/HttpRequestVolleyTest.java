@@ -23,7 +23,6 @@ import java.util.Locale;
 public class HttpRequestVolleyTest {
 
     private static final String TAG = HttpRequestVolleyTest.class.getName();
-/*
     @Test
     public void requestSignUpVolley(){
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -95,7 +94,7 @@ public class HttpRequestVolleyTest {
 
             bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
             //bodyJson.put( FieldDataBase.WEIGHT.toName(), "Kira");
-            HttpRequest.requestUpdateUserInformation(context, bodyJson,this::responseServer);
+            HttpRequest.requestDelayedUpdateUserInformation(context, bodyJson,this::responseServer, null);
 
         } catch (Exception e) {
             Log.e(TAG, e.toString());
@@ -309,5 +308,5 @@ public class HttpRequestVolleyTest {
             Log.d(TAG, response.toString());
         }
     }
-    */
+
 }

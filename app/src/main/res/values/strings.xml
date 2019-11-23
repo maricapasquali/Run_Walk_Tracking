@@ -86,6 +86,8 @@
     <string name="home">Home</string>
     <string name="statistics">Statistiche</string>
 
+    <string name="weights">Pesi</string>
+
     <!-- Impostazioni -->
     <string name="sport">Sport</string>
     <string name="walk">Camminata</string>

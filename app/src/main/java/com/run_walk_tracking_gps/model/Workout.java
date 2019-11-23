@@ -8,6 +8,7 @@ import com.google.android.gms.common.util.NumberUtils;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
 import org.json.JSONArray;
@@ -32,15 +33,13 @@ public class Workout implements Parcelable, Cloneable{
     private ArrayList<Measure> parameters;
     private Sport sport;
 
-    private static String ND;
-
     public Workout(Context context){
-        ND = context.getString(R.string.no_available_abbr);
         parameters = new ArrayList<>();
         parameters.add(Measure.create(context, Measure.Type.DURATION));
         parameters.add(Measure.create(context, Measure.Type.DISTANCE));
         parameters.add(Measure.create(context, Measure.Type.ENERGY));
         parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
+        sport = (Sport) EnumUtilities.getEnumFromString(Sport.class, context, Sport.defaultForUser(context));
         setContext(context);
     }
 
@@ -196,6 +195,7 @@ public class Workout implements Parcelable, Cloneable{
     public void setSport(Sport sport) {
         this.sport = sport;
     }
+
     /*
         public void setDuration(Integer duration) {
             getDuration().setValue(Double.valueOf(duration));
@@ -242,14 +242,14 @@ public class Workout implements Parcelable, Cloneable{
     public String toString() {
 
         return "Workout{ id_workout='" + id_workout +'\''+
-                    ", map_route='" + map_route +'\''+
-                    ", sport='" + sport +'\''+
-                    ", date='" + getDateStr() + '\'' +
-                    ", duration='" + getDuration().toString()  + '\'' +
-                    ", distance='" + getDistance().toString()  + '\'' +
-                    ", calories='" + getCalories().toString()  + '\'' +
-                    ", middleSpeed='" + getMiddleSpeed().toString()  + '\'' +
-                    '}';
+                        ", map_route='" + map_route +'\''+
+                        ", sport='" + sport +'\''+
+                        ", date='" + getDateStr() + '\'' +
+                        ", duration='" + getDuration().toString()  + '\'' +
+                        ", distance='" + getDistance().toString()  + '\'' +
+                        ", calories='" + getCalories().toString()  + '\'' +
+                        ", middleSpeed='" + getMiddleSpeed().toString()  + '\'' +
+                        '}';
     }
 
     public enum Info {

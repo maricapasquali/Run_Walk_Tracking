@@ -45,7 +45,6 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
 
     @Override
     protected void listenerAction() {
-
         forgotPassword.setOnClickListener(v ->{
             Toast.makeText(this,getString(R.string.forgot_password) , Toast.LENGTH_LONG).show();
             final Intent intent = new Intent(this, ForgotPassword.class);
@@ -74,28 +73,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
 
     @Override
     public void onResponse(JSONObject response) {
-        try {
-            if(HttpRequest.someError(response)){
-                Snackbar.make(findViewById(R.id.snake), response.get(HttpRequest.ERROR).toString(), Snackbar.LENGTH_LONG).show();
-            }else {
-
-                Intent intent;
-                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(FieldDataBase.FIRST_LOGIN.toName()))){
-                    Snackbar.make(findViewById(R.id.snake), getString(R.string.account_not_checked), Snackbar.LENGTH_LONG).show();
-                    intent = new Intent(this, TokenActivity.class);
-                    intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
-                } else {
-                    Preferences.writeImageIntoSharedPreferences(this, response);
-                    Preferences.writeSettingsIntoSharedPreferences(this, response);
-                    intent = new Intent(this, ApplicationActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                }
-                startActivity(intent);
-                finish();
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        if(new SplashScreenActivity().dataAccessResponse(this, response)) finishAffinity();
     }
 
     private boolean check(Editable user, Editable pass){

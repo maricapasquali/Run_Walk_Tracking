@@ -77,6 +77,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
             }
         }
        if(workout!=null){
+
            adapter = new DetailsWorkoutAdapter(this, workout.details(true));
            summary_workout.setAdapter(adapter);
        }
