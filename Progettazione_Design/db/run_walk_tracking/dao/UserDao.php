@@ -190,6 +190,13 @@ class UserDao {
      return array(ID_USER=>$id_user);
    }
 
+   static function dataAfterAccess($user){
+     return array(USER => $user + UserDao::getImageProfileForIdUser($user[ID_USER]),
+                  WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
+                  WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
+                  APP => array( SETTINGS =>
+                                SettingsDao::getSettingsFor($user[ID_USER])));
+   }
 
   static function getImageProfileForIdUser($id){
         if(connect()){
@@ -258,7 +265,7 @@ class UserDao {
          }
          array_push($values, $user[ID_USER]);
 
-    
+
          if(count($values)>1){
            $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
            if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());

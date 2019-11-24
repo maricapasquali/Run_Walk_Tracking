@@ -159,9 +159,10 @@ public class ApplicationActivity extends CommonActivity
 
     @Override
     public void onBackPressed() {
-        if(((HomeFragment)getSupportFragmentManager().findFragmentById(R.id.container_fragments_application)).isWorkoutRunning()){
+        final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
+        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).isWorkoutRunning()){
             moveTaskToBack(true);
-        }else{
+        } else{
             finish();
             System.exit(0);
         }

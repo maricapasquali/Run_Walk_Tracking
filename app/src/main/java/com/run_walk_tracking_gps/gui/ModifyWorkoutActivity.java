@@ -47,7 +47,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         details_workout = findViewById(R.id.summary);
-        ((MapView)findViewById(R.id.summary_map)).setVisibility(View.GONE);
+        findViewById(R.id.summary_map).setVisibility(View.GONE);
         summary_ok = findViewById(R.id.summary_ok);
         summary_ok.setVisibility(View.GONE);
 

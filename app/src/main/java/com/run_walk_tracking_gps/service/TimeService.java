@@ -110,6 +110,7 @@ public class TimeService extends Service {
     }
 
     public void stop(){
+
         setStart(false);
         context.unregisterReceiver(receiver);
         notificationWorkout.stopClicked();

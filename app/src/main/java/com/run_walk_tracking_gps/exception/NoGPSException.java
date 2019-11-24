@@ -11,7 +11,6 @@ import com.run_walk_tracking_gps.R;
 public class NoGPSException extends Exception {
 
     private Context context;
-    private final static String NO_GPS = "No GPS";
     private final String NO_GPS_MEX ;
 
     public NoGPSException(Context context){

@@ -25,6 +25,7 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.UserBuilder;
+import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ public class SettingActivity extends CommonActivity {
 
     private LinearLayout profile;
     private Switch locationOnOff;
+    private LinearLayout location;
     private LinearLayout unit;
     private LinearLayout language;
 
@@ -72,6 +74,7 @@ public class SettingActivity extends CommonActivity {
 
         profile = findViewById(R.id.profile);
         locationOnOff = findViewById(R.id.location_on_off);
+        location = findViewById(R.id.location);
         unit = findViewById(R.id.unit);
         language = findViewById(R.id.language);
 
@@ -97,6 +100,33 @@ public class SettingActivity extends CommonActivity {
 
         }catch (Exception e){
             Log.e(TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
+                (!LocationUtilities.isGpsEnable(this) && locationOnOff.isChecked())){
+
+            if(!LocationUtilities.Request.setLocationOnOff(this,Integer.valueOf(id_user), response -> {
+                try {
+                    if(HttpRequest.someError(response) || !response.getBoolean("update")){
+                        Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
+                    }else {
+                        Log.e(TAG, response.toString());
+                        locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
+                        ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
+                        Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            })){
+                Log.e(TAG, "Not change");
+                locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
+            }
         }
     }
 
@@ -142,8 +172,27 @@ public class SettingActivity extends CommonActivity {
             }
         });
 
-        locationOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            try {
+        location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
+
+       /* locationOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+   /*         if(!LocationUtilities.Request.setLocationOnOff(this,Integer.valueOf(id_user), response -> {
+                try {
+                    if(HttpRequest.someError(response) || !response.getBoolean("update")){
+                        Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
+                    }else {
+                        locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
+                        ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
+                        Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            })){
+                 locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
+            }*/
+
+            /*try {
                 JSONObject bodyJson = new JSONObject();
                 bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
                         .put(FieldDataBase.FILTER.toName(), FieldDataBase.LOCATION.toName())
@@ -151,7 +200,7 @@ public class SettingActivity extends CommonActivity {
 
                 if(!HttpRequest.requestUpdateSetting(this, bodyJson, response -> {
                     try {
-                        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.ERROR)) || !(boolean)response.get("update")){
+                        if(HttpRequest.someError(response) || !(boolean)response.get("update")){
                             Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
                         }else {
                             ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
@@ -167,6 +216,7 @@ public class SettingActivity extends CommonActivity {
                 Log.e(TAG, e.getMessage());
             }
         });
+*/
 
         language.setOnClickListener(v -> Toast.makeText(this, getString(R.string.language), Toast.LENGTH_SHORT).show());
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());

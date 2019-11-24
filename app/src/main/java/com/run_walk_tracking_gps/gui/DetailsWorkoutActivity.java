@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
@@ -15,24 +16,30 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 
+import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.service.MapRouteService;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DetailsWorkoutActivity extends  CommonActivity {
+import java.util.Arrays;
+import java.util.Collection;
+
+public class DetailsWorkoutActivity extends  CommonActivity{
+
     private final static String TAG = DetailsWorkoutActivity.class.getName();
 
     private final static int REQUEST_MODIFY = 0;
-
-    private MapView summary_map;
 
     private ListView summary_workout;
     private ImageButton summary_ok;
@@ -45,13 +52,12 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
     @Override
     protected void init() {
+        Log.e(TAG, "OnCreate");
         setContentView(R.layout.activity_details_workout);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        summary_map = findViewById(R.id.summary_map);
         summary_workout = findViewById(R.id.summary);
         summary_ok = findViewById(R.id.summary_ok);
-
 
         workout = (Workout)getIntent().getParcelableExtra(getString(R.string.summary_workout));
         if(workout!=null){ // SUMMARY_DETAILS
@@ -59,6 +65,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
             workout.setContext(this);
             Log.d(TAG, workout.toString());
 
+            setMapView();
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -70,7 +77,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
                 workout.setContext(this);
 
                 Log.d(TAG, workout.toString());
-                if(workout.getMapRoute()==null)summary_map.setVisibility(View.GONE);
+                setMapView();
 
                 summary_ok.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(R.string.detail_workout);
@@ -82,6 +89,17 @@ public class DetailsWorkoutActivity extends  CommonActivity {
            summary_workout.setAdapter(adapter);
        }
     }
+
+    private void setMapView(){
+        if(workout.getMapRoute()!=null){
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.summary_map, MapFragment.createWithArguments(workout.getMapRoute()))
+                    .commit();
+        }else {
+            findViewById(R.id.summary_map).setVisibility(View.GONE);
+        }
+    }
+
 
     @Override
     protected void listenerAction() {
@@ -149,7 +167,6 @@ public class DetailsWorkoutActivity extends  CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -174,6 +191,7 @@ public class DetailsWorkoutActivity extends  CommonActivity {
 
     @Override
     public void onBackPressed() {
+        Log.e(TAG, "OnBackPressed");
         if(isSummary){
             // TODO: 11/2/2019 REQUEST INSERT AUTO-WORKOUT
             saveWorkout();

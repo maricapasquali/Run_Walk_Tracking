@@ -2,13 +2,18 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionsUtilities <K, V>{
 
@@ -26,5 +31,22 @@ public class CollectionsUtilities <K, V>{
 
     public ArrayList<Map.Entry<K, V>> mapToListOfMapEntry(Map<K, V> map){
         return new ArrayList<>(map.entrySet());
+    }
+
+
+    public static List<LatLng> convertStringToListLatLng(String toString){
+        List<LatLng> list = new ArrayList<>();
+
+        Object[] o = toString.replace("lat/lng:", "")
+                             .replace("(","")
+                             .replace(")", "")
+                             .replace("[", "")
+                             .replace("]", "")
+                             .split(",");
+
+        for (int i=0; i<o.length; i+=2){
+            list.add(new LatLng(Double.valueOf(o[i].toString()), Double.valueOf(o[i+1].toString())));
+        }
+        return list;
     }
 }

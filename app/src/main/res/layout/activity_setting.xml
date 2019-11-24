@@ -108,7 +108,49 @@
                     android:textSize="18sp" />
 
             </LinearLayout>
+            <LinearLayout
+                android:id="@+id/location"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/custom_item_setting"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal">
 
+                <ImageView
+                    android:id="@+id/setting_location_icon"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="2dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/location"
+                    android:elevation="8dp"
+                    android:padding="2dp"
+                    app:srcCompat="@drawable/ic_location" />
+
+                <Switch
+                    android:id="@+id/location_on_off"
+                    android:clickable="false"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:elevation="8dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:text="@string/location"
+                    android:textColor="@android:color/background_light"
+                    android:textColorLink="@color/colorPrimaryDark"
+                    android:textOff="@string/off"
+                    android:textOn="@string/on"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+
+        <!--
             <LinearLayout
                 android:id="@+id/location"
                 android:layout_width="match_parent"
@@ -148,7 +190,7 @@
                     android:textSize="18sp" />
 
             </LinearLayout>
-
+-->
             <LinearLayout
                 android:id="@+id/unit"
                 android:layout_width="match_parent"

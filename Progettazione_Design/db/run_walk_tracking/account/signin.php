@@ -1,19 +1,25 @@
 <?php
 require_once("../utility.php");
 require_once("../dao/UserDao.php");
+require_once("../dao/StatisticsDao.php");
+require_once("../dao/WorkoutDao.php");
 require_once("../dao/SettingsDao.php");
 try{
   $userCredentials = bodyRequest();
-  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD])) throw new Exception(URL_NOT_VALID);
+  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD]))
+      throw new Exception(URL_NOT_VALID);
 
    $user = UserDao::checkCredential($userCredentials[USERNAME], $userCredentials[PASSWORD]);
    if($user[ID_USER]==NULL) throw new Exception("USER NON TROVATO");
 
    // NEL CASO SIA LA PRIMA VOLTA USA TOKEN INVIATO
    $result = UserDao::checkFirstLogin($user);
-   if($result) print json_encode(array(FIRST_LOGIN => $result==1) + array(ID_USER =>$user[ID_USER]));
-   else print json_encode(array(USER => $user+UserDao::getImageProfileForIdUser($user[ID_USER]),
-                                APP => array(SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))));
+   if($result)
+      print json_encode(array(FIRST_LOGIN => $result==1) + array(ID_USER =>$user[ID_USER]));
+   else
+      print json_encode(UserDao::dataAfterAccess($user));
+
+
 }catch(Exception $e){
   print json_errors($e->getMessage());
 }
