@@ -1,9 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.content.Intent;
-import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -12,7 +9,6 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,19 +56,6 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
 
     @Override
     public void onResponse(JSONObject response) {
-        try {
-            if(HttpRequest.someError(response)){
-                Snackbar.make(findViewById(R.id.snake), response.get(HttpRequest.ERROR).toString(), Snackbar.LENGTH_LONG).show();
-            }else {
-
-                Preferences.writeSettingsIntoSharedPreferences(this, response);
-                Intent intent = new Intent(this, ApplicationActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        if(SplashScreenActivity.dataAccessResponse(this, response)) finishAffinity();
     }
 }

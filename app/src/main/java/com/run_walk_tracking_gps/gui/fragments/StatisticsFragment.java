@@ -71,12 +71,13 @@ public class StatisticsFragment extends Fragment {
         Bundle args = getArguments();
         if(args!=null){
             if(args.getParcelableArrayList(LIST_WORKOUT_KEY)!=null) {
+                workouts.clear();
                 workouts = getArguments().getParcelableArrayList(LIST_WORKOUT_KEY);
             }
 
             if(args.getParcelableArrayList(LIST_WEIGHT_KEY)!=null) {
+                weights.clear();
                 weights = getArguments().getParcelableArrayList(LIST_WEIGHT_KEY);
-
             }
             Log.d(TAG, "List Workouts = "+ workouts);
             Log.d(TAG, "List Weights = "+ weights);
@@ -228,7 +229,9 @@ public class StatisticsFragment extends Fragment {
         if(spinner_measure!=null && measureSelected.equals(Measure.Type.WEIGHT)){
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
+                Log.e(TAG, "Add weight: " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
+                onWeightListener.resetAddWeight();
             }
 
             if(onWeightListener.changedWeight()!=null){
@@ -246,9 +249,10 @@ public class StatisticsFragment extends Fragment {
 
             if(onWeightListener.deletedWeight()>0){
                 int id_changed_weight = onWeightListener.deletedWeight();
+                Log.e(TAG, id_changed_weight +" Delete Before : " +weights.toString());
                 weights.stream().filter(w -> w.getId() == id_changed_weight)
                         .findFirst().ifPresent(w -> weights.remove(w));
-
+                Log.e(TAG, "Delete After : " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetDeletedWeight();
             }
@@ -260,6 +264,7 @@ public class StatisticsFragment extends Fragment {
     public interface OnWeightListener{
         void onAddWeight();
         StatisticsData newWeight();
+        void resetAddWeight();
 
         void modifyWeight(StatisticsData statisticsData);
         StatisticsData changedWeight();

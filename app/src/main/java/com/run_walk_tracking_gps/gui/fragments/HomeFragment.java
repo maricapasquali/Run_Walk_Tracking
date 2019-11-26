@@ -88,26 +88,19 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         if (bundle != null) {
             double weight = bundle.getDouble(WEIGHT);
 
-            try {
-                if (weight == 0.0) throw new Exception(WEIGHT);
-                //Toast.makeText(getContext(), "Weight Fragment : "+ weight, Toast.LENGTH_LONG).show();
-                workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
+            workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
 
-                    workout_duration.setText(Measure.DurationUtilities.format(sec));
-                    workout.getDuration().setValue((double) sec);
+                workout_duration.setText(Measure.DurationUtilities.format(sec));
+                workout.getDuration().setValue((double) sec);
 
-                    workout.getDistance().setValue(distance);
-                    workout_distance.setText(workout.getDistance().toString(true));
+                workout.getDistance().setValue(distance);
+                workout_distance.setText(workout.getDistance().toString(true));
 
-                    workout.getCalories().setValue(energy);
-                    workout_energy.setText(workout.getCalories().toString(true));
-                    //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: "
-                    // + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
-                }, this);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                workout.getCalories().setValue(energy);
+                workout_energy.setText(workout.getCalories().toString(true));
+                //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: "
+                // + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
+            }, this);
         }
 
     }

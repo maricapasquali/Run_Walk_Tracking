@@ -219,6 +219,8 @@
 
     </string>
 
+    <!-- Intent Key -->
+    <string name="isLastWeight">Ultimo peso</string>
 
     <!-- Messaggi di errore -->
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>

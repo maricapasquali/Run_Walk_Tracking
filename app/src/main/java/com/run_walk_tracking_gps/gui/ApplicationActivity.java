@@ -2,35 +2,22 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
-
 import android.support.annotation.Nullable;
-
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
-import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class ApplicationActivity extends CommonActivity
@@ -61,7 +48,7 @@ public class ApplicationActivity extends CommonActivity
     private StatisticsData statisticsData;
     private int id_weight_delete;
 
-    private ArrayList<Workout> workouts;
+    private ArrayList<Workout> workouts = new ArrayList<>();
     private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
     @Override
@@ -81,8 +68,14 @@ public class ApplicationActivity extends CommonActivity
 
                 addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
                 selectActiveFragment(HomeFragment.class);
+                Log.e(TAG, statisticsWeight.toString()); Log.e(TAG, workouts.toString());
             }
-            Log.e(TAG, statisticsWeight.toString()); Log.e(TAG, workouts.toString());
+            if(workouts==null) workouts = new ArrayList<>();
+            if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
+
+            // TODO: 11/26/2019 PER TEST MAPROUTE
+            //StatisticsData statisticsData = StatisticsData.create(this, Measure.Type.WEIGHT);statisticsData.setValue(70.0); statisticsWeight.add(statisticsData);
+
         }
     }
 
@@ -145,7 +138,6 @@ public class ApplicationActivity extends CommonActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     protected void onResume() {
@@ -254,10 +246,16 @@ public class ApplicationActivity extends CommonActivity
     }
 
     @Override
+    public void resetAddWeight() {
+        newWeight =null;
+    }
+
+    @Override
     public void modifyWeight(StatisticsData statisticsData) {
         final Intent intent = new Intent(this, ModifyWeightActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         intent.putExtra(getString(R.string.modify_weight),statisticsData);
+        intent.putExtra(getString(R.string.isLastWeight), statisticsWeight.size()==1);
         startActivityForResult(intent, REQUEST_MODIFY_WEIGHT);
     }
 
@@ -343,6 +341,7 @@ public class ApplicationActivity extends CommonActivity
                     }
 
                     id_weight_delete = data.getIntExtra(getString(R.string.delete_weight), 0);
+                    Log.d(TAG, "Workout deleted = " +id_weight_delete);
                     if(id_weight_delete>0){
                         Toast.makeText(this, R.string.delete_weight, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout deleted = " +id_weight_delete);
@@ -355,6 +354,5 @@ public class ApplicationActivity extends CommonActivity
                 break;
         }
     }
-
 
  }

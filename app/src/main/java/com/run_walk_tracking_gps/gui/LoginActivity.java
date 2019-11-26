@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -13,15 +12,12 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.stream.Stream;
 
 public class LoginActivity extends CommonActivity implements  Response.Listener<JSONObject> {
 
@@ -73,7 +69,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
 
     @Override
     public void onResponse(JSONObject response) {
-        if(new SplashScreenActivity().dataAccessResponse(this, response)) finishAffinity();
+        if(SplashScreenActivity.dataAccessResponse(this, response)) finishAffinity();
     }
 
     private boolean check(Editable user, Editable pass){
