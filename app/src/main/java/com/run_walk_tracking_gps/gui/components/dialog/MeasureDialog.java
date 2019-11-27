@@ -60,7 +60,6 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
 
     private void setUnit(Measure.Type measure){
         this.measure = Measure.create(getContext(), measure);
-
         if(measure.equals(Measure.Type.DURATION)){
             final TextView separation = theView.findViewById(R.id.separation);
             separation.setText(Measure.Unit.HOURS.getStrId());
@@ -72,7 +71,6 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-
         onSelectedListener.setPositiveListener(getMeasureValue());
     }
 
@@ -94,7 +92,6 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
             case HEIGHT:
                 int[] values = valueHeightSplit(valueStr);
                 iValue = values[0]; dValue = values[1];
-
                 break;
         }
         integer.setValue(iValue);
@@ -104,7 +101,6 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
     private int[] valueHeightSplit(String heightStr){
         final String REGEX_INT_DEC = "\\.";
         final String REGEX_DEC_UNIT = getContext().getResources().getString(R.string.space);
-
         String[] hSplit = heightStr.split(REGEX_INT_DEC);
         final String integer = hSplit[0];
         final String decimal = hSplit[1].split(REGEX_DEC_UNIT)[0];

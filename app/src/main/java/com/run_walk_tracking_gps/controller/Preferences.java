@@ -2,18 +2,13 @@ package com.run_walk_tracking_gps.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-
-import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 public class Preferences {
 
@@ -23,6 +18,11 @@ public class Preferences {
 
     private static final String LAST_USER_LOGGED ="last_user_logged";
     private static final String IS_JUST_LOGGED ="is_just_logged";
+
+    public static void delete(Context context, String id_user){
+        getSharedPreferencesSettingUserLogged(context).edit().remove(id_user).apply();
+        getSharedPreferencesImagesUser(context).edit().remove(id_user).apply();
+    }
 
     // LOGIN
     private static SharedPreferences getSharedPreferencesUserLogged(Context context){

@@ -1,48 +1,37 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
-import android.widget.ImageButton;
 import android.widget.ListView;
-
 import android.widget.Toast;
 
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
+import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
-
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.service.MapRouteService;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-public class DetailsWorkoutActivity extends  CommonActivity{
+public class DetailsWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>{
 
     private final static String TAG = DetailsWorkoutActivity.class.getName();
 
     private final static int REQUEST_MODIFY = 0;
 
     private ListView summary_workout;
-    private ImageButton summary_ok;
+    private FloatingActionButton summary_ok;
 
     private DetailsWorkoutAdapter adapter;
 
@@ -50,6 +39,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
     private boolean isSummary = false;
     private Workout workout;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void init() {
         Log.e(TAG, "OnCreate");
@@ -69,7 +59,6 @@ public class DetailsWorkoutActivity extends  CommonActivity{
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
-
         }
         else { // DETAILS
             workout = (Workout)getIntent().getParcelableExtra(getString(R.string.detail_workout));
@@ -84,7 +73,6 @@ public class DetailsWorkoutActivity extends  CommonActivity{
             }
         }
        if(workout!=null){
-
            adapter = new DetailsWorkoutAdapter(this, workout.details(true));
            summary_workout.setAdapter(adapter);
        }
@@ -99,7 +87,6 @@ public class DetailsWorkoutActivity extends  CommonActivity{
             findViewById(R.id.summary_map).setVisibility(View.GONE);
         }
     }
-
 
     @Override
     protected void listenerAction() {
@@ -183,7 +170,6 @@ public class DetailsWorkoutActivity extends  CommonActivity{
                         workout = work;
                         Log.d(TAG, "Workout= " + workout);
                     }
-
                 }
                 break;
         }
@@ -193,7 +179,6 @@ public class DetailsWorkoutActivity extends  CommonActivity{
     public void onBackPressed() {
         Log.e(TAG, "OnBackPressed");
         if(isSummary){
-            // TODO: 11/2/2019 REQUEST INSERT AUTO-WORKOUT
             saveWorkout();
         }
         if(isChangedWorkout){
@@ -208,11 +193,36 @@ public class DetailsWorkoutActivity extends  CommonActivity{
 
     private void saveWorkout(){
         Log.d(getString(R.string.new_workout), "Summary : Workout = "+ workout);
-        final Intent resultIntent = new Intent();
-        resultIntent.putExtra(getString(R.string.new_workout), workout);
-        setResult(Activity.RESULT_OK, resultIntent);
-        finish();
+        try {
+            final JSONObject bodyJson = workout.toJson(this);
+            Log.e(TAG, bodyJson.toString());
+            if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){
+                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
+
+    @Override
+    public void onResponse(JSONObject response) {
+        try {
+            if(HttpRequest.someError(response)){
+                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+            }else {
+                int id_workout = response.getInt(FieldDataBase.ID_WORKOUT.toName());
+                // save and send to workouts list
+                final Intent resultIntent = new Intent();
+                workout.setIdWorkout(id_workout);
+                resultIntent.putExtra(getString(R.string.new_workout), workout);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
 }
 
 

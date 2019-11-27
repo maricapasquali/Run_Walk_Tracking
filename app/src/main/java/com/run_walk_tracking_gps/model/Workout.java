@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import com.google.android.gms.common.util.NumberUtils;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateUtilities;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
@@ -32,6 +34,8 @@ public class Workout implements Parcelable, Cloneable{
     private Date date;
     private ArrayList<Measure> parameters;
     private Sport sport;
+
+    public Workout(){}
 
     public Workout(Context context){
         parameters = new ArrayList<>();
@@ -65,14 +69,14 @@ public class Workout implements Parcelable, Cloneable{
 
             try {
                 JSONObject w = (JSONObject)workouts.get(i);
-                workoutsList.get(i).setIdWorkout(w.getInt("id_workout"));
-                String map = w.getString("map_route");
+                workoutsList.get(i).setIdWorkout(w.getInt(FieldDataBase.ID_WORKOUT.toName()));
+                String map = w.getString(FieldDataBase.MAP_ROUTE.toName());
                 if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
-                workoutsList.get(i).setDate(w.getString("date"));
-                workoutsList.get(i).getDuration().setValue((double)w.getInt("duration"));
-                workoutsList.get(i).getDistance().setValue(w.getDouble("distance"));
-                workoutsList.get(i).getCalories().setValue(w.getDouble("calories"));
-                workoutsList.get(i).setSport(Sport.valueOf(w.getString("sport")));
+                workoutsList.get(i).setDate(w.getString(FieldDataBase.DATE.toName()));
+                workoutsList.get(i).getDuration().setValue((double)w.getInt(FieldDataBase.DURATION.toName()));
+                workoutsList.get(i).getDistance().setValue(w.getDouble(FieldDataBase.DISTANCE.toName()));
+                workoutsList.get(i).getCalories().setValue(w.getDouble(FieldDataBase.CALORIES.toName()));
+                workoutsList.get(i).setSport(Sport.valueOf(w.getString(FieldDataBase.SPORT.toName())));
                 double duration = workoutsList.get(i).getDuration().getValue();
                 double distance = workoutsList.get(i).getDistance().getValue();
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
@@ -196,32 +200,6 @@ public class Workout implements Parcelable, Cloneable{
         this.sport = sport;
     }
 
-    /*
-        public void setDuration(Integer duration) {
-            getDuration().setValue(Double.valueOf(duration));
-            //setMiddleSpeed();
-        }
-
-        public void setDistance(Double distance) {
-            getDistance().setValue(distance);
-            setMiddleSpeed();
-        }
-
-    private void setMiddleSpeed(){
-        int duration = getDuration().getValue().intValue();
-        double distance = Measure.isNullOrEmpty(getDistance()) ? 0d : getDistance().getValue();
-
-        setMiddleSpeed(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d));
-    }
-
-    private void setMiddleSpeed(Double middleSpeed) {
-        getMiddleSpeed().setValue(middleSpeed);
-    }
-
-    public void setCalories(Double calories) {
-        getCalories().setValue(calories);
-    } */
-
     // TODO: 11/15/2019 MIGLIORARE
     public LinkedHashMap<Workout.Info, Object> details(final boolean withMiddleSpeed){
         final LinkedHashMap<Workout.Info, Object> map = new LinkedHashMap<>();
@@ -236,6 +214,17 @@ public class Workout implements Parcelable, Cloneable{
 
     public boolean isMinimalSet(){
         return this.date!=null && this.sport!=null && !Measure.isNullOrEmpty(getDuration());
+    }
+
+    public JSONObject toJson(Context context) throws JSONException {
+        return new JSONObject()
+                .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(context)))
+                .put(FieldDataBase.MAP_ROUTE.toName(), this.getMapRoute())
+                .put(FieldDataBase.DATE.toName(), this.getDate())
+                .put(FieldDataBase.DURATION.toName(), this.getDuration().getValue())
+                .put(FieldDataBase.DISTANCE.toName(), this.getDistance().getValue())
+                .put(FieldDataBase.CALORIES.toName(), this.getCalories().getValue())
+                .put(FieldDataBase.SPORT.toName(), this.getSport());
     }
 
     @Override

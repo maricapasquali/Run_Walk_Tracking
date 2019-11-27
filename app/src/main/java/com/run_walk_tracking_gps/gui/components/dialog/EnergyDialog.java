@@ -11,7 +11,7 @@ import com.run_walk_tracking_gps.model.Measure;
 public class EnergyDialog extends MeasureDialog {
 
     private static final int MAX_VALUES_INT_CALORIES = 5000;
-    private static final int MAX_VALUES_DEC_CALORIES = 9;
+    private static final int MAX_VALUES_DEC_CALORIES = 99;
 
     private EnergyDialog(Context context, OnSelectedListener onSelectedListener) {
         super(context, Measure.Type.ENERGY, onSelectedListener);

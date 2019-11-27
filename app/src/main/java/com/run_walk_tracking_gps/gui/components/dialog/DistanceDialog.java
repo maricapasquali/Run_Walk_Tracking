@@ -10,7 +10,7 @@ import com.run_walk_tracking_gps.model.Measure;
 public class DistanceDialog extends MeasureDialog {
 
     private static final int MAX_VALUES_INT_DISTANCE = 1000;
-    private static final int MAX_VALUES_DEC_DISTANCE = 9;
+    private static final int MAX_VALUES_DEC_DISTANCE = 99;
 
     private DistanceDialog(Context context, OnSelectedListener onSelectedListener) {
         super(context, Measure.Type.DISTANCE, onSelectedListener);

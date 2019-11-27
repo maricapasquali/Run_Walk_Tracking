@@ -240,15 +240,6 @@ public class Measure implements Parcelable {
             return conversionTo(Type.MIDDLE_SPEED.getMeasureUnit()[1], value);
         else
             return conversionTo(this.type.getMeasureUnit()[1], value);
-
-        /*switch (this.type){
-            case ENERGY:
-                return getValue();
-            case MIDDLE_SPEED:
-                return isDefaultUnitMeasure() ? getValue() : conversionTo(Type.MIDDLE_SPEED.getMeasureUnit()[1], value);
-            default:
-                return isDefaultUnitMeasure() ? getValue() : conversionTo(this.type.getMeasureUnit()[1], value);
-        }*/
     }
 
     private void reSetUnit(){
@@ -317,6 +308,9 @@ public class Measure implements Parcelable {
                     this.value = unitS.equals(context.getString(Unit.FEET.getStrId())) ? conversionTo(Unit.METER, value): value;
                     break;
                 }
+                default:
+                    setValue(value);
+                    break;
             }
         }catch (JSONException e){
             e.printStackTrace();
@@ -348,7 +342,7 @@ public class Measure implements Parcelable {
     }
 
     public static boolean isNullOrEmpty(Measure distance) {
-        return distance==null || distance.getValue() == null || distance.getValue() == 0f;
+        return distance==null || distance.getValue() == null || distance.getValue() == 0d;
     }
 
     public Double conversionTo(Unit unit, Double value){
@@ -442,8 +436,6 @@ public class Measure implements Parcelable {
         public static final String FORMAT_NUMBER_SINGLE ="%d";
 
         private final static String FORMAT_DURATION = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE;
-        private final static String FORMAT_DURATION_HOME = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE;
-        private final static String FORMAT_DURATION_NO_SEC = FORMAT_NUMBER_DOUBLE+":"+FORMAT_NUMBER_DOUBLE+":00";
         private final static String FORMAT_WEIGHT = FORMAT_NUMBER_SINGLE+"."+FORMAT_NUMBER_SINGLE;
         private final static String FORMAT = FORMAT_NUMBER_SINGLE+"."+FORMAT_NUMBER_DOUBLE;
     }

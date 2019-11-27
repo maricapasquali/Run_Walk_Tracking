@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,15 +15,16 @@ import android.widget.Toast;
 
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
-import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
-import com.run_walk_tracking_gps.utilities.MeasureUtilities;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class UserActivity extends CommonActivity {
@@ -42,6 +44,7 @@ public class UserActivity extends CommonActivity {
     private TextView height;
 
     private User user;
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -63,7 +66,6 @@ public class UserActivity extends CommonActivity {
             setGui(getIntent().getParcelableExtra(getString(R.string.user_info)));
             getSupportActionBar().setTitle(user.getUsername());
         }
-
     }
 
     @Override
@@ -77,21 +79,56 @@ public class UserActivity extends CommonActivity {
         switch (item.getItemId()){
             case R.id.profile_modify:{
                 //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
-
                 final Intent profileIntent = new Intent(this, ModifyUserActivity.class);
                 profileIntent.putExtra(getString(R.string.profile), user);
                 startActivityForResult(profileIntent, REQUEST_MODIFY_PROFILE);
             }
             break;
-
             case R.id.profile_change_password:
                 Toast.makeText(this, getString(R.string.change_password), Toast.LENGTH_LONG).show();
+                startActivity(new Intent(this, ChangePasswordActivity.class));
                 break;
+            case R.id.delete_account: {
+                Toast.makeText(this, "delete", Toast.LENGTH_LONG).show();
+                try {
+                    final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(),  user.getIdUser());
+                    Log.e(TAG, bodyJson.toString());
+
+                    new AlertDialog.Builder(this).setMessage(R.string.delete_account_mex)
+                            .setPositiveButton(R.string.delete, (dialog, id) -> {
+                                if(!HttpRequest.requestDeleteUser(this, bodyJson, response -> {
+                                    try {
+                                        if(HttpRequest.someError(response) || !(boolean)response.get("delete")){
+                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                                        }else {
+                                            // CANCELLAZIONE PREFERENCES
+                                            Preferences.delete(this, String.valueOf(user.getIdUser()));
+                                            //EXIT
+                                            Preferences.unSetUserLogged(this);
+
+                                            final Intent intent = new Intent(this, BootAppActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                })){
+                                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, null).create().show();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            break;
 
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override

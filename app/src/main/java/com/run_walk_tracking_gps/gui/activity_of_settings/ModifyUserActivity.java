@@ -73,7 +73,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         gender = findViewById(R.id.modify_profile_gender);
         birthDate = findViewById(R.id.modify_profile_birth_date);
         height = findViewById(R.id.modify_profile_height);
-
+// TODO: 11/27/2019  CHECK SE EDITTEXT SONO VUOTI
         if(getIntent()!=null){
             oldUser = (User)getIntent().getParcelableExtra(getString(R.string.profile));
             oldUser.setContext(this);
@@ -194,7 +194,6 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                     }).setWithImageCrop(1,1);
             imagePicker.choosePicture(true);
         });
-
 
         gender.setOnClickListener(v ->{
             final ChooseDialog<Gender> genderDialog = new ChooseDialog<>(this, Gender.values(),

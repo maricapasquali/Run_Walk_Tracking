@@ -26,7 +26,6 @@
     <uses-feature android:name="android.hardware.sensor.stepcounter" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher_runwalktracking"
@@ -109,14 +108,14 @@
             android:name=".gui.activity_of_settings.UserActivity"
             android:parentActivityName=".gui.SettingActivity"
             android:screenOrientation="portrait" >
-
-
+        </activity>
+        <activity
+            android:name=".gui.activity_of_settings.ChangePasswordActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".gui.activity_of_settings.ModifyUserActivity"
-            android:screenOrientation="portrait" >
-
-        </activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".gui.NewWeightActivity"
             >
@@ -132,7 +131,7 @@
         <!-- SERVICE -->
         <service android:name=".service.TimeService" />
 
-        <receiver android:name=".receiver.ReceiverNotificationButtonHandler" ></receiver>
+        <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
     </application>
 
 </manifest>

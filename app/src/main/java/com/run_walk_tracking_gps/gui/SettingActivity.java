@@ -160,7 +160,6 @@ public class SettingActivity extends CommonActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
         target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -171,53 +170,7 @@ public class SettingActivity extends CommonActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-
-       /* locationOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-   /*         if(!LocationUtilities.Request.setLocationOnOff(this,Integer.valueOf(id_user), response -> {
-                try {
-                    if(HttpRequest.someError(response) || !response.getBoolean("update")){
-                        Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-                    }else {
-                        locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
-                        ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
-                        Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            })){
-                 locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
-            }*/
-
-            /*try {
-                JSONObject bodyJson = new JSONObject();
-                bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
-                        .put(FieldDataBase.FILTER.toName(), FieldDataBase.LOCATION.toName())
-                        .put(FieldDataBase.VALUE.toName(), isChecked);
-
-                if(!HttpRequest.requestUpdateSetting(this, bodyJson, response -> {
-                    try {
-                        if(HttpRequest.someError(response) || !(boolean)response.get("update")){
-                            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-                        }else {
-                            ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
-                            Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
-                        }
-                    } catch (JSONException e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                })){
-                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-        });
-*/
-
         language.setOnClickListener(v -> Toast.makeText(this, getString(R.string.language), Toast.LENGTH_SHORT).show());
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
         coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
@@ -255,9 +208,7 @@ public class SettingActivity extends CommonActivity {
 
         });
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
-
         exit.setOnClickListener(v -> {
-
             Preferences.unSetUserLogged(this);
 
             final Intent intent = new Intent(this, BootAppActivity.class);

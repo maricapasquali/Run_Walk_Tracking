@@ -195,6 +195,8 @@
     <!-- User -->
     <string name="change_password">Cambia Password</string>
     <string name="save">Salva</string>
+    <string name="delete_account">Elimina account</string>
+    <string name="delete_account_mex">Sei sicuro di cancellare l\'account?</string>
 
     <!-- Statistiche -->
     <string name="statistic_data">Dati</string>

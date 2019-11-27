@@ -11,13 +11,113 @@
         android:layout_height="wrap_content"
         android:elevation="24dp">
 
+        <LinearLayout
+            android:id="@+id/duration_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sport"
+            android:background="@drawable/textview_border"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/time_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:text="@string/time"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/time_workout_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:text="@string/time_workout"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/distance_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/duration_layout"
+            android:background="@drawable/textview_border"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/distance_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:text="@string/distance"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/distance_workout_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:text="@string/distance_workout"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/calories_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/distance_layout"
+            android:background="@drawable/textview_border"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/calories_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:text="@string/calories"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/calories_workout_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:text="@string/calories_workout"
+                android:textAlignment="center"
+                android:textSize="18sp" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/sport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/textview_border"
             android:elevation="24dp"
+            android:paddingStart="70dp"
             android:paddingTop="10dp"
+            android:paddingEnd="100dp"
             android:paddingBottom="10dp"
             android:text="@string/sport"
             android:textAlignment="center"
@@ -30,7 +130,8 @@
             android:layout_below="@+id/sport"
             android:background="@color/colorPrimary"
             android:elevation="24dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/time"
@@ -73,7 +174,8 @@
             android:layout_below="@+id/info_workout"
             android:background="@color/colorPrimary"
             android:elevation="24dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/time_workout"

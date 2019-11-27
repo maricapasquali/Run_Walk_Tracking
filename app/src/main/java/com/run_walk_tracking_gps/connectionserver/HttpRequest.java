@@ -33,9 +33,9 @@ import java.util.stream.StreamSupport;
 public class HttpRequest {
 
     private static final String TAG = HttpRequest.class.getName();
+    public static final String ERROR = "Error";
 
     private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
-    public static final String ERROR = "Error";
     private static final String ip = "192.168.1.132"; //"10.10.10.3";//
     private static final String SERVER = "http://"+ip+"/run_walk_tracking/";
 
@@ -52,7 +52,7 @@ public class HttpRequest {
     private static final String UPDATE_USER_INFO = ACCOUNT + "update_profile.php";
     private static final String DELETE_USER = ACCOUNT + "delete_account.php";
     private static final String DATA_AFTER_ACCESS = ACCOUNT + "data_after_access.php";
-    private static final String UPDATE_PASSWORD = ACCOUNT + "";
+    private static final String UPDATE_PASSWORD = ACCOUNT + "change_password.php";
 
     private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
 
@@ -138,7 +138,6 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, FORGOT_PASSWORD, bodyJson,responseJsonListener);
     }
 
-    // NON ANCORA IMPLEMENTATO IL PHP
     public static boolean requestUpdatePassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
         check(bodyJson,  FieldDataBase.fieldRequiredForUpdatePassword());
@@ -255,24 +254,24 @@ public class HttpRequest {
     }
 
     private static boolean requestJsonPostToServerVolley(final Context context, final String url, final JSONObject bodyJson,
-                                                        Response.Listener<JSONObject> listenerResponse){
+                                                         final Response.Listener<JSONObject> listenerResponse){
 
         return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
     }
 
-
-    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
-                                                     Response.Listener<JSONObject> listenerResponse){
+    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method,
+                                                                       final JSONObject bodyJson,
+                                                                       final Response.Listener<JSONObject> listenerResponse){
         return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, false);
     }
 
     private static boolean requestJsonToServerVolleyWithProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
-                                                     Response.Listener<JSONObject> listenerResponse){
+                                                                    final Response.Listener<JSONObject> listenerResponse){
         return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, true);
     }
 
     private static boolean requestJsonToServerVolley(final Context context, final String url, final int method, final JSONObject bodyJson,
-                                                     Response.Listener<JSONObject> listenerResponse, final boolean withProgressBar){
+                                                     final Response.Listener<JSONObject> listenerResponse, final boolean withProgressBar){
         final AtomicBoolean errRequest = new AtomicBoolean(false);
         if(!isNetWorkAvailable(context)) return false;
 
@@ -288,8 +287,8 @@ public class HttpRequest {
         return !errRequest.get();
     }
 
-    private static  RequestQueue createRequest(Context context, int method, String url,  JSONObject bodyJson, Response.Listener<JSONObject>  responseJsonListener,
-                                       AtomicBoolean errRequest){
+    private static  RequestQueue createRequest(Context context, int method, String url, JSONObject bodyJson,
+                                               Response.Listener<JSONObject>  responseJsonListener, AtomicBoolean errRequest){
         final RequestQueue queue = Volley.newRequestQueue(context);
         final JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, bodyJson,
                 responseJsonListener,
@@ -304,14 +303,12 @@ public class HttpRequest {
         queue.add(jsonRequest);
         return queue;
     }
-/*
-    public static boolean requestStringToServerVolley(final Context context, final String url, final int method, final JSONObject jsonBody,
-                                                Response.Listener<String> listener){
 
+    /*public static boolean requestStringToServerVolley(final Context context, final String url, final int method,
+                                                        final JSONObject jsonBody, Response.Listener<String> listener){
         final AtomicBoolean errRequest = new AtomicBoolean(false);
         if(!isNetWorkAvailable(context)) return false;
         String mRequestBody = jsonBody.toString();
-
         final StringRequest stringRequest = new StringRequest(method, url, listener, error -> {
             Log.e(TAG, error.toString());
             Toast.makeText(context, errRequest.toString(), Toast.LENGTH_LONG).show();
@@ -321,7 +318,6 @@ public class HttpRequest {
             public String getBodyContentType() {
                 return "application/json; charset=utf-8";
             }
-
             @Override
             public byte[] getBody() throws AuthFailureError {
                 try {
@@ -332,11 +328,8 @@ public class HttpRequest {
                 }
             }
         };
-
         final RequestQueue queue = Volley.newRequestQueue(context);
         queue.add(stringRequest);
         return!errRequest.get();
-    }
-
-*/
+    }*/
 }

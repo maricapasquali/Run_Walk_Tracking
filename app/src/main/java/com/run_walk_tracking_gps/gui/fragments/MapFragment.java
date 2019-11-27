@@ -46,7 +46,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private static final int MAP_TYPE_DEFAULT = GoogleMap.MAP_TYPE_NORMAL;
     private static final float DEFAULT_ZOOM = 15f;
 
-    private static  final String ROUTE = "route";
+    private static final String ROUTE = "route";
 
     private String routeStr;
     private MapView mapView;
@@ -86,9 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         myLocation = view.findViewById(R.id.mylocation);
         typeMap = view.findViewById(R.id.type_map);
 
-        if(routeStr!=null)
-            ((LinearLayout)myLocation.getParent()).setVisibility(View.GONE);
-
+        if(routeStr!=null) ((LinearLayout)myLocation.getParent()).setVisibility(View.GONE);
         setListener();
 
         return view;
@@ -172,6 +170,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         final List<LatLng> route = CollectionsUtilities.convertStringToListLatLng(mapRoute);
         route.forEach(polylineOptions::add);
         googleMap.addPolyline(polylineOptions);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(0), DEFAULT_ZOOM));
     }
 
     private void setGoogleMap(Activity activity, GoogleMap gMap, boolean myLocation) {
@@ -179,9 +178,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             googleMap = gMap;
             googleMap.setMapType(MAP_TYPE_DEFAULT);
 
-            if(myLocation) googleMap.setMyLocationEnabled(true);
-
-            myLocation(activity);
+            if(myLocation){
+                googleMap.setMyLocationEnabled(true);
+                myLocation(activity);
+            }
 
             LocationUtilities.setRequestPermissions(false);
         }catch (SecurityException e){
