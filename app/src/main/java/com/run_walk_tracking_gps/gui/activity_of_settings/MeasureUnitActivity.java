@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.ListView;
@@ -39,6 +40,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
     private int distance;
     private int weight;
     private int height;
+
 
     @Override
     protected void init() {
@@ -123,11 +125,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
             }else {
                 final Iterable<String> iterable = response::keys;
                 final String measure = StreamSupport.stream(iterable.spliterator(), false).filter(i -> !i.equals("update")).findFirst().orElse(null);
-                JSONObject unit_measure = ((JSONObject)settingsJson.get(FieldDataBase.UNIT_MEASURE.toName()));
-                unit_measure.put(measure, response.get(measure));
-                settingsJson.put(FieldDataBase.UNIT_MEASURE.toName(), unit_measure);
-                appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
-                Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                Preferences.setUnitMeasure(this, measure, response.get(measure));
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

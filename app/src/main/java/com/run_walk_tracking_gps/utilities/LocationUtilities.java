@@ -74,7 +74,6 @@ public class LocationUtilities {
     }
 
     public static void setLocationPermission(final Activity activity) {
-        Log.d(TAG, activity.getString(R.string.request_location_permissions));
         final String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
         ActivityCompat.requestPermissions(activity, permissions, LOCATION_PERMISSION_REQUEST_CODE);

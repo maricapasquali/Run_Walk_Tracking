@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
+import com.run_walk_tracking_gps.intent.ConstantIntent;
 import com.run_walk_tracking_gps.model.Workout;
 
 import org.json.JSONException;
@@ -52,7 +54,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
         summary_ok.setVisibility(View.GONE);
 
         if(getIntent()!=null){
-            oldWorkout = getIntent().getParcelableExtra(getString(R.string.modify_workout));
+            oldWorkout = getIntent().getParcelableExtra(ConstantIntent.MODIFY_WORKOUT);
             if(oldWorkout!=null){
                 oldWorkout.setContext(this);
                 workout = oldWorkout.clone();
@@ -65,6 +67,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
             }
         }
     }
+
 
     @Override
     protected void listenerAction() {
@@ -188,7 +191,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                 Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
                 Intent returnIntent = new Intent();
                 if(response.getBoolean("update")){
-                    returnIntent.putExtra(getString(R.string.changed_workout), workout);
+                    returnIntent.putExtra(ConstantIntent.CHANGED_WORKOUT, workout);
                 }
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();

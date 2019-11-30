@@ -4,22 +4,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/workouts"
-        android:checked="false"
-        android:enabled="true"
         android:icon="@drawable/ic_workouts"
         android:title="@string/workouts"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/home"
-        android:checked="true"
-        android:enabled="true"
         android:icon="@drawable/ic_home"
         android:title="@string/home"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/statistics"
-        android:checked="false"
-        android:enabled="true"
         android:icon="@drawable/ic_statistics"
         android:title="@string/statistics"
         app:showAsAction="ifRoom" />

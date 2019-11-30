@@ -229,6 +229,7 @@ public class StatisticsFragment extends Fragment {
         if(spinner_measure!=null && measureSelected.equals(Measure.Type.WEIGHT)){
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
+                weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
                 Log.e(TAG, "Add weight: " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetAddWeight();

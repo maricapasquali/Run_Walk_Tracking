@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
+import com.run_walk_tracking_gps.intent.ConstantIntent;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
 import org.json.JSONException;
@@ -46,14 +48,14 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
         listView = findViewById(R.id.info_to_add);
 
         if(getIntent()!=null){
-            oldStatisticsData = getIntent().getParcelableExtra(getString(R.string.modify_weight));
+            oldStatisticsData = getIntent().getParcelableExtra(ConstantIntent.MODIFY_WEIGHT);
             if(oldStatisticsData!=null){
                 oldStatisticsData.setContext(this);
                 adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString()) ;
                 listView.setAdapter(adapter);
                 statisticsData = oldStatisticsData.clone();
             }
-            isLastWeight = getIntent().getBooleanExtra(getString(R.string.isLastWeight), false);
+            isLastWeight = getIntent().getBooleanExtra(ConstantIntent.IS_LAST_WEIGHT, false);
         }
     }
 
@@ -154,12 +156,12 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                 Log.e(TAG, response.toString());
 
                 if(Stream.of(response.keys()).anyMatch(i -> i.next().equals("update"))){
-                    modifyWeightIntent.putExtra(getString(R.string.modify_weight), statisticsData);
+                    modifyWeightIntent.putExtra(ConstantIntent.CHANGED_WEIGHT, statisticsData);
                     Log.e(TAG, statisticsData.toString());
                 }
 
                 if(Stream.of(response.keys()).anyMatch(i -> i.next().equals("delete"))){
-                    modifyWeightIntent.putExtra(getString(R.string.delete_weight), statisticsData.getId());
+                    modifyWeightIntent.putExtra(ConstantIntent.DELETE_WEIGHT, statisticsData.getId());
                     Log.e(TAG, "Id to delete : " +statisticsData.getId());
                 }
 

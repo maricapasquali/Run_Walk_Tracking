@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
+import org.json.JSONException;
+
 import java.util.Arrays;
 
 
@@ -40,7 +42,7 @@ public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterf
     @Override
     public void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
-        onSelectedItemListener.onSelectedItem(type[which], strings[which]);
+        if(indexCheckedItem!=which) onSelectedItemListener.onSelectedItem(type[which], strings[which]);
     }
 
     public interface OnSelectedItemListener<T> {

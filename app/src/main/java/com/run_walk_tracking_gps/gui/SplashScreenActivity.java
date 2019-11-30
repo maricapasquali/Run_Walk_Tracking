@@ -12,6 +12,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.intent.ConstantIntent;
 import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
@@ -74,8 +75,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                     intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
                     context.startActivity(intent);
                 } else {
-                    Preferences.writeImageIntoSharedPreferences(context, response);
-                    Preferences.writeSettingsIntoSharedPreferences(context, response);
+                    Preferences.setImage(context, response);
+                    Preferences.setSettings(context, response);
                     intent = new Intent(context, ApplicationActivity.class);
                     final ArrayList<Workout> workouts = Workout.createList(context, (JSONArray)response.get("workouts"));
                     final ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
@@ -91,8 +92,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                         statisticsWeight.add(statisticsData);
                     }
                     Log.d(TAG, statisticsWeight.toString()); Log.d(TAG, workouts.toString());
-                    intent.putExtra(context.getString(R.string.workouts), workouts);
-                    intent.putExtra(context.getString(R.string.weights), statisticsWeight);
+                    intent.putExtra(ConstantIntent.WORKOUTS, workouts);
+                    intent.putExtra(ConstantIntent.WEIGHTS, statisticsWeight);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
                     context.startActivity(intent);

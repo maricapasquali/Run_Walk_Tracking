@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
@@ -11,10 +13,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.model.enumerations.Language;
+import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.LanguageUtilities;
+
+import org.json.JSONException;
+
 
 public abstract class CommonActivity extends AppCompatActivity {
 
     private final static String TAG = CommonActivity.class.getName();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +77,14 @@ public abstract class CommonActivity extends AppCompatActivity {
 
         if(toStack) fragmentTransaction.addToBackStack(null);
         return fragmentTransaction;
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.e(TAG, "onConfigurationChanged ");
+        init();
+        listenerAction();
     }
 
 }

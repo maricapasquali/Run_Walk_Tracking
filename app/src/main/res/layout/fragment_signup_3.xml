@@ -148,14 +148,14 @@
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginTop="30dp"
             android:background="@drawable/button_boot_app"
-            android:drawableStart="@drawable/ic_login"
+            android:drawableStart="@drawable/ic_sign_up"
             android:drawablePadding="20dp"
             android:gravity="center_horizontal|center_vertical"
             android:paddingStart="20dp"
             android:paddingTop="15dp"
             android:paddingEnd="20dp"
             android:paddingBottom="15dp"
-            android:text="@string/login"
+            android:text="@string/rec"
             android:textColor="@android:color/background_light" />
 
         <LinearLayout

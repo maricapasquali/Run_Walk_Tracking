@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,6 +26,7 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
     private static final String TAG = ChangePasswordActivity.class.getName();
     private EditText password;
     private EditText conf_password;
+
     @Override
     protected void init() {
         setContentView(R.layout.activity_change_password);

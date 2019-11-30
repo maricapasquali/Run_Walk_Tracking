@@ -2,8 +2,10 @@ package com.run_walk_tracking_gps.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.gui.SettingActivity;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 
@@ -18,8 +20,11 @@ public class Preferences {
 
     private static final String LAST_USER_LOGGED ="last_user_logged";
     private static final String IS_JUST_LOGGED ="is_just_logged";
+    private static final String USER ="user";
+    private static final String APP ="app";
 
-    public static void delete(Context context, String id_user){
+
+    public static void deleteUser(Context context, String id_user){
         getSharedPreferencesSettingUserLogged(context).edit().remove(id_user).apply();
         getSharedPreferencesImagesUser(context).edit().remove(id_user).apply();
     }
@@ -51,13 +56,13 @@ public class Preferences {
         return context.getSharedPreferences(PREFERENCE_USER_IMAGE, Context.MODE_PRIVATE);
     }
 
-    public static void writeImageIntoSharedPreferences(Context context, int id_user, String image_encode){
+    public static void setImage(Context context, int id_user, String image_encode){
         if(image_encode!=null)
             getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
     }
 
-    public static void writeImageIntoSharedPreferences(Context context, JSONObject response) throws JSONException {
-        JSONObject user = ((JSONObject)response.get("user"));
+    public static void setImage(Context context, JSONObject response) throws JSONException {
+        JSONObject user = ((JSONObject)response.get(USER));
         String image_encode = user.getString(FieldDataBase.IMG_ENCODE.toName());
         int id_user = (int)user.get(FieldDataBase.ID_USER.toName());
 
@@ -132,15 +137,19 @@ public class Preferences {
         return getNameDefault(context, FieldDataBase.TARGET);
     }
 
-    public static void writeSettingsIntoSharedPreferences(Context context, JSONObject json) throws JSONException {
-        final String id_user = String.valueOf((int) ((JSONObject) json.get("user")).get(FieldDataBase.ID_USER.toName()));
+    public static String getLanguageDefault(Context context) throws JSONException {
+        return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(FieldDataBase.LANGUAGE.toName());
+    }
+
+    public static void setSettings(Context context, JSONObject json) throws JSONException {
+        final String id_user = String.valueOf((int) ((JSONObject) json.get(USER)).get(FieldDataBase.ID_USER.toName()));
 
         // MEMORIZZO ID DELL'USER CHE HA EFFETTUATO L'ACCESSO
         final boolean isJustLogged = Preferences.isJustUserLogged(context);
         if (!isJustLogged) Preferences.setUserLogged(context, id_user);
 
         // MEMORIZZO LE IMPOSTRAZIONI DELLA APPLICAZIONE
-        final JSONObject app = (JSONObject) json.get("app");
+        final JSONObject app = (JSONObject) json.get(APP);
         SharedPreferences sharedPreferences = Preferences.getSharedPreferencesSettingUserLogged(context);
         String appSharedPreferencesJson = sharedPreferences.getString(id_user, "");
         if (appSharedPreferencesJson.isEmpty() || !(app.equals(new JSONObject(appSharedPreferencesJson)))) {
@@ -150,4 +159,27 @@ public class Preferences {
         }
     }
 
+    public static void setLanguage(Context context, String language) throws JSONException {
+        final String id_user = getIdUserLogged(context);
+        final JSONObject appJson = getAppJsonUserLogged(context, id_user);
+        final JSONObject settingsJson = (JSONObject)appJson.get(FieldDataBase.SETTINGS.toName());
+        settingsJson.put(FieldDataBase.LANGUAGE.toName(), language);
+
+        appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
+        Preferences.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
+    }
+
+
+    public static void setUnitMeasure(Context context, String measure, Object unit) throws JSONException {
+        final String id_user = getIdUserLogged(context);
+        final JSONObject appJson = getAppJsonUserLogged(context, id_user);
+        final JSONObject settingsJson = (JSONObject)appJson.get(FieldDataBase.SETTINGS.toName());
+        final JSONObject unit_measure = ((JSONObject)settingsJson.get(FieldDataBase.UNIT_MEASURE.toName()));
+
+        unit_measure.put(measure, unit);
+        settingsJson.put(FieldDataBase.UNIT_MEASURE.toName(), unit_measure);
+        appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
+        Preferences.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
+
+    }
 }

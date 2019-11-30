@@ -23,10 +23,12 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;
+import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.service.MapRouteService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
+import com.run_walk_tracking_gps.utilities.LanguageUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.ArrayList;
@@ -89,7 +91,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.e(TAG, "onCreate : " + LanguageUtilities.of(getContext()));
         final Bundle bundle = getArguments();
         if (bundle != null) {
             double weight = bundle.getDouble(WEIGHT);

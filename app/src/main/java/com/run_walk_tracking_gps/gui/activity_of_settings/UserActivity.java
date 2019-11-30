@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +21,7 @@ import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.CommonActivity;
+import com.run_walk_tracking_gps.intent.ConstantIntent;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
@@ -63,10 +65,11 @@ public class UserActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         if(getIntent()!=null){
-            setGui(getIntent().getParcelableExtra(getString(R.string.user_info)));
+            setGui(getIntent().getParcelableExtra(ConstantIntent.USER_INFO));
             getSupportActionBar().setTitle(user.getUsername());
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,7 +83,7 @@ public class UserActivity extends CommonActivity {
             case R.id.profile_modify:{
                 //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
                 final Intent profileIntent = new Intent(this, ModifyUserActivity.class);
-                profileIntent.putExtra(getString(R.string.profile), user);
+                profileIntent.putExtra(ConstantIntent.PROFILE, user);
                 startActivityForResult(profileIntent, REQUEST_MODIFY_PROFILE);
             }
             break;
@@ -102,7 +105,7 @@ public class UserActivity extends CommonActivity {
                                             Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                                         }else {
                                             // CANCELLAZIONE PREFERENCES
-                                            Preferences.delete(this, String.valueOf(user.getIdUser()));
+                                            Preferences.deleteUser(this, String.valueOf(user.getIdUser()));
                                             //EXIT
                                             Preferences.unSetUserLogged(this);
 
@@ -137,7 +140,7 @@ public class UserActivity extends CommonActivity {
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
                 if(resultCode== Activity.RESULT_OK){
-                    setGui((User) data.getParcelableExtra(getString(R.string.changed_profile)));
+                    setGui((User) data.getParcelableExtra(ConstantIntent.CHANGED_USER));
                 }
                 break;
         }

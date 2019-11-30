@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.utilities;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -14,14 +13,14 @@ import android.support.v4.app.NotificationManagerCompat;
  * Helper, utilize per mascherare la creazione di canali su Android Oreo,
  * ed inoltre utilizza le notifiche compat che sono compatibili sia con Oreo che con vecchie versioni.
  */
-public final class NotificationHelper {
+public final class NotificationUtilities {
 
     public static final String CHANNEL_1 = "Channel_1";
     public static final String CHANNEL_2 = "Channel_2";
     private NotificationManager notificationManager;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public NotificationHelper(Context context) {
+    public NotificationUtilities(Context context) {
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         createChannels();

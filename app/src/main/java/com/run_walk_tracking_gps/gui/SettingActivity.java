@@ -1,9 +1,11 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
-
-
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -11,7 +13,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -24,12 +25,18 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.gui.components.dialog.LanguageDialog;
+import com.run_walk_tracking_gps.intent.ConstantIntent;
 import com.run_walk_tracking_gps.model.UserBuilder;
+import com.run_walk_tracking_gps.model.enumerations.Language;
+import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.LanguageUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
 import java.util.stream.Stream;
 
 
@@ -56,6 +63,8 @@ public class SettingActivity extends CommonActivity {
 
     private JSONObject appJson;
     private JSONObject settingsJson;
+
+    private Configuration newConfiguration;
 
     @Override
     protected void init() {
@@ -133,6 +142,7 @@ public class SettingActivity extends CommonActivity {
     @Override
     public void onBackPressed() {
         Intent returnIntent = new Intent();
+        returnIntent.putExtra(ConstantIntent.CHANGED_LANGUAGE, newConfiguration);
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
     }
@@ -171,7 +181,27 @@ public class SettingActivity extends CommonActivity {
             }
         });
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-        language.setOnClickListener(v -> Toast.makeText(this, getString(R.string.language), Toast.LENGTH_SHORT).show());
+
+        language.setOnClickListener(v -> {
+
+            Log.e("Language", "Language default: " + LanguageUtilities.of(this));
+            LanguageDialog.create(this, LanguageUtilities.of(this),
+                        (val, description) -> {
+                            try {
+                                Log.e("Language", "Language : " + val + ", string : " + description);
+                                newConfiguration = LanguageUtilities.change(SettingActivity.this, val);
+                                Preferences.setLanguage(SettingActivity.this, getString(val.getCode()));
+                                onConfigurationChanged(newConfiguration);
+                                Log.e("Language", "Configuration : " + newConfiguration);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+            }).show();
+
+
+        });
+
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
         coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
         info.setOnClickListener(v -> {
@@ -192,7 +222,7 @@ public class SettingActivity extends CommonActivity {
                         try {
                             final JSONObject userInfo = (JSONObject) response.get("user");
                             final Intent intent = new Intent(this, UserActivity.class);
-                            intent.putExtra(getString(R.string.user_info), UserBuilder.create(this, userInfo).build());
+                            intent.putExtra(ConstantIntent.USER_INFO, UserBuilder.create(this, userInfo).build());
                             startActivity(intent);
 
                         } catch (JSONException e) {
@@ -217,6 +247,7 @@ public class SettingActivity extends CommonActivity {
             finish();
         });
     }
+
 
     private void onChangeSpinnerSelection(String type, int position){
         try {

@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
+import android.content.Context;
 import android.support.v4.util.Pair;
 
 import java.text.DateFormat;

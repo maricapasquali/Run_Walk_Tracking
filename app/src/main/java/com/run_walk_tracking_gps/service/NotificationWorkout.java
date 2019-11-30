@@ -2,14 +2,11 @@ package com.run_walk_tracking_gps.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -17,7 +14,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
-import com.run_walk_tracking_gps.utilities.NotificationHelper;
+import com.run_walk_tracking_gps.utilities.NotificationUtilities;
 
 public class NotificationWorkout {
 
@@ -32,7 +29,7 @@ public class NotificationWorkout {
     private Context context;
     private Service service;
 
-    private NotificationHelper notificationHelper;
+    private NotificationUtilities notificationHelper;
     private NotificationCompat.Builder notificationBuilder;
 
     private RemoteViews remoteViewSmall;
@@ -42,7 +39,7 @@ public class NotificationWorkout {
     public NotificationWorkout(Context c, Service service){
         this.context = c;
         this.service = service;
-        this.notificationHelper = new NotificationHelper(context);
+        this.notificationHelper = new NotificationUtilities(context);
 
         this.remoteViewSmall  = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_small);
         this.remoteViewBig = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_big);
@@ -52,7 +49,7 @@ public class NotificationWorkout {
         PendingIntent onClickNotificationIntent = PendingIntent.getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-        this.notificationBuilder = this.notificationHelper.getNotificationBuilder(context, NotificationHelper.CHANNEL_1)
+        this.notificationBuilder = this.notificationHelper.getNotificationBuilder(context, NotificationUtilities.CHANNEL_1)
                                                           .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                                                           .setCustomContentView(remoteViewSmall)
                                                           .setCustomBigContentView(remoteViewBig)
