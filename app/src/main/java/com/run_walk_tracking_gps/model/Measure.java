@@ -82,6 +82,13 @@ public class Measure implements Parcelable {
             return new Type[]{MIDDLE_SPEED,ENERGY, DISTANCE, WEIGHT};
         }
 
+        /**
+         * @return default measure unit of DATABASE
+         */
+        public Unit getMeasureUnitDefault(){
+            return getMeasureUnit()[0];
+        }
+
         public Unit[] getMeasureUnit() {
             Unit[] measureUnits = new Unit[0];
 
@@ -349,7 +356,7 @@ public class Measure implements Parcelable {
         return distance==null || distance.getValue() == null || distance.getValue() == 0d;
     }
 
-    public Double conversionTo(Unit unit, Double value){
+    public static Double conversionTo(Unit unit, Double value){
         switch (unit){
             case MILE:
                 return ConversionUnitUtilities.kilometerToMile(value);

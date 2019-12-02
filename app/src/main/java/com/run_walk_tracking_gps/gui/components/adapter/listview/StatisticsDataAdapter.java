@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,18 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
+import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.toList;
 
 
 public class StatisticsDataAdapter extends BaseAdapter {
@@ -37,6 +45,23 @@ public class StatisticsDataAdapter extends BaseAdapter {
         this.statisticsFiltered.clear();
         this.statisticsFiltered.addAll(list);
         this.notifyDataSetChanged();
+    }
+
+    // TODO: 12/2/2019 MIGLIORARE
+    private List<StatisticsData> getStatisticsFilteredGraphic(){
+        final List<StatisticsData> statisticsData = new ArrayList<>();
+        final Measure.Type type = statisticsFiltered.get(0).getMeasure().getType();
+        final Measure.Unit unit = statisticsFiltered.get(0).getMeasure().getUnit();
+
+        for (int i=0; i<statisticsFiltered.size(); i++) {
+            Double value = statisticsFiltered.get(i).getValue();
+            statisticsData.add(StatisticsBuilder.create(context, type)
+                                                .setDate(statisticsFiltered.get(i).getDate())
+                                                .setValue(unit.equals(type.getMeasureUnitDefault()) ? value : Measure.conversionTo(unit, value))
+                                                .build());
+        }
+        Log.e(TAG, statisticsFiltered.toString());
+        return statisticsData;
     }
 
     @Override
@@ -69,9 +94,10 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
                 seriesPoint.setSize(13);
                 seriesPoint.setColor(R.color.colorPrimaryDark);
-                statisticsFiltered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate()))
+                final  List<StatisticsData> statisticsFilteredGraphic = getStatisticsFilteredGraphic();
+                statisticsFilteredGraphic.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate()))
                         .forEach(data -> seriesPoint.appendData(new DataPoint(data.getDate(),data.getValue()),true, getCount()-1));
-                statisticsFiltered.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate()))
+                statisticsFilteredGraphic.stream().sorted((d1, d2) -> d1.getDate().compareTo(d2.getDate()))
                         .forEach(data -> seriesLine.appendData(new DataPoint(data.getDate(),data.getValue()),true, getCount()-1));
 
                 graphView.addSeries(seriesPoint);graphView.addSeries(seriesLine);
@@ -81,9 +107,9 @@ public class StatisticsDataAdapter extends BaseAdapter {
                 graphView.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
 
                 // set manual x bounds to have nice steps
-                final List<Date> x = statisticsFiltered.stream().map(StatisticsData::getDate).collect(Collectors.toList());
+                final List<Date> x = statisticsFilteredGraphic.stream().map(StatisticsData::getDate).collect(toList());
                 if(!x.isEmpty()){
-                    graphView.getViewport().setMinX(x.get(statisticsFiltered.size()-1).getTime());
+                    graphView.getViewport().setMinX(x.get(statisticsFilteredGraphic.size()-1).getTime());
                     graphView.getViewport().setMaxX(x.get(0).getTime());
                     graphView.getViewport().setXAxisBoundsManual(true);
 

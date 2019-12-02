@@ -13,7 +13,7 @@ public class StatisticsBuilder {
         statisticsData = StatisticsData.create(Measure.create(context, measure));
     }
 
-    private static StatisticsBuilder create(Context context, Measure.Type measure){
+    public static StatisticsBuilder create(Context context, Measure.Type measure){
         return new StatisticsBuilder(context, measure) ;
     }
 
