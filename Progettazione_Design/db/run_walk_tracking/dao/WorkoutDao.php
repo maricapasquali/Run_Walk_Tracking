@@ -11,9 +11,6 @@ class WorkoutDao {
           startTransaction();
           $date = formatDateWithTime($workout[DATE]);
 
-          $workout[ID_SPORT] = self::findIdSport($workout[SPORT]);
-          unset($workout[SPORT]);
-
           $keys = array();
           $values = array();
           $typeParam ="";
@@ -21,7 +18,7 @@ class WorkoutDao {
           foreach ($workout as $key => $value) {
             array_push($keys, $key);
             array_push($values, $key==DATE ? $date : $value);
-            if($key==ID_USER || $key==DURATION || $key==ID_SPORT) $typeParam.="i";
+            if($key==ID_USER || $key==DURATION) $typeParam.="i";
             else if($key==DISTANCE || $key==CALORIES) $typeParam.="d";
             else $typeParam.="s";
 
@@ -50,8 +47,8 @@ class WorkoutDao {
      $workouts = array();
 
      if(connect()){
-        $stmt = getConnection()->prepare("SELECT w.id_workout, w.map_route, DATE_FORMAT(w.date,'%d/%m/%Y %H:%i') AS date, w.duration, w.distance, w.calories, s.name as sport
-        FROM workout w join sport s on(w.id_sport=s.id_sport) WHERE id_user =? ORDER BY UNIX_TIMESTAMP(date) DESC;");
+        $stmt = getConnection()->prepare("SELECT id_workout, map_route, DATE_FORMAT(date,'%d/%m/%Y %H:%i') AS date,
+                                                 duration, distance, calories, sport FROM workout  WHERE id_user =? ORDER BY UNIX_TIMESTAMP(date) DESC;");
         if(!$stmt) throw new Exception("Workouts : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("i", $id_user);
         if(!$stmt->execute()) throw new Exception("Workouts : Selezione fallita. Errore: ". getErrorConnection());
@@ -74,10 +71,6 @@ class WorkoutDao {
          if(isset($workout[DATE])){
            $date = formatDateWithTime($workout[DATE]);
          }
-         if(isset($workout[SPORT])){
-           $workout[ID_SPORT] = self::findIdSport($workout[SPORT]);
-           unset($workout[SPORT]);
-         }
 
          $keys = array();
          $values = array();
@@ -86,7 +79,7 @@ class WorkoutDao {
            if($key!=ID_WORKOUT){
              array_push($keys, $key);
              array_push($values, $key==DATE ? $date : $value);
-             if($key==DURATION || $key==ID_SPORT) $typeParam.="i";
+             if($key==DURATION) $typeParam.="i";
              else if($key==DISTANCE || $key==CALORIES || $key==MIDDLE_SPEED) $typeParam.="d";
              else $typeParam.="s";
            }
@@ -133,17 +126,6 @@ class WorkoutDao {
      return true;
    }
 
-   private static function findIdSport($name_sport){
-     $stmt = getConnection()->prepare("SELECT id_sport FROM sport WHERE name=?");
-     if(!$stmt) throw new Exception("Sport find id: Preparazione fallita. Errore: ". getErrorConnection());
-     $stmt->bind_param("s", $name_sport);
-     if(!$stmt->execute()) throw new Exception("Sport find id: Selezione fallito. Errore: ". getErrorConnection());
-     $stmt->bind_result($id_sport);
-     $stmt->fetch();
-     if($id_sport==NULL) throw new Exception("Sport ($name_sport) NON ESISTENTE");
-     $stmt->close();
-     return $id_sport;
-   }
 }
 
 ?>

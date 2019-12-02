@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Dic 02, 2019 alle 19:43
+-- Creato il: Dic 02, 2019 alle 23:54
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -85,51 +85,13 @@ CREATE TABLE `request_forgot_password` (
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `sport`
---
-
-CREATE TABLE `sport` (
-  `id_sport` int(11) NOT NULL,
-  `name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `sport`
---
-
-INSERT INTO `sport` (`id_sport`, `name`) VALUES
-(1, 'RUN'),
-(2, 'WALK');
-
--- --------------------------------------------------------
-
---
 -- Struttura della tabella `sport_default`
 --
 
 CREATE TABLE `sport_default` (
   `id_user` int(11) NOT NULL,
-  `sport` int(11) NOT NULL
+  `sport` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `target`
---
-
-CREATE TABLE `target` (
-  `id_target` int(11) NOT NULL,
-  `name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `target`
---
-
-INSERT INTO `target` (`id_target`, `name`) VALUES
-(1, 'MARATHON'),
-(2, 'LOSE_WEIGHT');
 
 -- --------------------------------------------------------
 
@@ -139,7 +101,7 @@ INSERT INTO `target` (`id_target`, `name`) VALUES
 
 CREATE TABLE `target_default` (
   `id_user` int(11) NOT NULL,
-  `target` int(11) NOT NULL
+  `target` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -147,16 +109,16 @@ CREATE TABLE `target_default` (
 --
 DELIMITER $$
 CREATE TRIGGER `after_insert_target_default` AFTER INSERT ON `target_default` FOR EACH ROW BEGIN
-DECLARE run_sport int DEFAULT 1;
-DECLARE walk_sport int DEFAULT 2;
+DECLARE run_sport int DEFAULT "RUN";
+DECLARE walk_sport int DEFAULT "WALK";
 
-if new.target=1
+if new.target="MARATHON"
 THEN
 
 	INSERT INTO sport_default (id_user, sport) 
     VALUES(new.id_user, run_sport);
 
-ELSEIF new.target=2
+ELSEIF new.target="LOSE_WEIGHT"
 THEN
 
 	INSERT INTO sport_default (id_user, sport) 
@@ -239,7 +201,7 @@ CREATE TABLE `workout` (
   `duration` int(10) UNSIGNED NOT NULL,
   `distance` float NOT NULL DEFAULT 0,
   `calories` float NOT NULL DEFAULT 0,
-  `id_sport` int(11) NOT NULL
+  `sport` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -283,26 +245,12 @@ ALTER TABLE `request_forgot_password`
   ADD PRIMARY KEY (`email`) USING BTREE;
 
 --
--- Indici per le tabelle `sport`
---
-ALTER TABLE `sport`
-  ADD PRIMARY KEY (`id_sport`),
-  ADD UNIQUE KEY `ID_Sport_IND` (`id_sport`);
-
---
 -- Indici per le tabelle `sport_default`
 --
 ALTER TABLE `sport_default`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `FKchange_IND` (`id_user`),
   ADD KEY `FKR_1_IND` (`sport`);
-
---
--- Indici per le tabelle `target`
---
-ALTER TABLE `target`
-  ADD PRIMARY KEY (`id_target`),
-  ADD UNIQUE KEY `ID_Target_IND` (`id_target`);
 
 --
 -- Indici per le tabelle `target_default`
@@ -341,24 +289,11 @@ ALTER TABLE `weight`
 ALTER TABLE `workout`
   ADD PRIMARY KEY (`id_workout`),
   ADD UNIQUE KEY `ID_Workout_IND` (`id_workout`),
-  ADD KEY `FKabout_IND` (`id_sport`),
   ADD KEY `FKcarry_out_IND` (`id_user`) USING BTREE;
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
 --
-
---
--- AUTO_INCREMENT per la tabella `sport`
---
-ALTER TABLE `sport`
-  MODIFY `id_sport` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT per la tabella `target`
---
-ALTER TABLE `target`
-  MODIFY `id_target` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `user`
@@ -410,14 +345,12 @@ ALTER TABLE `profile_image`
 -- Limiti per la tabella `sport_default`
 --
 ALTER TABLE `sport_default`
-  ADD CONSTRAINT `FKR_1_FK` FOREIGN KEY (`sport`) REFERENCES `sport` (`id_sport`),
   ADD CONSTRAINT `FKchange_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `target_default`
 --
 ALTER TABLE `target_default`
-  ADD CONSTRAINT `FKR_FK` FOREIGN KEY (`target`) REFERENCES `target` (`id_target`),
   ADD CONSTRAINT `FKpossess_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
@@ -436,7 +369,6 @@ ALTER TABLE `weight`
 -- Limiti per la tabella `workout`
 --
 ALTER TABLE `workout`
-  ADD CONSTRAINT `FKabout_FK` FOREIGN KEY (`id_sport`) REFERENCES `sport` (`id_sport`),
   ADD CONSTRAINT `FKcarry_out_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 COMMIT;
 

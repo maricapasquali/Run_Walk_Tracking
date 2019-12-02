@@ -11,6 +11,10 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public abstract class CustomSpinnerAdapter<T> extends BaseAdapter {
 
@@ -95,6 +99,11 @@ public abstract class CustomSpinnerAdapter<T> extends BaseAdapter {
 
 
         return view;
+    }
+
+    public int getPositionOf(T item){
+        List<T> list = Stream.of(genericArray).collect(Collectors.toList());
+        return list.indexOf(item);
     }
 
     private static class ListHolder {

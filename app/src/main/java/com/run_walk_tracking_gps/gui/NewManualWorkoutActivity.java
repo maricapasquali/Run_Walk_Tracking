@@ -12,7 +12,7 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewManualWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -86,7 +86,6 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                     }else{
                         detail.setText(distanceMeasure.toString());
                         workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
-
                     }
                     workout.setMiddleSpeed();
                 }).show();
@@ -113,7 +112,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             if(!workout.isMinimalSet())
                 throw new NullPointerException("Workout doesn't correctly set !! " + workout);
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)))
+            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                                                         .put(FieldDataBase.SPORT.toName(), workout.getSport())
                                                         .put(FieldDataBase.DURATION.toName(), workout.getDuration().getValue())
                                                         .put(FieldDataBase.DATE.toName(), workout.getDate());

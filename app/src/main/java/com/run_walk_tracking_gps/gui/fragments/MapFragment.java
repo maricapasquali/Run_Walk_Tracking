@@ -1,11 +1,9 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,18 +22,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.exception.NoGPSException;
 import com.run_walk_tracking_gps.gui.components.FactoryPolyLine;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 

@@ -14,7 +14,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
@@ -24,6 +24,9 @@ import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
+import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.model.enumerations.Target;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
@@ -50,10 +53,8 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout info;
     private LinearLayout exit;
 
-    private String id_user;
-
-    private JSONObject settingsJson;
-
+    private int idStrTarget;
+    private int idStrSport;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -65,6 +66,7 @@ public class SettingActivity extends CommonActivity {
         sport = findViewById(R.id.setting_spinner_sport);
         final SportAdapterSpinner spinnerAdapterSport = new SportAdapterSpinner(this, false);
         sport.setAdapter(spinnerAdapterSport);
+
         // target
         target = findViewById(R.id.setting_spinner_target);
         final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this, false);
@@ -84,14 +86,11 @@ public class SettingActivity extends CommonActivity {
 
         try{
 
-            id_user = Preferences.getIdUserLogged(this);
-            settingsJson = Preferences.getSettingsJsonUserLogged(this, id_user);
+            idStrSport = DefaultPreferencesUser.getSportDefault(this).getStrId();
+            sport.setSelection(spinnerAdapterSport.getPositionOf(idStrSport));
 
-            int sport_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.SPORT.toName())).get(FieldDataBase.ID_SPORT.toName()) -1;
-            int target_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.TARGET.toName())).get(FieldDataBase.ID_TARGET.toName()) -1;
-
-            sport.setSelection(sport_default);
-            target.setSelection(target_default);
+            idStrTarget = DefaultPreferencesUser.getTargetDefault(this).getStrId();
+            target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
 
         }catch (Exception e){
             Log.e(TAG, e.getMessage());
@@ -132,7 +131,12 @@ public class SettingActivity extends CommonActivity {
         sport.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onChangeSpinnerSelection(FieldDataBase.SPORT.toName(), position);
+                if(idStrSport!=(int)parent.getSelectedItem())
+                {
+                    Sport sport = (Sport) EnumUtilities.getEnumFromStrId(Sport.class, (int)parent.getSelectedItem());
+                    Log.e(TAG, sport.toString());
+                    onChangeSpinnerSelection(Sport.class.getSimpleName().toLowerCase(), sport);
+                }
             }
 
             @Override
@@ -142,9 +146,12 @@ public class SettingActivity extends CommonActivity {
         target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onChangeSpinnerSelection(FieldDataBase.TARGET.toName(), position);
+                if (idStrTarget != (int) parent.getSelectedItem()) {
+                    Target target = (Target) EnumUtilities.getEnumFromStrId(Target.class, (int) parent.getSelectedItem());
+                    Log.e(TAG, target.toString());
+                    onChangeSpinnerSelection(Target.class.getSimpleName().toLowerCase(), target);
+                }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -200,7 +207,7 @@ public class SettingActivity extends CommonActivity {
         profile.setOnClickListener(v ->{
             try {
 
-                final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)));
+                final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)));
                 if(!HttpRequest.requestUserInformation(this, bodyJson, response -> {
 
                     if(HttpRequest.someError(response))
@@ -226,7 +233,7 @@ public class SettingActivity extends CommonActivity {
         });
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
         exit.setOnClickListener(v -> {
-            Preferences.unSetUserLogged(this);
+            DefaultPreferencesUser.unSetUserLogged(this);
 
             final Intent intent = new Intent(this, BootAppActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -236,12 +243,17 @@ public class SettingActivity extends CommonActivity {
     }
 
 
-    private void onChangeSpinnerSelection(String type, int position){
+    private void onChangeSpinnerSelection(String type, Enum value){
         try {
-            int id = position +1;
-            int s_default = (int) ((JSONObject)settingsJson.get(type)).get("id_"+type);
+
+            String id_user = DefaultPreferencesUser.getIdUserLogged(this);
+            JSONObject settingsJson = DefaultPreferencesUser.getSettingsJsonUserLogged(this, id_user);
+
+            String s_default = settingsJson.getString(type);
+            String id = value.toString();
             Log.d(TAG, "Selected " + type + " = " + id + ", Default = " + s_default);
-            if(id != s_default){
+
+            if(!id.equals(s_default)){
                 // request update
                 JSONObject bodyJson = new JSONObject();
                 bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
@@ -253,8 +265,8 @@ public class SettingActivity extends CommonActivity {
                         if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.ERROR)) || !(boolean)response.get("update")){
                             Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
                         }else {
-
-                            Preferences.updateSpinnerSettings(this, type, (JSONObject)response.get(type));
+                            Log.e(TAG, response.toString());
+                            DefaultPreferencesUser.updateSpinnerSettings(this, type, response.getString(type));
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());

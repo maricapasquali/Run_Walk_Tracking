@@ -11,7 +11,7 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
@@ -34,8 +34,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        if(Preferences.isJustUserLogged(this)){
-            int id_user = Integer.valueOf(Preferences.getIdUserLogged(this));
+        if(DefaultPreferencesUser.isJustUserLogged(this)){
+            int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
 
             try {
                 // REQUEST IMAGE PROFILE, WEIGHTS AND WORKOUTS
@@ -75,8 +75,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                     intent.putExtra(FieldDataBase.ID_USER.toName(), response.getInt(FieldDataBase.ID_USER.toName()));
                     context.startActivity(intent);
                 } else {
-                    Preferences.setImage(context, response);
-                    Preferences.setSettings(context, response);
+                    DefaultPreferencesUser.setImage(context, response);
+                    DefaultPreferencesUser.setSettings(context, response);
                     intent = new Intent(context, ApplicationActivity.class);
                     final ArrayList<Workout> workouts = Workout.createList(context, (JSONArray)response.get("workouts"));
                     final ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();

@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.intent.KeysIntent;
@@ -105,9 +105,9 @@ public class UserActivity extends CommonActivity {
                                             Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                                         }else {
                                             // CANCELLAZIONE PREFERENCES
-                                            Preferences.deleteUser(this, String.valueOf(user.getIdUser()));
+                                            DefaultPreferencesUser.deleteUser(this, String.valueOf(user.getIdUser()));
                                             //EXIT
-                                            Preferences.unSetUserLogged(this);
+                                            DefaultPreferencesUser.unSetUserLogged(this);
 
                                             final Intent intent = new Intent(this, BootAppActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -164,7 +164,7 @@ public class UserActivity extends CommonActivity {
 
         height.setText(user.getHeight().toString());
 
-        String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
+        String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
         Log.e(TAG, "IMAGE ENCODE = " + img_encode);
         if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 

@@ -2,9 +2,8 @@ package com.run_walk_tracking_gps.service;
 
 import android.content.Context;
 
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 
@@ -23,11 +22,7 @@ public class EnergyService implements WorkoutServiceHandler.OnEnergyListener {
     public EnergyService(Context context, double weightInKg){
         super();
         this.weight = weightInKg;
-        try {
-            this.sport = (Sport) EnumUtilities.getEnumFromString(Sport.class, context, Preferences.getNameSportDefault(context));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        this.sport = DefaultPreferencesUser.getSportDefault(context);
     }
 
     @Override

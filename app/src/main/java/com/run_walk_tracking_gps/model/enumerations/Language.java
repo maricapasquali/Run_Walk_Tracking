@@ -3,12 +3,8 @@ package com.run_walk_tracking_gps.model.enumerations;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
-
-import org.json.JSONException;
 
 import java.util.Locale;
 import java.util.stream.Stream;

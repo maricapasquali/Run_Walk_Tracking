@@ -13,7 +13,7 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
@@ -90,7 +90,7 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
 
     private void saveChangedPassword(final String hash){
         try {
-            int id_user = Integer.valueOf(Preferences.getIdUserLogged(this));
+            int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
             final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
                     .put(FieldDataBase.PASSWORD.toName(), hash);
 

@@ -22,7 +22,7 @@ import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -81,7 +81,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             oldUser.setContext(this);
             Log.d(TAG, oldUser.toString());
 
-            String img_encode = Preferences.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
+            String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
             if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
             name.setText(oldUser.getName());
@@ -252,7 +252,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             if(HttpRequest.someError(response) || !(boolean)response.get("update")){
                 Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             }else {
-                Preferences.setImage(this, user.getIdUser(), image_encode);
+                DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
 
                 final Intent returnIntent = new Intent();
                 returnIntent.putExtra(KeysIntent.CHANGED_USER, user);

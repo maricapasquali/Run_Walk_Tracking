@@ -6,18 +6,8 @@ import android.app.Service;
 import android.content.Context;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.Response;
 import com.google.android.gms.location.LocationRequest;
-import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class LocationUtilities {
 

@@ -6,10 +6,9 @@ import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateHelper;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
 import org.json.JSONArray;
@@ -42,7 +41,8 @@ public class Workout implements Parcelable, Cloneable{
         parameters.add(Measure.create(context, Measure.Type.DISTANCE));
         parameters.add(Measure.create(context, Measure.Type.ENERGY));
         parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
-        sport = (Sport) EnumUtilities.getEnumFromString(Sport.class, context, Sport.defaultForUser(context));
+        sport = DefaultPreferencesUser.getSportDefault(context);
+
         setContext(context);
     }
 
@@ -217,7 +217,7 @@ public class Workout implements Parcelable, Cloneable{
 
     public JSONObject toJson(Context context) throws JSONException {
         return new JSONObject()
-                .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(context)))
+                .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
                 .put(FieldDataBase.MAP_ROUTE.toName(), this.getMapRoute())
                 .put(FieldDataBase.DATE.toName(), this.getDate())
                 .put(FieldDataBase.DURATION.toName(), this.getDuration().getValue())

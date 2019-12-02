@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
@@ -21,11 +21,6 @@ import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class MeasureUnitActivity extends CommonActivity implements RadioGroup.OnCheckedChangeListener,  Response.Listener<JSONObject>{
 
@@ -73,7 +68,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
                 value = getString(unit.getStrId());
                 Log.d(TAG, "Filter = "+ filter +", Value = "+value);
                 try {
-                    final String  id_user = Preferences.getIdUserLogged(this);
+                    final String  id_user = DefaultPreferencesUser.getIdUserLogged(this);
                     JSONObject bodyJson = new JSONObject();
                     bodyJson.put(FieldDataBase.ID_USER.toName(), id_user)
                             .put(FieldDataBase.FILTER.toName(), filter)
@@ -97,7 +92,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
             if(HttpRequest.someError(response) || !(boolean)response.get("update")){
                 Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             }else {
-                 Preferences.setUnitMeasure(this, filter, value);
+                 DefaultPreferencesUser.setUnitMeasure(this, filter, value);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

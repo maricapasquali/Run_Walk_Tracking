@@ -15,7 +15,7 @@ import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -82,7 +82,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 throw new NullPointerException("Weight data doesn't correctly set !! " + statisticsData);
 
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(Preferences.getIdUserLogged(this)))
+            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                     .put(FieldDataBase.VALUE.toName(), statisticsData.getValue())
                     .put(FieldDataBase.DATE.toName(), statisticsData.getDate());
 

@@ -34,19 +34,10 @@ class UserDao {
           if(!$stmt->execute()) throw new Exception("Login : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
-          $stmt = getConnection()->prepare("SELECT id_target FROM target WHERE name=?");
-          if(!$stmt) throw new Exception("Target find id: Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("s", $name_target);
-          $name_target = $user[TARGET];
-          if(!$stmt->execute()) throw new Exception("Target find id: Selezione fallito. Errore: ". getErrorConnection());
-          $stmt->bind_result($id_target);
-          $stmt->fetch();
-          if($id_target==NULL) throw new Exception("Target ($name_target) NON ESISTENTE");
-          $stmt->close();
-
           $stmt = getConnection()->prepare("INSERT INTO target_default(id_user, target) VALUES (?, ?)");
           if(!$stmt) throw new Exception("Target : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("ii", $id, $id_target);
+          $stmt->bind_param("is", $id, $target);
+          $target = $user[TARGET];
           if(!$stmt->execute()) throw new Exception("Target : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 

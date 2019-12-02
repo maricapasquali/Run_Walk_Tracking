@@ -1,9 +1,7 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -12,20 +10,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.model.enumerations.Language;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ApplicationActivity extends CommonActivity
         implements  WorkoutsFragment.OnWorkOutSelectedListener,

@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
@@ -25,8 +26,9 @@ import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.service.MapRouteService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,10 +143,10 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     }
 
     private void setSport(){
-        final Sport sport_e = (Sport) EnumUtilities.getEnumFromString(Sport.class, getContext(), Sport.defaultForUser(getContext()));
-        sport.setText(getString(sport_e.getStrId()));
-        sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
-        sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+         final Sport sport_e = DefaultPreferencesUser.getSportDefault(getContext());
+         sport.setText(getString(sport_e.getStrId()));
+         sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
+         sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     @SuppressLint("RestrictedApi")

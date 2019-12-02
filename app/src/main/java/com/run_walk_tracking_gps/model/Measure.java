@@ -4,22 +4,18 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
 import org.json.JSONException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Measure implements Parcelable {
@@ -89,7 +85,7 @@ public class Measure implements Parcelable {
 
         private Unit getValueOfMeasureUnitDefault(final Context context ){
             try {
-                String measure = Preferences.getUnitDefault(context, this.toString().toLowerCase());
+                String measure = DefaultPreferencesUser.getUnitDefault(context, this.toString().toLowerCase());
                 final Unit unit = Stream.of(getMeasureUnit()).filter(f ->context.getString(f.getStrId()).equals(measure)).findFirst().orElse(getMeasureUnitDefault());
                 return unit;
             }catch (JSONException e){
@@ -163,31 +159,31 @@ public class Measure implements Parcelable {
         // TODO: 12/2/2019 MIGLIORARE 
         switch (type){
             case HEIGHT:
-                if(!Preferences.isJustUserLogged(context) ||
-                        Preferences.getUnitHeightDefault(context).equals(context.getString(Measure.Unit.METER.getStrId())))
+                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
+                        DefaultPreferencesUser.getUnitHeightDefault(context).equals(context.getString(Measure.Unit.METER.getStrId())))
                     setUnit(Measure.Unit.METER);
                 else
                     setUnit(Measure.Unit.FEET);
 
                 break;
             case DISTANCE:
-                if(!Preferences.isJustUserLogged(context) ||
-                        Preferences.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
+                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
+                        DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
                     setUnit(Measure.Unit.KILOMETER);
                 else
                     setUnit(Measure.Unit.MILE);
 
                 break;
             case WEIGHT:
-                if(!Preferences.isJustUserLogged(context) ||
-                        Preferences.getUnitWeightDefault(context).equals(context.getString(Measure.Unit.KILOGRAM.getStrId())))
+                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
+                        DefaultPreferencesUser.getUnitWeightDefault(context).equals(context.getString(Measure.Unit.KILOGRAM.getStrId())))
                     setUnit(Measure.Unit.KILOGRAM);
                 else
                     setUnit(Measure.Unit.POUND);
                 break;
             case MIDDLE_SPEED:
-                if(!Preferences.isJustUserLogged(context) ||
-                        Preferences.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
+                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
+                        DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
                     setUnit(Unit.KILOMETER_PER_HOUR);
                 else
                     setUnit(Unit.MILE_PER_HOUR);
@@ -288,7 +284,7 @@ public class Measure implements Parcelable {
                     case MIDDLE_SPEED:
                     {
 
-                        final String unitS = Preferences.getUnitDistanceDefault(context); //km
+                        final String unitS = DefaultPreferencesUser.getUnitDistanceDefault(context); //km
                         if(!unitS.equals(context.getString(this.unit.getStrId()).split("/")[0])) // km  != mi
                             setUnit(this.unit.equals(Type.MIDDLE_SPEED.getMeasureUnit()[0])? // mi/h
                                     Type.MIDDLE_SPEED.getMeasureUnit()[1]
@@ -298,7 +294,7 @@ public class Measure implements Parcelable {
                     }
                     default:
                     {
-                        final String unitS = Preferences.getUnitDefault(context, this.type.toString().toLowerCase()); //km
+                        final String unitS = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase()); //km
                         if(unitS==null) setUnit(this.type.getMeasureUnitDefault());
                         else {
                             if(!unitS.equals(context.getString(this.unit.getStrId()))) // km  == mi
@@ -317,9 +313,9 @@ public class Measure implements Parcelable {
     private boolean isDefaultUnitMeasure(){
         try {
             if(type.equals(Type.MIDDLE_SPEED))
-                return Preferences.getUnitDistanceDefault(context).equals(context.getString(Type.DISTANCE.getMeasureUnit()[0].strId));
+                return DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Type.DISTANCE.getMeasureUnit()[0].strId));
             else{
-                String uDef = Preferences.getUnitDefault(context, this.type.toString().toLowerCase());
+                String uDef = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase());
                 return uDef==null || uDef.equals(context.getString(this.type.getMeasureUnitDefault().strId));
             }
 
@@ -337,17 +333,17 @@ public class Measure implements Parcelable {
     public void setValueFromGui(Double value){
             switch (this.type){
                 case DISTANCE:{
-                    String unitS = Preferences.getUnitDistanceDefault(context);
+                    String unitS = DefaultPreferencesUser.getUnitDistanceDefault(context);
                     this.value = unitS.equals(context.getString(Unit.MILE.getStrId())) ? conversionTo(Unit.KILOMETER, value): value;
                     break;
                 }
                 case WEIGHT:{
-                    String unitS = Preferences.getUnitWeightDefault(context);
+                    String unitS = DefaultPreferencesUser.getUnitWeightDefault(context);
                     this.value = unitS.equals(context.getString(Unit.POUND.getStrId())) ? conversionTo(Unit.KILOGRAM, value): value;
                     break;
                 }
                 case HEIGHT:{
-                    String unitS = Preferences.getUnitHeightDefault(context);
+                    String unitS = DefaultPreferencesUser.getUnitHeightDefault(context);
                     this.value = unitS.equals(context.getString(Unit.FEET.getStrId())) ? conversionTo(Unit.METER, value): value;
                     break;
                 }
