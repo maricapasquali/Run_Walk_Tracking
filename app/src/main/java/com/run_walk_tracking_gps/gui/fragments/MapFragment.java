@@ -183,17 +183,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 myLocation(activity);
             }
 
-            LocationUtilities.setRequestPermissions(false);
         }catch (SecurityException e){
             LocationUtilities.setLocationPermission(activity);
-            LocationUtilities.setRequestPermissions(true);
         }
     }
 
     private void myLocation(Activity activity){
         Log.d(TAG, "viewMap");
         try {
-            if (!LocationUtilities.isGpsEnable(getContext())) throw new NoGPSException(activity);
+            if (!LocationUtilities.isGpsEnable(activity)) throw new NoGPSException(activity);
 
             final FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(activity, location -> {
@@ -205,9 +203,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         }catch (SecurityException e) {
             Log.e(TAG, e.getMessage());
-            LocationUtilities.setRequestPermissions(true);
         }
-        catch (NoGPSException ex) { LocationUtilities.setRequestPermissions(true); ex.alert();  }
+        catch (NoGPSException ex) { ex.alert();  }
     }
 
     public void onBlockScreenClickListener(boolean is) {

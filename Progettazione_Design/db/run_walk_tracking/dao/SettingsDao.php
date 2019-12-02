@@ -12,7 +12,6 @@ class SettingsDao{
       $sport = self::getDefault(SPORT, $id_user);
       $target = self::getDefault(TARGET, $id_user);
       $language = self::getDefault(LANGUAGE, $id_user);
-      $location = self::getDefault(LOCATION, $id_user);
 
       $energy = self::getUnitMeaure(ENERGY, $id_user);
       $distance = self::getUnitMeaure(DISTANCE,$id_user);
@@ -24,7 +23,6 @@ class SettingsDao{
     return array(SPORT=>$sport,
                  TARGET=>$target,
                  LANGUAGE=> $language[LANGUAGE],
-                 LOCATION=> $location["active"]==1,
                  UNIT_MEASURE=> array(
                                   ENERGY =>$energy,
                                   DISTANCE=>$distance,
@@ -49,8 +47,6 @@ class SettingsDao{
 
     if($type==LANGUAGE){
       $sql = "SELECT language FROM language_default WHERE id_user=?";
-    }else if($type==LOCATION){
-      $sql = "SELECT active FROM location WHERE id_user=?";
     }else{
       $sql = "SELECT t.* FROM ".$type."_default td JOIN ".$type." t on(td.".$type."=t.id_".$type.") WHERE id_user=?;";
     }
@@ -80,10 +76,6 @@ class SettingsDao{
     return self::updateDeafult(LANGUAGE, $val, $id_user);
   }
 
-  static function updateLocationFor($val, $id_user){
-    return self::updateDeafult(LOCATION, $val, $id_user);
-  }
-
   static function updateUnitHeightFor($val, $id_user){
     return self::updateUnitMeasure(HEIGHT, $val, $id_user);
   }
@@ -102,8 +94,7 @@ class SettingsDao{
       {
 
         startTransaction();
-        $sql = ($type==LOCATION ? "UPDATE location SET active=? WHERE id_user=?;"
-          :"UPDATE ".$type."_default SET $type=? WHERE id_user=?");
+        $sql = "UPDATE ".$type."_default SET $type=? WHERE id_user=?";
         $param = ($type==LANGUAGE? "si": "ii");
         $stmt = getConnection()->prepare($sql);
         if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
@@ -122,7 +113,6 @@ class SettingsDao{
     }
     closeConnection();
     $retunArray = array(UPDATE => true);
-    if($type==LOCATION) return $retunArray  + array($type => $value_update["active"]==1);
     if($type==LANGUAGE) return $retunArray  + array($type => $value_update["language"]);
     return $retunArray + array($type => $value_update);
   }

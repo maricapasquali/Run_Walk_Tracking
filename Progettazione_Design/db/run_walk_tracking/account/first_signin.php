@@ -43,7 +43,6 @@ o
         "name": "LOSE_WEIGHT"
       },
       "language": "Inglese",
-      "location": false,
       "unit_measure": {
         "energy": {
           "id_unit": 1,

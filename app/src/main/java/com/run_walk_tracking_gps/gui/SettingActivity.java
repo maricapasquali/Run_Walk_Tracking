@@ -55,7 +55,6 @@ public class SettingActivity extends CommonActivity {
 
     private String id_user;
 
-    private JSONObject appJson;
     private JSONObject settingsJson;
 
 
@@ -89,16 +88,13 @@ public class SettingActivity extends CommonActivity {
         try{
 
             id_user = Preferences.getIdUserLogged(this);
-            appJson = Preferences.getAppJsonUserLogged(this, id_user);
             settingsJson = Preferences.getSettingsJsonUserLogged(this, id_user);
 
             int sport_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.SPORT.toName())).get(FieldDataBase.ID_SPORT.toName()) -1;
             int target_default = (int) ((JSONObject)settingsJson.get(FieldDataBase.TARGET.toName())).get(FieldDataBase.ID_TARGET.toName()) -1;
-            boolean location_default = (boolean) settingsJson.get(FieldDataBase.LOCATION.toName());
 
             sport.setSelection(sport_default);
             target.setSelection(target_default);
-            locationOnOff.setChecked(location_default);
 
         }catch (Exception e){
             Log.e(TAG, e.getMessage());
@@ -112,23 +108,7 @@ public class SettingActivity extends CommonActivity {
         if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
                 (!LocationUtilities.isGpsEnable(this) && locationOnOff.isChecked())){
 
-            if(!LocationUtilities.Request.setLocationOnOff(this,Integer.valueOf(id_user), response -> {
-                try {
-                    if(HttpRequest.someError(response) || !response.getBoolean("update")){
-                        Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-                    }else {
-                        Log.e(TAG, response.toString());
-                        locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
-                        ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(), locationOnOff.isChecked());
-                        Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            })){
-                Log.e(TAG, "Not change");
-                locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
-            }
+            locationOnOff.setChecked(LocationUtilities.isGpsEnable(this));
         }
     }
 
@@ -277,6 +257,7 @@ public class SettingActivity extends CommonActivity {
                             Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
                         }else {
 
+                            final JSONObject appJson = Preferences.getAppJsonUserLogged(this, id_user);
                             settingsJson.put(type, (JSONObject)response.get(type));
                             appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
                             Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();

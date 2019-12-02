@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Dic 01, 2019 alle 18:34
+-- Creato il: Dic 02, 2019 alle 16:28
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -21,8 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `run_walk_tracking`
 --
-CREATE DATABASE IF NOT EXISTS `run_walk_tracking` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `run_walk_tracking`;
 
 -- --------------------------------------------------------
 
@@ -44,17 +42,6 @@ CREATE TABLE `check_registration` (
 CREATE TABLE `language_default` (
   `id_user` int(11) NOT NULL,
   `language` char(2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `location`
---
-
-CREATE TABLE `location` (
-  `id_user` int(11) NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -296,7 +283,6 @@ CREATE TABLE `user` (
 DELIMITER $$
 CREATE TRIGGER `after_insert_user` AFTER INSERT ON `user` FOR EACH ROW BEGIN
 
-INSERT INTO location (id_user) VALUES(new.id_user);
 INSERT INTO unit_measure_default (id_user) VALUES(new.id_user);
 
 END
@@ -350,13 +336,6 @@ ALTER TABLE `check_registration`
 ALTER TABLE `language_default`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `FKuse_IND` (`id_user`);
-
---
--- Indici per le tabelle `location`
---
-ALTER TABLE `location`
-  ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKbe_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `login`
@@ -547,12 +526,6 @@ ALTER TABLE `check_registration`
 --
 ALTER TABLE `language_default`
   ADD CONSTRAINT `FKuse_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
-
---
--- Limiti per la tabella `location`
---
-ALTER TABLE `location`
-  ADD CONSTRAINT `FKbe_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `login`

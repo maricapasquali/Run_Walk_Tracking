@@ -53,7 +53,6 @@ print json_encode(UserDao::getUserForId($_GET['id']));
 //print json_encode(array("update sport"=>SettingsDao::updateSportFor(2, 27)));
 //print json_encode(array("update target"=>SettingsDao::updateTargetFor(2, 27)));
 //print json_encode(array("update language"=>SettingsDao::updateLanguageFor("Inglese", 27)));
-//print json_encode(array("update location"=>SettingsDao::updateLocationFor(false, 27)));
 //print json_encode(array("update distance"=>SettingsDao::updateUnitDistanceFor(1,27)));
 //print json_encode(array("update weight"=>SettingsDao::updateUnitWeightFor(1,27)));
 //print json_encode(array("update height"=>SettingsDao::updateUnitHeightFor(1,27)));

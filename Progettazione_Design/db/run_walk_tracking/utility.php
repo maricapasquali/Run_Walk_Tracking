@@ -54,7 +54,6 @@ define("VALUE", "value");
 // Settings
 define("SETTINGS", "settings");
 define("SPORT", "sport");
-define("LOCATION", "location");
 define("UNIT_MEASURE", "unit_measure");
 define("ENERGY", "energy");
 
