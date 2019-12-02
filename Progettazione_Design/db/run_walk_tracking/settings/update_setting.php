@@ -17,13 +17,13 @@ try{
     case LANGUAGE :
       print json_encode(SettingsDao::updateLanguageFor($changed_setting[VALUE], $changed_setting[ID_USER]));
       break;
-    case UNIT_DISTANCE :
+    case DISTANCE :
       print json_encode(SettingsDao::updateUnitDistanceFor($changed_setting[VALUE],  $changed_setting[ID_USER]));
       break;
-    case UNIT_WEIGHT :
+    case WEIGHT :
       print json_encode(SettingsDao::updateUnitWeightFor($changed_setting[VALUE],  $changed_setting[ID_USER]));
       break;
-    case UNIT_HEIGHT :
+    case HEIGHT :
       print json_encode(SettingsDao::updateUnitHeightFor($changed_setting[VALUE],  $changed_setting[ID_USER]));
       break;
     default:

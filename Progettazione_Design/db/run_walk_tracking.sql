@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Dic 02, 2019 alle 16:28
+-- Creato il: Dic 02, 2019 alle 19:43
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `run_walk_tracking`
 --
+CREATE DATABASE IF NOT EXISTS `run_walk_tracking` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `run_walk_tracking`;
 
 -- --------------------------------------------------------
 
@@ -174,90 +176,11 @@ DELIMITER ;
 
 CREATE TABLE `unit_measure_default` (
   `id_user` int(11) NOT NULL,
-  `energy` int(11) NOT NULL DEFAULT 1,
-  `weight` int(11) NOT NULL DEFAULT 1,
-  `distance` int(11) NOT NULL DEFAULT 1,
-  `height` int(11) NOT NULL DEFAULT 1
+  `energy` varchar(4) NOT NULL DEFAULT 'Kcal',
+  `weight` varchar(4) NOT NULL DEFAULT 'Kg',
+  `distance` varchar(4) NOT NULL DEFAULT 'Km',
+  `height` varchar(4) NOT NULL DEFAULT 'm'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `unit_measure_distance`
---
-
-CREATE TABLE `unit_measure_distance` (
-  `id_unit_distance` int(11) NOT NULL,
-  `unit` varchar(2) NOT NULL,
-  `extended_name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `unit_measure_distance`
---
-
-INSERT INTO `unit_measure_distance` (`id_unit_distance`, `unit`, `extended_name`) VALUES
-(1, 'Km', 'Chilometro'),
-(2, 'mi', 'Miglio');
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `unit_measure_energy`
---
-
-CREATE TABLE `unit_measure_energy` (
-  `id_unit_energy` int(11) NOT NULL,
-  `unit` varchar(4) NOT NULL,
-  `extended_name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `unit_measure_energy`
---
-
-INSERT INTO `unit_measure_energy` (`id_unit_energy`, `unit`, `extended_name`) VALUES
-(1, 'Kcal', 'Chilocaloria');
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `unit_measure_height`
---
-
-CREATE TABLE `unit_measure_height` (
-  `id_unit_height` int(11) NOT NULL,
-  `unit` varchar(2) NOT NULL,
-  `extended_name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `unit_measure_height`
---
-
-INSERT INTO `unit_measure_height` (`id_unit_height`, `unit`, `extended_name`) VALUES
-(1, 'm', 'Metro'),
-(2, 'ft', 'Piede');
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `unit_measure_weight`
---
-
-CREATE TABLE `unit_measure_weight` (
-  `id_unit_weight` int(11) NOT NULL,
-  `unit` varchar(2) NOT NULL,
-  `extended_name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dump dei dati per la tabella `unit_measure_weight`
---
-
-INSERT INTO `unit_measure_weight` (`id_unit_weight`, `unit`, `extended_name`) VALUES
-(1, 'Kg', 'Chilogrammo'),
-(2, 'lb', 'Libbra');
 
 -- --------------------------------------------------------
 
@@ -394,39 +317,7 @@ ALTER TABLE `target_default`
 --
 ALTER TABLE `unit_measure_default`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKchoose_IND` (`id_user`),
-  ADD KEY `FKR_6_IND` (`energy`),
-  ADD KEY `FKR_5_IND` (`weight`),
-  ADD KEY `FKR_4_IND` (`distance`),
-  ADD KEY `FKR_3_IND` (`height`);
-
---
--- Indici per le tabelle `unit_measure_distance`
---
-ALTER TABLE `unit_measure_distance`
-  ADD PRIMARY KEY (`id_unit_distance`),
-  ADD UNIQUE KEY `ID_Unit_Measure_Distance_IND` (`id_unit_distance`);
-
---
--- Indici per le tabelle `unit_measure_energy`
---
-ALTER TABLE `unit_measure_energy`
-  ADD PRIMARY KEY (`id_unit_energy`),
-  ADD UNIQUE KEY `ID_Unit_Measure_Energy_IND` (`id_unit_energy`);
-
---
--- Indici per le tabelle `unit_measure_height`
---
-ALTER TABLE `unit_measure_height`
-  ADD PRIMARY KEY (`id_unit_height`),
-  ADD UNIQUE KEY `ID_Unit_Measure_Height_IND` (`id_unit_height`);
-
---
--- Indici per le tabelle `unit_measure_weight`
---
-ALTER TABLE `unit_measure_weight`
-  ADD PRIMARY KEY (`id_unit_weight`),
-  ADD UNIQUE KEY `ID_Unit_Measure_Weight_IND` (`id_unit_weight`);
+  ADD UNIQUE KEY `FKchoose_1_IND` (`id_user`) USING BTREE;
 
 --
 -- Indici per le tabelle `user`
@@ -468,30 +359,6 @@ ALTER TABLE `sport`
 --
 ALTER TABLE `target`
   MODIFY `id_target` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT per la tabella `unit_measure_distance`
---
-ALTER TABLE `unit_measure_distance`
-  MODIFY `id_unit_distance` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT per la tabella `unit_measure_energy`
---
-ALTER TABLE `unit_measure_energy`
-  MODIFY `id_unit_energy` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT per la tabella `unit_measure_height`
---
-ALTER TABLE `unit_measure_height`
-  MODIFY `id_unit_height` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT per la tabella `unit_measure_weight`
---
-ALTER TABLE `unit_measure_weight`
-  MODIFY `id_unit_weight` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `user`
@@ -557,11 +424,7 @@ ALTER TABLE `target_default`
 -- Limiti per la tabella `unit_measure_default`
 --
 ALTER TABLE `unit_measure_default`
-  ADD CONSTRAINT `FKR_3_FK` FOREIGN KEY (`height`) REFERENCES `unit_measure_height` (`id_unit_height`),
-  ADD CONSTRAINT `FKR_4_FK` FOREIGN KEY (`distance`) REFERENCES `unit_measure_distance` (`id_unit_distance`),
-  ADD CONSTRAINT `FKR_5_FK` FOREIGN KEY (`weight`) REFERENCES `unit_measure_weight` (`id_unit_weight`),
-  ADD CONSTRAINT `FKR_6_FK` FOREIGN KEY (`energy`) REFERENCES `unit_measure_energy` (`id_unit_energy`),
-  ADD CONSTRAINT `FKchoose_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FKchoose_1_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `weight`

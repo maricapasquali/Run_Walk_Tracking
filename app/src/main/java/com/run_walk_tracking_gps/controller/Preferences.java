@@ -6,11 +6,14 @@ import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.SettingActivity;
+import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.stream.Collectors;
 
 public class Preferences {
 
@@ -22,12 +25,9 @@ public class Preferences {
     private static final String IS_JUST_LOGGED ="is_just_logged";
     private static final String USER ="user";
     private static final String APP ="app";
+    private static final String SETTINGS = "settings";
+    private static final String UNIT_MEASURE ="unit_measure";
 
-
-    public static void deleteUser(Context context, String id_user){
-        getSharedPreferencesSettingUserLogged(context).edit().remove(id_user).apply();
-        getSharedPreferencesImagesUser(context).edit().remove(id_user).apply();
-    }
 
     // LOGIN
     private static SharedPreferences getSharedPreferencesUserLogged(Context context){
@@ -38,36 +38,9 @@ public class Preferences {
         return getSharedPreferencesUserLogged(context).getBoolean(IS_JUST_LOGGED, false);
     }
 
-    public static void setUserLogged(Context context, String id_user){
-        getSharedPreferencesUserLogged(context).edit()
-                                    .putString(LAST_USER_LOGGED, id_user)
-                                    .putBoolean(IS_JUST_LOGGED, true)
-                                    .apply();
-    }
-
-    public static void unSetUserLogged(Context context){
-        getSharedPreferencesUserLogged(context).edit()
-                .putBoolean(IS_JUST_LOGGED, false)
-                .apply();
-    }
-
     //IMAGE
     public static SharedPreferences getSharedPreferencesImagesUser(Context context){
         return context.getSharedPreferences(PREFERENCE_USER_IMAGE, Context.MODE_PRIVATE);
-    }
-
-    public static void setImage(Context context, int id_user, String image_encode){
-        if(image_encode!=null)
-            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
-    }
-
-    public static void setImage(Context context, JSONObject response) throws JSONException {
-        JSONObject user = ((JSONObject)response.get(USER));
-        String image_encode = user.getString(FieldDataBase.IMG_ENCODE.toName());
-        int id_user = (int)user.get(FieldDataBase.ID_USER.toName());
-
-        if(!image_encode.equals("null") || !image_encode.equals(getSharedPreferencesImagesUser(context).getString(String.valueOf(id_user), "null")))
-            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
     }
 
     // SETTING
@@ -84,29 +57,60 @@ public class Preferences {
     }
 
     public static JSONObject getSettingsJsonUserLogged(Context context, String id_user) throws JSONException {
-        return (JSONObject) Preferences.getAppJsonUserLogged(context, id_user).get(FieldDataBase.SETTINGS.toName());
+        return (JSONObject) Preferences.getAppJsonUserLogged(context, id_user).get(SETTINGS);
     }
 
-    public static String getUnitDefault(Context context, String measure) throws JSONException{
-        JSONObject settings = Preferences.getSettingsJsonUserLogged(context, Preferences.getIdUserLogged(context));
-        return (String) ((JSONObject)((JSONObject)settings.get(FieldDataBase.UNIT_MEASURE.toName()))
-                .get(measure)).get(FieldDataBase.UNIT.toName());
+    public static JSONObject getUnitsMeasureDefault(Context context) throws JSONException {
+        return (JSONObject) getSettingsJsonUserLogged(context, getIdUserLogged(context)).get(UNIT_MEASURE);
     }
 
-    public static String getUnitHeightDefault(Context context) throws JSONException{
-        return getUnitDefault(context, FieldDataBase.HEIGHT.toName());
+    public static String getUnitDefault(Context context, String measure) throws JSONException {
+        if(Preferences.isJustUserLogged(context)){
+            JSONObject settings = Preferences.getSettingsJsonUserLogged(context, Preferences.getIdUserLogged(context));
+            return ((JSONObject)settings.get(UNIT_MEASURE)).getString(measure);
+        }
+        return null;
     }
 
-    public static String getUnitWeightDefault(Context context) throws JSONException{
-        return getUnitDefault(context, FieldDataBase.WEIGHT.toName());
+    public static String getUnitHeightDefault(Context context) {
+        final String default_measure = context.getString(Measure.Type.HEIGHT.getMeasureUnitDefault().getStrId());
+        try {
+            final String unitHeight = getUnitDefault(context, FieldDataBase.HEIGHT.toName());
+            return unitHeight==null ? default_measure : unitHeight;
+        }catch (JSONException e ){
+            return default_measure;
+        }
     }
 
-    public static String getUnitDistanceDefault(Context context) throws JSONException{
-        return getUnitDefault(context, FieldDataBase.DISTANCE.toName());
+    public static String getUnitWeightDefault(Context context) {
+        final String default_measure = context.getString(Measure.Type.WEIGHT.getMeasureUnitDefault().getStrId());
+        try {
+            final String unitWeight = getUnitDefault(context, FieldDataBase.WEIGHT.toName());
+            return unitWeight==null ? default_measure : unitWeight;
+        }catch (JSONException e ){
+            return default_measure;
+        }
+    }
+
+    public static String getUnitDistanceDefault(Context context) {
+        final String default_measure = context.getString(Measure.Type.DISTANCE.getMeasureUnitDefault().getStrId());
+        try {
+            final String unitDistance = getUnitDefault(context, FieldDataBase.DISTANCE.toName());
+            return unitDistance==null ? default_measure : unitDistance;
+        }catch (JSONException e ){
+            return default_measure;
+        }
     }
 
     public static String getUnitEnergyDefault(Context context) throws JSONException{
-        return getUnitDefault(context, FieldDataBase.ENERGY.toName());
+
+        final String default_measure = context.getString(Measure.Type.ENERGY.getMeasureUnitDefault().getStrId());
+        try {
+            final String unitEnergy = getUnitDefault(context, FieldDataBase.ENERGY.toName());
+            return unitEnergy==null ? default_measure : unitEnergy;
+        }catch (JSONException e ){
+            return default_measure;
+        }
     }
 
     public static String getUnitMiddleSpeedDefault(Context context) throws JSONException{
@@ -141,6 +145,40 @@ public class Preferences {
         return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(FieldDataBase.LANGUAGE.toName());
     }
 
+    // SET SharedPreferences
+
+    public static void deleteUser(Context context, String id_user){
+        getSharedPreferencesSettingUserLogged(context).edit().remove(id_user).apply();
+        getSharedPreferencesImagesUser(context).edit().remove(id_user).apply();
+    }
+
+    public static void setUserLogged(Context context, String id_user){
+        getSharedPreferencesUserLogged(context).edit()
+                .putString(LAST_USER_LOGGED, id_user)
+                .putBoolean(IS_JUST_LOGGED, true)
+                .apply();
+    }
+
+    public static void unSetUserLogged(Context context){
+        getSharedPreferencesUserLogged(context).edit()
+                .putBoolean(IS_JUST_LOGGED, false)
+                .apply();
+    }
+
+    public static void setImage(Context context, int id_user, String image_encode){
+        if(image_encode!=null)
+            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
+    }
+
+    public static void setImage(Context context, JSONObject response) throws JSONException {
+        JSONObject user = ((JSONObject)response.get(USER));
+        String image_encode = user.getString(FieldDataBase.IMG_ENCODE.toName());
+        int id_user = (int)user.get(FieldDataBase.ID_USER.toName());
+
+        if(!image_encode.equals("null") || !image_encode.equals(getSharedPreferencesImagesUser(context).getString(String.valueOf(id_user), "null")))
+            getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
+    }
+
     public static void setSettings(Context context, JSONObject json) throws JSONException {
         final String id_user = String.valueOf((int) ((JSONObject) json.get(USER)).get(FieldDataBase.ID_USER.toName()));
 
@@ -162,24 +200,36 @@ public class Preferences {
     public static void setLanguage(Context context, String language) throws JSONException {
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(FieldDataBase.SETTINGS.toName());
+        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
         settingsJson.put(FieldDataBase.LANGUAGE.toName(), language);
 
-        appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
+        appJson.put(SETTINGS, settingsJson);
         Preferences.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 
-
-    public static void setUnitMeasure(Context context, String measure, Object unit) throws JSONException {
+    public static void setUnitMeasure(Context context, String measure, String unit) throws JSONException {
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(FieldDataBase.SETTINGS.toName());
-        final JSONObject unit_measure = ((JSONObject)settingsJson.get(FieldDataBase.UNIT_MEASURE.toName()));
+        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
+        final JSONObject unit_measure = ((JSONObject)settingsJson.get(UNIT_MEASURE));
 
         unit_measure.put(measure, unit);
-        settingsJson.put(FieldDataBase.UNIT_MEASURE.toName(), unit_measure);
-        appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
+        settingsJson.put(UNIT_MEASURE, unit_measure);
+        appJson.put(SETTINGS, settingsJson);
+
         Preferences.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
 
+    }
+
+    // X TARGET O SPORT
+    public static void updateSpinnerSettings(Context context, String type, JSONObject jsonObject) throws JSONException {
+
+        final String id_user = getIdUserLogged(context);
+        final JSONObject appJson = getAppJsonUserLogged(context, id_user);
+        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
+
+        settingsJson.put(type, jsonObject);
+        appJson.put(SETTINGS, settingsJson);
+        Preferences.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 }

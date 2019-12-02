@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
-
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -25,7 +24,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 public class MeasureUnitActivity extends CommonActivity implements RadioGroup.OnCheckedChangeListener,  Response.Listener<JSONObject>{
 
@@ -33,14 +31,12 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
     private ListView measure_unit;
 
-    private String id_user;
-    private JSONObject appJson ;
-    private JSONObject settingsJson ;
-
     private int distance;
     private int weight;
     private int height;
 
+    private String filter;
+    private String value;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -50,17 +46,13 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
         measure_unit = findViewById(R.id.measures_units);
 
         try {
-            id_user = Preferences.getIdUserLogged(this);
-            appJson = Preferences.getAppJsonUserLogged(this, id_user);
-            settingsJson = (JSONObject)appJson.get(FieldDataBase.SETTINGS.toName());
+            JSONObject unit_measure = Preferences.getUnitsMeasureDefault(this);
 
-            JSONObject unit_measure = (JSONObject)settingsJson.get(FieldDataBase.UNIT_MEASURE.toName());
+            distance = Measure.Type.DISTANCE.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.DISTANCE.toName()))+1;
+            weight = Measure.Type.WEIGHT.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.WEIGHT.toName()))+1;
+            height = Measure.Type.HEIGHT.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.HEIGHT.toName()))+1;
 
-            distance = (int)((JSONObject)unit_measure.get(FieldDataBase.DISTANCE.toName())).get(FieldDataBase.ID_UNIT.toName());
-            weight = (int)((JSONObject)unit_measure.get(FieldDataBase.WEIGHT.toName())).get(FieldDataBase.ID_UNIT.toName());
-            height = (int)((JSONObject)unit_measure.get(FieldDataBase.HEIGHT.toName())).get(FieldDataBase.ID_UNIT.toName());
-
-            Map<Measure.Type, Integer> map = new HashMap<>();
+            final Map<Measure.Type, Integer> map = new HashMap<>();
             map.put(Measure.Type.DISTANCE, distance);
             map.put(Measure.Type.WEIGHT, weight);
             map.put(Measure.Type.HEIGHT, height);
@@ -79,40 +71,53 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+        Measure.Type type = null;
+        Measure.Unit unit;
+
         // TODO: 11/17/2019 MIGLIORARE
-        boolean is_default = true;
-        int id_unit ;
-        String filter = "";
-        switch (checkedId){
-            case R.id.unit_1: id_unit = 1; break;
-            case R.id.unit_2: id_unit = 2; break;
-            default: throw new IllegalArgumentException();
-        }
-        String measure = ((TextView)((RelativeLayout)group.getParent()).getChildAt(0)).getText().toString();
-        if(measure.equals(getString(Measure.Type.DISTANCE.getStrId()))) {
-            filter = FieldDataBase.UNIT_DISTANCE.toName();
-            is_default = distance==id_unit;
-        }else if(measure.equals(getString(Measure.Type.WEIGHT.getStrId()))){
-            filter = FieldDataBase.UNIT_WEIGHT.toName();
-            is_default = weight==id_unit;
-        }else if(measure.equals(getString(Measure.Type.HEIGHT.getStrId()))){
-            filter = FieldDataBase.UNIT_HEIGHT.toName();
-            is_default = height==id_unit;
-        }
+        final String measure = ((TextView)((RelativeLayout)group.getParent()).getChildAt(0)).getText().toString();
+        if(measure.equals(getString(Measure.Type.DISTANCE.getStrId())))
+            type = Measure.Type.DISTANCE;
+        else if(measure.equals(getString(Measure.Type.WEIGHT.getStrId())))
+            type = Measure.Type.WEIGHT;
+        else if(measure.equals(getString(Measure.Type.HEIGHT.getStrId())))
+            type = Measure.Type.HEIGHT;
 
-        if(!is_default){
-            try {
-                JSONObject bodyJson = new JSONObject();
-                bodyJson.put(FieldDataBase.ID_USER.toName(), id_user)
-                        .put(FieldDataBase.FILTER.toName(), filter)
-                        .put(FieldDataBase.VALUE.toName(), id_unit);
+        if(type!=null){
+            filter = type.toString().toLowerCase();
 
-                if(!HttpRequest.requestUpdateSetting(this, bodyJson, this)){
-                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.getMessage());
+            switch (checkedId){
+                case R.id.unit_1:
+                    unit = type.getMeasureUnitDefault();
+                    break;
+                case R.id.unit_2:
+                    unit = type.getMeasureUnit()[1];
+                    break;
+                default:
+                    throw new IllegalArgumentException();
             }
+
+            if(unit!=null){
+                value = getString(unit.getStrId());
+
+                Log.d(TAG, "Filter = "+ filter +", Value = "+value);
+
+                try {
+                    final String  id_user = Preferences.getIdUserLogged(this);
+                    JSONObject bodyJson = new JSONObject();
+                    bodyJson.put(FieldDataBase.ID_USER.toName(), id_user)
+                            .put(FieldDataBase.FILTER.toName(), filter)
+                            .put(FieldDataBase.VALUE.toName(), value);
+
+                    if(!HttpRequest.requestUpdateSetting(this, bodyJson, this)){
+                        Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
         }
 
     }
@@ -123,9 +128,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
             if(HttpRequest.someError(response) || !(boolean)response.get("update")){
                 Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             }else {
-                final Iterable<String> iterable = response::keys;
-                final String measure = StreamSupport.stream(iterable.spliterator(), false).filter(i -> !i.equals("update")).findFirst().orElse(null);
-                Preferences.setUnitMeasure(this, measure, response.get(measure));
+                 Preferences.setUnitMeasure(this, filter, value);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

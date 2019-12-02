@@ -7,20 +7,36 @@ import java.util.stream.Stream;
 
 public enum FieldDataBase {
 
-    FIRST_LOGIN, TOKEN,
-    ID_USER, NAME, LAST_NAME, BIRTH_DATE, EMAIL, CITY, PHONE, GENDER , HEIGHT,
+    FIRST_LOGIN,
+    TOKEN,
+    ID_USER,
+    NAME,
+    LAST_NAME,
+    BIRTH_DATE,
+    EMAIL,
+    CITY,
+    PHONE,
+    GENDER ,
+    HEIGHT,
     IMG_ENCODE,
-    USERNAME, PASSWORD,
-    SPORT, TARGET, LANGUAGE, WEIGHT, ENERGY,
-    ID_WEIGHT, ID_TARGET,
-    ID_WORKOUT , DURATION , ID_SPORT , MAP_ROUTE , DISTANCE , CALORIES,
+    USERNAME,
+    PASSWORD,
+    SPORT,
+    TARGET,
+    WEIGHT,
+    ID_WEIGHT,
+    ID_WORKOUT ,
+    DURATION ,
+    ID_SPORT ,
+    MAP_ROUTE ,
+    DISTANCE ,
+    CALORIES,
     DATE ,
     VALUE ,
     FILTER,
-    UNIT_MEASURE, UNIT_DISTANCE, UNIT_WEIGHT, UNIT_HEIGHT, ID_UNIT, UNIT,
-    SETTINGS;
-
-
+    ENERGY,
+    ID_TARGET,
+    LANGUAGE;
 
     public String toName() {
         return this.toString().toLowerCase();

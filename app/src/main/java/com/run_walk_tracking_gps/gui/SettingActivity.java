@@ -257,10 +257,7 @@ public class SettingActivity extends CommonActivity {
                             Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
                         }else {
 
-                            final JSONObject appJson = Preferences.getAppJsonUserLogged(this, id_user);
-                            settingsJson.put(type, (JSONObject)response.get(type));
-                            appJson.put(FieldDataBase.SETTINGS.toName(), settingsJson);
-                            Preferences.getSharedPreferencesSettingUserLogged(this).edit().putString(id_user, appJson.toString()).apply();
+                            Preferences.updateSpinnerSettings(this, type, (JSONObject)response.get(type));
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());

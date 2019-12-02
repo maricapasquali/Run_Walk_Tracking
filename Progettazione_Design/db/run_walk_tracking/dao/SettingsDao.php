@@ -13,27 +13,18 @@ class SettingsDao{
       $target = self::getDefault(TARGET, $id_user);
       $language = self::getDefault(LANGUAGE, $id_user);
 
-      $energy = self::getUnitMeaure(ENERGY, $id_user);
-      $distance = self::getUnitMeaure(DISTANCE,$id_user);
-      $weight = self::getUnitMeaure(WEIGHT,$id_user);
-      $height = self::getUnitMeaure(HEIGHT,$id_user);
-
+      $unit_measure = self::getUnitMeaureDefaultForUser($id_user);
     }
     closeConnection();
     return array(SPORT=>$sport,
                  TARGET=>$target,
                  LANGUAGE=> $language[LANGUAGE],
-                 UNIT_MEASURE=> array(
-                                  ENERGY =>$energy,
-                                  DISTANCE=>$distance,
-                                  WEIGHT=>$weight,
-                                  HEIGHT=>$height
-                                ));
+                 UNIT_MEASURE => $unit_measure);
   }
 
-  private function getUnitMeaure($type, $id_user){
+  private function getUnitMeaureDefaultForUser($id_user){
 
-    $stmt = getConnection()->prepare("SELECT t.id_unit_".$type." as id_unit, t.unit FROM unit_measure_default u JOIN unit_measure_".$type." t on (u.".$type."=t.id_unit_".$type.") WHERE id_user=?;");
+    $stmt = getConnection()->prepare("SELECT energy, distance, weight, height FROM unit_measure_default WHERE id_user=?;");
     if(!$stmt) throw new Exception("unit measure : Preparazione fallita. Errore: ". getErrorConnection());
     $stmt->bind_param("i", $id_user);
     if(!$stmt->execute()) throw new Exception("unit measure : Inserimento fallito. Errore: ". getErrorConnection());
@@ -126,17 +117,8 @@ class SettingsDao{
 
         $stmt = getConnection()->prepare("UPDATE unit_measure_default SET $type=? WHERE id_user=?");
         if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
-        $stmt->bind_param("ii" , $id_unit, $id_user);
+        $stmt->bind_param("si" , $id_unit, $id_user);
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
-        $stmt->close();
-
-
-        $stmt = getConnection()->prepare("SELECT id_unit_".$type." as id_unit, unit FROM unit_measure_".$type."  WHERE id_unit_".$type."=?");
-        if(!$stmt) throw new Exception("$type select : Preparazione fallita. Errore: ". getErrorConnection());
-        $stmt->bind_param("i", $id_unit);
-        if(!$stmt->execute()) throw new Exception("$type : Select fallito. Errore: ". getErrorConnection());
-        $result = $stmt->get_result();
-        $value_update = $result->fetch_assoc();
         $stmt->close();
 
         commitTransaction();
@@ -146,7 +128,7 @@ class SettingsDao{
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    return array(UPDATE => true) + array($type => $value_update);
+    return array(UPDATE => true);
   }
 
 }
