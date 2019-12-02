@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.widget.Button;
 
 import com.run_walk_tracking_gps.R;
@@ -14,7 +15,7 @@ public class BootAppActivity extends AttachBaseContextActivity {
 
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_bootapp);
         registration = findViewById(R.id.recbtn);
         login = findViewById(R.id.loginbtn);

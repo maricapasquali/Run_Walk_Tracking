@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
@@ -49,7 +50,7 @@ public class UserActivity extends CommonActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_profile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

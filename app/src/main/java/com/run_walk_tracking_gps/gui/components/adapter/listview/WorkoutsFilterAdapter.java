@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +123,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
                         }
                         /* La view è stata creata in precedenza, quindi posso utilizzarla. */
                         viewHolder.textView.setText(filterTime.equals(FilterTime.MONTH) ?
-                                DateUtilities.create(context).getMonth(groupLabel):String.valueOf(groupLabel));
+                                DateHelper.create(context).getMonth(groupLabel):String.valueOf(groupLabel));
 
                         break;
                 }
@@ -162,7 +162,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
             vH = (ListHolderChild) convertView.getTag();
         }
 
-        vH.date.setText(DateUtilities.create(context).parseFullToString(workout.getDate()));
+        vH.date.setText(DateHelper.create(context).parseFullToString(workout.getDate()));
         vH.time.setText(workout.getDuration().toString());
 
         vH.distance.setText(workout.getDistance().toString());

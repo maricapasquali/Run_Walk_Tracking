@@ -8,11 +8,10 @@ import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.WorkoutBuilder;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.FilterUtilities;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -35,7 +34,7 @@ public class FilterTest {
     public void initWorkout(){
 
        Workout workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("05/11/2019 11:42"))
+                .setDate(DateHelper.create(context).parseStringWithTimeToDateString("05/11/2019 11:42"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -44,7 +43,7 @@ public class FilterTest {
 
 
         workout = WorkoutBuilder.create(context)
-                                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("03/11/2019 21:07"))
+                                .setDate(DateHelper.create(context).parseStringWithTimeToDateString("03/11/2019 21:07"))
                                 .setCalories(200)
                                 .setDistance(30)
                                 .setDuration(3600)
@@ -52,7 +51,7 @@ public class FilterTest {
         workouts.add(workout);
 
         workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("02/11/2015 21:07"))
+                .setDate(DateHelper.create(context).parseStringWithTimeToDateString("02/11/2015 21:07"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -60,7 +59,7 @@ public class FilterTest {
         workouts.add(workout);
 
         workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("01/10/2015 21:07"))
+                .setDate(DateHelper.create(context).parseStringWithTimeToDateString("01/10/2015 21:07"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -105,32 +104,32 @@ public class FilterTest {
     public void initStatisticsData() throws ParseException {
 
         final  StatisticsData statisticsData = StatisticsData.create(context, Measure.Type.WEIGHT);
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("02/11/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("02/11/2019"));
         statisticsData.setValue(73.0);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("27/10/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("27/10/2019"));
         statisticsData.setValue(74.0);
         statistics.add(statisticsData);
 
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("26/10/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("26/10/2019"));
         statisticsData.setValue(74.0);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("25/10/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("25/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("24/10/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("24/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("10/10/2019"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("10/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("10/10/2016"));
+        statisticsData.setDate(DateHelper.create(context).parseShortToDate("10/10/2016"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 

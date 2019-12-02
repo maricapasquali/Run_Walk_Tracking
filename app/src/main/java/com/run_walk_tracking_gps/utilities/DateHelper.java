@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.support.v4.util.Pair;
-import android.util.Log;
 
 import com.run_walk_tracking_gps.model.enumerations.Language;
 
@@ -16,23 +15,23 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class DateUtilities {
-    private final static String TAG = DateUtilities.class.getName();
+public final class DateHelper {
+    private final static String TAG = DateHelper.class.getName();
 
     private int HOUR;
     private boolean is24H;
     private static Locale locale;
     private Calendar calendar;
 
-    private DateUtilities(Context context){
-        locale = Language.defaultForUser(context).getLocale(context);
+    private DateHelper(Context context){
+        locale = Language.Utilities.createLocale(context);
         calendar = Calendar.getInstance(locale);
         is24H = !locale.equals(Locale.ENGLISH);
         HOUR = is24H ? Calendar.HOUR_OF_DAY : Calendar.HOUR;
     }
 
-    public static DateUtilities create(Context context){
-        return new DateUtilities(context);
+    public static DateHelper create(Context context){
+        return new DateHelper(context);
     }
 
     public boolean isIs24Hour(){

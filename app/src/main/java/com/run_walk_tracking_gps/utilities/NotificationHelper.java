@@ -13,14 +13,14 @@ import android.support.v4.app.NotificationManagerCompat;
  * Helper, utilize per mascherare la creazione di canali su Android Oreo,
  * ed inoltre utilizza le notifiche compat che sono compatibili sia con Oreo che con vecchie versioni.
  */
-public final class NotificationUtilities {
+public final class NotificationHelper {
 
     public static final String CHANNEL_1 = "Channel_1";
     public static final String CHANNEL_2 = "Channel_2";
     private NotificationManager notificationManager;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public NotificationUtilities(Context context) {
+    public NotificationHelper(Context context) {
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         createChannels();

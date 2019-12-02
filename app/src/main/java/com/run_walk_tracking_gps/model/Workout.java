@@ -4,12 +4,11 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.common.util.NumberUtils;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
@@ -153,7 +152,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private String getDateStr() {
-        return DateUtilities.create(getContext()).parseShortToString(date);
+        return DateHelper.create(getContext()).parseShortToString(date);
     }
 
     public Sport getSport() {
@@ -193,7 +192,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     public void setDate(String date) {
-        this.date = DateUtilities.create(getContext()).parseStringWithTimeToDateString(date);
+        this.date = DateHelper.create(getContext()).parseStringWithTimeToDateString(date);
     }
 
     public void setSport(Sport sport) {

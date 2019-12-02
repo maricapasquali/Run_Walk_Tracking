@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -59,7 +60,7 @@ public class SettingActivity extends CommonActivity {
 
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_setting);
         getSupportActionBar().setTitle(getString(R.string.setting));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -172,8 +173,7 @@ public class SettingActivity extends CommonActivity {
             }
         });
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-
-        language.setOnClickListener(v -> {
+/*      language.setOnClickListener(v -> {
 
             Log.e("Language", "Language default: " + Language.defaultForUser(this));
             LanguageDialog.create(this, Language.defaultForUser(this),
@@ -209,9 +209,8 @@ public class SettingActivity extends CommonActivity {
                                 e.printStackTrace();
                             }
             }).show();
-
-
         });
+*/
 
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
         coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());

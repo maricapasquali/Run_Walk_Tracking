@@ -28,7 +28,7 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
     private EditText conf_password;
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_change_password);
         getSupportActionBar().setTitle(R.string.change_password);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

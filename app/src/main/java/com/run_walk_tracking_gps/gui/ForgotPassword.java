@@ -29,7 +29,7 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
     private Button request;
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_forgot_password);
         getSupportActionBar().setTitle(getString(R.string.reset_password));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -50,22 +50,22 @@ public class FilterUtilities {
             Date lastInsert = statisticsData.get(0).getDate();
             switch (filter) {
                 case WEEK:
-                    range = DateUtilities.create(context).getRangeLastWeek(lastInsert);
+                    range = DateHelper.create(context).getRangeLastWeek(lastInsert);
                     System.out.println(range);
                     break;
 
                 case MONTH:
-                    range = DateUtilities.create(context).getRangeLastMonth(lastInsert);
+                    range = DateHelper.create(context).getRangeLastMonth(lastInsert);
                     break;
 
                 case YEAR:
-                    range = DateUtilities.create(context).getRangeLastYear(lastInsert);
+                    range = DateHelper.create(context).getRangeLastYear(lastInsert);
                     break;
             }
         }
 
         Pair<Date, Date> finalRange = range;
         return range==null ? statisticsData :
-                statisticsData.stream().filter(s -> DateUtilities.isIntoRange(s.getDate(), finalRange)).collect(Collectors.toList());
+                statisticsData.stream().filter(s -> DateHelper.isIntoRange(s.getDate(), finalRange)).collect(Collectors.toList());
     }
 }

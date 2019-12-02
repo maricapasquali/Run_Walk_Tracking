@@ -43,7 +43,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_measure_unit);
         getSupportActionBar().setTitle(R.string.measure_unit);
 

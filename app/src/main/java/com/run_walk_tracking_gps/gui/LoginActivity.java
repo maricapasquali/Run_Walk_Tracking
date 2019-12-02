@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -30,7 +31,7 @@ public class LoginActivity extends AttachBaseContextActivity implements  Respons
 
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_login);
         getSupportActionBar().setTitle(getString(R.string.login));
 

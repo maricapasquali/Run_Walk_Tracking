@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +26,7 @@ public abstract class NewInformationActivity extends CommonActivity {
 
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_add_info);
 
         getSupportActionBar().setTitle(title);

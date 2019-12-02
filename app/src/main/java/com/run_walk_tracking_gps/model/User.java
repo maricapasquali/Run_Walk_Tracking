@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +68,7 @@ public class User implements Parcelable {
         last_name = userJson.getString("last_name");
         gender = Gender.valueOf(userJson.getString("gender"));
         try {
-            birth_date = DateUtilities.create(context).parseShortToDate(userJson.getString("birth_date"));
+            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString("birth_date"));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -156,7 +156,7 @@ public class User implements Parcelable {
     }
 
     public String getBirthDateString() {
-        return DateUtilities.create(height.getContext()).parseToString(DateFormat.SHORT, birth_date);
+        return DateHelper.create(height.getContext()).parseToString(DateFormat.SHORT, birth_date);
     }
 
     public String getEmail() {

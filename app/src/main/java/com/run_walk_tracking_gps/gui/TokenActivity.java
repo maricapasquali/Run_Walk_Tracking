@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +23,7 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
     private EditText token;
     private int id_user;
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_token);
         getSupportActionBar().setTitle(R.string.token);
         access = findViewById(R.id.access_login_token);

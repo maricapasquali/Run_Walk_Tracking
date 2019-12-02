@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -60,7 +61,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_modify_profile);
         getSupportActionBar().setTitle(R.string.modify);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

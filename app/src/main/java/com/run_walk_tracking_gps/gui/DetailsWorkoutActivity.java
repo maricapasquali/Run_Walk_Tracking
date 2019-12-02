@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -42,7 +43,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
 
     @SuppressLint("RestrictedApi")
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         Log.e(TAG, "OnCreate");
         setContentView(R.layout.activity_details_workout);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

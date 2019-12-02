@@ -14,6 +14,7 @@ public abstract class CommonActivity extends AppCompatActivity {
 
     private final static String TAG = CommonActivity.class.getName();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +22,9 @@ public abstract class CommonActivity extends AppCompatActivity {
 
         //hideNavigationBar();
         //fullScreenMode();
-        init();
+        Log.e(TAG, ""+ savedInstanceState);
+        init(savedInstanceState);
+
         listenerAction();
     }
 
@@ -40,7 +43,7 @@ public abstract class CommonActivity extends AppCompatActivity {
         //show the activity in full screen
     }
 
-    protected abstract void init();
+    protected abstract void init(Bundle savedInstanceState);
 
     protected abstract void listenerAction();
 
@@ -71,7 +74,7 @@ public abstract class CommonActivity extends AppCompatActivity {
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.e(TAG, "onConfigurationChanged ");
-        init();
+        init(null);
         listenerAction();
     }
 

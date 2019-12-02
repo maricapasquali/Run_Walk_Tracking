@@ -9,7 +9,7 @@ import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -179,7 +179,7 @@ public class HttpRequestVolleyTest {
 
             //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
             bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
-            bodyJson.put( FieldDataBase.DATE.toName(), DateUtilities.getCalendar().getTime());
+            bodyJson.put( FieldDataBase.DATE.toName(), DateHelper.getCalendar().getTime());
             bodyJson.put( FieldDataBase.ID_SPORT.toName(), 2);
             bodyJson.put( FieldDataBase.DURATION.toName(), 27);
 

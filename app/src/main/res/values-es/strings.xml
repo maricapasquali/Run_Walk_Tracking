@@ -92,10 +92,10 @@
     <string name="block_screen">Blocas pantalla</string>
     <string name="unlock_screen">Desbloqueas pantalla</string>
     <string-array name="type_map">
-        <item name="standard">Standard</item>
-        <item name="satellite">Satellite</item>
-        <item name="terrain">Terrain</item>
-        <item name="hybrid">Hybrid</item>
+        <item name="standard">Estándar</item>
+        <item name="satellite">Satélite</item>
+        <item name="terrain">Terreno</item>
+        <item name="hybrid">Híbrido</item>
     </string-array>
 
     <!-- Riepilogo / Dettaglio Allenamento -->

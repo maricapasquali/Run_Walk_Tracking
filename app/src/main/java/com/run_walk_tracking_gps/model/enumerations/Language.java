@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 
 import org.json.JSONException;
 
@@ -22,7 +21,7 @@ public enum Language {
 
     /*
     *  Se si aggiunge una lingua, si deve aggiungere in:
-    *  -  getLocale(...)
+    *
     *  -  Resourses : array-string (di tutti i file 'string.xml' )
     */
 
@@ -40,27 +39,15 @@ public enum Language {
         return Language.ENGLISH;
     }
 
-    public Locale getLocale(Context context){
-        switch (this) {
-            case ITALIAN:
-                return Locale.ITALIAN;
-            case ENGLISH:
-                return Locale.ENGLISH;
-            case SPANISH:
-                return Utilities.createLocale(context, this);
-            default: // =  defaultForApplication
-                return Language.defaultForApplication().getLocale(context);
-        }
-    }
-
     public static Language defaultForUser(final Context context){
         String current = null;
-        try {
+        /*try {
             current = Preferences.isJustUserLogged(context) ? Preferences.getLanguageDefault(context) : Locale.getDefault().getLanguage();
             Log.e("Language", "Language current : " + current);
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
+        current = Locale.getDefault().getLanguage();
         return  supported(context, current);
     }
 
@@ -74,6 +61,15 @@ public enum Language {
         private static Resources res;
         private static Configuration configuration;
 
+        /**
+         *
+         * @param context
+         * @return Locale for Language Default
+         */
+        public static Locale createLocale(Context context){
+            return createLocale(context, Language.defaultForUser(context));
+        }
+
         private static Locale createLocale(Context context, Language language){
             return new Locale(context.getString(language.getCode()));
         }
@@ -81,7 +77,7 @@ public enum Language {
         private static void change(Context context, Language language) {
             res = context.getResources();
             configuration  = new Configuration(res.getConfiguration());
-            final Locale locale = language.getLocale(context);
+            final Locale locale = createLocale(context, language);
             configuration.setLocale(locale);
         }
 

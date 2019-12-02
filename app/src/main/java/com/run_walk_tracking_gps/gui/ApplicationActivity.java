@@ -36,7 +36,6 @@ public class ApplicationActivity extends CommonActivity
                     StatisticsFragment.OnWeightListener {
 
     private final static String TAG = ApplicationActivity.class.getName();
-    private final static String FRAGMENT_OPEN = "fragment open";
     private final static int REQUEST_SETTINGS = 1;
     private final static int REQUEST_CHANGED_DETAILS = 2;
     private final static int REQUEST_SUMMARY = 3;
@@ -58,10 +57,8 @@ public class ApplicationActivity extends CommonActivity
     private ArrayList<Workout> workouts = new ArrayList<>();
     private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
-    private Bundle saveInstanceState;
-
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         Log.d(TAG,"init");
 
         setContentView(R.layout.activity_application);
@@ -77,33 +74,18 @@ public class ApplicationActivity extends CommonActivity
                 workouts.forEach(w -> w.setContext(this));
                 statisticsWeight.forEach(s -> s.setContext(this));
 
-                if(saveInstanceState==null){
+                if(savedInstanceState==null){
                     selectActiveFragment(HomeFragment.class);
-                }else{
-                    final String fragmentClassName = saveInstanceState.getString(FRAGMENT_OPEN);
-                    if(fragmentClassName!=null){
-                        try {
-                            selectActiveFragment(Class.forName(fragmentClassName));
-                            Log.e(TAG, "Class Fragment Open = "+Class.forName(fragmentClassName));
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                }else {
+                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
                 }
             }
             if(workouts==null) workouts = new ArrayList<>();
             if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
             // TODO: 11/26/2019 PER TEST MAPROUTE
-            //StatisticsData statisticsData = StatisticsData.create(this, Measure.Type.WEIGHT);statisticsData.setValue(70.0); statisticsWeight.add(statisticsData);
-
+            // StatisticsData statisticsData = StatisticsData.create(this, Measure.Type.WEIGHT);statisticsData.setValue(70.0);
+            // statisticsWeight.add(statisticsData);
         }
-    }
-
-    private void setFragmentOpen(){
-        Menu menu = navigationBarBottom.getMenu();
-        Log.e(TAG, "Before "+ navigationBarBottom.getSelectedItemId());
-        for (int i=0; i<menu.size(); i++) navigationBarBottom.setSelectedItemId(navigationBarBottom.getSelectedItemId());
-        Log.e(TAG, "After "+ navigationBarBottom.getSelectedItemId());
     }
 
     private void setNavigationBarBottom(){
@@ -111,31 +93,28 @@ public class ApplicationActivity extends CommonActivity
 
         navigationBarBottom.setOnNavigationItemSelectedListener(menuItem -> {
             Log.e(TAG, "setOnNavigationItemSelectedListener");
-            return onNavigationItem(menuItem.getItemId());
+            final int previousItem = navigationBarBottom.getSelectedItemId();
+            final int nextItem = menuItem.getItemId();
+            if(previousItem!=nextItem){
+                switch (menuItem.getItemId()) {
+                    case R.id.workouts:
+                        addFragment(WorkoutsFragment.createWithArgument(workouts),false);
+                        break;
+                    case R.id.home:
+                        addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
+                        break;
+                    case R.id.statistics:
+                        addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
+                        break;
+                    default:
+                        return true;
+                }
+            }
+            return true;
         });
 
-        navigationBarBottom.setOnNavigationItemReselectedListener(menuItem -> {
-            Log.e(TAG, "setOnNavigationItemReselectedListener");
-            onNavigationItem(menuItem.getItemId());
-        });
     }
 
-    private boolean onNavigationItem(int itemId){
-        switch (itemId) {
-            case R.id.workouts:
-                addFragment(WorkoutsFragment.createWithArgument(workouts),false);
-                break;
-            case R.id.home:
-                addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
-                break;
-            case R.id.statistics:
-                addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
-                break;
-            default:
-                return true;
-        }
-        return true;
-    }
 
     @Override
     protected void listenerAction() {
@@ -143,7 +122,6 @@ public class ApplicationActivity extends CommonActivity
 
     private void selectActiveFragment(final Class fragment_class) {
         navigationBarBottom.setVisibility(View.VISIBLE);
-
         navigationBarBottom.setSelectedItemId(fragment_class == HomeFragment.class ? R.id.home :
                     fragment_class == WorkoutsFragment.class ? R.id.workouts : R.id.statistics);
     }
@@ -186,21 +164,16 @@ public class ApplicationActivity extends CommonActivity
     protected void onResume() {
         super.onResume();
         Log.d(TAG,"OnResume");
-        final Language languageDefault = Language.defaultForUser(this);
-        if(!languageDefault.equals(Locale.getDefault().getLanguage())){
+        // TODO: 12/2/2019 ELIMINARE SE DECIDO DI CANCELLARE  "LANGUAGE_DEFAULT"  
+        /*final Language languageDefault = Language.defaultForUser(this);
+        if(!getString(languageDefault.getCode()).equals(Locale.getDefault().getLanguage())){
             onConfigurationChanged(Language.Utilities.changeConfiguration(this, languageDefault));
-        }
-        /*final Fragment topFragmentStack = getSupportFragmentManager().getPrimaryNavigationFragment();
-        if(topFragmentStack!=null) {
-            addFragment(topFragmentStack, false);
         }*/
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(FRAGMENT_OPEN, getSupportFragmentManager().findFragmentByTag(TAG).getClass().getName());
-        this.saveInstanceState = outState;
         Log.d(TAG, "onSaveInstanceState : " + outState);
     }
 
@@ -213,16 +186,6 @@ public class ApplicationActivity extends CommonActivity
             finish();
             System.exit(0);
         }
-
-/*
-        addFragment(new HomeFragment(), false);
-        selectActiveFragment(HomeFragment.class);
-        if(getSupportFragmentManager().findFragmentById(R.id.container_fragments_application).getClass()==HomeFragment.class){
-            finish();
-            System.exit(0);
-        }
-*/
-
     }
 
     // LISTENER FRAGMENTS
@@ -404,7 +367,8 @@ public class ApplicationActivity extends CommonActivity
                 }
             case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {
-                    Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Close Settings");
                 }
                 break;
         }

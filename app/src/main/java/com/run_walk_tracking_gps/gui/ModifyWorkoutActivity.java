@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     private Workout workout;
 
     @Override
-    protected void init() {
+    protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_details_workout);
         getSupportActionBar().setTitle(R.string.modify);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

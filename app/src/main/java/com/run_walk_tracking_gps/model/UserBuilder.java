@@ -3,13 +3,10 @@ package com.run_walk_tracking_gps.model;
 import android.content.Context;
 
 import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.Date;
 
 public class UserBuilder {
