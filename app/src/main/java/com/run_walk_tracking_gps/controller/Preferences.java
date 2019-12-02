@@ -60,13 +60,9 @@ public class Preferences {
         return (JSONObject) Preferences.getAppJsonUserLogged(context, id_user).get(SETTINGS);
     }
 
-    public static JSONObject getUnitsMeasureDefault(Context context) throws JSONException {
-        return (JSONObject) getSettingsJsonUserLogged(context, getIdUserLogged(context)).get(UNIT_MEASURE);
-    }
-
     public static String getUnitDefault(Context context, String measure) throws JSONException {
         if(Preferences.isJustUserLogged(context)){
-            JSONObject settings = Preferences.getSettingsJsonUserLogged(context, Preferences.getIdUserLogged(context));
+            JSONObject settings = Preferences.getSettingsJsonUserLogged(context, getIdUserLogged(context));
             return ((JSONObject)settings.get(UNIT_MEASURE)).getString(measure);
         }
         return null;

@@ -13,10 +13,9 @@ import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.intent.KeysIntent;
-import com.run_walk_tracking_gps.model.StatisticsBuilder;
+import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.model.enumerations.Language;
 
 import org.json.JSONArray;
 import org.json.JSONException;

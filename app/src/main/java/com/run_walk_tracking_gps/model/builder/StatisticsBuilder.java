@@ -1,6 +1,9 @@
-package com.run_walk_tracking_gps.model;
+package com.run_walk_tracking_gps.model.builder;
 
 import android.content.Context;
+
+import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.StatisticsData;
 
 import java.text.ParseException;
 import java.util.Date;

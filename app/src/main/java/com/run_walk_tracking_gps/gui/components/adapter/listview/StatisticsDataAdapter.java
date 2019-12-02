@@ -15,15 +15,13 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.model.Measure;
-import com.run_walk_tracking_gps.model.StatisticsBuilder;
+import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;

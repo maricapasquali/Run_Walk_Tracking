@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
-import com.run_walk_tracking_gps.model.UserBuilder;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -16,6 +16,7 @@ import org.json.JSONException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -86,11 +87,27 @@ public class Measure implements Parcelable {
             return new Type[]{MIDDLE_SPEED,ENERGY, DISTANCE, WEIGHT};
         }
 
-        public int indexMeasureUnit(final Context context, final String measure ){
-            final Unit unit = Stream.of(getMeasureUnit()).
-                    filter(f ->context.getString(f.getStrId()).equals(measure)).findFirst().orElse(getMeasureUnitDefault());
-            Log.e("Measure", "Unit: "+unit.toString());
-            return Stream.of(getMeasureUnit()).collect(Collectors.toList()).indexOf(unit);
+        private Unit getValueOfMeasureUnitDefault(final Context context ){
+            try {
+                String measure = Preferences.getUnitDefault(context, this.toString().toLowerCase());
+                final Unit unit = Stream.of(getMeasureUnit()).filter(f ->context.getString(f.getStrId()).equals(measure)).findFirst().orElse(getMeasureUnitDefault());
+                return unit;
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+            return this.getMeasureUnitDefault();
+        }
+
+        public static LinkedHashMap<Type, Unit> getUnitDefaultForUser(final Context context){
+            final Measure.Unit distance = Measure.Type.DISTANCE.getValueOfMeasureUnitDefault(context);
+            final Measure.Unit weight = Measure.Type.WEIGHT.getValueOfMeasureUnitDefault(context);
+            final Measure.Unit height = Measure.Type.HEIGHT.getValueOfMeasureUnitDefault(context);
+
+            final LinkedHashMap<Measure.Type, Measure.Unit> map = new LinkedHashMap<>();
+            map.put(Measure.Type.DISTANCE, distance);
+            map.put(Measure.Type.WEIGHT, weight);
+            map.put(Measure.Type.HEIGHT, height);
+            return map;
         }
 
         /**
@@ -407,7 +424,6 @@ public class Measure implements Parcelable {
             return toString(context);
         return "context not set";
     }
-
 
     public String toString(boolean isHome) {
         if(isHome)

@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -23,10 +22,8 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.gui.components.dialog.LanguageDialog;
 import com.run_walk_tracking_gps.intent.KeysIntent;
-import com.run_walk_tracking_gps.model.UserBuilder;
-import com.run_walk_tracking_gps.model.enumerations.Language;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;

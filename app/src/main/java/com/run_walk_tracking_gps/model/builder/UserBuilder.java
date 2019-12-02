@@ -1,7 +1,8 @@
-package com.run_walk_tracking_gps.model;
+package com.run_walk_tracking_gps.model.builder;
 
 import android.content.Context;
 
+import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 
 import org.json.JSONException;

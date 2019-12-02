@@ -20,7 +20,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.model.WorkoutBuilder;
+import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.service.MapRouteService;

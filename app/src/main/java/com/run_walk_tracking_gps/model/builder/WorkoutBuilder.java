@@ -1,7 +1,8 @@
-package com.run_walk_tracking_gps.model;
+package com.run_walk_tracking_gps.model.builder;
 
 import android.content.Context;
 
+import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import java.util.Date;
 

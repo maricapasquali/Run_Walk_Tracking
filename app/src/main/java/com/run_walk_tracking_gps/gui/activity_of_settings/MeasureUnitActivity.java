@@ -17,23 +17,19 @@ import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MeasureUnitActivity extends CommonActivity implements RadioGroup.OnCheckedChangeListener,  Response.Listener<JSONObject>{
 
     private final static String TAG = MeasureUnitActivity.class.getName();
-
-    private ListView measure_unit;
-
-    private int distance;
-    private int weight;
-    private int height;
 
     private String filter;
     private String value;
@@ -43,26 +39,9 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
         setContentView(R.layout.activity_measure_unit);
         getSupportActionBar().setTitle(R.string.measure_unit);
 
-        measure_unit = findViewById(R.id.measures_units);
+        final ListView measure_unit = findViewById(R.id.measures_units);
 
-        try {
-            JSONObject unit_measure = Preferences.getUnitsMeasureDefault(this);
-
-            distance = Measure.Type.DISTANCE.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.DISTANCE.toName()))+1;
-            weight = Measure.Type.WEIGHT.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.WEIGHT.toName()))+1;
-            height = Measure.Type.HEIGHT.indexMeasureUnit(this, unit_measure.getString(FieldDataBase.HEIGHT.toName()))+1;
-
-            final Map<Measure.Type, Integer> map = new HashMap<>();
-            map.put(Measure.Type.DISTANCE, distance);
-            map.put(Measure.Type.WEIGHT, weight);
-            map.put(Measure.Type.HEIGHT, height);
-
-            final MeasureAdapter adapter = new MeasureAdapter(this,this, map);
-            measure_unit.setAdapter(adapter);
-
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        measure_unit.setAdapter(new MeasureAdapter(this,this, Measure.Type.getUnitDefaultForUser(this)));
     }
 
     @Override
@@ -72,21 +51,13 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
 
-        Measure.Type type = null;
-        Measure.Unit unit;
-
         // TODO: 11/17/2019 MIGLIORARE
         final String measure = ((TextView)((RelativeLayout)group.getParent()).getChildAt(0)).getText().toString();
-        if(measure.equals(getString(Measure.Type.DISTANCE.getStrId())))
-            type = Measure.Type.DISTANCE;
-        else if(measure.equals(getString(Measure.Type.WEIGHT.getStrId())))
-            type = Measure.Type.WEIGHT;
-        else if(measure.equals(getString(Measure.Type.HEIGHT.getStrId())))
-            type = Measure.Type.HEIGHT;
+        final Measure.Type type = (Measure.Type) EnumUtilities.getEnumFromString(Measure.Type.class, MeasureUnitActivity.this, measure);
 
         if(type!=null){
             filter = type.toString().toLowerCase();
-
+            Measure.Unit unit;
             switch (checkedId){
                 case R.id.unit_1:
                     unit = type.getMeasureUnitDefault();
@@ -100,9 +71,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
             if(unit!=null){
                 value = getString(unit.getStrId());
-
                 Log.d(TAG, "Filter = "+ filter +", Value = "+value);
-
                 try {
                     final String  id_user = Preferences.getIdUserLogged(this);
                     JSONObject bodyJson = new JSONObject();
