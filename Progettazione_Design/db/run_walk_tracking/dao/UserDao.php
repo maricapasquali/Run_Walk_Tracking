@@ -78,7 +78,7 @@ class UserDao {
 
           $token = getToken(10);
 
-          $stmt = getConnection()->prepare("INSERT INTO verify_registration(id_user, token) VALUES (?,?)");
+          $stmt = getConnection()->prepare("INSERT INTO check_registration(id_user, token) VALUES (?,?)");
           if(!$stmt) throw new Exception("Token : Preparazione fallita. Errore: ". getErrorConnection());
           $stmt->bind_param("is", $id, $token);
           if(!$stmt->execute()) throw new Exception("Token : Inserimento fallito. Errore: ". getErrorConnection());
@@ -119,7 +119,7 @@ class UserDao {
 
    static function checkToken($id_user, $token){
      if(connect()){
-         $stmt = getConnection()->prepare("SELECT count(*) FROM verify_registration WHERE id_user=? and token=?");
+         $stmt = getConnection()->prepare("SELECT count(*) FROM check_registration WHERE id_user=? and token=?");
          if(!$stmt) throw new Exception("Check Token : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("is", $id_user, $token);
          if(!$stmt->execute()) throw new Exception("Check Token: Selezione fallita. Errore: ". getErrorConnection());

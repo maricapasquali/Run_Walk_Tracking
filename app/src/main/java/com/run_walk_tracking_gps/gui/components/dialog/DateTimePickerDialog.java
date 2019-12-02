@@ -16,12 +16,18 @@ public class DateTimePickerDialog {
 
     private static final String TAG = DateTimePickerDialog.class.getName();
 
-    private static boolean is24HourView = DateUtilities.isIs24Hour();
+    private DateUtilities dateUtilities;
+
     private Calendar calendar;
     private DatePickerDialog datePickerDialog;
 
+    private DateTimePickerDialog(Context context){
+        dateUtilities = DateUtilities.create(context);
+        calendar = DateUtilities.create(context).getCalendar();
+    }
+
     private DateTimePickerDialog(Context context, OnSelectDateTime onSelectDateTime) {
-        calendar = DateUtilities.getCalendar();
+        this(context);
 
         datePickerDialog = new DatePickerDialog(context, (datePicker, year, month, dayOfMonth) -> {
             calendar.set(year, month, dayOfMonth);
@@ -33,10 +39,9 @@ public class DateTimePickerDialog {
 
 
     private DateTimePickerDialog(Context context, String dateString, OnSelectDateTime onSelectDateTime, boolean alsoTime) {
-
-        calendar = DateUtilities.getCalendar();
+        this(context);
         try {
-            calendar.setTime(DateUtilities.parseShortToDate(dateString));
+            calendar.setTime(dateUtilities.parseShortToDate(dateString));
         } catch (ParseException e) {
             Log.e(TAG, e.getMessage());
             //Toast.makeText(context, "Data non valida", Toast.LENGTH_SHORT).show();
@@ -48,7 +53,7 @@ public class DateTimePickerDialog {
             if(alsoTime)
                 createTimePicker(context, onSelectDateTime).show();
             else
-               onSelectDateTime.setTextView(DateUtilities.parseToString(DateFormat.SHORT, calendar.getTime()), calendar);
+               onSelectDateTime.setTextView(dateUtilities.parseToString(DateFormat.SHORT, calendar.getTime()), calendar);
 
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
@@ -56,12 +61,12 @@ public class DateTimePickerDialog {
 
     private TimePickerDialog createTimePicker(Context context, OnSelectDateTime onSelectDateTime){
         return new TimePickerDialog(context, (timePicker, hourOfDay, minute) -> {
-            calendar.set(is24HourView ? Calendar.HOUR_OF_DAY : Calendar.HOUR, hourOfDay);
+            calendar.set(dateUtilities.getHour(), hourOfDay);
             calendar.set(Calendar.MINUTE, minute);
 
-            onSelectDateTime.setTextView(DateUtilities.parseShortToString(calendar.getTime()), calendar);
+            onSelectDateTime.setTextView(dateUtilities.parseShortToString(calendar.getTime()), calendar);
 
-        },calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), is24HourView);
+        },calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), dateUtilities.isIs24Hour());
     }
 
 

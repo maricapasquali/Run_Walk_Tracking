@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 
 import com.run_walk_tracking_gps.R;
 
-public class IndoorFragment extends Fragment {
+public class NoValueFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_indoor, container, false);
+        return inflater.inflate(R.layout.custom_item_no_value, container, true);
     }
 }

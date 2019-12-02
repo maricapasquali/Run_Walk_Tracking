@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,7 +19,7 @@ import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class LoginActivity extends CommonActivity implements  Response.Listener<JSONObject> {
+public class LoginActivity extends AttachBaseContextActivity implements  Response.Listener<JSONObject> {
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -28,6 +27,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
     private EditText password;
     private TextView forgotPassword;
     private Button login;
+
 
     @Override
     protected void init() {

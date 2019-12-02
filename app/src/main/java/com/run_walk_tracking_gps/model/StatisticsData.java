@@ -90,7 +90,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public String getDateStr(){
-        return DateUtilities.parseFullToString(date);
+        return DateUtilities.create(measure.getContext()).parseFullToString(date);
     }
 
     public Double getValue() {
@@ -102,7 +102,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public void setDate(String date) throws ParseException {
-        this.date = DateUtilities.parseShortToDate(date);
+        this.date = DateUtilities.create(measure.getContext()).parseShortToDate(date);
     }
 
     public void setDate(Date date) {
@@ -114,7 +114,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public List<String> toArrayListString(){
-        return Arrays.asList(getMeasure().toString(), DateUtilities.parseShortToStringNoTime(date));
+        return Arrays.asList(getMeasure().toString(), DateUtilities.create(measure.getContext()).parseShortToStringNoTime(date));
     }
 
     public boolean isSet() {

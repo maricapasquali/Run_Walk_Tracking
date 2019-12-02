@@ -12,10 +12,11 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.model.enumerations.Language;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,8 +93,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                         statisticsWeight.add(statisticsData);
                     }
                     Log.d(TAG, statisticsWeight.toString()); Log.d(TAG, workouts.toString());
-                    intent.putExtra(ConstantIntent.WORKOUTS, workouts);
-                    intent.putExtra(ConstantIntent.WEIGHTS, statisticsWeight);
+                    intent.putExtra(KeysIntent.WORKOUTS, workouts);
+                    intent.putExtra(KeysIntent.WEIGHTS, statisticsWeight);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
                     context.startActivity(intent);

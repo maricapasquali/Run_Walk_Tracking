@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.service.NotificationWorkout;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 
@@ -38,7 +38,7 @@ public class ReceiverWorkoutElement extends BroadcastReceiver {
             switch (intent.getAction()){
                 case ActionReceiver.TIMER_ACTION: {
 
-                    final int sec = intent.getIntExtra(context.getString(R.string.second), 0);
+                    final int sec = intent.getIntExtra(KeysIntent.SECONDS, 0);
 
                     final double distanceInKm = onDistanceListener.getDistanceInKm();
                     final double energyInKcal  = onEnergyListener.getEnergyInKcal(distanceInKm) ;

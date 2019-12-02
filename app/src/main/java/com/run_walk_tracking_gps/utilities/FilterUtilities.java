@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
+import android.content.Context;
 import android.support.v4.util.Pair;
 
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
@@ -43,22 +44,22 @@ public class FilterUtilities {
 
     }
 
-    public static List<StatisticsData> createListFilteredStatisticsData(List<StatisticsData> statisticsData, FilterTime filter) {
+    public static List<StatisticsData> createListFilteredStatisticsData(Context context, List<StatisticsData> statisticsData, FilterTime filter) {
         Pair<Date, Date> range = null;
         if(statisticsData.size()>0){
             Date lastInsert = statisticsData.get(0).getDate();
             switch (filter) {
                 case WEEK:
-                    range = DateUtilities.getRangeLastWeek(lastInsert);
+                    range = DateUtilities.create(context).getRangeLastWeek(lastInsert);
                     System.out.println(range);
                     break;
 
                 case MONTH:
-                    range = DateUtilities.getRangeLastMonth(lastInsert);
+                    range = DateUtilities.create(context).getRangeLastMonth(lastInsert);
                     break;
 
                 case YEAR:
-                    range = DateUtilities.getRangeLastYear(lastInsert);
+                    range = DateUtilities.create(context).getRangeLastYear(lastInsert);
                     break;
             }
         }

@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,7 +20,7 @@ import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 
@@ -145,7 +144,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 // save and send to workouts list
                 final Intent newManualWorkoutIntent = new Intent();
                 workout.setIdWorkout(id_workout);
-                newManualWorkoutIntent.putExtra(ConstantIntent.NEW_WORKOUT_MANUAL, workout);
+                newManualWorkoutIntent.putExtra(KeysIntent.NEW_WORKOUT_MANUAL, workout);
                 setResult(RESULT_OK, newManualWorkoutIntent);
                 finish();
             }

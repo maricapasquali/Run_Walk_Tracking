@@ -48,12 +48,13 @@ class SettingsDao{
   private function getDefault($type, $id_user){
 
     if($type==LANGUAGE){
-      $sql = "SELECT language FROM language_default WHERE id_user=?;";
+      $sql = "SELECT language FROM language_default WHERE id_user=?";
     }else if($type==LOCATION){
       $sql = "SELECT active FROM location WHERE id_user=?";
     }else{
       $sql = "SELECT t.* FROM ".$type."_default td JOIN ".$type." t on(td.".$type."=t.id_".$type.") WHERE id_user=?;";
     }
+
     $stmt = getConnection()->prepare($sql);
     if(!$stmt) throw new Exception("default $type : Preparazione fallita. Errore: ". getErrorConnection());
     $stmt->bind_param("i", $id_user);
@@ -109,15 +110,9 @@ class SettingsDao{
         $stmt->bind_param($param , $val, $id_user);
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
         $stmt->close();
-        if($type!=LOCATION){
-          $stmt = getConnection()->prepare("SELECT id_".$type.", name FROM ".$type."  WHERE id_".$type."=?");
-          if(!$stmt) throw new Exception("$type select : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("i", $val);
-          if(!$stmt->execute()) throw new Exception("$type : Select fallito. Errore: ". getErrorConnection());
-          $result = $stmt->get_result();
-          $value_update = $result->fetch_assoc();
-          $stmt->close();
-        }
+
+        $value_update = self::getDefault($type, $id_user);
+
         commitTransaction();
 
       }
@@ -126,9 +121,10 @@ class SettingsDao{
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    if($type==LOCATION)
-      return array(UPDATE => true);
-    return array(UPDATE => true) + array($type => $value_update);
+    $retunArray = array(UPDATE => true);
+    if($type==LOCATION) return $retunArray  + array($type => $value_update["active"]==1);
+    if($type==LANGUAGE) return $retunArray  + array($type => $value_update["language"]);
+    return $retunArray + array($type => $value_update);
   }
 
   private function updateUnitMeasure($type, $id_unit, $id_user){

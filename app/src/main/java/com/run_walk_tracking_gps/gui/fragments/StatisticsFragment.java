@@ -175,8 +175,15 @@ public class StatisticsFragment extends Fragment {
 
     private void update(Measure.Type measure, FilterTime filterTime){
         Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
+        checkSizeStatistics(measure);
         statisticsDataAdapter.updateStatisticsData(
-                FilterUtilities.createListFilteredStatisticsData(getStatistics(measure), filterTime));
+                FilterUtilities.createListFilteredStatisticsData(getContext(), getStatistics(measure), filterTime));
+    }
+
+    private void checkSizeStatistics(Measure.Type measure){
+        final boolean isVisible = getStatistics(measure).size()>0;
+        spinner_time.setVisibility(isVisible?  View.VISIBLE : View.GONE );
+        if(isVisible) Log.e(TAG, "No Statistics");
     }
 
     private ArrayList<StatisticsData> middleSpeedStatistics(){
@@ -202,7 +209,6 @@ public class StatisticsFragment extends Fragment {
 
     }
 
-
     private ArrayList<StatisticsData> getStatistics(Measure.Type measure){
         switch (measure){
             case WEIGHT:
@@ -216,6 +222,8 @@ public class StatisticsFragment extends Fragment {
         }
         return null;
     }
+
+
 
     @Override
     public void onResume() {

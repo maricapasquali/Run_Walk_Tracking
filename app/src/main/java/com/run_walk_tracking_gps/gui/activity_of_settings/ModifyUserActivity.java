@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -19,7 +18,7 @@ import com.android.volley.Response;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -77,7 +76,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         height = findViewById(R.id.modify_profile_height);
 // TODO: 11/27/2019  CHECK SE EDITTEXT SONO VUOTI
         if(getIntent()!=null){
-            oldUser = (User)getIntent().getParcelableExtra(ConstantIntent.PROFILE);
+            oldUser = (User)getIntent().getParcelableExtra(KeysIntent.PROFILE);
             oldUser.setContext(this);
             Log.d(TAG, oldUser.toString());
 
@@ -255,7 +254,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 Preferences.setImage(this, user.getIdUser(), image_encode);
 
                 final Intent returnIntent = new Intent();
-                returnIntent.putExtra(ConstantIntent.CHANGED_USER, user);
+                returnIntent.putExtra(KeysIntent.CHANGED_USER, user);
                 setResult(RESULT_OK, returnIntent);
                 finish();
             }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="loading">Loading ...</string>
 
     <!-- Language -->
     <string-array name="language">
-        <item name="italian">Italian</item>
         <item name="english">English</item>
+        <item name="italian">Italian</item>
+        <item name="spanish">Spanish</item>
     </string-array>
 
     <!-- BootApp -->
@@ -16,24 +16,21 @@
     <string name="login">Login</string>
 
     <!-- Login -->
-    <string name="username">Username</string>
-    <string name="password">Password</string>
     <string name="forgot_password"><u><i>Forgot Password ?</i></u></string>
 
     <!-- Forgot Password -->
     <string name="reset_password">Reset password</string>
 
     <!-- Sign Up -->
-    <string name="forward">Avanti</string>
-    <string name="personal_data">Personal Data</string>
+    <string name="forward">Continue</string>
+    <string name="personal_data">Personal data</string>
     <string name="img_profile">Picture profile</string>
     <string name="name">Name</string>
-    <string name="lastname">Surname</string>
+    <string name="lastname">Last name</string>
     <string name="birth_date">Date of birth</string>
-    <string name="email">Email</string>
     <string name="tel">Phone</string>
     <string name="city">City</string>
-    <string name="physical_data">Physical Data</string>
+    <string name="physical_data">Physical data</string>
     <string name="gender">Gender</string>
     <string name="female">Female</string>
     <string name="male">Male</string>
@@ -43,12 +40,12 @@
     <string name="target">Target</string>
     <string name="marathon">Marathon</string>
     <string name="lose_weight">Lose Weight</string>
-    <string name="access_data">Access Data</string>
+    <string name="access_data">Access data</string>
     <string name="confirm_password">Confirm Password</string>
 
     <!-- Validazione Sign Up -->
     <string name="name_not_empty">Name not empty</string>
-    <string name="lastname_not_empty">Surname not empty</string>
+    <string name="lastname_not_empty">Last name not empty</string>
     <string name="birth_date_not_empty">Date of birth not empty</string>
     <string name="email_not_empty">Email not empty</string>
     <string name="tel_not_empty">Phone not empty</string>
@@ -70,12 +67,9 @@
     <string name="location">Location</string>
     <string name="measure_unit">Measure Unit</string>
     <string name="language">Language</string>
-    <string name="playlist">Playlist</string>
     <string name="vocal_coach">Vocal Coach</string>
     <string name="info">Information</string>
     <string name="exit">Exit</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
 
     <!-- Home -->
     <string name="setting">Settings</string>
@@ -83,7 +77,6 @@
     <string name="statistics">Statistics</string>
 
     <string name="yes">Yes</string>
-    <string name="no">No</string>
     <string name="my_position">My Position</string>
     <string name="type_map">Maps Type</string>
     <string name="date">Day</string>

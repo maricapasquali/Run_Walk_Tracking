@@ -1,11 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -26,19 +23,15 @@ import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.dialog.LanguageDialog;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.UserBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Language;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
-import com.run_walk_tracking_gps.utilities.LanguageUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Locale;
 import java.util.stream.Stream;
-
 
 public class SettingActivity extends CommonActivity {
 
@@ -64,7 +57,6 @@ public class SettingActivity extends CommonActivity {
     private JSONObject appJson;
     private JSONObject settingsJson;
 
-    private Configuration newConfiguration;
 
     @Override
     protected void init() {
@@ -142,7 +134,6 @@ public class SettingActivity extends CommonActivity {
     @Override
     public void onBackPressed() {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra(ConstantIntent.CHANGED_LANGUAGE, newConfiguration);
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
     }
@@ -184,15 +175,35 @@ public class SettingActivity extends CommonActivity {
 
         language.setOnClickListener(v -> {
 
-            Log.e("Language", "Language default: " + LanguageUtilities.of(this));
-            LanguageDialog.create(this, LanguageUtilities.of(this),
+            Log.e("Language", "Language default: " + Language.defaultForUser(this));
+            LanguageDialog.create(this, Language.defaultForUser(this),
                         (val, description) -> {
                             try {
                                 Log.e("Language", "Language : " + val + ", string : " + description);
-                                newConfiguration = LanguageUtilities.change(SettingActivity.this, val);
+                                final Configuration newConfiguration = Language.Utilities.changeConfiguration(SettingActivity.this, val);
                                 Preferences.setLanguage(SettingActivity.this, getString(val.getCode()));
-                                onConfigurationChanged(newConfiguration);
-                                Log.e("Language", "Configuration : " + newConfiguration);
+
+                                try {
+                                    JSONObject bodyJson = new JSONObject()
+                                                            .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
+                                                            .put(FieldDataBase.FILTER.toName(), FieldDataBase.LANGUAGE.toName())
+                                                            .put(FieldDataBase.VALUE.toName(), Preferences.getLanguageDefault(this));
+
+                                    if (!HttpRequest.requestUpdateSetting(this, bodyJson, response -> {
+                                        if(HttpRequest.someError(response))
+                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
+                                        else {
+
+                                            onConfigurationChanged(newConfiguration);
+                                            Log.d("Language", "Configuration : " + newConfiguration);
+                                        }
+
+                                    } )) {
+                                        Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, e.getMessage());
+                                }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -222,7 +233,7 @@ public class SettingActivity extends CommonActivity {
                         try {
                             final JSONObject userInfo = (JSONObject) response.get("user");
                             final Intent intent = new Intent(this, UserActivity.class);
-                            intent.putExtra(ConstantIntent.USER_INFO, UserBuilder.create(this, userInfo).build());
+                            intent.putExtra(KeysIntent.USER_INFO, UserBuilder.create(this, userInfo).build());
                             startActivity(intent);
 
                         } catch (JSONException e) {

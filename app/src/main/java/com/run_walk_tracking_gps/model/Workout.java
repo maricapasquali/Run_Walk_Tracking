@@ -137,7 +137,7 @@ public class Workout implements Parcelable, Cloneable{
 // END - Parcelable IMPLEMENTATION
 
     public Context getContext() {
-        return context;
+        return parameters.get(0).getContext();
     }
 
     public int getIdWorkout() {
@@ -153,7 +153,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private String getDateStr() {
-        return DateUtilities.parseShortToString(date);
+        return DateUtilities.create(getContext()).parseShortToString(date);
     }
 
     public Sport getSport() {
@@ -193,7 +193,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     public void setDate(String date) {
-        this.date = DateUtilities.parseStringWithTimeToDateString(date);
+        this.date = DateUtilities.create(getContext()).parseStringWithTimeToDateString(date);
     }
 
     public void setSport(Sport sport) {

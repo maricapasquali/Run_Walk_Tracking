@@ -35,7 +35,7 @@ public class FilterTest {
     public void initWorkout(){
 
        Workout workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.parseStringWithTimeToDateString("05/11/2019 11:42"))
+                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("05/11/2019 11:42"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -44,7 +44,7 @@ public class FilterTest {
 
 
         workout = WorkoutBuilder.create(context)
-                                .setDate(DateUtilities.parseStringWithTimeToDateString("03/11/2019 21:07"))
+                                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("03/11/2019 21:07"))
                                 .setCalories(200)
                                 .setDistance(30)
                                 .setDuration(3600)
@@ -52,7 +52,7 @@ public class FilterTest {
         workouts.add(workout);
 
         workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.parseStringWithTimeToDateString("02/11/2015 21:07"))
+                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("02/11/2015 21:07"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -60,7 +60,7 @@ public class FilterTest {
         workouts.add(workout);
 
         workout = WorkoutBuilder.create(context)
-                .setDate(DateUtilities.parseStringWithTimeToDateString("01/10/2015 21:07"))
+                .setDate(DateUtilities.create(context).parseStringWithTimeToDateString("01/10/2015 21:07"))
                 .setCalories(200)
                 .setDistance(30)
                 .setDuration(3600)
@@ -105,32 +105,32 @@ public class FilterTest {
     public void initStatisticsData() throws ParseException {
 
         final  StatisticsData statisticsData = StatisticsData.create(context, Measure.Type.WEIGHT);
-        statisticsData.setDate(DateUtilities.parseShortToDate("02/11/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("02/11/2019"));
         statisticsData.setValue(73.0);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("27/10/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("27/10/2019"));
         statisticsData.setValue(74.0);
         statistics.add(statisticsData);
 
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("26/10/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("26/10/2019"));
         statisticsData.setValue(74.0);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("25/10/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("25/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("24/10/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("24/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("10/10/2019"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("10/10/2019"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
-        statisticsData.setDate(DateUtilities.parseShortToDate("10/10/2016"));
+        statisticsData.setDate(DateUtilities.create(context).parseShortToDate("10/10/2016"));
         statisticsData.setValue(74.5);
         statistics.add(statisticsData);
 
@@ -151,16 +151,16 @@ public class FilterTest {
 
     @Test
     public void filterStatisticsData(){
-        final  List<StatisticsData> statisticsDataAll = FilterUtilities.createListFilteredStatisticsData(statistics, FilterTime.ALL);
+        final  List<StatisticsData> statisticsDataAll = FilterUtilities.createListFilteredStatisticsData(context, statistics, FilterTime.ALL);
         Assert.assertEquals(statistics, statisticsDataAll);
 
-        final  List<StatisticsData> sLastWeek = FilterUtilities.createListFilteredStatisticsData(statistics, FilterTime.WEEK);
+        final  List<StatisticsData> sLastWeek = FilterUtilities.createListFilteredStatisticsData(context,statistics, FilterTime.WEEK);
         Assert.assertEquals(sLastWeek, statisticsLastWeek);
 
-        final  List<StatisticsData> sLastMonth = FilterUtilities.createListFilteredStatisticsData(statistics, FilterTime.MONTH);
+        final  List<StatisticsData> sLastMonth = FilterUtilities.createListFilteredStatisticsData(context,statistics, FilterTime.MONTH);
         Assert.assertEquals(sLastMonth, statisticsLastMonth);
 
-        final  List<StatisticsData> sLastYear = FilterUtilities.createListFilteredStatisticsData(statistics, FilterTime.YEAR);
+        final  List<StatisticsData> sLastYear = FilterUtilities.createListFilteredStatisticsData(context,statistics, FilterTime.YEAR);
         Assert.assertEquals(sLastYear, statisticsLastYear);
     }
 

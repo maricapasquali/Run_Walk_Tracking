@@ -1,15 +1,13 @@
 package com.run_walk_tracking_gps.gui;
 
+
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-
-
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
@@ -17,10 +15,9 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-
 import com.android.volley.Response;
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
@@ -30,17 +27,15 @@ import com.run_walk_tracking_gps.gui.fragments.PersonalDataFragment;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
-import com.run_walk_tracking_gps.utilities.LanguageUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-public class SignUpActivity extends CommonActivity
+public class SignUpActivity extends AttachBaseContextActivity
                             implements PersonalDataFragment.PersonalDataListener,
                                        PhysicalDataFragment.PhysicalDataListener,
                                        AccessDataFragment.AccessDataListener,
@@ -162,7 +157,7 @@ public class SignUpActivity extends CommonActivity
     public void accessData(JSONObject jsonAccess) {
         try{
             user = JSONUtilities.merge(user, jsonAccess);
-            user.put(FieldDataBase.LANGUAGE.toName(), getString(LanguageUtilities.of(this).getCode()));
+            user.put(FieldDataBase.LANGUAGE.toName(), getString(Language.defaultForUser(this).getCode()));
             Log.d(TAG, user.toString());
 
             if(!HttpRequest.requestSignUp(this, user,this))
@@ -187,7 +182,7 @@ public class SignUpActivity extends CommonActivity
             //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
             try {
                 final Intent intent = new Intent(this, TokenActivity.class);
-                intent.putExtra(ConstantIntent.ID_USER, response.getInt(FieldDataBase.ID_USER.toName()));
+                intent.putExtra(KeysIntent.ID_USER, response.getInt(FieldDataBase.ID_USER.toName()));
                 startActivity(intent);
                 finish();
             } catch (JSONException e) {

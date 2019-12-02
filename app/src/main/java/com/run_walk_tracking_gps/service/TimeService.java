@@ -10,7 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 
 
-import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
 
@@ -38,7 +38,7 @@ public class TimeService extends Service {
         @Override
         public void run() {
             if(isStart())
-                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(getApplicationContext().getString(R.string.second), ++time));
+                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(KeysIntent.SECONDS, ++time));
         }
     };
 

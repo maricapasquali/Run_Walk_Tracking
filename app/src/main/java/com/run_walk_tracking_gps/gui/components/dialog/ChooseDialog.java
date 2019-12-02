@@ -4,39 +4,57 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import org.json.JSONException;
-
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
-
 public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterface.OnClickListener{
+
+    private static String ERROR;
 
     private T[] type;
     private String[] strings;
     private int indexCheckedItem;
     private OnSelectedItemListener<T> onSelectedItemListener;
 
-    public ChooseDialog(Context context, T[] type, T checkedItem, int arrayStrings, OnSelectedItemListener<T> onSelectedItemListener) {
+    private ChooseDialog(Context context, T[] type, OnSelectedItemListener<T> onSelectedItemListener){
         super(context);
         this.onSelectedItemListener = onSelectedItemListener;
         this.type = type;
-        this.strings = getContext().getResources().getStringArray(arrayStrings);
 
-        indexCheckedItem = Arrays.asList(type).indexOf(checkedItem);
-        setSingleChoiceItems(strings, indexCheckedItem, this);
+        final String tType = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].toString();
+        ERROR = "Enum (" + tType + ") e Array-String (Resources) non hanno la stessa lunghezza";
     }
 
+    public ChooseDialog(Context context, T[] type, T checkedItem, int arrayStrings, OnSelectedItemListener<T> onSelectedItemListener) {
+        this(context, type, onSelectedItemListener);
+
+        this.strings = getContext().getResources().getStringArray(arrayStrings);
+
+        try {
+            if(type.length!=strings.length) throw new ArrayIndexOutOfBoundsException(ERROR);
+
+            indexCheckedItem = Arrays.asList(type).indexOf(checkedItem);
+            setSingleChoiceItems(strings, indexCheckedItem, this);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public ChooseDialog(Context context, T[] type, CharSequence checkedItem, OnSelectedItemListener<T> onSelectedItemListener, OnSetStringArrayListener
             onSetStringArrayListener) {
-        super(context);
-        this.onSelectedItemListener = onSelectedItemListener;
-        this.type = type;
+        this(context, type, onSelectedItemListener);
 
-        strings = onSetStringArrayListener.getStringArray();
+        this.strings = onSetStringArrayListener.getStringArray();
 
-        indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem);
-        setSingleChoiceItems(strings, indexCheckedItem, this);
+        try {
+            if(type.length!=strings.length) throw new ArrayIndexOutOfBoundsException(ERROR);
+
+            indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem);
+            setSingleChoiceItems(strings, indexCheckedItem, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

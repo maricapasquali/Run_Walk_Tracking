@@ -123,7 +123,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
                         }
                         /* La view è stata creata in precedenza, quindi posso utilizzarla. */
                         viewHolder.textView.setText(filterTime.equals(FilterTime.MONTH) ?
-                                DateUtilities.getMonth(groupLabel):String.valueOf(groupLabel));
+                                DateUtilities.create(context).getMonth(groupLabel):String.valueOf(groupLabel));
 
                         break;
                 }
@@ -162,7 +162,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
             vH = (ListHolderChild) convertView.getTag();
         }
 
-        vH.date.setText(DateUtilities.parseFullToString(workout.getDate()));
+        vH.date.setText(DateUtilities.create(context).parseFullToString(workout.getDate()));
         vH.time.setText(workout.getDuration().toString());
 
         vH.distance.setText(workout.getDistance().toString());

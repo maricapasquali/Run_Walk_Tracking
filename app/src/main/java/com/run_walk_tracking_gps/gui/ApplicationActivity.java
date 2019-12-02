@@ -1,16 +1,13 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,17 +15,17 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.enumerations.Language;
-import com.run_walk_tracking_gps.utilities.LanguageUtilities;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
+import java.util.Locale;
 
 public class ApplicationActivity extends CommonActivity
         implements  WorkoutsFragment.OnWorkOutSelectedListener,
@@ -63,8 +60,6 @@ public class ApplicationActivity extends CommonActivity
 
     private Bundle saveInstanceState;
 
-    private Configuration newConfiguration;
-
     @Override
     protected void init() {
         Log.d(TAG,"init");
@@ -76,8 +71,8 @@ public class ApplicationActivity extends CommonActivity
         setNavigationBarBottom();
 
         if(getIntent()!=null){
-            workouts = getIntent().getParcelableArrayListExtra(ConstantIntent.WORKOUTS);
-            statisticsWeight = getIntent().getParcelableArrayListExtra(ConstantIntent.WEIGHTS);
+            workouts = getIntent().getParcelableArrayListExtra(KeysIntent.WORKOUTS);
+            statisticsWeight = getIntent().getParcelableArrayListExtra(KeysIntent.WEIGHTS);
             if(workouts!=null && statisticsWeight!=null){
                 workouts.forEach(w -> w.setContext(this));
                 statisticsWeight.forEach(s -> s.setContext(this));
@@ -89,7 +84,7 @@ public class ApplicationActivity extends CommonActivity
                     if(fragmentClassName!=null){
                         try {
                             selectActiveFragment(Class.forName(fragmentClassName));
-                            Log.e(TAG, "CLass Fragment Open = "+Class.forName(fragmentClassName));
+                            Log.e(TAG, "Class Fragment Open = "+Class.forName(fragmentClassName));
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -104,6 +99,13 @@ public class ApplicationActivity extends CommonActivity
         }
     }
 
+    private void setFragmentOpen(){
+        Menu menu = navigationBarBottom.getMenu();
+        Log.e(TAG, "Before "+ navigationBarBottom.getSelectedItemId());
+        for (int i=0; i<menu.size(); i++) navigationBarBottom.setSelectedItemId(navigationBarBottom.getSelectedItemId());
+        Log.e(TAG, "After "+ navigationBarBottom.getSelectedItemId());
+    }
+
     private void setNavigationBarBottom(){
         navigationBarBottom = findViewById(R.id.nav_bar);
 
@@ -114,8 +116,7 @@ public class ApplicationActivity extends CommonActivity
 
         navigationBarBottom.setOnNavigationItemReselectedListener(menuItem -> {
             Log.e(TAG, "setOnNavigationItemReselectedListener");
-            if(newConfiguration!=null) onNavigationItem(menuItem.getItemId());
-
+            onNavigationItem(menuItem.getItemId());
         });
     }
 
@@ -185,6 +186,10 @@ public class ApplicationActivity extends CommonActivity
     protected void onResume() {
         super.onResume();
         Log.d(TAG,"OnResume");
+        final Language languageDefault = Language.defaultForUser(this);
+        if(!languageDefault.equals(Locale.getDefault().getLanguage())){
+            onConfigurationChanged(Language.Utilities.changeConfiguration(this, languageDefault));
+        }
         /*final Fragment topFragmentStack = getSupportFragmentManager().getPrimaryNavigationFragment();
         if(topFragmentStack!=null) {
             addFragment(topFragmentStack, false);
@@ -196,7 +201,7 @@ public class ApplicationActivity extends CommonActivity
         super.onSaveInstanceState(outState);
         outState.putString(FRAGMENT_OPEN, getSupportFragmentManager().findFragmentByTag(TAG).getClass().getName());
         this.saveInstanceState = outState;
-        Log.e(TAG, "onSaveInstanceState : " + outState);
+        Log.d(TAG, "onSaveInstanceState : " + outState);
     }
 
     @Override
@@ -225,7 +230,7 @@ public class ApplicationActivity extends CommonActivity
     @Override
     public void onWorkOutSelected(Workout workout) {
         final Intent intentDetail = new Intent(this, DetailsWorkoutActivity.class);
-        intentDetail.putExtra(ConstantIntent.DETAIL, workout);
+        intentDetail.putExtra(KeysIntent.DETAIL, workout);
         startActivityForResult(intentDetail, REQUEST_CHANGED_DETAILS);
     }
 
@@ -243,7 +248,7 @@ public class ApplicationActivity extends CommonActivity
     @Override
     public void OnStopWorkoutClick(Workout workout) {
         final Intent intentSummary = new Intent(this, DetailsWorkoutActivity.class);
-        intentSummary.putExtra(ConstantIntent.SUMMARY, workout);
+        intentSummary.putExtra(KeysIntent.SUMMARY, workout);
         intentSummary.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivityForResult(intentSummary, REQUEST_SUMMARY);
     }
@@ -304,8 +309,8 @@ public class ApplicationActivity extends CommonActivity
     public void modifyWeight(StatisticsData statisticsData) {
         final Intent intent = new Intent(this, ModifyWeightActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        intent.putExtra(ConstantIntent.MODIFY_WEIGHT,statisticsData);
-        intent.putExtra(ConstantIntent.LAST_WEIGHT, statisticsWeight.size()==1);
+        intent.putExtra(KeysIntent.MODIFY_WEIGHT,statisticsData);
+        intent.putExtra(KeysIntent.IS_LAST_WEIGHT, statisticsWeight.size()==1);
         startActivityForResult(intent, REQUEST_MODIFY_WEIGHT);
     }
 
@@ -338,14 +343,14 @@ public class ApplicationActivity extends CommonActivity
             case REQUEST_CHANGED_DETAILS:
                 if(resultCode==Activity.RESULT_OK){
                     
-                    workoutChanged = (Workout)data.getParcelableExtra(ConstantIntent.CHANGED_WORKOUT);
+                    workoutChanged = (Workout)data.getParcelableExtra(KeysIntent.CHANGED_WORKOUT);
                     if(workoutChanged!=null){
                         workoutChanged.setContext(this);
                         //Toast.makeText(this, ConstantIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout changed = " +workoutChanged);
                     }
 
-                    id_workout_delete = data.getIntExtra(ConstantIntent.DELETE_WORKOUT, 0);
+                    id_workout_delete = data.getIntExtra(KeysIntent.DELETE_WORKOUT, 0);
                     if(id_workout_delete>0){
                         //Toast.makeText(this, R.string.delete_workout, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Workout deleted = " +id_workout_delete);
@@ -355,7 +360,7 @@ public class ApplicationActivity extends CommonActivity
             case REQUEST_SUMMARY:
                 if(resultCode==Activity.RESULT_OK) {
                     //Toast.makeText(this, getString(R.string.summary_workout), Toast.LENGTH_LONG).show();
-                    final Workout newAutoWorkout = (Workout) data.getParcelableExtra(ConstantIntent.NEW_WORKOUT);
+                    final Workout newAutoWorkout = (Workout) data.getParcelableExtra(KeysIntent.NEW_WORKOUT);
                     newAutoWorkout.setContext(this);
                     workouts.add(0,newAutoWorkout);
                     workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
@@ -366,7 +371,7 @@ public class ApplicationActivity extends CommonActivity
             case REQUEST_NEW_WORKOUT:
                 if(resultCode==Activity.RESULT_OK) {
                     //Toast.makeText(this, ConstantIntent.NEW_WORKOUT_MANUAL, Toast.LENGTH_LONG).show();
-                    newWorkout = (Workout) data.getParcelableExtra(ConstantIntent.NEW_WORKOUT_MANUAL);
+                    newWorkout = (Workout) data.getParcelableExtra(KeysIntent.NEW_WORKOUT_MANUAL);
                     newWorkout.setContext(this);
                     Log.d(TAG, "New Manual Workout = " + newWorkout);
                 }
@@ -375,7 +380,7 @@ public class ApplicationActivity extends CommonActivity
             case REQUEST_NEW_WEIGHT:
                 if(resultCode==Activity.RESULT_OK) {
                     //Toast.makeText(this, getString(R.string.new_weight), Toast.LENGTH_LONG).show();
-                    newWeight = (StatisticsData) data.getParcelableExtra(ConstantIntent.NEW_WEIGHT);
+                    newWeight = (StatisticsData) data.getParcelableExtra(KeysIntent.NEW_WEIGHT);
                     newWeight.setContext(this);
                     Log.d(TAG, "New Weight = " + newWeight);
                 }
@@ -383,14 +388,14 @@ public class ApplicationActivity extends CommonActivity
 
             case REQUEST_MODIFY_WEIGHT:
                 if(resultCode==Activity.RESULT_OK) {
-                    statisticsData = (StatisticsData)data.getParcelableExtra(ConstantIntent.CHANGED_WEIGHT);
+                    statisticsData = (StatisticsData)data.getParcelableExtra(KeysIntent.CHANGED_WEIGHT);
                     if(statisticsData!=null){
                         statisticsData.setContext(this);
                         //Toast.makeText(this, R.string.modify_weight, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Weight changed = " +statisticsData);
                     }
 
-                    id_weight_delete = data.getIntExtra(ConstantIntent.DELETE_WEIGHT, 0);
+                    id_weight_delete = data.getIntExtra(KeysIntent.DELETE_WEIGHT, 0);
                     Log.d(TAG, "Weight deleted = " +id_weight_delete);
                     if(id_weight_delete>0){
                         //Toast.makeText(this, R.string.delete_weight, Toast.LENGTH_LONG).show();
@@ -400,12 +405,6 @@ public class ApplicationActivity extends CommonActivity
             case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {
                     Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
-                    newConfiguration = (Configuration)data.getParcelableExtra(ConstantIntent.CHANGED_LANGUAGE);
-                   // Toast.makeText(this, "Close Settings : New Config : " + newConfiguration, Toast.LENGTH_LONG).show();
-                    if(newConfiguration!=null){
-                        onConfigurationChanged(newConfiguration);
-                        newConfiguration=null;
-                    }
                 }
                 break;
         }

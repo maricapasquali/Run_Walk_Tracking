@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Nov 15, 2019 alle 21:24
+-- Creato il: Dic 01, 2019 alle 18:34
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -21,6 +21,19 @@ SET time_zone = "+00:00";
 --
 -- Database: `run_walk_tracking`
 --
+CREATE DATABASE IF NOT EXISTS `run_walk_tracking` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `run_walk_tracking`;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `check_registration`
+--
+
+CREATE TABLE `check_registration` (
+  `id_user` int(11) NOT NULL,
+  `token` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -30,7 +43,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `language_default` (
   `id_user` int(11) NOT NULL,
-  `language` varchar(20) NOT NULL
+  `language` char(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -293,17 +306,6 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `verify_registration`
---
-
-CREATE TABLE `verify_registration` (
-  `id_user` int(11) NOT NULL,
-  `token` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Struttura della tabella `weight`
 --
 
@@ -334,6 +336,13 @@ CREATE TABLE `workout` (
 --
 -- Indici per le tabelle scaricate
 --
+
+--
+-- Indici per le tabelle `check_registration`
+--
+ALTER TABLE `check_registration`
+  ADD PRIMARY KEY (`id_user`),
+  ADD UNIQUE KEY `FKachieve_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `language_default`
@@ -449,13 +458,6 @@ ALTER TABLE `user`
   ADD UNIQUE KEY `ID_User_IND` (`id_user`);
 
 --
--- Indici per le tabelle `verify_registration`
---
-ALTER TABLE `verify_registration`
-  ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKachieve_IND` (`id_user`);
-
---
 -- Indici per le tabelle `weight`
 --
 ALTER TABLE `weight`
@@ -535,6 +537,12 @@ ALTER TABLE `workout`
 --
 
 --
+-- Limiti per la tabella `check_registration`
+--
+ALTER TABLE `check_registration`
+  ADD CONSTRAINT `FKachieve_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
 -- Limiti per la tabella `language_default`
 --
 ALTER TABLE `language_default`
@@ -581,12 +589,6 @@ ALTER TABLE `unit_measure_default`
   ADD CONSTRAINT `FKR_5_FK` FOREIGN KEY (`weight`) REFERENCES `unit_measure_weight` (`id_unit_weight`),
   ADD CONSTRAINT `FKR_6_FK` FOREIGN KEY (`energy`) REFERENCES `unit_measure_energy` (`id_unit_energy`),
   ADD CONSTRAINT `FKchoose_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
-
---
--- Limiti per la tabella `verify_registration`
---
-ALTER TABLE `verify_registration`
-  ADD CONSTRAINT `FKachieve_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `weight`

@@ -217,6 +217,10 @@ public class Measure implements Parcelable {
 // END - Parcelable IMPLEMENTATION
 
 
+    public Context getContext() {
+        return context;
+    }
+
     public Type getType() {
         return type;
     }

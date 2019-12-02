@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 
@@ -33,6 +34,8 @@ public class WorkoutsFragment extends Fragment {
     private Spinner filter;
     private ExpandableListView workoutsViewExpandable;
     private ImageButton addManualWorkout;
+
+    private NoValueFragment no_value_fragment;
 
     private WorkoutsFilterAdapter workoutsFilterAdapter;
 
@@ -99,6 +102,9 @@ public class WorkoutsFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         final View view;
         view = inflater.inflate(R.layout.fragment_workouts, container, false);
+
+        no_value_fragment = (NoValueFragment) getChildFragmentManager().findFragmentById(R.id.no_value_fragment);
+
         // Filter
         filter = view.findViewById(R.id.filter_workouts);
         filter.setAdapter(new FilterAdapterSpinner(getContext(),  true));
@@ -156,10 +162,22 @@ public class WorkoutsFragment extends Fragment {
         }
     }
 
+    private void checkSizeWorkouts(){
+        final boolean isVisible = workouts.size()<=0;
+        no_value_fragment.getView().setVisibility(isVisible? View.VISIBLE : View.GONE);
+        filter.setVisibility(isVisible? View.GONE: View.VISIBLE );
+        if(isVisible) Log.e(TAG, "No Workouts");
+        else Log.e(TAG, "Workouts = "+workouts);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "OnResume");
+        if(onManualAddClickedListener.newWorkout()==null &&
+           onWorkOutSelectedListener.workoutChanged()==null &&
+           onDeleteWorkoutClickedListener.idWorkoutDeleted()<=0)
+                checkSizeWorkouts();
 
         FilterTime filterTime = (FilterTime) filter.getSelectedItem();
         workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
@@ -170,7 +188,7 @@ public class WorkoutsFragment extends Fragment {
             workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
             workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
             onManualAddClickedListener.resetNewWorkout();
-
+            checkSizeWorkouts();
             Log.d(TAG, "Gui Update : New Manual Workout = " +newW);
         }
 
@@ -180,7 +198,6 @@ public class WorkoutsFragment extends Fragment {
                                  .findFirst().ifPresent(w -> workouts.remove(w));
             workouts.add(newW);
             workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-
             workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
             onWorkOutSelectedListener.resetWorkoutChanged();
 
@@ -194,6 +211,7 @@ public class WorkoutsFragment extends Fragment {
 
             workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
             onDeleteWorkoutClickedListener.resetWorkoutDelete();
+            checkSizeWorkouts();
             Log.d(TAG, "Gui Update : Workout Deleted = " +id_workout_deleted);
         }
 

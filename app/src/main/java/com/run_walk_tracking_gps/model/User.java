@@ -68,7 +68,7 @@ public class User implements Parcelable {
         last_name = userJson.getString("last_name");
         gender = Gender.valueOf(userJson.getString("gender"));
         try {
-            birth_date = DateUtilities.parseShortToDate(userJson.getString("birth_date"));
+            birth_date = DateUtilities.create(context).parseShortToDate(userJson.getString("birth_date"));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -156,7 +156,7 @@ public class User implements Parcelable {
     }
 
     public String getBirthDateString() {
-        return DateUtilities.parseToString(DateFormat.SHORT, birth_date);
+        return DateUtilities.create(height.getContext()).parseToString(DateFormat.SHORT, birth_date);
     }
 
     public String getEmail() {

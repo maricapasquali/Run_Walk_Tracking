@@ -1,190 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="ok">OK</string>
-    <string name="cancel">Annulla</string>
-    <string name="loading">Caricamento ...</string>
+    <string name="cancel">Cancel</string>
+    <string name="loading">Loading ...</string>
 
     <!-- Language -->
     <string-array name="language">
-        <item name="italian">Italiano</item>
-        <item name="english">Inglese</item>
+        <item name="english">English</item>
+        <item name="italian">Italian</item>
+        <item name="spanish">Spanish</item>
     </string-array>
 
     <!-- BootApp -->
-    <string name="rec">Iscriviti</string>
-    <string name="login">Accedi</string>
+    <string name="rec">Sign Up</string>
+    <string name="login">Login</string>
 
     <!-- Login -->
-    <string name="username">Username</string>
-    <string name="password">Password</string>
-    <string name="forgot_password"><u><i>Password Dimenticata ?</i></u></string>
+    <string name="forgot_password"><u><i>Forgot Password ?</i></u></string>
 
     <!-- Forgot Password -->
-    <string name="reset_password">Ripristina password</string>
+    <string name="reset_password">Reset password</string>
 
     <!-- Sign Up -->
-    <string name="forward">Avanti</string>
-    <string name="personal_data">Dati personali</string>
-    <string name="img_profile">Immagine profilo</string>
-    <string name="name">Nome</string>
-    <string name="lastname">Cognome</string>
-    <string name="birth_date">Data di Nascita</string>
-    <string name="email">Email</string>
-    <string name="tel">Telefono</string>
-    <string name="city">Città</string>
-    <string name="physical_data">Dati relativi al fisico</string>
-    <string name="gender">Genere</string>
-    <string name="female">Femmina</string>
-    <string name="male">Maschio</string>
-    <string name="other">Altro</string>
-    <string name="weight">Peso</string>
-    <string name="height">Altezza</string>
-    <string name="target">Obiettivo</string>
-    <string name="marathon">Maratona</string>
-    <string name="lose_weight">Dimagrire</string>
-    <string name="access_data">Dati di accesso</string>
-    <string name="confirm_password">Conferma Password</string>
-
+    <string name="forward">Continue</string>
+    <string name="personal_data">Personal data</string>
+    <string name="img_profile">Picture profile</string>
+    <string name="name">Name</string>
+    <string name="lastname">Last name</string>
+    <string name="birth_date">Date of birth</string>
+    <string name="tel">Phone</string>
+    <string name="city">City</string>
+    <string name="physical_data">Physical data</string>
+    <string name="gender">Gender</string>
+    <string name="female">Female</string>
+    <string name="male">Male</string>
+    <string name="other">Other</string>
+    <string name="weight">Weight</string>
+    <string name="height">Height</string>
+    <string name="target">Target</string>
+    <string name="marathon">Marathon</string>
+    <string name="lose_weight">Lose Weight</string>
+    <string name="access_data">Access data</string>
+    <string name="confirm_password">Confirm Password</string>
 
     <!-- Validazione Sign Up -->
-    <string name="name_not_empty">Nome non vuoto</string>
-    <string name="lastname_not_empty">Cognome non vuoto</string>
-    <string name="birth_date_not_empty">Data di Nascita non vuota</string>
-    <string name="email_not_empty">Email non valida</string>
-    <string name="tel_not_empty">Telefono non valido</string>
-    <string name="city_not_empty">Città non vuota</string>
-    <string name="gender_not_empty">Genere non vuoto</string>
-    <string name="target_not_empty">Obiettivo non vuoto</string>
-    <string name="weight_not_empty">Peso non vuoto</string>
-    <string name="height_not_empty">Altezza non vuoto</string>
-    <string name="username_not_empty">Username non vuoto</string>
-    <string name="password_not_empty">Password non vuota</string>
-    <string name="confirm_password_not_empty">Conferma Password non vuota</string>
+    <string name="name_not_empty">Name not empty</string>
+    <string name="lastname_not_empty">Last name not empty</string>
+    <string name="birth_date_not_empty">Date of birth not empty</string>
+    <string name="email_not_empty">Email not empty</string>
+    <string name="tel_not_empty">Phone not empty</string>
+    <string name="city_not_empty">City not empty</string>
+    <string name="gender_not_empty">Gender not empty</string>
+    <string name="target_not_empty">Target not empty</string>
+    <string name="weight_not_empty">Weight not empty</string>
+    <string name="height_not_empty">Height not empty</string>
+    <string name="username_not_empty">Username not empty</string>
+    <string name="password_not_empty">Password not empty</string>
+    <string name="confirm_password_not_empty">Confirm Password not empty</string>
+
 
     <!-- Impostazioni -->
     <string name="sport">Sport</string>
-    <string name="walk">Camminata</string>
-    <string name="run">Corsa</string>
-    <string name="profile">Profilo</string>
-    <string name="location">Localizzazione</string>
-    <string name="measure_unit">Unità di misura</string>
-    <string name="language">Lingua</string>
-    <string name="playlist">Playlist</string>
-    <string name="vocal_coach">Allenatore Vocale</string>
-    <string name="info">Informazioni</string>
-    <string name="exit">Esci</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
+    <string name="walk">Walk</string>
+    <string name="run">Run</string>
+    <string name="profile">Profile</string>
+    <string name="location">Location</string>
+    <string name="measure_unit">Measure Unit</string>
+    <string name="language">Language</string>
+    <string name="vocal_coach">Vocal Coach</string>
+    <string name="info">Information</string>
+    <string name="exit">Exit</string>
 
     <!-- Home -->
-    <string name="setting">Impostazioni</string>
-    <string name="workouts">Allenamenti</string>
+    <string name="setting">Settings</string>
+    <string name="workouts">Workouts</string>
+    <string name="statistics">Statistics</string>
 
-    <string name="statistics">Statistiche</string>
-    <string name="yes">Si</string>
-    <string name="no">No</string>
-    <string name="my_position">Mia Posizione</string>
-    <string name="type_map">Tipi di mappe</string>
-    <string name="date">Giorno</string>
-    <string name="time">Durata</string>
-    <string name="distance">Distanza</string>
-    <string name="calories">Calorie</string>
-    <string name="middle_speed">Velocità Media</string>
-
-    <string name="start">Inizia</string>
-    <string name="pause">Pausa</string>
+    <string name="yes">Yes</string>
+    <string name="my_position">My Position</string>
+    <string name="type_map">Maps Type</string>
+    <string name="date">Day</string>
+    <string name="time">Duration</string>
+    <string name="distance">Distance</string>
+    <string name="calories">Calories</string>
+    <string name="middle_speed">Middle Speed</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
     <string name="stop">Stop</string>
-    <string name="restart">Riprendi</string>
-    <string name="block_screen">Blocca schermo</string>
-    <string name="unlock_screen">Sblocca schermo</string>
+    <string name="restart">Restart</string>
+    <string name="block_screen">Block screen</string>
+    <string name="unlock_screen">Unlock screen</string>
     <string-array name="type_map">
         <item name="standard">Standard</item>
         <item name="satellite">Satellite</item>
-        <item name="terrain">Terrena</item>
-        <item name="hybrid">Ibrida</item>
+        <item name="terrain">Terrain</item>
+        <item name="hybrid">Hybrid</item>
     </string-array>
 
     <!-- Riepilogo / Dettaglio Allenamento -->
-    <string name="summary_workout">Riepilogo</string>
-    <string name="modify">Modifica</string>
-    <string name="delete">Elimina</string>
-    <string name="all"> Tutti </string>
-    <string name="year"> Anno </string>
-    <string name="month"> Mese </string>
-    <string name="week"> Settimana </string>
-    <string name="detail_workout">Dettaglio</string>
-    <string name="workout">Allenamento</string>
-    <string name="add">Aggiungi</string>
-    <string name="no_available_abbr">N.D.</string>
-
-    <string name="measure">Misura</string>
+    <string name="summary_workout">Summary</string>
+    <string name="modify">Modify</string>
+    <string name="delete">Delete</string>
+    <string name="all"> All </string>
+    <string name="year"> Year </string>
+    <string name="month"> Month </string>
+    <string name="week"> Week </string>
+    <string name="detail_workout">Detail</string>
+    <string name="workout">Workout</string>
+    <string name="add">Add</string>
+    <string name="no_available_abbr">N.A.</string>
+    <string name="measure">Measure</string>
 
     <!-- User -->
-    <string name="change_password">Cambia Password</string>
-    <string name="save">Salva</string>
-    <string name="delete_account">Elimina account</string>
+    <string name="change_password">Change Password</string>
+    <string name="save">Save</string>
+    <string name="delete_account">Delete account</string>
 
     <!-- Statistiche -->
-    <string name="statistic_data">Dati</string>
-    <string name="graphic_statistics">Grafico</string>
-    <string name="nothing_value">Nessun Valore</string>
+    <string name="statistic_data">Data</string>
+    <string name="graphic_statistics">Graphic</string>
+    <string name="nothing_value">No Value</string>
 
     <!-- Informazioni account -->
     <string name="info_description">
-        <i>Run/Walk Tracking</i> è un\' innovativa suite di applicazioni,
-        prodotti e servizi che tracciano e gestiscono dati sulla salute ed il fitness per moticare
-        i singoli individui a mantenersi in forma e a migliorare il proprio benessere personale.
+        <i>Run/Walk Tracking</i> is an innovative suite of applications, products and services
+        that track and manage health and fitness data to motivate individuals to keep fit and
+        improve their personal well-being.
     </string>
 
     <!-- Messaggi di info -->
-    <string name="delete_account_mex">Sei sicuro di cancellare l\'account?</string>
-    <string name="password_request_success">Riceverai un\'email con il link.</string>
-    <string name="gps_disabled">Il GPS sembra essere disattivato, vuoi attivarlo?</string>
-    <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
-    <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
-    <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
+    <string name="delete_account_mex">Are you sure to cancel the account?</string>
+    <string name="password_request_success">You will receive an email with the link.</string>
+    <string name="gps_disabled">GPS seems to be disabled, do you want to activate it?</string>
+    <string name="delete_weight_mex">Are you sure you want to remove this weight?</string>
+    <string name="delete_workout_mex">Are you sure you want to delete this workout?</string>
+    <string name="correctly_sign_up">Registration successful! You will receive an email with a code.</string>
 
     <!-- Messaggi di errore -->
-    <string name="not_correct_password">Password non corretta</string>
-    <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
-    <string name="internet_not_available">Internet non attivo</string>
-    <string name="not_empty">\u0020 non può essere vuoto</string>
-    <string name="user_not_set">User non settato</string>
-    <string name="account_not_checked">Account non verificato!</string>
-    <string name="uploadImageOk">Compressione Immagine Finita</string>
+    <string name="not_correct_password">Incorrect password</string>
+    <string name="workout_not_set_correctly">At least DAY, SPORT and DURATION must be set</string>
+    <string name="internet_not_available">Internet not available</string>
+    <string name="not_empty">\u0020 can not be empty</string>
+    <string name="user_not_set">User not set</string>
+    <string name="account_not_checked">Account not verified!</string>
+    <string name="uploadImageOk">Finished Image Compression</string>
 
 
-<!-- Da non copiare nelle altre lingue -->
+    <!-- Da non TRADURRE -->
 
-    <string name="app_name"><i>Run/Walk Tracking</i></string>
-    <string name="space">\u0020</string>
-    <string name="dot">.</string>
-    <string name="colon">:</string>
+    <string name="app_name" translatable="false"><i>Run/Walk Tracking</i></string>
+    <string name="space" translatable="false">\u0020</string>
+    <string name="dot" translatable="false">.</string>
+    <string name="colon" translatable="false">:</string>
+
+    <string name="ok" translatable="false">OK</string>
+    <string name="on" translatable="false">ON</string>
+    <string name="off" translatable="false">OFF</string>
+    <string name="no" translatable="false">No</string>
+
+    <!-- Login -->
+    <string name="username" translatable="false">Username</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="email" translatable="false">Email</string>
 
     <!-- Token -->
-    <string name="token">Token</string>
+    <string name="token" translatable="false">Token</string>
+
+    <!-- Impostazione -->
+    <string name="playlist" translatable="false">Playlist</string>
 
     <!-- Home -->
-    <string name="home">Home</string>
+    <string name="home" translatable="false">Home</string>
 
     <!--Unità di misura -->
-    <string name="kilometer">Km</string>
-    <string name="meter">m</string>
-    <string name="kilogram">Kg</string>
-    <string name="mile">mi</string>
-    <string name="pound">lb</string>
-    <string name="feet">ft</string>
-    <string name="kilo_calories">Kcal</string>
-    <string name="kilometer_per_hour">Km/h</string>
-    <string name="mile_per_hour">mi/h</string>
-    <string name="second">s</string>
-    <string name="unit_hours">h</string>
-    <string name="unit_min">min</string>
-    <string name="time_workout">00:00:00</string>
-    <string name="distance_workout">0.00 </string>
-    <string name="calories_workout">0.00 </string>
+    <string name="kilometer" translatable="false">Km</string>
+    <string name="meter" translatable="false">m</string>
+    <string name="kilogram" translatable="false">Kg</string>
+    <string name="mile" translatable="false">mi</string>
+    <string name="pound" translatable="false">lb</string>
+    <string name="feet" translatable="false">ft</string>
+    <string name="kilo_calories" translatable="false">Kcal</string>
+    <string name="kilometer_per_hour" translatable="false">Km/h</string>
+    <string name="mile_per_hour" translatable="false">mi/h</string>
+    <string name="second" translatable="false">s</string>
+    <string name="unit_hours" translatable="false">h</string>
+    <string name="unit_min" translatable="false">min</string>
+    <string name="time_workout" translatable="false">00:00:00</string>
+    <string name="distance_workout" translatable="false">0.00 </string>
+    <string name="calories_workout" translatable="false">0.00 </string>
 
     <!-- Language Code -->
-    <string name="it_code">it</string>
-    <string name="en_code">en</string>
+    <string name="it_code" translatable="false">it</string>
+    <string name="en_code" translatable="false">en</string>
+    <string name="es_code" translatable="false">es</string>
 </resources>

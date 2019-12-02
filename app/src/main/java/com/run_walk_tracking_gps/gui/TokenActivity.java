@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,7 +9,7 @@ import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +29,7 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
         token = findViewById(R.id.access_token);
 
         if(getIntent()!=null){
-            id_user = getIntent().getIntExtra(ConstantIntent.ID_USER, 0);
+            id_user = getIntent().getIntExtra(KeysIntent.ID_USER, 0);
         }
     }
 

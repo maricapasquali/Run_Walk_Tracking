@@ -13,6 +13,13 @@
         android:layout_marginBottom="10dp"
         android:background="@color/colorPrimaryDark" />
 
+    <fragment
+        android:id="@+id/no_value_fragment"
+        android:name="com.run_walk_tracking_gps.gui.fragments.NoValueFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/filter_workouts" />
+
     <android.widget.ExpandableListView
         android:id="@+id/list_workouts_expandable"
         android:layout_width="match_parent"

@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -20,7 +19,7 @@ import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 
 import org.json.JSONException;
@@ -51,7 +50,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         summary_workout = findViewById(R.id.summary);
         summary_ok = findViewById(R.id.summary_ok);
 
-        workout = (Workout)getIntent().getParcelableExtra(ConstantIntent.SUMMARY);
+        workout = (Workout)getIntent().getParcelableExtra(KeysIntent.SUMMARY);
         if(workout!=null){ // SUMMARY_DETAILS
             isSummary = true;
             workout.setContext(this);
@@ -63,7 +62,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
             getSupportActionBar().setTitle(R.string.summary_workout);
         }
         else { // DETAILS
-            workout = (Workout)getIntent().getParcelableExtra(ConstantIntent.DETAIL);
+            workout = (Workout)getIntent().getParcelableExtra(KeysIntent.DETAIL);
             if(workout!=null){
                 workout.setContext(this);
 
@@ -109,7 +108,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
 
                 final Intent intentModify = new Intent(this, ModifyWorkoutActivity.class);
                 //intentModify.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intentModify.putExtra(ConstantIntent.MODIFY_WORKOUT, workout);
+                intentModify.putExtra(KeysIntent.MODIFY_WORKOUT, workout);
                 startActivityForResult(intentModify, REQUEST_MODIFY);
                 break;
 
@@ -129,7 +128,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                                         }else{
                                             if(response.getBoolean("delete")){
                                                 final Intent resultIntent = new Intent();
-                                                resultIntent.putExtra(ConstantIntent.DELETE_WORKOUT, workout.getIdWorkout());
+                                                resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
                                                 setResult(Activity.RESULT_OK, resultIntent);
                                                 finish();
                                             }
@@ -163,8 +162,8 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         switch (requestCode){
             case REQUEST_MODIFY:
                 if(resultCode==Activity.RESULT_OK) {
-                    Toast.makeText(this, ConstantIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
-                    Workout work = (Workout) data.getParcelableExtra(ConstantIntent.CHANGED_WORKOUT);
+                    Toast.makeText(this, KeysIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
+                    Workout work = (Workout) data.getParcelableExtra(KeysIntent.CHANGED_WORKOUT);
                     isChangedWorkout = (work!=null);
                     if(isChangedWorkout){
                         work.setContext(this);
@@ -186,7 +185,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         if(isChangedWorkout){
             Log.d(TAG, "Return Workout changed");
             Intent returnIntent = new Intent();
-            returnIntent.putExtra(ConstantIntent.CHANGED_WORKOUT, workout);
+            returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
             setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
@@ -194,7 +193,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     }
 
     private void saveWorkout(){
-        Log.d(ConstantIntent.NEW_WORKOUT, "Summary : Workout = "+ workout);
+        Log.d(KeysIntent.NEW_WORKOUT, "Summary : Workout = "+ workout);
         try {
             final JSONObject bodyJson = workout.toJson(this);
             Log.e(TAG, bodyJson.toString());
@@ -216,7 +215,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                 // save and send to workouts list
                 final Intent resultIntent = new Intent();
                 workout.setIdWorkout(id_workout);
-                resultIntent.putExtra(ConstantIntent.NEW_WORKOUT, workout);
+                resultIntent.putExtra(KeysIntent.NEW_WORKOUT, workout);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }

@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +21,7 @@ import com.run_walk_tracking_gps.gui.components.adapter.listview.NewWeightAdapte
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
-import com.run_walk_tracking_gps.intent.ConstantIntent;
+import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
@@ -109,7 +108,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 statisticsData.setId(id_statistics);
                 // save and send
                 final Intent newWeightIntent = new Intent();
-                newWeightIntent.putExtra(ConstantIntent.NEW_WEIGHT, statisticsData);
+                newWeightIntent.putExtra(KeysIntent.NEW_WEIGHT, statisticsData);
                 setResult(RESULT_OK, newWeightIntent);
                 finish();
             }

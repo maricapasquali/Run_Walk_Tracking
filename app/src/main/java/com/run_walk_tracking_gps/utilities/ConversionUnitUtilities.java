@@ -1,10 +1,5 @@
 package com.run_walk_tracking_gps.utilities;
 
-import com.google.android.gms.common.util.NumberUtils;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 public class ConversionUnitUtilities {
 
     private static final double KM_TO_MI = 1.609;

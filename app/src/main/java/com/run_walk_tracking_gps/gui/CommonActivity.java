@@ -1,30 +1,18 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.model.enumerations.Language;
-import com.run_walk_tracking_gps.utilities.DateUtilities;
-import com.run_walk_tracking_gps.utilities.LanguageUtilities;
-
-import org.json.JSONException;
-
-
 public abstract class CommonActivity extends AppCompatActivity {
 
     private final static String TAG = CommonActivity.class.getName();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
