@@ -4,10 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +13,12 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
-import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.net.PasswordAuthentication;
 
 public class AccessDataFragment extends Fragment {
 
@@ -85,8 +80,8 @@ public class AccessDataFragment extends Fragment {
 
                     if(!hash_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(getContext());
 
-                    final JSONObject accessData = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText())
-                            .put(FieldDataBase.PASSWORD.toName(), hash_password);
+                    final JSONObject accessData = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText())
+                            .put(HttpRequest.Constant.PASSWORD, hash_password);
 
                     accessDataListener.accessData(accessData);
 

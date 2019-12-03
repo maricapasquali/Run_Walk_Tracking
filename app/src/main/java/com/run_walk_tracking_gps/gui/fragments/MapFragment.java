@@ -94,7 +94,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             Log.d(TAG, "Choose Type Map");
             MapTypeDialog.create(getContext(), getMapType(), (ChooseDialog.OnSelectedItemListener<Integer>) (val, description) -> {
                 setMapType(val);
-                Toast.makeText(getContext(), "Mappa = " + description, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Map = " + description);
             }).show();
         });
     }
@@ -200,7 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     public void onBlockScreenClickListener(boolean is) {
-        Log.e(TAG, "Block/Unblock into map_fragment");
+        Log.d(TAG, "Block/Unblock into map_fragment");
         myLocation.setClickable(is);
         typeMap.setClickable(is);
     }

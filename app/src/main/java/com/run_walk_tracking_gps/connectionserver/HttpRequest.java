@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -31,6 +32,130 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class HttpRequest {
+
+    public static class Constant{
+        public static final String FIRST_LOGIN ="first_login";
+        public static final String TOKEN = "token";
+        public static final String ID_USER = "id_user";
+        public static final String NAME = "name";
+        public static final String LAST_NAME = "last_name";
+        public static final String BIRTH_DATE = "birth_date";
+        public static final String EMAIL = "email";
+        public static final String CITY = "city";
+        public static final String PHONE = "phone";
+        public static final String GENDER = "gender";
+        public static final String HEIGHT = "height";
+        public static final String IMG_ENCODE = "img_encode";
+        public static final String USERNAME = "username";
+        public static final String PASSWORD = "password";
+        public static final String SPORT = "sport";
+        public static final String TARGET = "target";
+        public static final String WEIGHT = "weight";
+        public static final String ID_WEIGHT = "id_weight";
+        public static final String ID_WORKOUT = "id_workout";
+        public static final String DURATION = "duration";
+        public static final String MAP_ROUTE = "map_route";
+        public static final String DISTANCE  = "distance";
+        public static final String CALORIES = "calories";
+        public static final String DATE = "date";
+        public static final String VALUE ="value";
+        public static final String FILTER = "filter";
+
+        public static final String WEIGHTS = "weights";
+        public static final String WORKOUTS = "workouts";
+        public static final String REQUEST_SENDED = "request_sended";
+
+        public static final String UPDATE = "update";
+        public static final String DELETE = "delete";
+
+        public static final String USER ="user";
+        public static final String APP ="app";
+        public static final String SETTINGS = "settings";
+        public static final String UNIT_MEASURE ="unit_measure";
+
+        public static final String ENERGY = "energy";
+        public static final String LANGUAGE = "language";
+
+        //ACCOUNT
+        private static List<String> fieldRequiredForSignUp(){
+            return Arrays.asList(NAME, LAST_NAME, GENDER, BIRTH_DATE, EMAIL,
+                            CITY,PHONE,HEIGHT, LANGUAGE, TARGET, WEIGHT,
+                            USERNAME, PASSWORD);
+        }
+
+        private static List<String> fieldRequiredForSignIn(){
+            return Arrays.asList(USERNAME, PASSWORD);
+        }
+
+        private static List<String> fieldRequiredForFirstSignIn(){
+            return Arrays.asList(ID_USER, TOKEN);
+        }
+
+        private static List<String> fieldRequiredForUserInformation(){
+            return Collections.singletonList(ID_USER);
+        }
+
+        private static List<String> fieldRequiredForImgProfile() {
+            return Collections.singletonList(ID_USER);
+        }
+
+        private static List<String> fieldRequiredForUpdatePassword(){
+            return Arrays.asList(ID_USER,PASSWORD);
+        }
+
+        private static List<String> fieldRequiredForForgotPassword(){
+            return Collections.singletonList(EMAIL);
+        }
+
+        private static List<String> fieldSupportedForUpdateUserInformation(){
+            return Arrays.asList(ID_USER,  IMG_ENCODE,  NAME,  LAST_NAME,  GENDER,
+                    BIRTH_DATE,  EMAIL,  CITY,  PHONE, HEIGHT);
+        }
+
+        private static List<String> fieldRequiredForDeleteUser(){
+            return Collections.singletonList(ID_USER);
+        }
+
+        // SETTINGS
+        private static  List<String> fieldRequiredForUpdateSetting(){
+            return Arrays.asList(ID_USER,  FILTER,  VALUE);
+        }
+
+        // WORKOUTS
+        private static List<String> fieldRequiredForAllWorkouts(){
+            return Collections.singletonList(ID_USER);
+        }
+
+        private static List<String> fieldSupportedForNewWorkout(){
+            return Arrays.asList(ID_USER, DATE, SPORT, DURATION, MAP_ROUTE, DISTANCE, CALORIES);
+        }
+
+        private static List<String> fieldSupportedForUpdateWorkout(){
+            return Arrays.asList(ID_WORKOUT,  DATE,  SPORT,  DURATION,  MAP_ROUTE,
+                    DISTANCE,  CALORIES);
+        }
+
+        private static List<String> fieldRequiredForDeleteWorkout(){
+            return Collections.singletonList(ID_WORKOUT);
+        }
+
+        // STATISTICS
+        private static  List<String> fieldRequiredForAllStatistics(){
+            return Arrays.asList(ID_USER,  FILTER);
+        }
+
+        private static  List<String> fieldRequiredForNewWeight(){
+            return Arrays.asList(ID_USER,  DATE,  VALUE);
+        }
+
+        private static List<String> fieldSupportedForUpdateWeight(){
+            return Arrays.asList(ID_WEIGHT,  DATE,  VALUE);
+        }
+
+        private static List<String> fieldRequiredForDeleteWeight() {
+            return Collections.singletonList(ID_WEIGHT);
+        }
+    }
 
     private static final String TAG = HttpRequest.class.getName();
     public static final String ERROR = "Error";
@@ -48,7 +173,7 @@ public class HttpRequest {
     private static final String SIGN_UP = ACCOUNT + "signup.php";
     private static final String SIGN_IN = ACCOUNT + "signin.php";
     private static final String FIRST_SIGN_IN = ACCOUNT + "first_signin.php";
-    private static final String USER = ACCOUNT + "profile.php?"+  FieldDataBase.ID_USER.toName()+"=";
+    private static final String USER = ACCOUNT + "profile.php?"+  HttpRequest.Constant.ID_USER+"=";
     private static final String UPDATE_USER_INFO = ACCOUNT + "update_profile.php";
     private static final String DELETE_USER = ACCOUNT + "delete_account.php";
     private static final String DATA_AFTER_ACCESS = ACCOUNT + "data_after_access.php";
@@ -60,7 +185,7 @@ public class HttpRequest {
     private static final String UPDATE_SETTING = SETTINGS + "update_setting.php";
 
     // WORKOUTS
-    private static final String ALL_WORKOUTS = WORKOUT + "all_workouts.php?"+  FieldDataBase.ID_USER.toName()+"=";
+    private static final String ALL_WORKOUTS = WORKOUT + "all_workouts.php?"+  HttpRequest.Constant.ID_USER+"=";
     private static final String NEW_WORKOUT = WORKOUT + "new_workout.php";
     private static final String UPDATE_WORKOUT = WORKOUT + "update_workout.php";
     private static final String DELETE_WORKOUT = WORKOUT + "delete_workout.php";
@@ -80,36 +205,36 @@ public class HttpRequest {
             throws NullPointerException, IllegalArgumentException{
 
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-        final List<String> fieldRequired =  FieldDataBase.fieldRequiredForSignUp();
-        checkNotRequiredField(bodyJson::keys, s -> !fieldRequired.contains(s) && !s.equals(FieldDataBase.IMG_ENCODE.toName()));
+        final List<String> fieldRequired =  HttpRequest.Constant.fieldRequiredForSignUp();
+        checkNotRequiredField(bodyJson::keys, s -> !fieldRequired.contains(s) && !s.equals(HttpRequest.Constant.IMG_ENCODE));
         checkRequiredField(bodyJson::keys, (fieldSubmit) -> fieldRequired.stream().filter(f -> !fieldSubmit.contains(f)).toArray());
         return HttpRequest.requestJsonPostToServerVolley(context, SIGN_UP, bodyJson,responseJsonListener);
     }
 
     public static boolean requestSignIn(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
-        check(bodyJson,  FieldDataBase.fieldRequiredForSignIn());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForSignIn());
         return HttpRequest.requestJsonPostToServerVolley(context, SIGN_IN, bodyJson,responseJsonListener);
     }
 
     public static boolean requestFirstSignIn(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
-        check(bodyJson,  FieldDataBase.fieldRequiredForFirstSignIn());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForFirstSignIn());
         return HttpRequest.requestJsonPostToServerVolley(context, FIRST_SIGN_IN, bodyJson,responseJsonListener);
     }
 
     public static boolean requestUserInformation(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, JSONException {
 
-        check(bodyJson,  FieldDataBase.fieldRequiredForUserInformation());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForUserInformation());
 
-        final int id_user = (Integer) bodyJson.get(FieldDataBase.ID_USER.toName());
+        final int id_user = (Integer) bodyJson.get(HttpRequest.Constant.ID_USER);
         return HttpRequest.requestJsonGetToServerVolley(context, USER + id_user, bodyJson,responseJsonListener);
     }
 
     public static boolean requestDataAfterAccess(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForImgProfile());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForImgProfile());
         return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context, DATA_AFTER_ACCESS, Request.Method.POST, bodyJson,responseJsonListener);
     }
 
@@ -117,7 +242,7 @@ public class HttpRequest {
                                                               RequestDialog dialog)
             throws NullPointerException, IllegalArgumentException {
 
-        final List<String> fieldSupported =  FieldDataBase.fieldSupportedForUpdateUserInformation();
+        final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForUpdateUserInformation();
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
         checkNotRequiredField(bodyJson::keys, s -> !fieldSupported.contains(s));
 
@@ -134,41 +259,41 @@ public class HttpRequest {
 
     public static boolean requestForgotPassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
-        check(bodyJson, FieldDataBase.fieldRequiredForForgotPassword());
+        check(bodyJson, HttpRequest.Constant.fieldRequiredForForgotPassword());
         return HttpRequest.requestJsonPostToServerVolley(context, FORGOT_PASSWORD, bodyJson,responseJsonListener);
     }
 
     public static boolean requestUpdatePassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException{
-        check(bodyJson,  FieldDataBase.fieldRequiredForUpdatePassword());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForUpdatePassword());
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_PASSWORD, bodyJson,responseJsonListener);
     }
 
     public static boolean requestDeleteUser(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-        check(bodyJson, FieldDataBase.fieldRequiredForDeleteUser());
+        check(bodyJson, HttpRequest.Constant.fieldRequiredForDeleteUser());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_USER, bodyJson,responseJsonListener);
     }
 
     // SETTINGS
     public static boolean requestUpdateSetting(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
         throws NullPointerException, IllegalArgumentException {
-            check(bodyJson,  FieldDataBase.fieldRequiredForUpdateSetting());
+            check(bodyJson,  HttpRequest.Constant.fieldRequiredForUpdateSetting());
             return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_SETTING, bodyJson,responseJsonListener);
     }
 
     // WORKOUTS
     public static boolean requestWorkouts(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, JSONException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForAllWorkouts());
-        final int id_user = (Integer) bodyJson.get( FieldDataBase.ID_USER.toName());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForAllWorkouts());
+        final int id_user = (Integer) bodyJson.get( HttpRequest.Constant.ID_USER);
         return HttpRequest.requestJsonGetToServerVolley(context, ALL_WORKOUTS + id_user, bodyJson,responseJsonListener);
     }
 
     public static boolean requestNewWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-        final List<String> fieldSupported =  FieldDataBase.fieldSupportedForNewWorkout();
+        final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForNewWorkout();
         checkNotRequiredField(bodyJson::keys, s -> !fieldSupported.contains(s));
         return HttpRequest.requestJsonPostToServerVolley(context, NEW_WORKOUT, bodyJson,responseJsonListener);
     }
@@ -176,45 +301,45 @@ public class HttpRequest {
     public static boolean requestUpdateWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-        final List<String> fieldSupported =  FieldDataBase.fieldSupportedForUpdateWorkout();
+        final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForUpdateWorkout();
         checkNotRequiredField(bodyJson::keys, s -> !fieldSupported.contains(s));
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_WORKOUT, bodyJson,responseJsonListener);
     }
 
     public static boolean requestDeleteWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForDeleteWorkout());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForDeleteWorkout());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_WORKOUT, bodyJson,responseJsonListener);
     }
 
     // STATISTICS
     public static boolean requestStatistics(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, JSONException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForAllStatistics());
-        final int id_user = (Integer) bodyJson.get( FieldDataBase.ID_USER.toName());
-        final String filter = (String) bodyJson.get( FieldDataBase.FILTER.toName());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForAllStatistics());
+        final int id_user = (Integer) bodyJson.get( HttpRequest.Constant.ID_USER);
+        final String filter = (String) bodyJson.get( HttpRequest.Constant.FILTER);
         return HttpRequest.requestJsonGetToServerVolley(context,
-                ALL_STATISTICS + "?" +  FieldDataBase.ID_USER.toName() + "=" + id_user + "&" +  FieldDataBase.FILTER.toName() + "=" + filter,
+                ALL_STATISTICS + "?" +  HttpRequest.Constant.ID_USER + "=" + id_user + "&" +  HttpRequest.Constant.FILTER + "=" + filter,
                 bodyJson,responseJsonListener);
     }
 
     public static boolean requestNewWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForNewWeight());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForNewWeight());
         return HttpRequest.requestJsonPostToServerVolley(context, NEW_WEIGHT, bodyJson, responseJsonListener);
     }
 
     public static boolean requestUpdateWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-        final List<String> fieldSupported =  FieldDataBase.fieldSupportedForUpdateWeight();
+        final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForUpdateWeight();
         checkNotRequiredField(bodyJson::keys, s -> !fieldSupported.contains(s));
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_WEIGHT, bodyJson,responseJsonListener);
     }
 
     public static boolean requestDeleteWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException {
-        check(bodyJson,  FieldDataBase.fieldRequiredForDeleteWeight());
+        check(bodyJson,  HttpRequest.Constant.fieldRequiredForDeleteWeight());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_WEIGHT, bodyJson,responseJsonListener);
     }
 
@@ -303,33 +428,4 @@ public class HttpRequest {
         queue.add(jsonRequest);
         return queue;
     }
-
-    /*public static boolean requestStringToServerVolley(final Context context, final String url, final int method,
-                                                        final JSONObject jsonBody, Response.Listener<String> listener){
-        final AtomicBoolean errRequest = new AtomicBoolean(false);
-        if(!isNetWorkAvailable(context)) return false;
-        String mRequestBody = jsonBody.toString();
-        final StringRequest stringRequest = new StringRequest(method, url, listener, error -> {
-            Log.e(TAG, error.toString());
-            Toast.makeText(context, errRequest.toString(), Toast.LENGTH_LONG).show();
-            errRequest.set(true);
-        }) {
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
-            @Override
-            public byte[] getBody() throws AuthFailureError {
-                try {
-                    return mRequestBody == null ? null : mRequestBody.getBytes("utf-8");
-                } catch (UnsupportedEncodingException uee) {
-                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s",mRequestBody, "utf-8");
-                    return null;
-                }
-            }
-        };
-        final RequestQueue queue = Volley.newRequestQueue(context);
-        queue.add(stringRequest);
-        return!errRequest.get();
-    }*/
 }

@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.android.volley.Response;
 
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
@@ -109,36 +108,36 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     private void saveUserChanged(RequestDialog dialog){
         try {
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), user.getIdUser());
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, user.getIdUser());
             if(!user.getName().equals(oldUser.getName())){
-                bodyJson.put(FieldDataBase.NAME.toName(), user.getName());
+                bodyJson.put(HttpRequest.Constant.NAME, user.getName());
             }
             if(!user.getLastName().equals(oldUser.getLastName())){
-                bodyJson.put(FieldDataBase.LAST_NAME.toName(), user.getLastName());
+                bodyJson.put(HttpRequest.Constant.LAST_NAME, user.getLastName());
             }
             if(!user.getGender().equals(oldUser.getGender())){
-                bodyJson.put(FieldDataBase.GENDER.toName(), user.getGender());
+                bodyJson.put(HttpRequest.Constant.GENDER, user.getGender());
             }
             if(!user.getBirthDate().equals(oldUser.getBirthDate())){
-                bodyJson.put(FieldDataBase.BIRTH_DATE.toName(), user.getBirthDate());
+                bodyJson.put(HttpRequest.Constant.BIRTH_DATE, user.getBirthDate());
             }
             if(!user.getEmail().equals(oldUser.getEmail())){
-                bodyJson.put(FieldDataBase.EMAIL.toName(), user.getEmail());
+                bodyJson.put(HttpRequest.Constant.EMAIL, user.getEmail());
             }
             if(!user.getCity().equals(oldUser.getCity())){
-                bodyJson.put(FieldDataBase.CITY.toName(), user.getCity());
+                bodyJson.put(HttpRequest.Constant.CITY, user.getCity());
             }
             if(!user.getPhone().equals(oldUser.getPhone())){
-                bodyJson.put(FieldDataBase.PHONE.toName(), user.getPhone());
+                bodyJson.put(HttpRequest.Constant.PHONE, user.getPhone());
             }
             if(!user.getHeight().getValue().equals(oldUser.getHeight().getValue())){
-                bodyJson.put(FieldDataBase.HEIGHT.toName(), user.getHeight().getValue());
+                bodyJson.put(HttpRequest.Constant.HEIGHT, user.getHeight().getValue());
             }
 
             if(async!=null){
                 this.image_encode = async.get();
                 if(image_encode!=null)
-                    bodyJson.put(FieldDataBase.IMG_ENCODE.toName(), image_encode);
+                    bodyJson.put(HttpRequest.Constant.IMG_ENCODE, image_encode);
             }
 
             Log.d(TAG, bodyJson.toString());

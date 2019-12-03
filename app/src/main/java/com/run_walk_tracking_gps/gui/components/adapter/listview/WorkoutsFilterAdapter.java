@@ -147,7 +147,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
         final ListHolderChild vH;
         final Workout workout = (Workout)getChild(groupPosition, childPosition);
 
-        Log.e(TAG, workout.toString());
+        Log.d(TAG, workout.toString());
 
         if(convertView==null){
             view = LayoutInflater.from(context).inflate(R.layout.custom_item_workouts, null);

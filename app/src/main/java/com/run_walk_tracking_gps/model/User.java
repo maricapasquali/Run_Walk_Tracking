@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
@@ -46,12 +47,12 @@ public class User implements Parcelable {
     public JSONObject toJson() throws JSONException {
         JSONObject userJson = new JSONObject();
 
-        userJson.put("name", this.name)
-                .put("last_name", this.last_name)
-                .put("birth_date", this.birth_date)
-                .put("email", this.email)
-                .put("city", this.city)
-                .put("phone", this.phone);
+        userJson.put(HttpRequest.Constant.NAME, this.name)
+                .put(HttpRequest.Constant.LAST_NAME, this.last_name)
+                .put(HttpRequest.Constant.BIRTH_DATE, this.birth_date)
+                .put(HttpRequest.Constant.EMAIL, this.email)
+                .put(HttpRequest.Constant.CITY, this.city)
+                .put(HttpRequest.Constant.PHONE, this.phone);
 
         return userJson;
     }
@@ -62,20 +63,20 @@ public class User implements Parcelable {
 
     // TODO: 11/15/2019 MIGLIORARE
     public User(Context context, JSONObject userJson) throws JSONException {
-        id_user = userJson.getInt("id_user");
-        username = userJson.getString("username");
-        name = userJson.getString("name");
-        last_name = userJson.getString("last_name");
-        gender = Gender.valueOf(userJson.getString("gender"));
+        id_user = userJson.getInt(HttpRequest.Constant.ID_USER);
+        username = userJson.getString(HttpRequest.Constant.USERNAME);
+        name = userJson.getString(HttpRequest.Constant.NAME);
+        last_name = userJson.getString(HttpRequest.Constant.LAST_NAME);
+        gender = Gender.valueOf(userJson.getString(HttpRequest.Constant.GENDER));
         try {
-            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString("birth_date"));
+            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString(HttpRequest.Constant.BIRTH_DATE));
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        email = userJson.getString("email");
-        city = userJson.getString("city");
-        phone = userJson.getString("phone");
-        height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble("height"));
+        email = userJson.getString(HttpRequest.Constant.EMAIL);
+        city = userJson.getString(HttpRequest.Constant.CITY);
+        phone = userJson.getString(HttpRequest.Constant.PHONE);
+        height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble(HttpRequest.Constant.HEIGHT));
     }
 
     public void setContext(Context context){

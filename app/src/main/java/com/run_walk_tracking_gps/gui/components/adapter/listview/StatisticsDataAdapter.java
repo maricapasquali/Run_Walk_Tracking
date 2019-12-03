@@ -50,15 +50,14 @@ public class StatisticsDataAdapter extends BaseAdapter {
         final List<StatisticsData> statisticsData = new ArrayList<>();
         final Measure.Type type = statisticsFiltered.get(0).getMeasure().getType();
         final Measure.Unit unit = statisticsFiltered.get(0).getMeasure().getUnit();
-
-        for (int i=0; i<statisticsFiltered.size(); i++) {
-            Double value = statisticsFiltered.get(i).getValue();
+        for (StatisticsData sData : statisticsFiltered) {
             statisticsData.add(StatisticsBuilder.create(context, type)
-                                                .setDate(statisticsFiltered.get(i).getDate())
-                                                .setValue(unit.equals(type.getMeasureUnitDefault()) ? value : Measure.conversionTo(unit, value))
-                                                .build());
+                    .setDate(sData.getDate())
+                    .setValue(unit.equals(type.getMeasureUnitDefault()) ? sData.getValue() : Measure.conversionTo(unit, sData.getValue()))
+                    .build());
         }
-        Log.e(TAG, statisticsFiltered.toString());
+
+        Log.d(TAG, statisticsFiltered.toString());
         return statisticsData;
     }
 

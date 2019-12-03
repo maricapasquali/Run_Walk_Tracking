@@ -14,7 +14,6 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
@@ -70,9 +69,9 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
                 try {
                     final String  id_user = DefaultPreferencesUser.getIdUserLogged(this);
                     JSONObject bodyJson = new JSONObject();
-                    bodyJson.put(FieldDataBase.ID_USER.toName(), id_user)
-                            .put(FieldDataBase.FILTER.toName(), filter)
-                            .put(FieldDataBase.VALUE.toName(), value);
+                    bodyJson.put(HttpRequest.Constant.ID_USER, id_user)
+                            .put(HttpRequest.Constant.FILTER, filter)
+                            .put(HttpRequest.Constant.VALUE, value);
 
                     if(!HttpRequest.requestUpdateSetting(this, bodyJson, this)){
                         Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();

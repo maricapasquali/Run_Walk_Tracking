@@ -8,7 +8,6 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 
@@ -43,8 +42,8 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
             }
             else{
                 try {
-                    JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
-                                                          .put(FieldDataBase.TOKEN.toName(), token.getText().toString());
+                    JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
+                                                          .put(HttpRequest.Constant.TOKEN, token.getText().toString());
 
                     if(!HttpRequest.requestFirstSignIn(this, bodyJson, this )){
                         Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();

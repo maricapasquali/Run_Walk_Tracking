@@ -16,7 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.dialog.HeightDialog;
@@ -98,7 +98,7 @@ public class PhysicalDataFragment extends Fragment {
         if(target!=null)target.setAdapter(spinnerTargetAdapter);
 
 
-        Log.e(TAG, "Gender = " +gender.getSelectedItem().equals(R.string.gender));
+        Log.d(TAG, "Gender = " +gender.getSelectedItem().equals(R.string.gender));
 
         return view;
     }
@@ -134,10 +134,10 @@ public class PhysicalDataFragment extends Fragment {
 
             JSONObject physicalData= null;
             if(isSetAll()){
-                physicalData = new JSONObject().put(FieldDataBase.GENDER.toName(), EnumUtilities.getEnumFromStrId(Gender.class, (int)gender.getSelectedItem()))
-                        .put(FieldDataBase.TARGET.toName(), EnumUtilities.getEnumFromStrId(Target.class, (int) target.getSelectedItem()))
-                        .put(FieldDataBase.HEIGHT.toName(), heightValue)
-                        .put(FieldDataBase.WEIGHT.toName(), weightValue);
+                physicalData = new JSONObject().put(HttpRequest.Constant.GENDER, EnumUtilities.getEnumFromStrId(Gender.class, (int)gender.getSelectedItem()))
+                        .put(HttpRequest.Constant.TARGET, EnumUtilities.getEnumFromStrId(Target.class, (int) target.getSelectedItem()))
+                        .put(HttpRequest.Constant.HEIGHT, heightValue)
+                        .put(HttpRequest.Constant.WEIGHT, weightValue);
             }
 
             physicalDataListener.physicalData(physicalData);

@@ -20,7 +20,6 @@ import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpin
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.intent.KeysIntent;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
@@ -207,7 +206,7 @@ public class SettingActivity extends CommonActivity {
         profile.setOnClickListener(v ->{
             try {
 
-                final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)));
+                final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)));
                 if(!HttpRequest.requestUserInformation(this, bodyJson, response -> {
 
                     if(HttpRequest.someError(response))
@@ -256,9 +255,9 @@ public class SettingActivity extends CommonActivity {
             if(!id.equals(s_default)){
                 // request update
                 JSONObject bodyJson = new JSONObject();
-                bodyJson.put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
-                        .put(FieldDataBase.FILTER.toName(), type)
-                        .put(FieldDataBase.VALUE.toName(), id);
+                bodyJson.put(HttpRequest.Constant.ID_USER, Integer.valueOf(id_user))
+                        .put(HttpRequest.Constant.FILTER, type)
+                        .put(HttpRequest.Constant.VALUE, id);
 
                 if(!HttpRequest.requestUpdateSetting(SettingActivity.this, bodyJson, response -> {
                     try {

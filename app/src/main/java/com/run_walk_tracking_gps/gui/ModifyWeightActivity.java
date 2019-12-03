@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -29,6 +28,7 @@ import java.util.stream.Stream;
 public class ModifyWeightActivity extends CommonActivity implements Response.Listener<JSONObject>{
 
     private static final String TAG = ModifyWeightActivity.class.getName();
+    private static final String UNSET = "Weight data doesn't correctly set !! ";
 
     private ListView listView;
 
@@ -56,7 +56,7 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                 statisticsData = oldStatisticsData.clone();
             }
             isLastWeight = getIntent().getBooleanExtra(KeysIntent.IS_LAST_WEIGHT, false);
-            Log.e(TAG, "Weights size = 1 : "+ isLastWeight);
+            Log.d(TAG, "Weights size = 1 : "+ isLastWeight);
         }
     }
 
@@ -97,20 +97,20 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try{
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WEIGHT.toName(), statisticsData.getId());
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WEIGHT, statisticsData.getId());
 
             switch (item.getItemId()) {
                 case R.id.save_weight: {
                     try{
                         if(!statisticsData.isSet())
-                            throw new NullPointerException("Weight data doesn't correctly set !! " + statisticsData);
+                            throw new NullPointerException(UNSET);
 
                         if(!statisticsData.getValue().equals(oldStatisticsData.getValue())){
-                            bodyJson.put(FieldDataBase.VALUE.toName(), statisticsData.getValue());
+                            bodyJson.put(HttpRequest.Constant.VALUE, statisticsData.getValue());
                         }
 
                         if(!statisticsData.getDate().equals(oldStatisticsData.getDate())){
-                            bodyJson.put(FieldDataBase.DATE.toName(), statisticsData.getDate());
+                            bodyJson.put(HttpRequest.Constant.DATE, statisticsData.getDate());
                         }
                         Log.e(TAG, bodyJson.toString());
 
@@ -154,16 +154,16 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                 Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
             }else {
                 final Intent modifyWeightIntent = new Intent();
-                Log.e(TAG, response.toString());
+                Log.d(TAG, response.toString());
 
-                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals("update"))){
+                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.UPDATE))){
                     modifyWeightIntent.putExtra(KeysIntent.CHANGED_WEIGHT, statisticsData);
-                    Log.e(TAG, statisticsData.toString());
+                    Log.d(TAG, statisticsData.toString());
                 }
 
-                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals("delete"))){
+                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.DELETE))){
                     modifyWeightIntent.putExtra(KeysIntent.DELETE_WEIGHT, statisticsData.getId());
-                    Log.e(TAG, "Id to delete : " +statisticsData.getId());
+                    Log.d(TAG, "Id to delete : " +statisticsData.getId());
                 }
 
                 setResult(RESULT_OK, modifyWeightIntent);

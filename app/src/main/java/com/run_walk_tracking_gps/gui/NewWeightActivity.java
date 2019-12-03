@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
@@ -33,6 +32,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
     private final static String TAG = NewWeightActivity.class.getName();
 
+    private final String UNSET = "Weight data doesn't correctly set !!";
     private StatisticsData statisticsData;
 
     public NewWeightActivity() {
@@ -79,19 +79,19 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
         try{
             if(!statisticsData.isSet())
-                throw new NullPointerException("Weight data doesn't correctly set !! " + statisticsData);
+                throw new NullPointerException(UNSET);
 
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
-                    .put(FieldDataBase.VALUE.toName(), statisticsData.getValue())
-                    .put(FieldDataBase.DATE.toName(), statisticsData.getDate());
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
+                    .put(HttpRequest.Constant.VALUE, statisticsData.getValue())
+                    .put(HttpRequest.Constant.DATE, statisticsData.getDate());
 
             if(!HttpRequest.requestNewWeight(this, bodyJson, this)){
                 Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
             }
 
         }catch (NullPointerException e){
-            Log.e(TAG, e.getMessage());
+            Log.d(TAG, e.getMessage());
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }catch (JSONException je){
             je.printStackTrace();
@@ -104,7 +104,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
             if(HttpRequest.someError(response)){
                 Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
             }else {
-                int id_statistics = response.getInt(FieldDataBase.ID_WEIGHT.toName());
+                int id_statistics = response.getInt(HttpRequest.Constant.ID_WEIGHT);
                 statisticsData.setId(id_statistics);
                 // save and send
                 final Intent newWeightIntent = new Intent();

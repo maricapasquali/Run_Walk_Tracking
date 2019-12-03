@@ -5,8 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
@@ -68,14 +68,14 @@ public class Workout implements Parcelable, Cloneable{
 
             try {
                 JSONObject w = (JSONObject)workouts.get(i);
-                workoutsList.get(i).setIdWorkout(w.getInt(FieldDataBase.ID_WORKOUT.toName()));
-                String map = w.getString(FieldDataBase.MAP_ROUTE.toName());
+                workoutsList.get(i).setIdWorkout(w.getInt(HttpRequest.Constant.ID_WORKOUT));
+                String map = w.getString(HttpRequest.Constant.MAP_ROUTE);
                 if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
-                workoutsList.get(i).setDate(w.getString(FieldDataBase.DATE.toName()));
-                workoutsList.get(i).getDuration().setValue((double)w.getInt(FieldDataBase.DURATION.toName()));
-                workoutsList.get(i).getDistance().setValue(w.getDouble(FieldDataBase.DISTANCE.toName()));
-                workoutsList.get(i).getCalories().setValue(w.getDouble(FieldDataBase.CALORIES.toName()));
-                workoutsList.get(i).setSport(Sport.valueOf(w.getString(FieldDataBase.SPORT.toName())));
+                workoutsList.get(i).setDate(w.getString(HttpRequest.Constant.DATE));
+                workoutsList.get(i).getDuration().setValue((double)w.getInt(HttpRequest.Constant.DURATION));
+                workoutsList.get(i).getDistance().setValue(w.getDouble(HttpRequest.Constant.DISTANCE));
+                workoutsList.get(i).getCalories().setValue(w.getDouble(HttpRequest.Constant.CALORIES));
+                workoutsList.get(i).setSport(Sport.valueOf(w.getString(HttpRequest.Constant.SPORT)));
                 double duration = workoutsList.get(i).getDuration().getValue();
                 double distance = workoutsList.get(i).getDistance().getValue();
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
@@ -217,13 +217,13 @@ public class Workout implements Parcelable, Cloneable{
 
     public JSONObject toJson(Context context) throws JSONException {
         return new JSONObject()
-                .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
-                .put(FieldDataBase.MAP_ROUTE.toName(), this.getMapRoute())
-                .put(FieldDataBase.DATE.toName(), this.getDate())
-                .put(FieldDataBase.DURATION.toName(), this.getDuration().getValue())
-                .put(FieldDataBase.DISTANCE.toName(), this.getDistance().getValue())
-                .put(FieldDataBase.CALORIES.toName(), this.getCalories().getValue())
-                .put(FieldDataBase.SPORT.toName(), this.getSport());
+                .put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
+                .put(HttpRequest.Constant.MAP_ROUTE, this.getMapRoute())
+                .put(HttpRequest.Constant.DATE, this.getDate())
+                .put(HttpRequest.Constant.DURATION, this.getDuration().getValue())
+                .put(HttpRequest.Constant.DISTANCE, this.getDistance().getValue())
+                .put(HttpRequest.Constant.CALORIES, this.getCalories().getValue())
+                .put(HttpRequest.Constant.SPORT, this.getSport());
     }
 
     @Override

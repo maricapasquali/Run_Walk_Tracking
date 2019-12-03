@@ -174,7 +174,7 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void update(Measure.Type measure, FilterTime filterTime){
-        Log.e(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
+        Log.d(TAG, "updateGui :Measure = " +measure + ", Time = " +filterTime);
         checkSizeStatistics(measure);
         statisticsDataAdapter.updateStatisticsData(
                 FilterUtilities.createListFilteredStatisticsData(getContext(), getStatistics(measure), filterTime));
@@ -183,7 +183,7 @@ public class StatisticsFragment extends Fragment {
     private void checkSizeStatistics(Measure.Type measure){
         final boolean isVisible = getStatistics(measure).size()>0;
         spinner_time.setVisibility(isVisible?  View.VISIBLE : View.GONE );
-        if(isVisible) Log.e(TAG, "No Statistics");
+        if(isVisible) Log.d(TAG, "No Statistics");
     }
 
     private ArrayList<StatisticsData> middleSpeedStatistics(){
@@ -238,36 +238,33 @@ public class StatisticsFragment extends Fragment {
             if(onWeightListener.newWeight()!=null){
                 weights.add(0, onWeightListener.newWeight());
                 weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-                Log.e(TAG, "Add weight: " +weights.toString());
+                Log.d(TAG, "Add weight: " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetAddWeight();
             }
 
             if(onWeightListener.changedWeight()!=null){
                 StatisticsData changedWeight = onWeightListener.changedWeight();
-                Log.e(TAG, "Before : " +weights.toString());
+
                 weights.stream().filter(w -> w.getId() == changedWeight.getId())
                         .findFirst().ifPresent(w -> weights.remove(w));
-                Log.e(TAG, "After : " +weights.toString());
+
                 weights.add(changedWeight);
                 weights.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-
+                Log.d(TAG, "Changed weight : " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetChangedWeight();
             }
 
             if(onWeightListener.deletedWeight()>0){
                 int id_changed_weight = onWeightListener.deletedWeight();
-                Log.e(TAG, id_changed_weight +" Delete Before : " +weights.toString());
                 weights.stream().filter(w -> w.getId() == id_changed_weight)
                         .findFirst().ifPresent(w -> weights.remove(w));
-                Log.e(TAG, "Delete After : " +weights.toString());
+                Log.d(TAG, "Delete weight : " +weights.toString());
                 statisticsDataAdapter.updateStatisticsData(weights);
                 onWeightListener.resetDeletedWeight();
             }
         }
-
-
     }
 
     public interface OnWeightListener{

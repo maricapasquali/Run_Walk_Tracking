@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
@@ -44,7 +43,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     @SuppressLint("RestrictedApi")
     @Override
     protected void init(Bundle savedInstanceState) {
-        Log.e(TAG, "OnCreate");
+        Log.d(TAG, "OnCreate");
         setContentView(R.layout.activity_details_workout);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -119,7 +118,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
 
                             try{
-                                JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WORKOUT.toName(), workout.getIdWorkout());
+                                JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
 
                                 if(!HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
 
@@ -127,7 +126,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                                         if(HttpRequest.someError(response)){
                                             Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
                                         }else{
-                                            if(response.getBoolean("delete")){
+                                            if(response.getBoolean(HttpRequest.Constant.DELETE)){
                                                 final Intent resultIntent = new Intent();
                                                 resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
                                                 setResult(Activity.RESULT_OK, resultIntent);
@@ -179,7 +178,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
 
     @Override
     public void onBackPressed() {
-        Log.e(TAG, "OnBackPressed");
+        Log.d(TAG, "OnBackPressed");
         if(isSummary){
             saveWorkout();
         }
@@ -197,7 +196,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         Log.d(KeysIntent.NEW_WORKOUT, "Summary : Workout = "+ workout);
         try {
             final JSONObject bodyJson = workout.toJson(this);
-            Log.e(TAG, bodyJson.toString());
+            Log.d(TAG, bodyJson.toString());
             if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){
                 Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
             }
@@ -212,7 +211,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
             if(HttpRequest.someError(response)){
                 Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
             }else {
-                int id_workout = response.getInt(FieldDataBase.ID_WORKOUT.toName());
+                int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
                 // save and send to workouts list
                 final Intent resultIntent = new Intent();
                 workout.setIdWorkout(id_workout);

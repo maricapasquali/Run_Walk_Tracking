@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
@@ -30,7 +29,9 @@ import org.json.JSONObject;
 
 public class NewManualWorkoutActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener, Response.Listener<JSONObject> {
 
-    private  final static String TAG = NewManualWorkoutActivity.class.getName();
+    private final static String TAG = NewManualWorkoutActivity.class.getName();
+    private final String UNSET = "Workout doesn't correctly set !! ";
+
     private Workout workout;
 
 
@@ -110,14 +111,14 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
         try{
             Log.e(TAG, "" +workout.getDistance().getValue());
             if(!workout.isMinimalSet())
-                throw new NullPointerException("Workout doesn't correctly set !! " + workout);
+                throw new NullPointerException(UNSET);
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
-                                                        .put(FieldDataBase.SPORT.toName(), workout.getSport())
-                                                        .put(FieldDataBase.DURATION.toName(), workout.getDuration().getValue())
-                                                        .put(FieldDataBase.DATE.toName(), workout.getDate());
-            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance().getValue());
-            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories().getValue());
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
+                                                        .put(HttpRequest.Constant.SPORT, workout.getSport())
+                                                        .put(HttpRequest.Constant.DURATION, workout.getDuration().getValue())
+                                                        .put(HttpRequest.Constant.DATE, workout.getDate());
+            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue());
+            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue());
 
 
             if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){
@@ -139,7 +140,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             if(HttpRequest.someError(response)){
                 Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
             }else {
-                int id_workout = response.getInt(FieldDataBase.ID_WORKOUT.toName());
+                int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
                 // save and send to workouts list
                 final Intent newManualWorkoutIntent = new Intent();
                 workout.setIdWorkout(id_workout);

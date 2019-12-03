@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
@@ -91,8 +90,8 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
     private void saveChangedPassword(final String hash){
         try {
             int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(), id_user)
-                    .put(FieldDataBase.PASSWORD.toName(), hash);
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
+                    .put(HttpRequest.Constant.PASSWORD, hash);
 
             Log.e(TAG, bodyJson.toString());
 

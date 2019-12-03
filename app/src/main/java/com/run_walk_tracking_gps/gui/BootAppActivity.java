@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -8,7 +7,7 @@ import android.widget.Button;
 import com.run_walk_tracking_gps.R;
 
 
-public class BootAppActivity extends AttachBaseContextActivity {
+public class BootAppActivity extends CommonActivity {
 
     private Button registration;
     private Button login;

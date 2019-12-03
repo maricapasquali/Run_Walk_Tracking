@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
 
@@ -149,8 +149,8 @@ public class PersonalDataFragment extends Fragment {
                         .build()
                         .toJson();
 
-                userJson.remove(FieldDataBase.ID_USER.toName());
-                userJson.remove(FieldDataBase.HEIGHT.toName());
+                userJson.remove(HttpRequest.Constant.ID_USER);
+                userJson.remove(HttpRequest.Constant.HEIGHT);
             }
 
             personalDataListener.personalData(userJson);

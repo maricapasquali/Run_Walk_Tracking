@@ -13,14 +13,13 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class LoginActivity extends AttachBaseContextActivity implements  Response.Listener<JSONObject> {
+public class LoginActivity extends CommonActivity implements  Response.Listener<JSONObject> {
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -55,8 +54,8 @@ public class LoginActivity extends AttachBaseContextActivity implements  Respons
                 try {
                     final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
 
-                    final JSONObject bodyJson = new JSONObject().put(FieldDataBase.USERNAME.toName(), username.getText().toString())
-                                                                .put(FieldDataBase.PASSWORD.toName(), hash_password);
+                    final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText().toString())
+                                                                .put(HttpRequest.Constant.PASSWORD, hash_password);
 
                     if(!HttpRequest.requestSignIn(this, bodyJson, this)){
                         Snackbar.make(findViewById(R.id.snake), R.string.internet_not_available, Snackbar.LENGTH_INDEFINITE).show();

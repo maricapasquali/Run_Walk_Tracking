@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 
 import org.json.JSONException;
@@ -45,7 +44,7 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
             }
             else{
                 try {
-                    JSONObject bodyJson = new JSONObject().put(FieldDataBase.EMAIL.toName(), email.getText().toString());
+                    JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.EMAIL, email.getText().toString());
                     if(!HttpRequest.requestForgotPassword(this, bodyJson, this)){
                         Snackbar.make(findViewById(R.id.snake),getString(R.string.internet_not_available), Snackbar.LENGTH_LONG).show();
                     }
@@ -73,7 +72,7 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
                 Snackbar.make(findViewById(R.id.snake), response.get(HttpRequest.ERROR).toString(), Snackbar.LENGTH_LONG).show();
             }else {
 
-                if(response.getBoolean("request_sended")){
+                if(response.getBoolean(HttpRequest.Constant.REQUEST_SENDED)){
                     mexSuccess.setVisibility(View.VISIBLE);
                     request.setVisibility(View.GONE);
                 }

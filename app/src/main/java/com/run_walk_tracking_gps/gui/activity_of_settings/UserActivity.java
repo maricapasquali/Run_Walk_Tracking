@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
@@ -94,7 +93,7 @@ public class UserActivity extends CommonActivity {
             case R.id.delete_account: {
                 Toast.makeText(this, "delete", Toast.LENGTH_LONG).show();
                 try {
-                    final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_USER.toName(),  user.getIdUser());
+                    final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER,  user.getIdUser());
                     Log.e(TAG, bodyJson.toString());
 
                     new AlertDialog.Builder(this).setMessage(R.string.delete_account_mex)

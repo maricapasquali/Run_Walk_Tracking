@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.android.volley.Response;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -154,21 +153,21 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     private void saveWorkoutChanged(){
         try {
 
-            final JSONObject bodyJson = new JSONObject().put(FieldDataBase.ID_WORKOUT.toName(), workout.getIdWorkout());
+            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
             if(!workout.getDate().equals(oldWorkout.getDate())){
-                bodyJson.put(FieldDataBase.DATE.toName(), workout.getDate());
+                bodyJson.put(HttpRequest.Constant.DATE, workout.getDate());
             }
             if(!workout.getSport().equals(oldWorkout.getSport())){
-                bodyJson.put(FieldDataBase.SPORT.toName(), workout.getSport());
+                bodyJson.put(HttpRequest.Constant.SPORT, workout.getSport());
             }
             if(!workout.getDuration().getValue().equals(oldWorkout.getDuration().getValue())){
-                bodyJson.put(FieldDataBase.DURATION.toName(), workout.getDuration().getValue());
+                bodyJson.put(HttpRequest.Constant.DURATION, workout.getDuration().getValue());
             }
             if(!workout.getDistance().getValue().equals(oldWorkout.getDistance().getValue())){
-                bodyJson.put(FieldDataBase.DISTANCE.toName(), workout.getDistance().getValue());
+                bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue());
             }
             if(!workout.getCalories().getValue().equals(oldWorkout.getCalories().getValue())){
-                bodyJson.put(FieldDataBase.CALORIES.toName(), workout.getCalories().getValue());
+                bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue());
             }
 
             Log.d(TAG, bodyJson.toString());
@@ -189,7 +188,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
             }else {
                 Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
                 Intent returnIntent = new Intent();
-                if(response.getBoolean("update")){
+                if(response.getBoolean(HttpRequest.Constant.UPDATE)){
                     returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
                 }
                 setResult(Activity.RESULT_OK, returnIntent);

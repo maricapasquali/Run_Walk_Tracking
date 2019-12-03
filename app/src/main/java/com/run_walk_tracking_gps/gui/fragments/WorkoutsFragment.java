@@ -166,8 +166,8 @@ public class WorkoutsFragment extends Fragment {
         final boolean isVisible = workouts.size()<=0;
         no_value_fragment.getView().setVisibility(isVisible? View.VISIBLE : View.GONE);
         filter.setVisibility(isVisible? View.GONE: View.VISIBLE );
-        if(isVisible) Log.e(TAG, "No Workouts");
-        else Log.e(TAG, "Workouts = "+workouts);
+        if(isVisible) Log.d(TAG, "No Workouts");
+        else Log.d(TAG, "Workouts = "+workouts);
     }
 
     @Override

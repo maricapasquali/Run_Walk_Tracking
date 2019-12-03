@@ -18,10 +18,6 @@ public class DefaultPreferencesUser {
 
     private static final String LAST_USER_LOGGED ="last_user_logged";
     private static final String IS_JUST_LOGGED ="is_just_logged";
-    private static final String USER ="user";
-    private static final String APP ="app";
-    private static final String SETTINGS = "settings";
-    private static final String UNIT_MEASURE ="unit_measure";
 
 
 // GET SharedPreferences
@@ -51,13 +47,13 @@ public class DefaultPreferencesUser {
     }
 
     public static JSONObject getSettingsJsonUserLogged(Context context, String id_user) throws JSONException {
-        return (JSONObject) DefaultPreferencesUser.getAppJsonUserLogged(context, id_user).get(SETTINGS);
+        return (JSONObject) DefaultPreferencesUser.getAppJsonUserLogged(context, id_user).get(HttpRequest.Constant.SETTINGS);
     }
 
     public static String getUnitDefault(Context context, String measure) throws JSONException {
         if(DefaultPreferencesUser.isJustUserLogged(context)){
             JSONObject settings = DefaultPreferencesUser.getSettingsJsonUserLogged(context, getIdUserLogged(context));
-            return ((JSONObject)settings.get(UNIT_MEASURE)).getString(measure);
+            return ((JSONObject)settings.get(HttpRequest.Constant.UNIT_MEASURE)).getString(measure);
         }
         return null;
     }
@@ -65,7 +61,7 @@ public class DefaultPreferencesUser {
     public static String getUnitHeightDefault(Context context) {
         final String default_measure = context.getString(Measure.Type.HEIGHT.getMeasureUnitDefault().getStrId());
         try {
-            final String unitHeight = getUnitDefault(context, FieldDataBase.HEIGHT.toName());
+            final String unitHeight = getUnitDefault(context, HttpRequest.Constant.HEIGHT);
             return unitHeight==null ? default_measure : unitHeight;
         }catch (JSONException e ){
             return default_measure;
@@ -75,7 +71,7 @@ public class DefaultPreferencesUser {
     public static String getUnitWeightDefault(Context context) {
         final String default_measure = context.getString(Measure.Type.WEIGHT.getMeasureUnitDefault().getStrId());
         try {
-            final String unitWeight = getUnitDefault(context, FieldDataBase.WEIGHT.toName());
+            final String unitWeight = getUnitDefault(context, HttpRequest.Constant.WEIGHT);
             return unitWeight==null ? default_measure : unitWeight;
         }catch (JSONException e ){
             return default_measure;
@@ -85,7 +81,7 @@ public class DefaultPreferencesUser {
     public static String getUnitDistanceDefault(Context context) {
         final String default_measure = context.getString(Measure.Type.DISTANCE.getMeasureUnitDefault().getStrId());
         try {
-            final String unitDistance = getUnitDefault(context, FieldDataBase.DISTANCE.toName());
+            final String unitDistance = getUnitDefault(context, HttpRequest.Constant.DISTANCE);
             return unitDistance==null ? default_measure : unitDistance;
         }catch (JSONException e ){
             return default_measure;
@@ -96,7 +92,7 @@ public class DefaultPreferencesUser {
 
         final String default_measure = context.getString(Measure.Type.ENERGY.getMeasureUnitDefault().getStrId());
         try {
-            final String unitEnergy = getUnitDefault(context, FieldDataBase.ENERGY.toName());
+            final String unitEnergy = getUnitDefault(context, HttpRequest.Constant.ENERGY);
             return unitEnergy==null ? default_measure : unitEnergy;
         }catch (JSONException e ){
             return default_measure;
@@ -104,13 +100,13 @@ public class DefaultPreferencesUser {
     }
 
     public static String getUnitMiddleSpeedDefault(Context context) throws JSONException{
-        return getUnitDefault(context, FieldDataBase.DISTANCE.toName())+"/h";
+        return getUnitDefault(context, HttpRequest.Constant.DISTANCE)+"/h";
     }
 
     public static Target getTargetDefault(Context context) {
         try {
            return Target.valueOf(getSettingsJsonUserLogged(context,
-                   getIdUserLogged(context)).getString(FieldDataBase.TARGET.toName()));
+                   getIdUserLogged(context)).getString(HttpRequest.Constant.TARGET));
         }catch (JSONException e){
            e.printStackTrace();
         }
@@ -119,7 +115,7 @@ public class DefaultPreferencesUser {
 
     public static Sport getSportDefault(Context context){
         try {
-            return Sport.valueOf(getSettingsJsonUserLogged(context, getIdUserLogged(context)).getString(FieldDataBase.SPORT.toName()));
+            return Sport.valueOf(getSettingsJsonUserLogged(context, getIdUserLogged(context)).getString(HttpRequest.Constant.SPORT));
         }catch (JSONException e){
             e.printStackTrace();
         }
@@ -127,7 +123,7 @@ public class DefaultPreferencesUser {
     }
 
     public static String getLanguageDefault(Context context) throws JSONException {
-        return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(FieldDataBase.LANGUAGE.toName());
+        return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(HttpRequest.Constant.LANGUAGE);
     }
 
  // SET SharedPreferences
@@ -155,23 +151,23 @@ public class DefaultPreferencesUser {
     }
 
     public static void setImage(Context context, JSONObject response) throws JSONException {
-        JSONObject user = ((JSONObject)response.get(USER));
-        String image_encode = user.getString(FieldDataBase.IMG_ENCODE.toName());
-        int id_user = (int)user.get(FieldDataBase.ID_USER.toName());
+        JSONObject user = ((JSONObject)response.get(HttpRequest.Constant.USER));
+        String image_encode = user.getString(HttpRequest.Constant.IMG_ENCODE);
+        int id_user = (int)user.get(HttpRequest.Constant.ID_USER);
 
         if(!image_encode.equals("null") || !image_encode.equals(getSharedPreferencesImagesUser(context).getString(String.valueOf(id_user), "null")))
             getSharedPreferencesImagesUser(context).edit().putString(String.valueOf(id_user), image_encode).apply();
     }
 
     public static void setSettings(Context context, JSONObject json) throws JSONException {
-        final String id_user = String.valueOf((int) ((JSONObject) json.get(USER)).get(FieldDataBase.ID_USER.toName()));
+        final String id_user = String.valueOf((int) ((JSONObject) json.get(HttpRequest.Constant.USER)).get(HttpRequest.Constant.ID_USER));
 
         // MEMORIZZO ID DELL'USER CHE HA EFFETTUATO L'ACCESSO
         final boolean isJustLogged = DefaultPreferencesUser.isJustUserLogged(context);
         if (!isJustLogged) DefaultPreferencesUser.setUserLogged(context, id_user);
 
         // MEMORIZZO LE IMPOSTRAZIONI DELLA APPLICAZIONE
-        final JSONObject app = (JSONObject) json.get(APP);
+        final JSONObject app = (JSONObject) json.get(HttpRequest.Constant.APP);
         SharedPreferences sharedPreferences = DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context);
         String appSharedPreferencesJson = sharedPreferences.getString(id_user, "");
         if (appSharedPreferencesJson.isEmpty() || !(app.equals(new JSONObject(appSharedPreferencesJson)))) {
@@ -184,22 +180,22 @@ public class DefaultPreferencesUser {
     public static void setLanguage(Context context, String language) throws JSONException {
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
-        settingsJson.put(FieldDataBase.LANGUAGE.toName(), language);
+        final JSONObject settingsJson = (JSONObject)appJson.get(HttpRequest.Constant.SETTINGS);
+        settingsJson.put(HttpRequest.Constant.LANGUAGE, language);
 
-        appJson.put(SETTINGS, settingsJson);
+        appJson.put(HttpRequest.Constant.SETTINGS, settingsJson);
         DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 
     public static void setUnitMeasure(Context context, String measure, String unit) throws JSONException {
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
-        final JSONObject unit_measure = ((JSONObject)settingsJson.get(UNIT_MEASURE));
+        final JSONObject settingsJson = (JSONObject)appJson.get(HttpRequest.Constant.SETTINGS);
+        final JSONObject unit_measure = ((JSONObject)settingsJson.get(HttpRequest.Constant.UNIT_MEASURE));
 
         unit_measure.put(measure, unit);
-        settingsJson.put(UNIT_MEASURE, unit_measure);
-        appJson.put(SETTINGS, settingsJson);
+        settingsJson.put(HttpRequest.Constant.UNIT_MEASURE, unit_measure);
+        appJson.put(HttpRequest.Constant.SETTINGS, settingsJson);
 
         DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
 
@@ -209,10 +205,10 @@ public class DefaultPreferencesUser {
 
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(SETTINGS);
+        final JSONObject settingsJson = (JSONObject)appJson.get(HttpRequest.Constant.SETTINGS);
 
         settingsJson.put(type, value);
-        appJson.put(SETTINGS, settingsJson);
+        appJson.put(HttpRequest.Constant.SETTINGS, settingsJson);
         DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 

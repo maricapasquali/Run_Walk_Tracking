@@ -90,7 +90,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e(TAG, "onCreate : " + Language.defaultForUser(getContext()));
+        Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
         if (bundle != null) {
             double weight = bundle.getDouble(WEIGHT);
@@ -244,14 +244,14 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         if(getFragmentManager()!=null){
             if(getFragmentManager().findFragmentByTag(TAG) instanceof MapFragment &&
                     !LocationUtilities.isGpsEnable(getContext())){
-                Log.e(TAG, "Change to IndoorFragment");
+                Log.d(TAG, "Change to IndoorFragment");
                 setIndoor(true);
                 getFragmentManager().beginTransaction().replace(R.id.map, new IndoorFragment(), TAG).commit();
             }
 
             if(getFragmentManager().findFragmentByTag(TAG) instanceof IndoorFragment &&
                     LocationUtilities.isGpsEnable(getContext())){
-                Log.e(TAG, "Change to MapFragment");
+                Log.d(TAG, "Change to MapFragment");
                 setIndoor(false);
                 getFragmentManager().beginTransaction().replace(R.id.map, new MapFragment(), TAG).commit();
             }

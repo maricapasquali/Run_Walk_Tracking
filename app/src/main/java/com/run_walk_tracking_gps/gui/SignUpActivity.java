@@ -1,7 +1,5 @@
 package com.run_walk_tracking_gps.gui;
 
-
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -25,7 +23,6 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PhysicalDataFragment;
 import com.run_walk_tracking_gps.gui.fragments.PersonalDataFragment;
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
@@ -36,8 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class SignUpActivity extends AttachBaseContextActivity
-                            implements PersonalDataFragment.PersonalDataListener,
+public class SignUpActivity extends CommonActivity
+        implements PersonalDataFragment.PersonalDataListener,
                                        PhysicalDataFragment.PhysicalDataListener,
                                        AccessDataFragment.AccessDataListener,
                                        Response.Listener<JSONObject>,
@@ -84,21 +81,15 @@ public class SignUpActivity extends AttachBaseContextActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.next_signup:
-                try{
 
-                       //Log.d(TAG, "Next : Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
-                       switch(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
-                           case PERSONAL_DATA:
-                               addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
-                               break;
-                           case PHYSICAL_DATA:
-                               addFragment(fragmentSignUp.get(ACCESS_DATA), true);
-                               next.setVisible(false);
-                               break;
-                       }
-
-                }catch (Exception e){
-                    Toast.makeText(this, "Campi non settati" , Toast.LENGTH_LONG).show();
+                switch(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))) {
+                    case PERSONAL_DATA:
+                        addFragment(fragmentSignUp.get(PHYSICAL_DATA), true);
+                        break;
+                    case PHYSICAL_DATA:
+                        addFragment(fragmentSignUp.get(ACCESS_DATA), true);
+                        next.setVisible(false);
+                        break;
                 }
                 break;
             case android.R.id.home:
@@ -125,7 +116,7 @@ public class SignUpActivity extends AttachBaseContextActivity
             user = personalInfoUser;
             if(async!=null){
                 final String img_encode = async.get();
-                if(img_encode!=null)user.put(FieldDataBase.IMG_ENCODE.toName(),img_encode);
+                if(img_encode!=null)user.put(HttpRequest.Constant.IMG_ENCODE,img_encode);
             }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
@@ -158,7 +149,7 @@ public class SignUpActivity extends AttachBaseContextActivity
     public void accessData(JSONObject jsonAccess) {
         try{
             user = JSONUtilities.merge(user, jsonAccess);
-            user.put(FieldDataBase.LANGUAGE.toName(), getString(Language.defaultForUser(this).getCode()));
+            user.put(HttpRequest.Constant.LANGUAGE, getString(Language.defaultForUser(this).getCode()));
             Log.d(TAG, user.toString());
 
             if(!HttpRequest.requestSignUp(this, user,this))
@@ -183,7 +174,7 @@ public class SignUpActivity extends AttachBaseContextActivity
             //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
             try {
                 final Intent intent = new Intent(this, TokenActivity.class);
-                intent.putExtra(KeysIntent.ID_USER, response.getInt(FieldDataBase.ID_USER.toName()));
+                intent.putExtra(KeysIntent.ID_USER, response.getInt(HttpRequest.Constant.ID_USER));
                 startActivity(intent);
                 finish();
             } catch (JSONException e) {
