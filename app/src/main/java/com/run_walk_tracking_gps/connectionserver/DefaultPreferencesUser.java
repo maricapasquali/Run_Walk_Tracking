@@ -10,6 +10,8 @@ import com.run_walk_tracking_gps.model.enumerations.Target;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public class DefaultPreferencesUser {
 
     private static final String PREFERENCE_USER_LOGGED="User_Logged";
@@ -33,7 +35,6 @@ public class DefaultPreferencesUser {
         return context.getSharedPreferences(PREFERENCE_USER_IMAGE, Context.MODE_PRIVATE);
     }
 
-
     private static JSONObject getAppJsonUserLogged(Context context, String id_user) throws JSONException {
         return new JSONObject(getSharedPreferencesSettingUserLogged(context).getString(id_user, ""));
     }
@@ -50,64 +51,67 @@ public class DefaultPreferencesUser {
         return (JSONObject) DefaultPreferencesUser.getAppJsonUserLogged(context, id_user).get(HttpRequest.Constant.SETTINGS);
     }
 
-    public static String getUnitDefault(Context context, String measure) throws JSONException {
-        if(DefaultPreferencesUser.isJustUserLogged(context)){
-            JSONObject settings = DefaultPreferencesUser.getSettingsJsonUserLogged(context, getIdUserLogged(context));
-            return ((JSONObject)settings.get(HttpRequest.Constant.UNIT_MEASURE)).getString(measure);
+    public static String getUnitDefault(Context context, String measure) {
+        try {
+            if(DefaultPreferencesUser.isJustUserLogged(context)){
+                JSONObject settings = DefaultPreferencesUser.getSettingsJsonUserLogged(context, getIdUserLogged(context));
+                return ((JSONObject)settings.get(HttpRequest.Constant.UNIT_MEASURE)).getString(measure);
+            }
+        }catch (JSONException e ){
+            e.printStackTrace();
         }
         return null;
     }
 
-    public static String getUnitHeightDefault(Context context) {
-        final String default_measure = context.getString(Measure.Type.HEIGHT.getMeasureUnitDefault().getStrId());
+    public static Measure.Unit getUnitHeightDefault(Context context) {
         try {
-            final String unitHeight = getUnitDefault(context, HttpRequest.Constant.HEIGHT);
-            return unitHeight==null ? default_measure : unitHeight;
-        }catch (JSONException e ){
-            return default_measure;
+            return Measure.Unit.valueOf(Objects.requireNonNull(getUnitDefault(context, HttpRequest.Constant.HEIGHT)));
+        }catch (IllegalArgumentException | NullPointerException e){
+            return Measure.Type.HEIGHT.getMeasureUnitDefault();
         }
     }
 
-    public static String getUnitWeightDefault(Context context) {
-        final String default_measure = context.getString(Measure.Type.WEIGHT.getMeasureUnitDefault().getStrId());
+    public static Measure.Unit getUnitWeightDefault(Context context) {
         try {
-            final String unitWeight = getUnitDefault(context, HttpRequest.Constant.WEIGHT);
-            return unitWeight==null ? default_measure : unitWeight;
-        }catch (JSONException e ){
-            return default_measure;
+            return Measure.Unit.valueOf(Objects.requireNonNull(getUnitDefault(context, HttpRequest.Constant.WEIGHT)));
+        }catch (IllegalArgumentException | NullPointerException e){
+            return Measure.Type.WEIGHT.getMeasureUnitDefault();
         }
     }
 
-    public static String getUnitDistanceDefault(Context context) {
-        final String default_measure = context.getString(Measure.Type.DISTANCE.getMeasureUnitDefault().getStrId());
+    public static Measure.Unit getUnitDistanceDefault(Context context) {
         try {
-            final String unitDistance = getUnitDefault(context, HttpRequest.Constant.DISTANCE);
-            return unitDistance==null ? default_measure : unitDistance;
-        }catch (JSONException e ){
-            return default_measure;
+            return Measure.Unit.valueOf(Objects.requireNonNull(getUnitDefault(context, HttpRequest.Constant.DISTANCE)));
+        }catch (IllegalArgumentException | NullPointerException e){
+            return Measure.Type.DISTANCE.getMeasureUnitDefault();
         }
     }
 
-    public static String getUnitEnergyDefault(Context context) throws JSONException{
-
-        final String default_measure = context.getString(Measure.Type.ENERGY.getMeasureUnitDefault().getStrId());
-        try {
-            final String unitEnergy = getUnitDefault(context, HttpRequest.Constant.ENERGY);
-            return unitEnergy==null ? default_measure : unitEnergy;
-        }catch (JSONException e ){
-            return default_measure;
+    public static Measure.Unit getUnitMiddleSpeedDefault(Context context) {
+        Measure.Unit unitDistance = getUnitDistanceDefault(context);
+        switch (unitDistance){
+            case KILOMETER:
+                return Measure.Unit.KILOMETER_PER_HOUR;
+            case MILE:
+                return Measure.Unit.MILE_PER_HOUR;
+            default:
+                return null;
         }
     }
 
-    public static String getUnitMiddleSpeedDefault(Context context) throws JSONException{
-        return getUnitDefault(context, HttpRequest.Constant.DISTANCE)+"/h";
+    public static Measure.Unit getUnitEnergyDefault(Context context) {
+        try {
+            return Measure.Unit.valueOf(Objects.requireNonNull(getUnitDefault(context, HttpRequest.Constant.ENERGY)));
+        }catch (IllegalArgumentException | NullPointerException e){
+            return Measure.Type.ENERGY.getMeasureUnitDefault();
+        }
     }
 
     public static Target getTargetDefault(Context context) {
         try {
            return Target.valueOf(getSettingsJsonUserLogged(context,
                    getIdUserLogged(context)).getString(HttpRequest.Constant.TARGET));
-        }catch (JSONException e){
+        }catch (JSONException | IllegalArgumentException e){
            e.printStackTrace();
         }
         return null;
@@ -116,15 +120,17 @@ public class DefaultPreferencesUser {
     public static Sport getSportDefault(Context context){
         try {
             return Sport.valueOf(getSettingsJsonUserLogged(context, getIdUserLogged(context)).getString(HttpRequest.Constant.SPORT));
-        }catch (JSONException e){
+        }catch (JSONException | IllegalArgumentException e){
             e.printStackTrace();
         }
        return null;
     }
 
+
     public static String getLanguageDefault(Context context) throws JSONException {
         return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(HttpRequest.Constant.LANGUAGE);
     }
+
 
  // SET SharedPreferences
     private static void setUserLogged(Context context, String id_user){
@@ -187,7 +193,7 @@ public class DefaultPreferencesUser {
         DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 
-    public static void setUnitMeasure(Context context, String measure, String unit) throws JSONException {
+    public static void setUnitMeasure(Context context, String measure, Measure.Unit unit) throws JSONException {
         final String id_user = getIdUserLogged(context);
         final JSONObject appJson = getAppJsonUserLogged(context, id_user);
         final JSONObject settingsJson = (JSONObject)appJson.get(HttpRequest.Constant.SETTINGS);

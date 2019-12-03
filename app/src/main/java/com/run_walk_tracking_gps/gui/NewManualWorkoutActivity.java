@@ -73,7 +73,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             case TIME:
                 DurationDialog.create(NewManualWorkoutActivity.this, (durationMeasure) -> {
                    if(durationMeasure!=null){
-                       workout.getDuration().setValue(durationMeasure.getValue());
+                       workout.getDuration().setValue(true, durationMeasure.getValue(true));
                        detail.setText(durationMeasure.toString());
                    }
                    workout.setMiddleSpeed();
@@ -83,10 +83,10 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 DistanceDialog.create(NewManualWorkoutActivity.this, (distanceMeasure) -> {
                     if(distanceMeasure==null){
                         detail.setText(R.string.no_available_abbr);
-                        workout.getDistance().setValue(0d);
+                        workout.getDistance().setValue(true, 0d);
                     }else{
                         detail.setText(distanceMeasure.toString());
-                        workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
+                        workout.getDistance().setValue(false, distanceMeasure.getValue(false));
                     }
                     workout.setMiddleSpeed();
                 }).show();
@@ -95,10 +95,10 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 EnergyDialog.create(NewManualWorkoutActivity.this, (caloriesMeasure)  -> {
                     if(caloriesMeasure==null){
                         detail.setText(R.string.no_available_abbr);
-                        workout.getCalories().setValue(0d);
+                        workout.getCalories().setValue(true, 0d);
                     }else{
                         detail.setText(caloriesMeasure.toString());
-                        workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
+                        workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
                     }
                 }).show();
                 break;
@@ -109,16 +109,16 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
     public void onClickAddInfo() {
         // Set workout
         try{
-            Log.e(TAG, "" +workout.getDistance().getValue());
+            Log.e(TAG, "" +workout.getDistance().getValue(false));
             if(!workout.isMinimalSet())
                 throw new NullPointerException(UNSET);
 
             final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                                                         .put(HttpRequest.Constant.SPORT, workout.getSport())
-                                                        .put(HttpRequest.Constant.DURATION, workout.getDuration().getValue())
+                                                        .put(HttpRequest.Constant.DURATION, workout.getDuration().getValue(true))
                                                         .put(HttpRequest.Constant.DATE, workout.getDate());
-            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue());
-            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue());
+            if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue(true));
+            if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
 
 
             if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){

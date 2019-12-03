@@ -120,8 +120,7 @@ public class SignUpActivity extends CommonActivity
             }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
-            if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)
-                getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+           // if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)                getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

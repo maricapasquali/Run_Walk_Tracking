@@ -75,7 +75,7 @@ public class PhysicalDataFragment extends Fragment {
             WeightDialog.create(view.getContext(), (weightMeasure) -> {
                if(weightMeasure!=null){
                    ((TextView)v).setText(weightMeasure.toString());
-                   weightValue = weightMeasure.getValue();
+                   weightValue = weightMeasure.getValue(true);
                }
             }).show();
         });
@@ -86,7 +86,7 @@ public class PhysicalDataFragment extends Fragment {
             HeightDialog.create(view.getContext(), (heightMeasure) -> {
                 if(heightMeasure!=null){
                     ((TextView)v).setText(heightMeasure.toString());
-                    heightValue = heightMeasure.getValue();
+                    heightValue = heightMeasure.getValue(true);
                 }
             }).show();
 

@@ -52,9 +52,10 @@ public class StatisticsDataAdapter extends BaseAdapter {
         final Measure.Unit unit = statisticsFiltered.get(0).getMeasure().getUnit();
         for (StatisticsData sData : statisticsFiltered) {
             statisticsData.add(StatisticsBuilder.create(context, type)
-                    .setDate(sData.getDate())
-                    .setValue(unit.equals(type.getMeasureUnitDefault()) ? sData.getValue() : Measure.conversionTo(unit, sData.getValue()))
-                    .build());
+                                                .setDate(sData.getDate())
+                                                .setValue(unit.equals(type.getMeasureUnitDefault()) ? sData.getValue() :
+                                                                                                      Measure.conversionTo(unit, sData.getValue()))
+                                                .build());
         }
 
         Log.d(TAG, statisticsFiltered.toString());
@@ -78,7 +79,7 @@ public class StatisticsDataAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-// TODO: 11/17/2019 SE E' POSSIBILE USARE HOLDER
+        // TODO: 11/17/2019 SE E' POSSIBILE USARE HOLDER
         if(getCount()-1>0){
             if (position == 0) {
                 convertView = LayoutInflater.from(context).inflate(R.layout.custom_graph, null);

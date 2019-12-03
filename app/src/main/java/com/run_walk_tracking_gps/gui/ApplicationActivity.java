@@ -71,7 +71,7 @@ public class ApplicationActivity extends CommonActivity
                 if(savedInstanceState==null){
                     selectActiveFragment(HomeFragment.class);
                 }else {
-                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
+                   setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
                 }
             }
             if(workouts==null) workouts = new ArrayList<>();

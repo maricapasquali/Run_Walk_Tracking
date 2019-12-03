@@ -189,7 +189,7 @@ public class StatisticsFragment extends Fragment {
     private ArrayList<StatisticsData> middleSpeedStatistics(){
         return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getMiddleSpeed())).collect(ArrayList::new,
                 (s, w)-> s.add(StatisticsBuilder.createStatisticMiddleSpeed(getContext())
-                        .setDate(w.getDate()).setValue(w.getMiddleSpeed().getValue()).build()), ArrayList::addAll);
+                        .setDate(w.getDate()).setValue(w.getMiddleSpeed().getValue(true)).build()), ArrayList::addAll);
     }
 
     private ArrayList<StatisticsData> weightsStatistics(){
@@ -199,13 +199,13 @@ public class StatisticsFragment extends Fragment {
     private ArrayList<StatisticsData> energyStatistics(){
         return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getCalories())).collect(ArrayList::new,
                 (s, w)-> s.add(StatisticsBuilder.createStatisticEnergy(getContext())
-                        .setDate(w.getDate()).setValue(w.getCalories().getValue()).build()), ArrayList::addAll);
+                        .setDate(w.getDate()).setValue(w.getCalories().getValue(true)).build()), ArrayList::addAll);
     }
 
     private ArrayList<StatisticsData> distanceStatistics(){
         return workouts.stream().filter(w -> !Measure.isNullOrEmpty(w.getDistance())).collect(ArrayList::new,
                 (s, w)-> s.add(StatisticsBuilder.createStatisticDistance(getContext())
-                        .setDate(w.getDate()).setValue(w.getDistance().getValue()).build()), ArrayList::addAll);
+                        .setDate(w.getDate()).setValue(w.getDistance().getValue(true)).build()), ArrayList::addAll);
 
     }
 

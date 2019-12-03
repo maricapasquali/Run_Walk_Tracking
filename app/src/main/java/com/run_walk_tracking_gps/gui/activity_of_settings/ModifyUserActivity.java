@@ -130,8 +130,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             if(!user.getPhone().equals(oldUser.getPhone())){
                 bodyJson.put(HttpRequest.Constant.PHONE, user.getPhone());
             }
-            if(!user.getHeight().getValue().equals(oldUser.getHeight().getValue())){
-                bodyJson.put(HttpRequest.Constant.HEIGHT, user.getHeight().getValue());
+            if(!user.getHeight().getValue(true).equals(oldUser.getHeight().getValue(true))){
+                bodyJson.put(HttpRequest.Constant.HEIGHT, user.getHeight().getValue(true));
             }
 
             if(async!=null){
@@ -227,7 +227,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
                 if(heightMeasure!=null){
                     h.setText(heightMeasure.toString());
-                    user.getHeight().setValueFromGui(heightMeasure.getValueToGui());
+                    user.getHeight().setValue(false, heightMeasure.getValue(false));
                 }
             }).create().show();
         });

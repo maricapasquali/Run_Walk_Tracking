@@ -21,12 +21,14 @@ import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.LinkedHashMap;
+
 public class MeasureUnitActivity extends CommonActivity implements RadioGroup.OnCheckedChangeListener,  Response.Listener<JSONObject>{
 
     private final static String TAG = MeasureUnitActivity.class.getName();
 
     private String filter;
-    private String value;
+    private Measure.Unit unit;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -35,7 +37,17 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
         final ListView measure_unit = findViewById(R.id.measures_units);
 
-        measure_unit.setAdapter(new MeasureAdapter(this,this, Measure.Type.getUnitDefaultForUser(this)));
+        measure_unit.setAdapter(new MeasureAdapter(this,this, getUnitDefaultForUser()));
+    }
+
+    private LinkedHashMap<Measure.Type, Measure.Unit> getUnitDefaultForUser(){
+        final Measure.Type[] typeChangeable = Measure.Type.getMeasureChangeable();
+        final LinkedHashMap<Measure.Type, Measure.Unit> map = new LinkedHashMap<>();
+        for (Measure.Type type : typeChangeable){
+            final String valueDefault = DefaultPreferencesUser.getUnitDefault(MeasureUnitActivity.this, type.toString().toLowerCase());
+            map.put(type, type.getValueOfMeasureUnitDefault(valueDefault));
+        }
+        return map;
     }
 
     @Override
@@ -51,7 +63,7 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
 
         if(type!=null){
             filter = type.toString().toLowerCase();
-            Measure.Unit unit;
+
             switch (checkedId){
                 case R.id.unit_1:
                     unit = type.getMeasureUnitDefault();
@@ -62,16 +74,14 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
                 default:
                     throw new IllegalArgumentException();
             }
-
             if(unit!=null){
-                value = getString(unit.getStrId());
-                Log.d(TAG, "Filter = "+ filter +", Value = "+value);
+                Log.e(TAG, "Filter = "+ filter +", Value = "+unit);
                 try {
                     final String  id_user = DefaultPreferencesUser.getIdUserLogged(this);
                     JSONObject bodyJson = new JSONObject();
                     bodyJson.put(HttpRequest.Constant.ID_USER, id_user)
                             .put(HttpRequest.Constant.FILTER, filter)
-                            .put(HttpRequest.Constant.VALUE, value);
+                            .put(HttpRequest.Constant.VALUE, unit);
 
                     if(!HttpRequest.requestUpdateSetting(this, bodyJson, this)){
                         Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
@@ -88,10 +98,10 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response) || !(boolean)response.get("update")){
+            if(HttpRequest.someError(response) || !(boolean)response.get(HttpRequest.Constant.UPDATE)){
                 Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
             }else {
-                 DefaultPreferencesUser.setUnitMeasure(this, filter, value);
+                 DefaultPreferencesUser.setUnitMeasure(this, filter, unit);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

@@ -10,45 +10,46 @@ import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
-import org.json.JSONException;
-
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.PrimitiveIterator;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 public class Measure implements Parcelable {
 
     public enum Unit {
-        KILOMETER(R.string.kilometer),
-        MILE(R.string.mile),
+        // DISTANCE
+        KILOMETER("Km"),
+        MILE("mi"),
 
-        KILOGRAM(R.string.kilogram),
-        POUND(R.string.pound),
+        // WEIGHT
+        KILOGRAM("Kg"),
+        POUND("lb"),
 
-        METER(R.string.meter),
-        FEET(R.string.feet),
+        // HEIGHT
+        METER("m"),
+        FEET("ft"),
 
-        KILO_CALORIES(R.string.kilo_calories),
+        // ENERGY
+        KILO_CALORIES("Kcal"),
 
-        HOURS(R.string.unit_hours),
-        MINUTES(R.string.unit_min),
+        // DURATION
+        HOURS("h"),
+        MINUTES("min"),
+        SECOND("s"),
 
-        KILOMETER_PER_HOUR(R.string.kilometer_per_hour),
-        MILE_PER_HOUR(R.string.mile_per_hour),
+        // MIDDLE SPEED
+        KILOMETER_PER_HOUR("Km/h"),
+        MILE_PER_HOUR("mi/h");
 
-        SECOND(R.string.second);
+        private final String str;
 
-        private final int strId;
-
-        Unit(int strId) {
-            this.strId = strId;
+        Unit(String str) {
+            this.str = str;
         }
 
-        public int getStrId() {
-            return this.strId;
+        public String getString() {
+            return this.str;
         }
     }
 
@@ -84,22 +85,12 @@ public class Measure implements Parcelable {
             return new Type[]{MIDDLE_SPEED,ENERGY, DISTANCE, WEIGHT};
         }
 
-        private Unit getValueOfMeasureUnitDefault(final Context context ){
-            try {
-                String measure = DefaultPreferencesUser.getUnitDefault(context, this.toString().toLowerCase());
-                return Stream.of(getMeasureUnit()).filter(f ->context.getString(f.getStrId()).equals(measure)).findFirst().orElse(getMeasureUnitDefault());
-            }catch (JSONException e){
-                e.printStackTrace();
+        public Unit getValueOfMeasureUnitDefault(final String value){
+            try{
+                return Stream.of(getMeasureUnit()).filter(u -> u.equals(Unit.valueOf(value))).findFirst().orElse(getMeasureUnitDefault());
+            }catch (NullPointerException e){
+                return getMeasureUnitDefault();
             }
-            return this.getMeasureUnitDefault();
-        }
-
-        public static LinkedHashMap<Type, Unit> getUnitDefaultForUser(final Context context){
-            final Type[] typeChangeable = getMeasureChangeable();
-            final LinkedHashMap<Measure.Type, Measure.Unit> map = new LinkedHashMap<>();
-            for (Type type : typeChangeable)
-                map.put(type, type.getValueOfMeasureUnitDefault(context));
-            return map;
         }
 
         /**
@@ -153,42 +144,22 @@ public class Measure implements Parcelable {
         this.context = context;
         this.type = type;
         this.value = 0d;
-        // TODO: 12/2/2019 MIGLIORARE 
         switch (type){
             case HEIGHT:
-                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
-                        DefaultPreferencesUser.getUnitHeightDefault(context).equals(context.getString(Measure.Unit.METER.getStrId())))
-                    setUnit(Measure.Unit.METER);
-                else
-                    setUnit(Measure.Unit.FEET);
-
+                setUnit(DefaultPreferencesUser.getUnitHeightDefault(context));
                 break;
             case DISTANCE:
-                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
-                        DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
-                    setUnit(Measure.Unit.KILOMETER);
-                else
-                    setUnit(Measure.Unit.MILE);
-
+                setUnit(DefaultPreferencesUser.getUnitDistanceDefault(context));
                 break;
             case WEIGHT:
-                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
-                        DefaultPreferencesUser.getUnitWeightDefault(context).equals(context.getString(Measure.Unit.KILOGRAM.getStrId())))
-                    setUnit(Measure.Unit.KILOGRAM);
-                else
-                    setUnit(Measure.Unit.POUND);
+                setUnit(DefaultPreferencesUser.getUnitWeightDefault(context));
                 break;
             case MIDDLE_SPEED:
-                if(!DefaultPreferencesUser.isJustUserLogged(context) ||
-                        DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Measure.Unit.KILOMETER.getStrId())))
-                    setUnit(Unit.KILOMETER_PER_HOUR);
-                else
-                    setUnit(Unit.MILE_PER_HOUR);
+                setUnit(DefaultPreferencesUser.getUnitMiddleSpeedDefault(context));
                 break;
             case ENERGY:
-                setUnit(Measure.Unit.KILO_CALORIES);
+                setUnit(DefaultPreferencesUser.getUnitEnergyDefault(context));
                 break;
-
             case DURATION:
                 setUnit(Measure.Unit.SECOND);
                 break;
@@ -202,7 +173,7 @@ public class Measure implements Parcelable {
 
     public static Measure create(Context context, Measure.Type type, Double value){
         final  Measure measure = new Measure(context, type);
-        measure.setValue(value);
+        measure.setValueFromDb(value);
         return measure;
     }
 
@@ -237,7 +208,7 @@ public class Measure implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.type.toString());
-        dest.writeDouble(getValue());
+        dest.writeDouble(getValueToDb());
         dest.writeString(this.unit.toString());
     }
 
@@ -252,112 +223,122 @@ public class Measure implements Parcelable {
         return type;
     }
 
-// GET TO DB
-    public Double getValue(){
-        if(this.value==null)return 0d;
-        reSetUnit();
-        return NumberUtilities.round2(this.value);
-    }
-
-// GET TO GUI
-    public Double getValueToGui(){
-
-        if(this.type.equals(Type.ENERGY) || isDefaultUnitMeasure())
-            return getValue();
-
-        if(this.value==null)return 0d;
-        reSetUnit();
-        if(this.type.equals(Type.MIDDLE_SPEED) )
-            return conversionTo(Type.MIDDLE_SPEED.getMeasureUnit()[1], value);
-        else
-            return conversionTo(this.type.getMeasureUnit()[1], value);
-    }
-
-    // TODO: 12/2/2019 MIGLIORARE
-    private void reSetUnit(){
-        if(!type.equals(Type.DURATION)){
-            try {
-                switch (this.type){
-                    case MIDDLE_SPEED:
-                    {
-
-                        final String unitS = DefaultPreferencesUser.getUnitDistanceDefault(context); //km
-                        if(!unitS.equals(context.getString(this.unit.getStrId()).split("/")[0])) // km  != mi
-                            setUnit(this.unit.equals(Type.MIDDLE_SPEED.getMeasureUnit()[0])? // mi/h
-                                    Type.MIDDLE_SPEED.getMeasureUnit()[1]
-                                    : Type.MIDDLE_SPEED.getMeasureUnit()[0]);
-                        break;
-
-                    }
-                    default:
-                    {
-                        final String unitS = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase()); //km
-                        if(unitS==null) setUnit(this.type.getMeasureUnitDefault());
-                        else {
-                            if(!unitS.equals(context.getString(this.unit.getStrId()))) // km  == mi
-                                setUnit(this.unit.equals(this.type.getMeasureUnitDefault())? this.type.getMeasureUnit()[1] : this.type.getMeasureUnitDefault());
-                        }
-
-                        break;
-                    }
-                }
-            }catch (JSONException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private boolean isDefaultUnitMeasure(){
-        try {
-            if(type.equals(Type.MIDDLE_SPEED))
-                return DefaultPreferencesUser.getUnitDistanceDefault(context).equals(context.getString(Type.DISTANCE.getMeasureUnit()[0].strId));
-            else{
-                String uDef = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase());
-                return uDef==null || uDef.equals(context.getString(this.type.getMeasureUnitDefault().strId));
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
     public Unit getUnit() {
         return unit;
     }
 
-// SET FROM GUI
-    public void setValueFromGui(Double value){
-            switch (this.type){
-                case DISTANCE:{
-                    String unitS = DefaultPreferencesUser.getUnitDistanceDefault(context);
-                    this.value = unitS.equals(context.getString(Unit.MILE.getStrId())) ? conversionTo(Unit.KILOMETER, value): value;
-                    break;
-                }
-                case WEIGHT:{
-                    String unitS = DefaultPreferencesUser.getUnitWeightDefault(context);
-                    this.value = unitS.equals(context.getString(Unit.POUND.getStrId())) ? conversionTo(Unit.KILOGRAM, value): value;
-                    break;
-                }
-                case HEIGHT:{
-                    String unitS = DefaultPreferencesUser.getUnitHeightDefault(context);
-                    this.value = unitS.equals(context.getString(Unit.FEET.getStrId())) ? conversionTo(Unit.METER, value): value;
-                    break;
-                }
-                default:
-                    setValue(value);
-                    break;
-            }
+
+
+
+    public Double getValue(final boolean toDb){
+        if(toDb){
+            return getValueToDb();
+        }else {
+            return getValueToGui();
+        }
     }
 
-// SET FROM DB
-    public void setValue(Double value) {
+    private Double getValueToDb(){
+        if(this.value==null) return 0d;
+        return NumberUtilities.round2(this.value);
+    }
+
+    private Double getValueToGui(){
+        if(this.value==null) return 0d;
+        resetUnit();
+        switch (this.type){
+            case DURATION: return getValueToDb();
+            case ENERGY:{
+                if(DefaultPreferencesUser.getUnitEnergyDefault(context).equals(Type.ENERGY.getMeasureUnitDefault()))
+                    return getValueToDb();
+                else return conversionTo(this.type.getMeasureUnit()[1], value);
+            }
+           case MIDDLE_SPEED: {
+               if(DefaultPreferencesUser.getUnitDistanceDefault(context).equals(Type.DISTANCE.getMeasureUnitDefault()))
+                   return getValueToDb();
+               else
+                   return conversionTo(this.type.getMeasureUnit()[1], value);
+           }
+           default:{
+               String unitStr = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase());
+               if(unitStr==null || Measure.Unit.valueOf(unitStr).equals(this.type.getMeasureUnitDefault()))
+                   return getValueToDb();
+               else
+                   return conversionTo(this.type.getMeasureUnit()[1], value);
+
+           }
+        }
+    }
+
+
+    private void resetUnit(){
+        if(!type.equals(Type.DURATION)){
+            Measure.Unit u = null;
+            switch (this.type){
+                case MIDDLE_SPEED:
+                    u = DefaultPreferencesUser.getUnitMiddleSpeedDefault(context);
+                    break;
+                case ENERGY:
+                    u = DefaultPreferencesUser.getUnitEnergyDefault(context);
+                    break;
+                case DISTANCE:
+                    u = DefaultPreferencesUser.getUnitDistanceDefault(context);
+                    break;
+                case HEIGHT:
+                    u = DefaultPreferencesUser.getUnitHeightDefault(context);
+                    break;
+                case WEIGHT:
+                    u = DefaultPreferencesUser.getUnitWeightDefault(context);
+                    break;
+                default:
+                    break;
+            }
+            if(!u.equals(unit)) setUnit(u);
+        }
+    }
+
+
+
+    public void setValue(final boolean fromDb, Double value){
+        if(fromDb){
+            setValueFromDb(value);
+        }else {
+            setValueFromGui(value);
+        }
+    }
+
+    private void setValueFromGui(Double value){
+        switch (this.type){
+            case DISTANCE:{
+                Unit unitS = DefaultPreferencesUser.getUnitDistanceDefault(context);
+                this.value = unitS.equals(Unit.MILE) ? conversionTo(Unit.KILOMETER, value): value;
+                    break;
+            }
+            case WEIGHT:{
+                Unit unitS = DefaultPreferencesUser.getUnitWeightDefault(context);
+                this.value = unitS.equals(Unit.POUND) ? conversionTo(Unit.KILOGRAM, value): value;
+                break;
+            }
+            case HEIGHT:{
+                Unit unitS = DefaultPreferencesUser.getUnitHeightDefault(context);
+                this.value = unitS.equals(Unit.FEET) ? conversionTo(Unit.METER, value): value;
+                break;
+            }
+            default:
+                setValueFromDb(value);
+                break;
+        }
+    }
+
+    private void setValueFromDb(Double value) {
         this.value = value;
     }
 
+
+
     public Measure getMeasure(int integer, int decimal){
         if(this.getType().equals(Measure.Type.DURATION))
-            setValue(DurationUtilities.getSecond(integer, decimal));
+            setValueFromDb(DurationUtilities.getSecond(integer, decimal));
         else
             setValueFromGui(Double.valueOf(String.format(this.type.equals(Measure.Type.WEIGHT)?
                     Measure.Format.FORMAT_WEIGHT :
@@ -375,7 +356,7 @@ public class Measure implements Parcelable {
     }
 
     public static boolean isNullOrEmpty(Measure distance) {
-        return distance==null || distance.getValue() == null || distance.getValue() == 0d;
+        return distance==null || distance.getValueToDb() == 0d || distance.getValueToGui() == 0d;
     }
 
     public static Double conversionTo(Unit unit, Double value){
@@ -405,10 +386,10 @@ public class Measure implements Parcelable {
             return DurationUtilities.format(this.value.intValue());
 
         if((this.type.equals(Type.DISTANCE) || this.type.equals(Type.ENERGY) || this.type.equals(Type.MIDDLE_SPEED))&&
-                getValue() == 0d)
+                getValueToDb() == 0d)
             return context.getString(R.string.no_available_abbr);
 
-        return getValueToGui() + context.getString(R.string.space) + context.getString(getUnit().getStrId());
+        return getValueToGui() + context.getString(R.string.space) + getUnit().getString();
     }
 
     @Override
@@ -423,8 +404,7 @@ public class Measure implements Parcelable {
         {
             if(this.type.equals(Type.DURATION))
                 return DurationUtilities.format(this.value.intValue());
-            return getValueToGui() + context.getString(R.string.space) + context.getString(getUnit().getStrId());
-
+            return getValueToGui() + context.getString(R.string.space) + getUnit().getString();
         }
         return toString();
     }

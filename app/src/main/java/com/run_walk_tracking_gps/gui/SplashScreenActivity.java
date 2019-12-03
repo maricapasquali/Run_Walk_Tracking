@@ -69,7 +69,6 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 Toast.makeText(context, response.toString(), Toast.LENGTH_LONG).show();
                 return false;
             } else {
-                Log.e(TAG, response.toString());
                 if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.FIRST_LOGIN))
                         && response.getBoolean(HttpRequest.Constant.FIRST_LOGIN)){
                     final Intent intent = new Intent(context, TokenActivity.class);
@@ -92,7 +91,8 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                         statisticsData.setId(s.getInt(HttpRequest.Constant.ID_WEIGHT));
                         statisticsWeight.add(statisticsData);
                     }
-                    Log.d(TAG, statisticsWeight.toString()); Log.d(TAG, workouts.toString());
+                    Log.e(TAG, statisticsWeight.toString());
+                    Log.e(TAG, workouts.toString());
                     intent.putExtra(KeysIntent.WORKOUTS, workouts);
                     intent.putExtra(KeysIntent.WEIGHTS, statisticsWeight);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

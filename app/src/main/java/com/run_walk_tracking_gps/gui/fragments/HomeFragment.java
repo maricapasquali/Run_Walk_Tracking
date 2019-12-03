@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -22,18 +23,16 @@ import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
-import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.service.MapRouteService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressLint("StaticFieldLeak")
 public class HomeFragment extends Fragment implements MapRouteService.OnChangeLocationListener{
@@ -58,7 +57,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     private OnStopWorkoutClickListener onStopWorkoutClickListener;
     private OnBlockScreenClickListener onBlockScreenClickListener;
 
-    private List<Measure> workoutMeasure = new ArrayList<>();
+    private ArrayList<Measure> workoutMeasure = new ArrayList<>();
 
     private Workout workout;
     private WorkoutServiceHandler workoutService;
@@ -90,24 +89,28 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
         if (bundle != null) {
-            double weight = bundle.getDouble(WEIGHT);
+                double weight = bundle.getDouble(WEIGHT);
 
-            workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
-                workout_duration.setText(Measure.DurationUtilities.format(sec));
-                workout.getDuration().setValue((double) sec);
+                workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
+                    workout_duration.setText(Measure.DurationUtilities.format(sec));
+                    workout.getDuration().setValue(true, (double) sec);
 
-                workout.getDistance().setValue(distance);
-                workout_distance.setText(workout.getDistance().toString(true));
+                    workout.getDistance().setValue(true, distance);
+                    workout_distance.setText(workout.getDistance().toString(true));
 
-                workout.getCalories().setValue(energy);
-                workout_energy.setText(workout.getCalories().toString(true));
-                //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: " + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
-            }, this);
-        }
-    }
+                    workout.getCalories().setValue(true, energy);
+                    workout_energy.setText(workout.getCalories().toString(true));
+                    //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: " + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
+                }, this);
+            }
+     }
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -190,9 +193,9 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
                     .setMapRoute(listCoord)
                     .setDate(Calendar.getInstance().getTime())
-                    .setDistance(workout.getDistance().getValueToGui())
-                    .setDuration(workout.getDuration().getValue().intValue())
-                    .setCalories(workout.getCalories().getValueToGui())
+                    .setDistance(workout.getDistance().getValue(false))
+                    .setDuration(workout.getDuration().getValue(true).intValue())
+                    .setCalories(workout.getCalories().getValue(false))
                     .setMiddleSpeed()
                     .setSport(workout.getSport())
                     .build());
@@ -230,14 +233,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         Log.d(TAG, "onResume");
         super.onResume();
 
-        workout_distance.setText(workoutMeasure.get(1).toString(true));
-        workout_energy.setText(workoutMeasure.get(2).toString(true));
         setSport();
-
-        if (isWorkoutRunning()) {
-            workout_distance.setText(workout.getDistance().toString(true));
-            workout_energy.setText(workout.getCalories().toString(true));
-        }
 
         setIndoor(!LocationUtilities.isGpsEnable(getContext()));
 
@@ -265,28 +261,24 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         final LinearLayout info_workout = rootView.findViewById(R.id.info_workout);
         final LinearLayout info_workout_numbers = rootView.findViewById(R.id.info_workout_numbers);
 
-        if(isIndoor){
-            workout_distance = rootView.findViewById(R.id.distance_workout_indoor);
-            workout_energy = rootView.findViewById(R.id.calories_workout_indoor);
-            workout_duration = rootView.findViewById(R.id.time_workout_indoor);
-            duration.setVisibility(View.VISIBLE);
-            distance.setVisibility(View.VISIBLE);
-            calories.setVisibility(View.VISIBLE);
-            info_workout.setVisibility(View.GONE);
-            info_workout_numbers.setVisibility(View.GONE);
-        }else{
-            workout_distance = rootView.findViewById(R.id.distance_workout);
-            workout_energy = rootView.findViewById(R.id.calories_workout);
-            workout_duration = rootView.findViewById(R.id.time_workout);
-            duration.setVisibility(View.GONE);
-            distance.setVisibility(View.GONE);
-            calories.setVisibility(View.GONE);
-            info_workout.setVisibility(View.VISIBLE);
-            info_workout_numbers.setVisibility(View.VISIBLE);
-        }
-        workout_duration.setText(workoutMeasure.get(0).toString(true));
-        workout_distance.setText(workoutMeasure.get(1).toString(true));
-        workout_energy.setText(workoutMeasure.get(2).toString(true));
+        workout_distance = rootView.findViewById(R.id.distance_workout_indoor);
+        workout_energy = rootView.findViewById(R.id.calories_workout_indoor);
+        workout_duration = rootView.findViewById(R.id.time_workout_indoor);
+
+        workout_distance = rootView.findViewById(R.id.distance_workout);
+        workout_energy = rootView.findViewById(R.id.calories_workout);
+        workout_duration = rootView.findViewById(R.id.time_workout);
+
+        duration.setVisibility(isIndoor?View.VISIBLE : View.GONE);
+        distance.setVisibility(isIndoor?View.VISIBLE : View.GONE);
+        calories.setVisibility(isIndoor?View.VISIBLE : View.GONE);
+        info_workout.setVisibility(isIndoor?View.GONE : View.VISIBLE);
+        info_workout_numbers.setVisibility(isIndoor?View.GONE : View.VISIBLE);
+
+        workout_duration.setText(isWorkoutRunning() ? workout.getDuration().toString(true): workoutMeasure.get(0).toString(true));
+        workout_distance.setText(isWorkoutRunning() ? workout.getDistance().toString(true) : workoutMeasure.get(1).toString(true));
+        workout_energy.setText(isWorkoutRunning() ? workout.getCalories().toString(true): workoutMeasure.get(2).toString(true));
+
     }
 
     @Override

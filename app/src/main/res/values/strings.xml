@@ -172,22 +172,13 @@
     <!-- Home -->
     <string name="home" translatable="false">Home</string>
 
-    <!--Unità di misura -->
-    <string name="kilometer" translatable="false">Km</string>
-    <string name="meter" translatable="false">m</string>
-    <string name="kilogram" translatable="false">Kg</string>
-    <string name="mile" translatable="false">mi</string>
-    <string name="pound" translatable="false">lb</string>
-    <string name="feet" translatable="false">ft</string>
-    <string name="kilo_calories" translatable="false">Kcal</string>
-    <string name="kilometer_per_hour" translatable="false">Km/h</string>
-    <string name="mile_per_hour" translatable="false">mi/h</string>
-    <string name="second" translatable="false">s</string>
+    <string name="time_workout" translatable="false">00:00:00</string>
+    <string name="distance_workout" translatable="false">0.00</string>
+    <string name="calories_workout" translatable="false">0.00</string>
+
     <string name="unit_hours" translatable="false">h</string>
     <string name="unit_min" translatable="false">min</string>
-    <string name="time_workout" translatable="false">00:00:00</string>
-    <string name="distance_workout" translatable="false">0.00 </string>
-    <string name="calories_workout" translatable="false">0.00 </string>
+
 
     <!-- Language Code -->
     <string name="it_code" translatable="false">it</string>

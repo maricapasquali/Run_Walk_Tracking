@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.run_walk_tracking_gps.connectionserver.FieldDataBase;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.model.enumerations.Target;
@@ -22,28 +21,28 @@ import java.util.Locale;
 
 public class HttpRequestVolleyTest {
 
+    final Context context = InstrumentationRegistry.getTargetContext();
     private static final String TAG = HttpRequestVolleyTest.class.getName();
     @Test
     public void requestSignUpVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
-            //bodyJson.put(FieldDataBase.ID_USER.toName(), 21);
-            bodyJson.put( FieldDataBase.IMG_ENCODE.toName(), "SFSFISDIGN");
-            bodyJson.put( FieldDataBase.NAME.toName(), "fabio");
-            bodyJson.put( FieldDataBase.LAST_NAME.toName(), "cani");
-            bodyJson.put( FieldDataBase.GENDER.toName(), Gender.MALE);
-            bodyJson.put( FieldDataBase.BIRTH_DATE.toName(), Calendar.getInstance().getTime());
-            bodyJson.put( FieldDataBase.EMAIL.toName(), "marica@gmail.com");
-            bodyJson.put( FieldDataBase.CITY.toName(), "Roma");
-            bodyJson.put( FieldDataBase.PHONE.toName(), "324242342342");
-            bodyJson.put( FieldDataBase.LANGUAGE.toName(),  Locale.getDefault().getDisplayLanguage());
-            bodyJson.put( FieldDataBase.WEIGHT.toName(), 50.6);
-            bodyJson.put( FieldDataBase.HEIGHT.toName(), 1.66);
-            bodyJson.put( FieldDataBase.TARGET.toName(), Target.LOSE_WEIGHT);
-            bodyJson.put( FieldDataBase.USERNAME.toName(), "cacjas");
-            bodyJson.put( FieldDataBase.PASSWORD.toName(), CryptographicHashFunctions.md5("fino"));
+            //bodyJson.put(HttpRequest.Constant.ID_USER.toName(), 21);
+            bodyJson.put( HttpRequest.Constant.IMG_ENCODE, "SFSFISDIGN");
+            bodyJson.put( HttpRequest.Constant.NAME, "fabio");
+            bodyJson.put( HttpRequest.Constant.LAST_NAME, "cani");
+            bodyJson.put( HttpRequest.Constant.GENDER, Gender.MALE);
+            bodyJson.put( HttpRequest.Constant.BIRTH_DATE, Calendar.getInstance().getTime());
+            bodyJson.put( HttpRequest.Constant.EMAIL, "marica@gmail.com");
+            bodyJson.put( HttpRequest.Constant.CITY, "Roma");
+            bodyJson.put( HttpRequest.Constant.PHONE, "324242342342");
+            bodyJson.put( HttpRequest.Constant.LANGUAGE,  Locale.getDefault().getDisplayLanguage());
+            bodyJson.put( HttpRequest.Constant.WEIGHT, 50.6);
+            bodyJson.put( HttpRequest.Constant.HEIGHT, 1.66);
+            bodyJson.put( HttpRequest.Constant.TARGET, Target.LOSE_WEIGHT);
+            bodyJson.put( HttpRequest.Constant.USERNAME, "cacjas");
+            bodyJson.put( HttpRequest.Constant.PASSWORD, CryptographicHashFunctions.md5("fino"));
 
             if(!HttpRequest.requestSignUp(context, bodyJson, this::responseServer)){
                 Log.e(TAG, context.getString(R.string.internet_not_available));
@@ -53,15 +52,14 @@ public class HttpRequestVolleyTest {
         }
     }
 
-   // @Test
+    @Test
     public void requestSignInVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
-            bodyJson.put( FieldDataBase.USERNAME.toName(), "marioRossi$1");
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            //bodyJson.put( FieldDataBase.LAST_NAME.toName(), "Rossi");
+            bodyJson.put( HttpRequest.Constant.USERNAME, "marioRossi$1");
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            //bodyJson.put( HttpRequest.Constant.LAST_NAME, "Rossi");
 
             HttpRequest.requestSignIn(context, bodyJson,this::responseServer);
         } catch (Exception e) {
@@ -69,14 +67,14 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestUserInfoVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
 
             HttpRequest.requestUserInformation(context, bodyJson, this::responseServer);
 
@@ -85,15 +83,14 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestUpdateUserInfoVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
-            //bodyJson.put( FieldDataBase.WEIGHT.toName(), "Kira");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
+            //bodyJson.put( HttpRequest.Constant.WEIGHT, "Kira");
             HttpRequest.requestDelayedUpdateUserInformation(context, bodyJson,this::responseServer, null);
 
         } catch (Exception e) {
@@ -101,15 +98,14 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestDeleteUserInfoVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-           // bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
+           // bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
 
             HttpRequest.requestDeleteUser(context, bodyJson, this::responseServer);
 
@@ -118,15 +114,15 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestUpdatePasswordVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
 
             HttpRequest.requestUpdatePassword(context, bodyJson,this::responseServer);
 
@@ -135,15 +131,15 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestUpdateSettingVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
 
             HttpRequest.requestUpdateSetting(context, bodyJson, this::responseServer);
 
@@ -153,15 +149,15 @@ public class HttpRequestVolleyTest {
     }
 
 
-    //@Test
+    @Test
     public void requestAllWorkoutsVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
 
             HttpRequest.requestWorkouts(context, bodyJson, this::responseServer);
 
@@ -170,18 +166,16 @@ public class HttpRequestVolleyTest {
         }
     }
 
-   //@Test
+   @Test
     public void requestNewWorkoutVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            //bodyJson.put( FieldDataBase.NAME.toName(), "Mario");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
-            bodyJson.put( FieldDataBase.DATE.toName(), DateHelper.getCalendar().getTime());
-            bodyJson.put( FieldDataBase.ID_SPORT.toName(), 2);
-            bodyJson.put( FieldDataBase.DURATION.toName(), 27);
+            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
+            bodyJson.put( HttpRequest.Constant.DATE, DateHelper.create(context).getCalendar().getTime());
+            bodyJson.put( HttpRequest.Constant.DURATION, 27);
 
             HttpRequest.requestNewWorkout(context, bodyJson, this::responseServer);
 
@@ -191,16 +185,16 @@ public class HttpRequestVolleyTest {
     }
 
 
-    //@Test
+    @Test
     public void requestUpdateWorkoutVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
 
-            bodyJson.put( FieldDataBase.ID_WORKOUT.toName(), 17);
-            bodyJson.put( FieldDataBase.DISTANCE.toName(), 7.0);
+            bodyJson.put( HttpRequest.Constant.ID_WORKOUT, 17);
+            bodyJson.put( HttpRequest.Constant.DISTANCE, 7.0);
 
             HttpRequest.requestUpdateWorkout(context, bodyJson, this::responseServer);
 
@@ -209,16 +203,15 @@ public class HttpRequestVolleyTest {
         }
     }
 
-   // @Test
+    @Test
     public void requestDeleteWorkoutVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
 
-            bodyJson.put( FieldDataBase.ID_WORKOUT.toName(), 17);
-            //bodyJson.put( FieldDataBase.DISTANCE.toName(), 7.0);
+            bodyJson.put( HttpRequest.Constant.ID_WORKOUT, 17);
+            //bodyJson.put( HttpRequest.Constant.DISTANCE, 7.0);
 
             HttpRequest.requestDeleteWorkout(context, bodyJson, this::responseServer);
 
@@ -227,16 +220,16 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestStatisticsVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            bodyJson.put( FieldDataBase.FILTER.toName(), "weight");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 27);
-            //bodyJson.put( FieldDataBase.DISTANCE.toName(), 7.0);
+            bodyJson.put( HttpRequest.Constant.FILTER, "weight");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
+            //bodyJson.put( HttpRequest.Constant.DISTANCE, 7.0);
 
             HttpRequest.requestStatistics(context, bodyJson, this::responseServer);
 
@@ -245,16 +238,15 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestNewWeightVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            bodyJson.put( FieldDataBase.VALUE.toName(), 70.2);
-            bodyJson.put( FieldDataBase.DATE.toName(), "2019-10-29");
-            bodyJson.put( FieldDataBase.ID_USER.toName(), 39);
+            bodyJson.put( HttpRequest.Constant.VALUE, 70.2);
+            bodyJson.put( HttpRequest.Constant.DATE, "2019-10-29");
+            bodyJson.put( HttpRequest.Constant.ID_USER, 39);
 
 
             HttpRequest.requestNewWeight(context, bodyJson, this::responseServer);
@@ -264,16 +256,16 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestUpdateWeightVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
+
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-            // bodyJson.put( FieldDataBase.FILTER.toName(), "weight");
-            bodyJson.put( FieldDataBase.ID_WEIGHT.toName(),28);
-            bodyJson.put( FieldDataBase.VALUE.toName(),70);
+            // bodyJson.put( HttpRequest.Constant.FILTER, "weight");
+            bodyJson.put( HttpRequest.Constant.ID_WEIGHT,28);
+            bodyJson.put( HttpRequest.Constant.VALUE,70);
 
 
             HttpRequest.requestUpdateWeight(context, bodyJson, this::responseServer);
@@ -283,15 +275,14 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    //@Test
+    @Test
     public void requestDeleteWeightVolley(){
-        final Context context = InstrumentationRegistry.getTargetContext();
 
         final JSONObject bodyJson = new JSONObject();
         try {
 
-           // bodyJson.put( FieldDataBase.FILTER.toName(), "weight");
-            bodyJson.put( FieldDataBase.ID_WEIGHT.toName(), 81);
+           // bodyJson.put( HttpRequest.Constant.FILTER, "weight");
+            bodyJson.put( HttpRequest.Constant.ID_WEIGHT, 81);
 
 
             HttpRequest.requestDeleteWeight(context, bodyJson, this::responseServer);

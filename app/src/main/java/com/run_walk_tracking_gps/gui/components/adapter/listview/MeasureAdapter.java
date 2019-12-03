@@ -81,8 +81,8 @@ public class MeasureAdapter extends BaseAdapter {
 
         final Measure.Unit[] measureUnits = measure.getMeasureUnit();
         if(measureUnits.length==2){
-            viewHolder.unit_1.setText(measureUnits[0].getStrId());
-            viewHolder.unit_2.setText(measureUnits[1].getStrId());
+            viewHolder.unit_1.setText(measureUnits[0].getString());
+            viewHolder.unit_2.setText(measureUnits[1].getString());
         }
         if(unit!=null){
             if(unit.equals(measure.getMeasureUnitDefault())){

@@ -72,12 +72,12 @@ public class Workout implements Parcelable, Cloneable{
                 String map = w.getString(HttpRequest.Constant.MAP_ROUTE);
                 if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
                 workoutsList.get(i).setDate(w.getString(HttpRequest.Constant.DATE));
-                workoutsList.get(i).getDuration().setValue((double)w.getInt(HttpRequest.Constant.DURATION));
-                workoutsList.get(i).getDistance().setValue(w.getDouble(HttpRequest.Constant.DISTANCE));
-                workoutsList.get(i).getCalories().setValue(w.getDouble(HttpRequest.Constant.CALORIES));
+                workoutsList.get(i).getDuration().setValue(true, (double)w.getInt(HttpRequest.Constant.DURATION));
+                workoutsList.get(i).getDistance().setValue(true, w.getDouble(HttpRequest.Constant.DISTANCE));
+                workoutsList.get(i).getCalories().setValue(true, w.getDouble(HttpRequest.Constant.CALORIES));
                 workoutsList.get(i).setSport(Sport.valueOf(w.getString(HttpRequest.Constant.SPORT)));
-                double duration = workoutsList.get(i).getDuration().getValue();
-                double distance = workoutsList.get(i).getDistance().getValue();
+                double duration = workoutsList.get(i).getDuration().getValue(true);
+                double distance = workoutsList.get(i).getDistance().getValue(true);
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
             }catch (JSONException e){
                 e.printStackTrace();
@@ -88,12 +88,12 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private void setMiddleSpeed(double distance,double duration){
-        getMiddleSpeed().setValue(NumberUtilities.round2(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d)));
+        getMiddleSpeed().setValue(true, NumberUtilities.round2(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d)));
     }
 
     public void setMiddleSpeed(){
-        double duration = getDuration().getValue();
-        double distance = getDistance().getValue();
+        double duration = getDuration().getValue(true);
+        double distance = getDistance().getValue(true);
         setMiddleSpeed(distance,duration);
     }
 
@@ -220,9 +220,9 @@ public class Workout implements Parcelable, Cloneable{
                 .put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
                 .put(HttpRequest.Constant.MAP_ROUTE, this.getMapRoute())
                 .put(HttpRequest.Constant.DATE, this.getDate())
-                .put(HttpRequest.Constant.DURATION, this.getDuration().getValue())
-                .put(HttpRequest.Constant.DISTANCE, this.getDistance().getValue())
-                .put(HttpRequest.Constant.CALORIES, this.getCalories().getValue())
+                .put(HttpRequest.Constant.DURATION, this.getDuration().getValue(true))
+                .put(HttpRequest.Constant.DISTANCE, this.getDistance().getValue(true))
+                .put(HttpRequest.Constant.CALORIES, this.getCalories().getValue(true))
                 .put(HttpRequest.Constant.SPORT, this.getSport());
     }
 

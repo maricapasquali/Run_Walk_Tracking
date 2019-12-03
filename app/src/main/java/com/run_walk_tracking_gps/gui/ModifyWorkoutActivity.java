@@ -97,7 +97,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
                         if (durationMeasure!=null){
                             detail.setText(durationMeasure.toString());
-                            workout.getDuration().setValue(durationMeasure.getValue());
+                            workout.getDuration().setValue(true, durationMeasure.getValue(true));
                             workout.setMiddleSpeed();
                         }
                     }).show();
@@ -106,10 +106,10 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                     DistanceDialog.create(ModifyWorkoutActivity.this, (distanceMeasure)  -> {
                         if(distanceMeasure==null){
                             detail.setText(R.string.no_available_abbr);
-                            workout.getDistance().setValue(0d);
+                            workout.getDistance().setValue(true, 0d);
                         }else{
                             detail.setText(distanceMeasure.toString());
-                            workout.getDistance().setValueFromGui(distanceMeasure.getValueToGui());
+                            workout.getDistance().setValue(false,distanceMeasure.getValue(false));
                             workout.setMiddleSpeed();
                         }
                     }).show();
@@ -119,10 +119,10 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
 
                         if(caloriesMeasure==null){
                             detail.setText(R.string.no_available_abbr);
-                            workout.getCalories().setValue(0d);
+                            workout.getCalories().setValue(true, 0d);
                         }else{
                             detail.setText(caloriesMeasure.toString());
-                            workout.getCalories().setValueFromGui(caloriesMeasure.getValueToGui());
+                            workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
                         }
                     }).show();
                     break;
@@ -160,14 +160,14 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
             if(!workout.getSport().equals(oldWorkout.getSport())){
                 bodyJson.put(HttpRequest.Constant.SPORT, workout.getSport());
             }
-            if(!workout.getDuration().getValue().equals(oldWorkout.getDuration().getValue())){
-                bodyJson.put(HttpRequest.Constant.DURATION, workout.getDuration().getValue());
+            if(!workout.getDuration().getValue(true).equals(oldWorkout.getDuration().getValue(true))){
+                bodyJson.put(HttpRequest.Constant.DURATION, workout.getDuration().getValue(true));
             }
-            if(!workout.getDistance().getValue().equals(oldWorkout.getDistance().getValue())){
-                bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue());
+            if(!workout.getDistance().getValue(true).equals(oldWorkout.getDistance().getValue(true))){
+                bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue(true));
             }
-            if(!workout.getCalories().getValue().equals(oldWorkout.getCalories().getValue())){
-                bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue());
+            if(!workout.getCalories().getValue(true).equals(oldWorkout.getCalories().getValue(true))){
+                bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
             }
 
             Log.d(TAG, bodyJson.toString());

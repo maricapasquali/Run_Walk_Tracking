@@ -67,7 +67,7 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {
                    if(weightMeasure!=null){
                        detail.setText(weightMeasure.toString());
-                       statisticsData.getMeasure().setValueFromGui(weightMeasure.getValueToGui());
+                       statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
                    }
                 }).show();
                 break;

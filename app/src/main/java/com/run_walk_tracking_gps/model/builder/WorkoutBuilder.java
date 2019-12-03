@@ -33,12 +33,12 @@ public class WorkoutBuilder {
     }
 
     public WorkoutBuilder setDuration(int duration){
-        workout.getDuration().setValue((double)duration);
+        workout.getDuration().setValue(true, (double)duration);
         return this;
     }
 
     public WorkoutBuilder setDistance(double distance){
-        workout.getDistance().setValueFromGui(distance);
+        workout.getDistance().setValue(false, distance);
         return this;
     }
 
@@ -48,7 +48,7 @@ public class WorkoutBuilder {
     }
 
     public WorkoutBuilder setCalories(double calories){
-        workout.getCalories().setValue(calories);
+        workout.getCalories().setValue(true, calories);
         return this;
     }
 

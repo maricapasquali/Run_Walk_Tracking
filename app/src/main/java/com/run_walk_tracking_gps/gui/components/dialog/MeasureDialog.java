@@ -62,10 +62,10 @@ public abstract class MeasureDialog extends AlertDialog.Builder implements Dialo
         this.measure = Measure.create(getContext(), measure);
         if(measure.equals(Measure.Type.DURATION)){
             final TextView separation = theView.findViewById(R.id.separation);
-            separation.setText(Measure.Unit.HOURS.getStrId());
-            unit.setText(Measure.Unit.MINUTES.getStrId());
+            separation.setText(Measure.Unit.HOURS.getString());
+            unit.setText(Measure.Unit.MINUTES.getString());
         }else {
-            unit.setText(this.measure.getUnit().getStrId());
+            unit.setText(this.measure.getUnit().getString());
         }
     }
 

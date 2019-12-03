@@ -93,7 +93,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public Double getValue() {
-        return measure.getValue();
+        return measure.getValue(true);
     }
 
     public void setId(int id) {
@@ -109,7 +109,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public void setValue(Double value) {
-        this.measure.setValue(value);
+        this.measure.setValue(true, value);
     }
 
     public List<String> toArrayListString(){
@@ -122,7 +122,7 @@ public class StatisticsData implements Parcelable{
 
     @Override
     public String toString() {
-        return "StatisticsData [ Id = "+this.id+", Date = " +getDateStr() +", Value = " +this.measure.getValue()+ " ]";
+        return "StatisticsData [ Id = "+this.id+", Date = " +getDateStr() +", Value = " +this.measure.getValue(true)+ " ]";
     }
 
     public void setContext(Context context) {
