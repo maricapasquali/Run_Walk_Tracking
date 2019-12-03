@@ -30,6 +30,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/time"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -40,6 +41,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/time_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -63,6 +65,7 @@
                 android:paddingTop="10dp"
                 android:text="@string/distance"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -73,6 +76,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/distance_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -96,7 +100,8 @@
                 android:paddingTop="10dp"
                 android:text="@string/calories"
                 android:textAlignment="center"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:textColor="@color/checkState" />
 
             <TextView
                 android:id="@+id/calories_workout_indoor"
@@ -106,6 +111,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/calories_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -121,6 +127,7 @@
             android:paddingBottom="10dp"
             android:text="@string/sport"
             android:textAlignment="center"
+            android:textColor="@color/checkState"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -142,6 +149,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/time"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -153,6 +161,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/distance"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -164,6 +173,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/calories"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -186,6 +196,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/time_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -197,6 +208,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/distance_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <TextView
@@ -208,6 +220,7 @@
                 android:paddingBottom="10dp"
                 android:text="@string/calories_workout"
                 android:textAlignment="center"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
         </LinearLayout>
 

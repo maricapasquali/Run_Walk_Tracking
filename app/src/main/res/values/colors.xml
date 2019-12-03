@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF9900</color>
-    <color name="colorPrimaryOpaque">#4CFF9900</color>
-    <color name="colorPrimaryDark">#B45F06</color>
-    <color name="colorAccent">#4CFF9900</color> <!--#D81B60-->
+    <color name="colorPrimary">#706F6F</color>
+    <color name="colorPrimaryOpaque">#4DF0D7BD</color>
+    <color name="colorPrimaryDark">#2B2827</color>
+    <color name="colorAccent">#4DF0D7BD</color>
 
-    <color name="divColor">#ffd966</color>
+    <color name="divColor">#F0EEEB</color>
+
+    <!-- Color State -->
+    <color name="pressState">#A2A0A0</color>
+    <color name="checkState">#FFFFFF</color>
+    <color name="NoCheckState">#A2A0A0</color>
+
+    <!-- Color Button Workout Service -->
     <color name="startBtn">#009E0F</color>
     <color name="pauseBtn">#bf9000</color>
     <color name="RestartBtn">#93c47d</color>
     <color name="stopBtn">#cc0000</color>
-
-    <!-- Color State -->
-    <color name="pressState">#f9cb9c</color>
-    <color name="checkState">#660000</color>
-
 </resources>

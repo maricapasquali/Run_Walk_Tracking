@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/info_workout_numbers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/info_workout"
-        android:layout_marginTop="5dp"
-        android:orientation="horizontal">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/info_workout_numbers"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/info_workout"
+    android:layout_marginTop="5dp"
+    android:background="@color/colorPrimary"
+    android:orientation="horizontal">
 
 
         <TextView
@@ -17,7 +18,7 @@
             android:layout_weight="1"
             android:text="@string/time_workout"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/checkState"
             android:textSize="18sp" />
 
         <TextView
@@ -27,7 +28,7 @@
             android:layout_weight="1"
             android:text="@string/distance_workout"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/checkState"
             android:textSize="18sp" />
 
         <TextView
@@ -37,7 +38,7 @@
             android:layout_weight="1"
             android:text="@string/calories_workout"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/checkState"
             android:textSize="18sp" />
 
 </LinearLayout>
