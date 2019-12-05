@@ -21,8 +21,8 @@ public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterf
         this.onSelectedItemListener = onSelectedItemListener;
         this.type = type;
 
-        final String tType = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].toString();
-        ERROR = "Enum (" + tType + ") e Array-String (Resources) non hanno la stessa lunghezza";
+        /*final String tType = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].toString();*/
+        ERROR = "Enum e Array-String (Resources) non hanno la stessa lunghezza";
     }
 
     public ChooseDialog(Context context, T[] type, T checkedItem, int arrayStrings, OnSelectedItemListener<T> onSelectedItemListener) {

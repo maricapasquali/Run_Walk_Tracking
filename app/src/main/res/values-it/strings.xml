@@ -140,13 +140,16 @@
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
 
     <!-- Messaggi di errore -->
+    <string name="error">Errore</string>
     <string name="not_correct_password">Password non corretta</string>
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
-    <string name="internet_not_available">Internet non attivo</string>
+    <string name="weight_not_set_correctly">Devono essere settati sia PESO sia GIORNO</string>
     <string name="not_empty">\u0020 non può essere vuoto</string>
     <string name="user_not_set">User non settato</string>
     <string name="account_not_checked">Account non verificato!</string>
     <string name="uploadImageOk">Compressione Immagine Finita</string>
+    <string name="internet_not_available_title">Dati cellulare disattivati</string>
+    <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
 
 
 </resources>

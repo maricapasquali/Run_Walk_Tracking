@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateHelper;
@@ -280,7 +280,7 @@ public class Workout implements Parcelable, Cloneable{
         }
 
         public static Info[] infoWorkoutNoSpeed() {
-            return new ArrayList<>(Arrays.asList(values())).stream().filter(i -> i != MIDDLE_SPEED).toArray(Info[]::new);
+            return new ArrayList<>(Arrays.asList(values())).stream().filter(i -> !i.equals(MIDDLE_SPEED)).toArray(Info[]::new);
         }
 
         public static boolean valuesNotRequired(Info item) {

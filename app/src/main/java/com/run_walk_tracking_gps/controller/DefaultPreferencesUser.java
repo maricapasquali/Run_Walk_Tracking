@@ -1,8 +1,9 @@
-package com.run_walk_tracking_gps.connectionserver;
+package com.run_walk_tracking_gps.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
@@ -22,7 +23,7 @@ public class DefaultPreferencesUser {
     private static final String IS_JUST_LOGGED ="is_just_logged";
 
 
-// GET SharedPreferences
+// GETTER SharedPreferences
     private static SharedPreferences getSharedPreferencesUserLogged(Context context){
         return context.getSharedPreferences(PREFERENCE_USER_LOGGED, Context.MODE_PRIVATE);
     }
@@ -132,7 +133,7 @@ public class DefaultPreferencesUser {
     }
 
 
- // SET SharedPreferences
+ // SETTER SharedPreferences
     private static void setUserLogged(Context context, String id_user){
         getSharedPreferencesUserLogged(context).edit()
                 .putString(LAST_USER_LOGGED, id_user)

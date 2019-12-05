@@ -182,11 +182,10 @@ class UserDao {
    }
 
    static function dataAfterAccess($user){
-     return array(USER => $user + UserDao::getImageProfileForIdUser($user[ID_USER]),
+     return array(USER => $user + self:: getUserForId($user[ID_USER]) +  self::getImageProfileForIdUser($user[ID_USER]),
                   WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
                   WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
-                  APP => array( SETTINGS =>
-                                SettingsDao::getSettingsFor($user[ID_USER])));
+                  APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER])));
    }
 
   static function getImageProfileForIdUser($id){

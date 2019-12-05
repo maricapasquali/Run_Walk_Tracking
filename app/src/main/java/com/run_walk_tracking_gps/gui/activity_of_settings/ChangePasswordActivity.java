@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -12,7 +11,8 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
@@ -95,25 +95,17 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
 
             Log.e(TAG, bodyJson.toString());
 
-            if(!HttpRequest.requestUpdatePassword(this, bodyJson,this))
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-
+            HttpRequest.requestUpdatePassword(this, bodyJson,this);
 
         }catch (JSONException json){
             json.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
-        try {
-            if(HttpRequest.someError(response) || !(boolean)response.get("update")){
-                Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-            }else {
-                super.onBackPressed();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        super.onBackPressed();
     }
 }

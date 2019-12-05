@@ -24,7 +24,7 @@
                 android:layout_centerInParent="true"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@string/img_profile"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/ic_user_empty" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -308,12 +308,6 @@
                 android:paddingBottom="20dp"
                 android:textColor="@android:color/background_light" />
         </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/snake"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"></LinearLayout>
 
     </LinearLayout>
 </ScrollView>

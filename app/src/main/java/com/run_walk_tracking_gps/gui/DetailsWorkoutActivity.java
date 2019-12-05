@@ -17,9 +17,10 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 
 import org.json.JSONException;
@@ -120,28 +121,24 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                             try{
                                 JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
 
-                                if(!HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
+                                HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
 
                                     try {
-                                        if(HttpRequest.someError(response)){
-                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                                        }else{
-                                            if(response.getBoolean(HttpRequest.Constant.DELETE)){
-                                                final Intent resultIntent = new Intent();
-                                                resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
-                                                setResult(Activity.RESULT_OK, resultIntent);
-                                                finish();
-                                            }
+                                        if(response.getBoolean(HttpRequest.Constant.DELETE)){
+                                            final Intent resultIntent = new Intent();
+                                            resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
+                                            setResult(Activity.RESULT_OK, resultIntent);
+                                            finish();
                                         }
                                     } catch (JSONException e) {
-                                        Log.e(TAG, e.getMessage());
+                                        e.printStackTrace();
                                     }
-                                })){
-                                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                                }
+                                });
 
                             }catch (JSONException e){
                                 e.printStackTrace();
+                            } catch (InternetNoAvailableException e) {
+                                e.alert();
                             }
                         })
                         .setNegativeButton(R.string.cancel, null).create().show();
@@ -197,30 +194,26 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         try {
             final JSONObject bodyJson = workout.toJson(this);
             Log.d(TAG, bodyJson.toString());
-            if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
+            HttpRequest.requestNewWorkout(this, bodyJson, this);
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response)){
-                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-            }else {
-                int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
-                // save and send to workouts list
-                final Intent resultIntent = new Intent();
-                workout.setIdWorkout(id_workout);
-                resultIntent.putExtra(KeysIntent.NEW_WORKOUT, workout);
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
-            }
+            int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
+            // save and send to workouts list
+            final Intent resultIntent = new Intent();
+            workout.setIdWorkout(id_workout);
+            resultIntent.putExtra(KeysIntent.NEW_WORKOUT, workout);
+            setResult(Activity.RESULT_OK, resultIntent);
+            finish();
         } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
+           e.printStackTrace();
         }
     }
 

@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,15 +13,14 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.intent.KeysIntent;
-import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
@@ -30,8 +28,6 @@ import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.stream.Stream;
 
 public class SettingActivity extends CommonActivity {
 
@@ -83,17 +79,13 @@ public class SettingActivity extends CommonActivity {
         info = findViewById(R.id.info);
         exit = findViewById(R.id.exit);
 
-        try{
 
-            idStrSport = DefaultPreferencesUser.getSportDefault(this).getStrId();
-            sport.setSelection(spinnerAdapterSport.getPositionOf(idStrSport));
+        idStrSport = DefaultPreferencesUser.getSportDefault(this).getStrId();
+        sport.setSelection(spinnerAdapterSport.getPositionOf(idStrSport));
 
-            idStrTarget = DefaultPreferencesUser.getTargetDefault(this).getStrId();
-            target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
+        idStrTarget = DefaultPreferencesUser.getTargetDefault(this).getStrId();
+        target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
 
-        }catch (Exception e){
-            Log.e(TAG, e.getMessage());
-        }
     }
 
     @Override
@@ -130,8 +122,7 @@ public class SettingActivity extends CommonActivity {
         sport.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(idStrSport!=(int)parent.getSelectedItem())
-                {
+                if(idStrSport!=(int)parent.getSelectedItem()){
                     Sport sport = (Sport) EnumUtilities.getEnumFromStrId(Sport.class, (int)parent.getSelectedItem());
                     Log.e(TAG, sport.toString());
                     onChangeSpinnerSelection(Sport.class.getSimpleName().toLowerCase(), sport);
@@ -142,6 +133,7 @@ public class SettingActivity extends CommonActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
         target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -155,6 +147,7 @@ public class SettingActivity extends CommonActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
 /*      language.setOnClickListener(v -> {
 
@@ -196,41 +189,15 @@ public class SettingActivity extends CommonActivity {
 */
 
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
+
         coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
-        info.setOnClickListener(v -> {
-            Toast.makeText(this, getString(R.string.info), Toast.LENGTH_SHORT).show();
-            final Intent intent = new Intent(this, InfoActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivity(intent);
-        });
-        profile.setOnClickListener(v ->{
-            try {
 
-                final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)));
-                if(!HttpRequest.requestUserInformation(this, bodyJson, response -> {
+        info.setOnClickListener(v -> startActivity(new Intent(this, InfoActivity.class)));
 
-                    if(HttpRequest.someError(response))
-                        Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                    else {
-                        try {
-                            final JSONObject userInfo = (JSONObject) response.get("user");
-                            final Intent intent = new Intent(this, UserActivity.class);
-                            intent.putExtra(KeysIntent.USER_INFO, UserBuilder.create(this, userInfo).build());
-                            startActivity(intent);
+        profile.setOnClickListener(v -> startActivity(new Intent(this, UserActivity.class)));
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                })){
-                    Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        });
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
+
         exit.setOnClickListener(v -> {
             DefaultPreferencesUser.unSetUserLogged(this);
 
@@ -259,24 +226,19 @@ public class SettingActivity extends CommonActivity {
                         .put(HttpRequest.Constant.FILTER, type)
                         .put(HttpRequest.Constant.VALUE, id);
 
-                if(!HttpRequest.requestUpdateSetting(SettingActivity.this, bodyJson, response -> {
+                HttpRequest.requestUpdateSetting(SettingActivity.this, bodyJson, response -> {
                     try {
-                        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.ERROR)) || !(boolean)response.get("update")){
-                            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-                        }else {
-                            Log.e(TAG, response.toString());
-                            DefaultPreferencesUser.updateSpinnerSettings(this, type, response.getString(type));
-                        }
+                        DefaultPreferencesUser.updateSpinnerSettings(this, type, response.getString(type));
                     } catch (JSONException e) {
-                        Log.e(TAG, e.getMessage());
+                        e.printStackTrace();
                     }
-                })){
-                    Toast.makeText(SettingActivity.this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                }
+                });
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 }

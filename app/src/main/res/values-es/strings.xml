@@ -143,14 +143,16 @@
 
 
     <!-- Messaggi di errore -->
-
+    <string name="error">Error</string>
     <string name="not_correct_password">Password incorrecta</string>
     <string name="workout_not_set_correctly">Al menos DÍA, DEPORTE y DURACIÓN deben estar configurados.</string>
-    <string name="internet_not_available">Internet no activo</string>
+    <string name="weight_not_set_correctly">PESO y FECHA deben estar configurados.</string>
     <string name="not_empty">\\u0020 no puede estar vacio</string>
     <string name="user_not_set">User no configurado</string>
     <string name="account_not_checked">¡Cuenta no verificada!</string>
     <string name="uploadImageOk">Compresión de imagen terminada</string>
+    <string name="internet_not_available_title">Datos móviles desactivados</string>
+    <string name="internet_not_available_mex">Activa la conexión de datos móviles o utiliza la red WI-FI para acceder a los datos.</string>
 
 
 

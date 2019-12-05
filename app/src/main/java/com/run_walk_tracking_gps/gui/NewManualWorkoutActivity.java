@@ -11,7 +11,9 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.exception.DataException;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewManualWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -19,7 +21,7 @@ import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 
@@ -30,10 +32,8 @@ import org.json.JSONObject;
 public class NewManualWorkoutActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener, Response.Listener<JSONObject> {
 
     private final static String TAG = NewManualWorkoutActivity.class.getName();
-    private final String UNSET = "Workout doesn't correctly set !! ";
 
     private Workout workout;
-
 
     public NewManualWorkoutActivity() {
         super(R.string.workout);
@@ -48,7 +48,6 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
     public NewInformationAdapter getAdapterListView() {
         return new NewManualWorkoutAdapter(this);
     }
-
 
     @Override
     public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
@@ -111,7 +110,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
         try{
             Log.e(TAG, "" +workout.getDistance().getValue(false));
             if(!workout.isMinimalSet())
-                throw new NullPointerException(UNSET);
+                throw new DataException(this, Workout.class);
 
             final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                                                         .put(HttpRequest.Constant.SPORT, workout.getSport())
@@ -121,35 +120,35 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
 
 
-            if(!HttpRequest.requestNewWorkout(this, bodyJson, this)){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
+            HttpRequest.requestNewWorkout(this, bodyJson, this);
 
         }catch (NullPointerException e){
             e.printStackTrace();
             //Log.e(TAG, e.getMessage());
-            Toast.makeText(this, getString(R.string.workout_not_set_correctly), Toast.LENGTH_LONG).show();
+            //new InfoA.Builder(this).setMessage(R.string.workout_not_set_correctly)
+            Toast.makeText(this, R.string.workout_not_set_correctly, Toast.LENGTH_LONG).show();
         }catch (JSONException je){
-            Log.e(TAG, je.getMessage());
+            je.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
+        } catch (DataException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response)){
-                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-            }else {
-                int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
-                // save and send to workouts list
-                final Intent newManualWorkoutIntent = new Intent();
-                workout.setIdWorkout(id_workout);
-                newManualWorkoutIntent.putExtra(KeysIntent.NEW_WORKOUT_MANUAL, workout);
-                setResult(RESULT_OK, newManualWorkoutIntent);
-                finish();
-            }
+            int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
+            // save and send to workouts list
+            final Intent newManualWorkoutIntent = new Intent();
+            workout.setIdWorkout(id_workout);
+            newManualWorkoutIntent.putExtra(KeysIntent.NEW_WORKOUT_MANUAL, workout);
+            setResult(RESULT_OK, newManualWorkoutIntent);
+            finish();
+
         } catch (JSONException e) {
-           Log.e(TAG, e.getMessage());
+           e.printStackTrace();
         }
     }
 

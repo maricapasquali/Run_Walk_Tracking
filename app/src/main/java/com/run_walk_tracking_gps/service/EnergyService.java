@@ -2,10 +2,8 @@ package com.run_walk_tracking_gps.service;
 
 import android.content.Context;
 
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-
-import org.json.JSONException;
 
 public class EnergyService implements WorkoutServiceHandler.OnEnergyListener {
 

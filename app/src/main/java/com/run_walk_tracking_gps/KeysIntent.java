@@ -1,4 +1,4 @@
-package com.run_walk_tracking_gps.intent;
+package com.run_walk_tracking_gps;
 
 public class KeysIntent {
 
@@ -22,7 +22,6 @@ public class KeysIntent {
 
     public final static String ID_USER = "id_user";
     public final static String PROFILE = "Profile";
-    public final static String USER_INFO = "Info User";
     public final static String CHANGED_USER = "Changed User";
 
 

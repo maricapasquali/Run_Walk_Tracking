@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 

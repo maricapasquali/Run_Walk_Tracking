@@ -16,13 +16,14 @@ import com.android.volley.Response;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DurationDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 
 import org.json.JSONException;
@@ -171,29 +172,27 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
             }
 
             Log.d(TAG, bodyJson.toString());
-            if(!HttpRequest.requestUpdateWorkout(this, bodyJson, this))
-            {
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
+            HttpRequest.requestUpdateWorkout(this, bodyJson, this);
+
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response)){
-                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-            }else {
-                Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
-                Intent returnIntent = new Intent();
-                if(response.getBoolean(HttpRequest.Constant.UPDATE)){
-                    returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-                }
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
+
+            Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
+            Intent returnIntent = new Intent();
+            if(response.getBoolean(HttpRequest.Constant.UPDATE)){
+                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
             }
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

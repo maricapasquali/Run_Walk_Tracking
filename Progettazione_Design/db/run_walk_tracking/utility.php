@@ -37,6 +37,8 @@ define("IMG", "img_encode");
 define("USERNAME", "username");
 define("PASSWORD", "password");
 define("TOKEN", "token");
+
+define("REQUEST_PASSWORD_FORGOT_SEND", "request_password_forgot_send");
 // Workouts
 define("ID_WORKOUT", "id_workout");
 define("MAP_ROUTE", "map_route");

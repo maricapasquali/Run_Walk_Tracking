@@ -120,7 +120,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
        String id_user = Preferences.getIdUserLogged(getContext());
         if(!LocationUtilities.Request.setLocationOnOff(getContext(),Integer.valueOf(id_user), response -> {
             try {
-                if(HttpRequest.someError(response) || !response.getBoolean("update")){
+                if(HttpRequest.someError(response) || !response.getBoolean(HttpRequest.Constant.UPDATE)){
                     Toast.makeText(getContext(), response.toString(), Toast.LENGTH_LONG).show();
                 }else {
                     JSONObject appJson = Preferences.getAppJsonUserLogged(getContext(), id_user);

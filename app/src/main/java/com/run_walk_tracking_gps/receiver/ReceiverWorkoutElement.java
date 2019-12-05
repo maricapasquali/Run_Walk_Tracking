@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.service.NotificationWorkout;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 

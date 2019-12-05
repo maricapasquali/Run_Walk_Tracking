@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,6 +13,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
@@ -57,12 +57,12 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                     final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText().toString())
                                                                 .put(HttpRequest.Constant.PASSWORD, hash_password);
 
-                    if(!HttpRequest.requestSignIn(this, bodyJson, this)){
-                        Snackbar.make(findViewById(R.id.snake), R.string.internet_not_available, Snackbar.LENGTH_INDEFINITE).show();
-                    }
+                    HttpRequest.requestSignIn(this, bodyJson, this);
 
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
+                } catch (InternetNoAvailableException e) {
+                    e.alert();
                 }
             }
         });

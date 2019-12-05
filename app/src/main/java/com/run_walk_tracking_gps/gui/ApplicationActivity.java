@@ -15,7 +15,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
@@ -130,9 +130,9 @@ public class ApplicationActivity extends CommonActivity
     private void setTitleAndLogoActionBar(final Class fragment_class) {
         if(getSupportActionBar()!= null){
             getSupportActionBar().setLogo(fragment_class==HomeFragment.class ? R.drawable.ic_runtracking_light : 0);
-            getSupportActionBar().setTitle(fragment_class==HomeFragment.class ? R.string.app_name :
+            getSupportActionBar().setTitle("  " + getString(fragment_class==HomeFragment.class ? R.string.app_name :
                     fragment_class==WorkoutsFragment.class? R.string.workouts :
-                            R.string.statistics);
+                            R.string.statistics));
         }
     }
 

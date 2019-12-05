@@ -1,17 +1,16 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
@@ -83,11 +82,11 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
                             .put(HttpRequest.Constant.FILTER, filter)
                             .put(HttpRequest.Constant.VALUE, unit);
 
-                    if(!HttpRequest.requestUpdateSetting(this, bodyJson, this)){
-                        Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                    }
+                    HttpRequest.requestUpdateSetting(this, bodyJson, this);
                 } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
+                    e.printStackTrace();
+                } catch (InternetNoAvailableException e) {
+                    e.alert();
                 }
             }
 
@@ -98,14 +97,9 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response) || !(boolean)response.get(HttpRequest.Constant.UPDATE)){
-                Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-            }else {
-                 DefaultPreferencesUser.setUnitMeasure(this, filter, unit);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            DefaultPreferencesUser.setUnitMeasure(this, filter, unit);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
     }
 }

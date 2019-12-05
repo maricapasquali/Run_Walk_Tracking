@@ -10,7 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 
 
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
 

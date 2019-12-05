@@ -5,7 +5,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,11 +16,13 @@ import android.widget.Toast;
 import com.android.volley.Response;
 
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.run_walk_tracking_gps.controller.UserSingleton;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -142,9 +143,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
             Log.d(TAG, bodyJson.toString());
 
-            if(!HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog)){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
+            HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -152,6 +151,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 
@@ -247,20 +248,15 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
     @Override
     public void onResponse(JSONObject response) {
-        try {
-            if(HttpRequest.someError(response) || !(boolean)response.get("update")){
-                Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-            }else {
-                DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
 
-                final Intent returnIntent = new Intent();
-                returnIntent.putExtra(KeysIntent.CHANGED_USER, user);
-                setResult(RESULT_OK, returnIntent);
-                finish();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            //Log.e(TAG, e.getMessage());
-        }
+        DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
+
+        UserSingleton.getInstance().setUser(user);
+        Log.d(TAG, UserSingleton.getInstance().getUser().toString());
+
+        final Intent returnIntent = new Intent();
+        returnIntent.putExtra(KeysIntent.CHANGED_USER, user);
+        setResult(RESULT_OK, returnIntent);
+        finish();
     }
 }

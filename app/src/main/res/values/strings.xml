@@ -137,14 +137,16 @@
     <string name="correctly_sign_up">Registration successful! You will receive an email with a code.</string>
 
     <!-- Messaggi di errore -->
+    <string name="error">Error</string>
     <string name="not_correct_password">Incorrect password</string>
     <string name="workout_not_set_correctly">At least DAY, SPORT and DURATION must be set</string>
-    <string name="internet_not_available">Internet not available</string>
+    <string name="weight_not_set_correctly">WEIGHT and DATE must be set</string>
     <string name="not_empty">\u0020 can not be empty</string>
     <string name="user_not_set">User not set</string>
     <string name="account_not_checked">Account not verified!</string>
     <string name="uploadImageOk">Finished Image Compression</string>
-
+    <string name="internet_not_available_title">Mobile Data is Turned Off</string>
+    <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
 
     <!-- Da non TRADURRE -->
 

@@ -4,12 +4,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.KeysIntent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,12 +45,12 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
                     JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
                                                           .put(HttpRequest.Constant.TOKEN, token.getText().toString());
 
-                    if(!HttpRequest.requestFirstSignIn(this, bodyJson, this )){
-                        Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-                    }
+                    HttpRequest.requestFirstSignIn(this, bodyJson, this );
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                } catch (InternetNoAvailableException e) {
+                    e.alert();
                 }
             }
 

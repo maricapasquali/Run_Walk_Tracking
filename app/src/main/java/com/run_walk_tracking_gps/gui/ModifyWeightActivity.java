@@ -13,10 +13,12 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.exception.DataException;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
 import org.json.JSONException;
@@ -28,7 +30,7 @@ import java.util.stream.Stream;
 public class ModifyWeightActivity extends CommonActivity implements Response.Listener<JSONObject>{
 
     private static final String TAG = ModifyWeightActivity.class.getName();
-    private static final String UNSET = "Weight data doesn't correctly set !! ";
+
 
     private ListView listView;
 
@@ -103,7 +105,7 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                 case R.id.save_weight: {
                     try{
                         if(!statisticsData.isSet())
-                            throw new NullPointerException(UNSET);
+                            throw new DataException(this, StatisticsData.class);
 
                         if(!statisticsData.getValue().equals(oldStatisticsData.getValue())){
                             bodyJson.put(HttpRequest.Constant.VALUE, statisticsData.getValue());
@@ -114,16 +116,16 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                         }
                         Log.e(TAG, bodyJson.toString());
 
-                        if(!HttpRequest.requestUpdateWeight(this, bodyJson, this))
-                        {
-                            Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                        }
+                        HttpRequest.requestUpdateWeight(this, bodyJson, this);
 
                     }catch (NullPointerException e){
-                        Log.e(TAG, e.getMessage());
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }catch (JSONException je){
                         je.printStackTrace();
+                    } catch (InternetNoAvailableException e) {
+                        e.alert();
+                    } catch (DataException e) {
+                        e.alert();
                     }
                 }
                 break;
@@ -131,10 +133,12 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                     new AlertDialog.Builder(this)
                             .setMessage(R.string.delete_weight_mex)
                             .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                if(!HttpRequest.requestDeleteWeight(this, bodyJson, this))
-                                {
-                                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                                try {
+                                    HttpRequest.requestDeleteWeight(this, bodyJson, this);
+                                } catch (InternetNoAvailableException e) {
+                                    e.alert();
                                 }
+
                             }).setNegativeButton(R.string.cancel, null).create().show();
                 }
                 break;
@@ -150,26 +154,20 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
     @Override
     public void onResponse(JSONObject response) {
 
-            if(HttpRequest.someError(response)){
-                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-            }else {
-                final Intent modifyWeightIntent = new Intent();
-                Log.d(TAG, response.toString());
+        final Intent modifyWeightIntent = new Intent();
+        Log.d(TAG, response.toString());
 
-                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.UPDATE))){
-                    modifyWeightIntent.putExtra(KeysIntent.CHANGED_WEIGHT, statisticsData);
-                    Log.d(TAG, statisticsData.toString());
-                }
+        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.UPDATE))){
+            modifyWeightIntent.putExtra(KeysIntent.CHANGED_WEIGHT, statisticsData);
+            Log.d(TAG, statisticsData.toString());
+        }
 
-                if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.DELETE))){
-                    modifyWeightIntent.putExtra(KeysIntent.DELETE_WEIGHT, statisticsData.getId());
-                    Log.d(TAG, "Id to delete : " +statisticsData.getId());
-                }
+        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.DELETE))){
+            modifyWeightIntent.putExtra(KeysIntent.DELETE_WEIGHT, statisticsData.getId());
+            Log.d(TAG, "Id to delete : " +statisticsData.getId());
+        }
 
-                setResult(RESULT_OK, modifyWeightIntent);
-                finish();
-
-            }
-
+        setResult(RESULT_OK, modifyWeightIntent);
+        finish();
     }
 }

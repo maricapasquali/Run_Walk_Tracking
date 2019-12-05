@@ -2,25 +2,25 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.exception.DataException;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
 
@@ -32,7 +32,6 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
     private final static String TAG = NewWeightActivity.class.getName();
 
-    private final String UNSET = "Weight data doesn't correctly set !!";
     private StatisticsData statisticsData;
 
     public NewWeightActivity() {
@@ -79,41 +78,39 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
         try{
             if(!statisticsData.isSet())
-                throw new NullPointerException(UNSET);
-
+                throw new DataException(this, StatisticsData.class);
 
             final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                     .put(HttpRequest.Constant.VALUE, statisticsData.getValue())
                     .put(HttpRequest.Constant.DATE, statisticsData.getDate());
 
-            if(!HttpRequest.requestNewWeight(this, bodyJson, this)){
-                Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-            }
+            HttpRequest.requestNewWeight(this, bodyJson, this);
 
         }catch (NullPointerException e){
-            Log.d(TAG, e.getMessage());
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }catch (JSONException je){
             je.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
+        } catch (DataException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(HttpRequest.someError(response)){
-                Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-            }else {
-                int id_statistics = response.getInt(HttpRequest.Constant.ID_WEIGHT);
-                statisticsData.setId(id_statistics);
-                // save and send
-                final Intent newWeightIntent = new Intent();
-                newWeightIntent.putExtra(KeysIntent.NEW_WEIGHT, statisticsData);
-                setResult(RESULT_OK, newWeightIntent);
-                finish();
-            }
+
+            int id_statistics = response.getInt(HttpRequest.Constant.ID_WEIGHT);
+            statisticsData.setId(id_statistics);
+            // save and send
+            final Intent newWeightIntent = new Intent();
+            newWeightIntent.putExtra(KeysIntent.NEW_WEIGHT, statisticsData);
+            setResult(RESULT_OK, newWeightIntent);
+            finish();
+
         } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
         }
     }
 

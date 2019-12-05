@@ -12,15 +12,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.connectionserver.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.UserSingleton;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
@@ -50,6 +51,7 @@ public class UserActivity extends CommonActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
+
         setContentView(R.layout.activity_profile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -64,7 +66,7 @@ public class UserActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         if(getIntent()!=null){
-            setGui(getIntent().getParcelableExtra(KeysIntent.USER_INFO));
+            setGui(UserSingleton.getInstance().getUser());
             getSupportActionBar().setTitle(user.getUsername());
         }
     }
@@ -80,47 +82,47 @@ public class UserActivity extends CommonActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.profile_modify:{
-                //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, R.string.modify, Toast.LENGTH_LONG).show();
+                Log.d(TAG, getString(R.string.modify));
                 final Intent profileIntent = new Intent(this, ModifyUserActivity.class);
                 profileIntent.putExtra(KeysIntent.PROFILE, user);
                 startActivityForResult(profileIntent, REQUEST_MODIFY_PROFILE);
             }
             break;
             case R.id.profile_change_password:
-                Toast.makeText(this, getString(R.string.change_password), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, R.string.change_password, Toast.LENGTH_LONG).show();
+                Log.d(TAG, getString(R.string.change_password));
                 startActivity(new Intent(this, ChangePasswordActivity.class));
                 break;
             case R.id.delete_account: {
-                Toast.makeText(this, "delete", Toast.LENGTH_LONG).show();
+                Log.d(TAG, getString(R.string.delete_account));
+                //Toast.makeText(this, R.string.delete_account, Toast.LENGTH_LONG).show();
                 try {
                     final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER,  user.getIdUser());
-                    Log.e(TAG, bodyJson.toString());
 
-                    new AlertDialog.Builder(this).setMessage(R.string.delete_account_mex)
+                    new AlertDialog.Builder(this)
+                            .setMessage(R.string.delete_account_mex)
                             .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                if(!HttpRequest.requestDeleteUser(this, bodyJson, response -> {
-                                    try {
-                                        if(HttpRequest.someError(response) || !(boolean)response.get("delete")){
-                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                                        }else {
-                                            // CANCELLAZIONE PREFERENCES
-                                            DefaultPreferencesUser.deleteUser(this, String.valueOf(user.getIdUser()));
-                                            //EXIT
-                                            DefaultPreferencesUser.unSetUserLogged(this);
+                                try {
+                                    HttpRequest.requestDeleteUser(this, bodyJson, response -> {
+                                        // CANCELLAZIONE PREFERENCES
+                                        DefaultPreferencesUser.deleteUser(this, String.valueOf(user.getIdUser()));
+                                        //EXIT
+                                        DefaultPreferencesUser.unSetUserLogged(this);
 
-                                            final Intent intent = new Intent(this, BootAppActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            startActivity(intent);
-                                            finish();
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                })){
-                                    Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
+                                        final Intent intent = new Intent(this, BootAppActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                        finish();
+
+                                    });
+                                } catch (InternetNoAvailableException e) {
+                                    e.alert();
                                 }
                             })
-                            .setNegativeButton(R.string.cancel, null).create().show();
+                            .setNegativeButton(R.string.cancel, null)
+                            .create()
+                            .show();
 
                 } catch (JSONException e) {
                     e.printStackTrace();

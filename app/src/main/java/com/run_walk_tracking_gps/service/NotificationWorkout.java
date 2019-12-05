@@ -18,7 +18,7 @@ import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
 public class NotificationWorkout {
 
-    public static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 1;
 
     // REQUEST
     private static final int REQUEST_CODE_RESUME = 5;

@@ -17,7 +17,7 @@ public class LocationUtilities {
     public static boolean isGpsEnable(Context context) {
         return ((LocationManager) context.getSystemService(Service.LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
-
+    // TODO: 12/5/2019 DA RIGUARDARE
     public static LocationRequest createLocationRequest() {
         return LocationRequest.create()
                               .setInterval(10000)

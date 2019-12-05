@@ -42,9 +42,7 @@ public final class DateHelper {
         return calendar;
     }
 
-    public Date parseShortToDate(String stringDate) throws ParseException {
-        return parseToDate(DateFormat.SHORT, stringDate);
-    }
+// FILTER
 
     public Pair<Date, Date> getRangeLastWeek(Date lastInsert){
         return getRangeOne(Calendar.DAY_OF_MONTH, lastInsert);
@@ -70,11 +68,12 @@ public final class DateHelper {
         return Pair.create(ago, lastInsert);
     }
 
-    /**
-     *
-     * @param dateWithTime to format
-     * @return date string short format with time
-     */
+// FORMATTER
+
+    public Date parseShortToDate(String stringDate) throws ParseException {
+        return parseToDate(DateFormat.SHORT, stringDate);
+    }
+
     public String parseShortToString(Date dateWithTime){
         if(dateWithTime==null) return "";
         final Calendar c = (Calendar)getCalendar().clone();
@@ -101,10 +100,6 @@ public final class DateHelper {
         return c.getTime();
     }
 
-    public String getMonth(int month){
-        return (new DateFormatSymbols(locale).getMonths()[month-1]).toUpperCase();
-    }
-
     public String parseFullToString(Date date){
         if(date==null) return "";
         return DateFormat.getDateInstance(DateFormat.FULL, locale).format(date);
@@ -117,6 +112,12 @@ public final class DateHelper {
 
     public String parseToString(int style, Date date) {
         return DateFormat.getDateInstance(style, locale).format(date);
+    }
+
+// GETTER
+
+    public String getMonth(int month){
+        return (new DateFormatSymbols(locale).getMonths()[month-1]).toUpperCase();
     }
 
     public int getHour() {

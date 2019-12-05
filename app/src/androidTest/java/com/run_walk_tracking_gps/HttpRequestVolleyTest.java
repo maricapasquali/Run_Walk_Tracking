@@ -21,7 +21,8 @@ import java.util.Locale;
 
 public class HttpRequestVolleyTest {
 
-    final Context context = InstrumentationRegistry.getTargetContext();
+    private final static String ERROR ="Error";
+    private final Context context = InstrumentationRegistry.getTargetContext();
     private static final String TAG = HttpRequestVolleyTest.class.getName();
     @Test
     public void requestSignUpVolley(){
@@ -44,9 +45,7 @@ public class HttpRequestVolleyTest {
             bodyJson.put( HttpRequest.Constant.USERNAME, "cacjas");
             bodyJson.put( HttpRequest.Constant.PASSWORD, CryptographicHashFunctions.md5("fino"));
 
-            if(!HttpRequest.requestSignUp(context, bodyJson, this::responseServer)){
-                Log.e(TAG, context.getString(R.string.internet_not_available));
-            }
+            HttpRequest.requestSignUp(context, bodyJson, this::responseServer);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
@@ -67,21 +66,6 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    @Test
-    public void requestUserInfoVolley(){
-
-
-        final JSONObject bodyJson = new JSONObject();
-        try {
-            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
-            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
-
-            HttpRequest.requestUserInformation(context, bodyJson, this::responseServer);
-
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-        }
-    }
 
     @Test
     public void requestUpdateUserInfoVolley(){
@@ -149,23 +133,6 @@ public class HttpRequestVolleyTest {
     }
 
 
-    @Test
-    public void requestAllWorkoutsVolley(){
-
-
-        final JSONObject bodyJson = new JSONObject();
-        try {
-
-            //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
-            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
-
-            HttpRequest.requestWorkouts(context, bodyJson, this::responseServer);
-
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-        }
-    }
-
    @Test
     public void requestNewWorkoutVolley(){
 
@@ -220,23 +187,6 @@ public class HttpRequestVolleyTest {
         }
     }
 
-    @Test
-    public void requestStatisticsVolley(){
-
-
-        final JSONObject bodyJson = new JSONObject();
-        try {
-
-            bodyJson.put( HttpRequest.Constant.FILTER, "weight");
-            bodyJson.put( HttpRequest.Constant.ID_USER, 27);
-            //bodyJson.put( HttpRequest.Constant.DISTANCE, 7.0);
-
-            HttpRequest.requestStatistics(context, bodyJson, this::responseServer);
-
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-        }
-    }
 
     @Test
     public void requestNewWeightVolley(){
@@ -294,7 +244,7 @@ public class HttpRequestVolleyTest {
 
     private void responseServer(final JSONObject response){
         try {
-            if(response.get(HttpRequest.ERROR)!=null) Log.e(TAG, response.toString());
+            if(response.get(ERROR)!=null) Log.e(TAG, response.toString());
         }catch (JSONException e){
             Log.d(TAG, response.toString());
         }

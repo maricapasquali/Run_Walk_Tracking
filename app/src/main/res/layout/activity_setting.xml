@@ -27,6 +27,7 @@
                 android:paddingStart="10dp"
                 android:paddingEnd="0dp"
                 android:text="@string/sport"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <Spinner
@@ -47,6 +48,7 @@
                 android:paddingStart="10dp"
                 android:paddingEnd="0dp"
                 android:text="@string/target"
+                android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
             <Spinner
@@ -442,11 +444,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/snake"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
     </RelativeLayout>
 
 

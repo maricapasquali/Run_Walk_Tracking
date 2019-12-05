@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -16,7 +15,8 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.intent.KeysIntent;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.task.CompressionBitMap;
 import com.run_walk_tracking_gps.R;
@@ -35,10 +35,10 @@ import java.util.concurrent.ExecutionException;
 
 public class SignUpActivity extends CommonActivity
         implements PersonalDataFragment.PersonalDataListener,
-                                       PhysicalDataFragment.PhysicalDataListener,
-                                       AccessDataFragment.AccessDataListener,
-                                       Response.Listener<JSONObject>,
-                                       PersonalDataFragment.ImagePickerHandlerListener {
+                   PhysicalDataFragment.PhysicalDataListener,
+                   AccessDataFragment.AccessDataListener,
+                   Response.Listener<JSONObject>,
+                   PersonalDataFragment.ImagePickerHandlerListener {
 
     private static final String TAG = SignUpActivity.class.getName();
 
@@ -120,7 +120,8 @@ public class SignUpActivity extends CommonActivity
             }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
-           // if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)                getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+           // if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)
+            //      getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -151,34 +152,30 @@ public class SignUpActivity extends CommonActivity
             user.put(HttpRequest.Constant.LANGUAGE, getString(Language.defaultForUser(this).getCode()));
             Log.d(TAG, user.toString());
 
-            if(!HttpRequest.requestSignUp(this, user,this))
-                Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+            HttpRequest.requestSignUp(this, user,this);
 
         }catch (JSONException je){
-            Log.e(TAG, je.getMessage());
+            je.printStackTrace();
         }catch (NullPointerException e){
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
     }
 
     @Override
     public void onResponse(JSONObject response) {
 
-        if(HttpRequest.someError(response)){
-            Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_LONG).show();
-            Log.e(TAG, response.toString());
-        } else{
-            // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GIUSTO
-            //Toast.makeText(this, getString(R.string.correctly_sign_up), Toast.LENGTH_LONG).show();
-            //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
-            try {
-                final Intent intent = new Intent(this, TokenActivity.class);
-                intent.putExtra(KeysIntent.ID_USER, response.getInt(HttpRequest.Constant.ID_USER));
-                startActivity(intent);
-                finish();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        // TODO: 10/26/2019 ??? NOTIFICA PUSH OPPURE SNAKE INDEFINITO E AGGIUNGO IL FRAGMENT PER INSERIRE IL TOKEN ->POI ACCEDO SE è GIUSTO
+        //Toast.makeText(this, getString(R.string.correctly_sign_up), Toast.LENGTH_LONG).show();
+        //Snackbar.make(findViewById(R.id.snake), response.toString(), Snackbar.LENGTH_INDEFINITE).show();
+        try {
+            final Intent intent = new Intent(this, TokenActivity.class);
+            intent.putExtra(KeysIntent.ID_USER, response.getInt(HttpRequest.Constant.ID_USER));
+            startActivity(intent);
+            finish();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
