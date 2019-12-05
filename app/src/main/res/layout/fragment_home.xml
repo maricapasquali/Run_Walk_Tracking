@@ -253,7 +253,7 @@
         android:focusable="true"
         android:padding="10dp"
         android:visibility="gone"
-        app:backgroundTint="@android:color/darker_gray"
+        app:backgroundTint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/ic_locked" />
 
     <LinearLayout
@@ -268,18 +268,21 @@
         android:orientation="horizontal"
         android:visibility="visible">
 
-        <android.support.design.widget.FloatingActionButton
+        <com.ncorti.slidetoact.SlideToActView
             android:id="@+id/unlock_screen"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="@string/unlock_screen"
-            android:focusable="true"
-            android:padding="10dp"
+            android:elevation="6dp"
             android:visibility="gone"
-            app:backgroundTint="@android:color/darker_gray"
-            app:srcCompat="@drawable/ic_unlocked" />
+            app:area_margin="0dp"
+            app:border_radius="25dp"
+            app:inner_color="@color/colorPrimaryDark"
+            app:outer_color="@color/colorPrimary"
+            app:slider_height="55dp"
+            app:slider_icon="@drawable/ic_unlocked"
+            app:text="@string/unlock_screen"
+            app:text_size="15sp" />
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/start_workout"

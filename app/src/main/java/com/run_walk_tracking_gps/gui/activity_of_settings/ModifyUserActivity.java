@@ -164,7 +164,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 Log.e(TAG, "SALVA MODIFICHE");
                 RequestDialog dialog = RequestDialog.create(ModifyUserActivity.this);
                 dialog.show();
-                Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
+
                 user.setName(name.getText().toString());
                 user.setLastName(lastName.getText().toString());
                 user.setEmail(email.getText().toString());
@@ -190,9 +190,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             imagePicker = new ImagePicker(this,
                     null ,
                     imageUri -> {
+
                         img.setImageURI(imageUri);
-                        async = CompressionBitMap.create();
-                        async.execute(((BitmapDrawable) img.getDrawable()).getBitmap());
+                        async = CompressionBitMap.create(this);
+                        async.execute(((BitmapDrawable)img.getDrawable()).getBitmap());
 
                     }).setWithImageCrop(1,1);
             imagePicker.choosePicture(true);

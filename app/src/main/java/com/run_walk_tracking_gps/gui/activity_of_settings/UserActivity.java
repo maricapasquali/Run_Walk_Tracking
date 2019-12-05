@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
@@ -66,11 +68,13 @@ public class UserActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         if(getIntent()!=null){
-            setGui(UserSingleton.getInstance().getUser());
-            getSupportActionBar().setTitle(user.getUsername());
+            user = UserSingleton.getInstance().getUser();
+            if(user!=null){
+                setGui(user);
+                getSupportActionBar().setTitle(user.getUsername());
+            }
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,6 +153,11 @@ public class UserActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
+
+        findViewById(R.id.profile_img).setOnClickListener(v ->{
+            ImageView i = (ImageView)v;
+            ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

@@ -23,7 +23,7 @@ public class DataException extends AbstractException {
 
     @Override
     public void alert() {
-        Log.e(getContext().getPackageName(), getContext().getString(R.string.internet_not_available_title));
+        Log.e(getContext().getPackageName(), getMessage());
         new AlertDialog.Builder(getContext())
                         .setTitle(R.string.info)
                         .setMessage(getMessage())

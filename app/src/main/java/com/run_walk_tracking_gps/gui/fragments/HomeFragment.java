@@ -17,8 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.ncorti.slidetoact.SlideToActView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
@@ -47,7 +49,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     private static FloatingActionButton restart;
     private static FloatingActionButton stop;
     private FloatingActionButton block_screen;
-    private FloatingActionButton unlock_screen;
+    private SlideToActView unlock_screen;
     private TextView workout_duration;
     private TextView workout_distance;
     private TextView workout_energy;
@@ -59,6 +61,8 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
 
     private Workout workout;
     private WorkoutServiceHandler workoutService;
+
+
 
      public static HomeFragment createWithArgument(double w) {
         final HomeFragment homeFragment = new HomeFragment();
@@ -150,18 +154,23 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
          sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
     }
 
+
     @SuppressLint("RestrictedApi")
     private void setListener() {
 
-        start.setOnClickListener(v -> {
-            getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
-            v.setVisibility(View.GONE);
-            block_screen.setVisibility(View.VISIBLE);
-            pause.setVisibility(View.VISIBLE);
+        start.setOnClickListener(v ->
+                DelayedStartWorkoutDialog.create(getContext(), () -> {
 
-            //START SERVICE
-            workoutService.start();
-        });
+                    getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+                    start.setVisibility(View.GONE);
+                    block_screen.setVisibility(View.VISIBLE);
+                    pause.setVisibility(View.VISIBLE);
+
+                    //START SERVICE
+                    workoutService.start();
+
+                }).show()
+        );
 
         pause.setOnClickListener(v -> {
             v.setVisibility(View.GONE);
@@ -208,7 +217,9 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             workoutService.block();
         });
 
-        unlock_screen.setOnClickListener(v -> {
+        unlock_screen.setOnSlideCompleteListener(v ->{
+            v.resetSlider();
+
             v.setVisibility(View.GONE);
             pause.setVisibility(View.VISIBLE);
             block_screen.setVisibility(View.VISIBLE);
@@ -216,6 +227,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
             workoutService.unblock();
         });
+
     }
 
     private void setClickable(final boolean is) {

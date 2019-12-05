@@ -11,14 +11,12 @@ class SettingsDao{
 
       $sport = self::getDefault(SPORT, $id_user);
       $target = self::getDefault(TARGET, $id_user);
-      $language = self::getDefault(LANGUAGE, $id_user);
 
       $unit_measure = self::getUnitMeaureDefaultForUser($id_user);
     }
     closeConnection();
     return array(SPORT=>$sport[SPORT],
                  TARGET=>$target[TARGET],
-                 LANGUAGE=> $language[LANGUAGE],
                  UNIT_MEASURE => $unit_measure);
   }
 
@@ -36,11 +34,6 @@ class SettingsDao{
 
   private function getDefault($type, $id_user){
 
-    /*if($type==LANGUAGE || $type==TARGET){
-          $sql =  "SELECT $type FROM ".$type."_default WHERE id_user=?;";
-    }else{
-      $sql = "SELECT t.* FROM ".$type."_default td JOIN ".$type." t on(td.".$type."=t.id_".$type.") WHERE id_user=?;";
-    }*/
     $sql =  "SELECT $type FROM ".$type."_default WHERE id_user=?;";
     $stmt = getConnection()->prepare($sql);
     if(!$stmt) throw new Exception("default $type : Preparazione fallita. Errore: ". getErrorConnection());
@@ -61,10 +54,6 @@ class SettingsDao{
 
   static function updateTargetFor($val, $id_user){
     return self::updateDeafult(TARGET, $val, $id_user);
-  }
-
-  static function updateLanguageFor($val, $id_user){
-    return self::updateDeafult(LANGUAGE, $val, $id_user);
   }
 
   static function updateUnitHeightFor($val, $id_user){

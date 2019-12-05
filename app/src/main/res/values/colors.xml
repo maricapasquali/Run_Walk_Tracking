@@ -17,4 +17,6 @@
     <color name="pauseBtn">#bf9000</color>
     <color name="RestartBtn">#93c47d</color>
     <color name="stopBtn">#cc0000</color>
+
+    <color name="overlay">#80333333</color>
 </resources>

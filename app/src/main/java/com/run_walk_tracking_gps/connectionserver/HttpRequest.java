@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.connectionserver;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -84,12 +85,11 @@ public class HttpRequest {
         public static final String UNIT_MEASURE ="unit_measure";
 
         public static final String ENERGY = "energy";
-        public static final String LANGUAGE = "language";
 
         //ACCOUNT
         private static List<String> fieldRequiredForSignUp(){
             return Arrays.asList(NAME, LAST_NAME, GENDER, BIRTH_DATE, EMAIL,
-                            CITY,PHONE,HEIGHT, LANGUAGE, TARGET, WEIGHT,
+                            CITY,PHONE,HEIGHT, TARGET, WEIGHT,
                             USERNAME, PASSWORD);
         }
 
@@ -195,12 +195,12 @@ public class HttpRequest {
     private static final String DELETE_WEIGHT = STATISTICS + "delete_weight.php";
 
 
-    private static boolean someError(JSONObject response){
+    /*private static boolean someError(JSONObject response){
         return Stream.of(response.keys()).anyMatch(i -> i.next().equals(Constant.ERROR));
-    }
+    }*/
 
     // ACCOUNT
-    public static boolean requestSignUp(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestSignUp(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
 
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
@@ -210,20 +210,20 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, SIGN_UP, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestSignIn(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestSignIn(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForSignIn());
         return HttpRequest.requestJsonPostToServerVolley(context, SIGN_IN, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestFirstSignIn(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestFirstSignIn(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForFirstSignIn());
         return HttpRequest.requestJsonPostToServerVolley(context, FIRST_SIGN_IN, bodyJson,responseJsonListener);
     }
 
 
-    public static boolean requestDataAfterAccess(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDataAfterAccess(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForImgProfile());
         return HttpRequest.requestJsonToServerVolleyWithoutProgressBar(context, DATA_AFTER_ACCESS, Request.Method.POST, bodyJson,responseJsonListener);
@@ -248,33 +248,33 @@ public class HttpRequest {
         return !errRequest.get();
     }
 
-    public static boolean requestForgotPassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestForgotPassword(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson, HttpRequest.Constant.fieldRequiredForForgotPassword());
         return HttpRequest.requestJsonPostToServerVolley(context, FORGOT_PASSWORD, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestUpdatePassword(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestUpdatePassword(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForUpdatePassword());
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_PASSWORD, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestDeleteUser(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDeleteUser(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson, HttpRequest.Constant.fieldRequiredForDeleteUser());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_USER, bodyJson,responseJsonListener);
     }
 
     // SETTINGS
-    public static boolean requestUpdateSetting(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestUpdateSetting(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  HttpRequest.Constant.fieldRequiredForUpdateSetting());
             return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_SETTING, bodyJson,responseJsonListener);
     }
 
     // WORKOUTS
-    public static boolean requestNewWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestNewWorkout(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
         final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForNewWorkout();
@@ -282,7 +282,7 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, NEW_WORKOUT, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestUpdateWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestUpdateWorkout(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
         final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForUpdateWorkout();
@@ -290,7 +290,7 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_WORKOUT, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestDeleteWorkout(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDeleteWorkout(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForDeleteWorkout());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_WORKOUT, bodyJson,responseJsonListener);
@@ -298,13 +298,13 @@ public class HttpRequest {
 
     // STATISTICS
 
-    public static boolean requestNewWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestNewWeight(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForNewWeight());
         return HttpRequest.requestJsonPostToServerVolley(context, NEW_WEIGHT, bodyJson, responseJsonListener);
     }
 
-    public static boolean requestUpdateWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestUpdateWeight(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
         final List<String> fieldSupported =  HttpRequest.Constant.fieldSupportedForUpdateWeight();
@@ -312,7 +312,7 @@ public class HttpRequest {
         return HttpRequest.requestJsonPostToServerVolley(context, UPDATE_WEIGHT, bodyJson,responseJsonListener);
     }
 
-    public static boolean requestDeleteWeight(Context context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+    public static boolean requestDeleteWeight(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
         check(bodyJson,  HttpRequest.Constant.fieldRequiredForDeleteWeight());
         return HttpRequest.requestJsonPostToServerVolley(context, DELETE_WEIGHT, bodyJson,responseJsonListener);
@@ -347,34 +347,27 @@ public class HttpRequest {
         return activeNetwork!=null && activeNetwork.isConnected();
     }
 
-    private static boolean requestJsonGetToServerVolley(final Context context, final String url, final JSONObject bodyJson,
-                                                       Response.Listener<JSONObject> listenerResponse)
-            throws InternetNoAvailableException {
-
-        return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.GET, bodyJson, listenerResponse);
-    }
-
-    private static boolean requestJsonPostToServerVolley(final Context context, final String url, final JSONObject bodyJson,
+    private static boolean requestJsonPostToServerVolley(final Activity context, final String url, final JSONObject bodyJson,
                                                          final Response.Listener<JSONObject> listenerResponse)
             throws InternetNoAvailableException {
 
         return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
     }
 
-    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method,
+    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Activity context, final String url, final int method,
                                                                        final JSONObject bodyJson,
                                                                        final Response.Listener<JSONObject> listenerResponse)
             throws InternetNoAvailableException {
         return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, false);
     }
 
-    private static boolean requestJsonToServerVolleyWithProgressBar(final Context context, final String url, final int method, final JSONObject bodyJson,
+    private static boolean requestJsonToServerVolleyWithProgressBar(final Activity context, final String url, final int method, final JSONObject bodyJson,
                                                                     final Response.Listener<JSONObject> listenerResponse)
             throws InternetNoAvailableException {
         return  requestJsonToServerVolley(context, url, method, bodyJson,listenerResponse, true);
     }
 
-    private static boolean requestJsonToServerVolley(final Context context, final String url, final int method, final JSONObject bodyJson,
+    private static boolean requestJsonToServerVolley(final Activity context, final String url, final int method, final JSONObject bodyJson,
                                                      final Response.Listener<JSONObject> listenerResponse, final boolean withProgressBar)
             throws InternetNoAvailableException {
         if(!isNetWorkAvailable(context)) throw new InternetNoAvailableException(context);
@@ -399,7 +392,8 @@ public class HttpRequest {
             Log.d(TAG, "onResponse");
             try {
                 JSONObject JSONResponse = new JSONObject(response);
-                if(HttpRequest.someError(JSONResponse))
+
+                if(JSONResponse.has(Constant.ERROR))
                     throw new SomeErrorHttpException(context, JSONResponse.getString(Constant.ERROR));
 
                 responseJsonListener.onResponse(JSONResponse);

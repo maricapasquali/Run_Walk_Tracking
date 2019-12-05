@@ -51,6 +51,10 @@ public class Measure implements Parcelable {
         public String getString() {
             return this.str;
         }
+
+        public static Unit of(String str){
+            return Stream.of(values()).filter(u -> u.str.equals(str)).findFirst().orElse(null);
+        }
     }
 
     public enum Type {

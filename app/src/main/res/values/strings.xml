@@ -2,14 +2,8 @@
 <resources>
 
     <string name="cancel">Cancel</string>
-    <string name="loading">Loading ...</string>
-
-    <!-- Language -->
-    <string-array name="language">
-        <item name="english">English</item>
-        <item name="italian">Italian</item>
-        <item name="spanish">Spanish</item>
-    </string-array>
+    <string name="saving">Saving ...</string>
+    <string name="request">Request ...</string>
 
     <!-- BootApp -->
     <string name="rec">Sign Up</string>
@@ -123,12 +117,15 @@
 
     <!-- Informazioni account -->
     <string name="info_description">
-        <i>Run/Walk Tracking</i> is an innovative suite of applications, products and services
-        that track and manage health and fitness data to motivate individuals to keep fit and
-        improve their personal well-being.
+        <b>Supported languages</b>:\n
+        <string-array name="language">- <item name="english">English</item>,\n
+            - <item name="italian">Italian</item>,\n
+            - <item name="spanish">Spanish</item>
+        </string-array>
     </string>
 
     <!-- Messaggi di info -->
+
     <string name="delete_account_mex">Are you sure to cancel the account?</string>
     <string name="password_request_success">You will receive an email with the link.</string>
     <string name="gps_disabled">GPS seems to be disabled, do you want to activate it?</string>
@@ -144,7 +141,8 @@
     <string name="not_empty">\u0020 can not be empty</string>
     <string name="user_not_set">User not set</string>
     <string name="account_not_checked">Account not verified!</string>
-    <string name="uploadImageOk">Finished Image Compression</string>
+    <string name="start_compression_image">Started Image Compression</string>
+    <string name="end_compression_image">Finished Image Compression</string>
     <string name="internet_not_available_title">Mobile Data is Turned Off</string>
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
 

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -40,7 +41,6 @@ public class SettingActivity extends CommonActivity {
     private Switch locationOnOff;
     private LinearLayout location;
     private LinearLayout unit;
-    private LinearLayout language;
 
     private LinearLayout playlist;
     private LinearLayout coach;
@@ -71,7 +71,6 @@ public class SettingActivity extends CommonActivity {
         locationOnOff = findViewById(R.id.location_on_off);
         location = findViewById(R.id.location);
         unit = findViewById(R.id.unit);
-        language = findViewById(R.id.language);
 
         playlist = findViewById(R.id.playlist);
         coach = findViewById(R.id.voacal_coach);
@@ -149,44 +148,6 @@ public class SettingActivity extends CommonActivity {
         });
 
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-/*      language.setOnClickListener(v -> {
-
-            Log.e("Language", "Language default: " + Language.defaultForUser(this));
-            LanguageDialog.create(this, Language.defaultForUser(this),
-                        (val, description) -> {
-                            try {
-                                Log.e("Language", "Language : " + val + ", string : " + description);
-                                final Configuration newConfiguration = Language.Utilities.changeConfiguration(SettingActivity.this, val);
-                                Preferences.setLanguage(SettingActivity.this, getString(val.getCode()));
-
-                                try {
-                                    JSONObject bodyJson = new JSONObject()
-                                                            .put(FieldDataBase.ID_USER.toName(), Integer.valueOf(id_user))
-                                                            .put(FieldDataBase.FILTER.toName(), FieldDataBase.LANGUAGE.toName())
-                                                            .put(FieldDataBase.VALUE.toName(), Preferences.getLanguageDefault(this));
-
-                                    if (!HttpRequest.requestUpdateSetting(this, bodyJson, response -> {
-                                        if(HttpRequest.someError(response))
-                                            Toast.makeText(this, response.toString(), Toast.LENGTH_LONG).show();
-                                        else {
-
-                                            onConfigurationChanged(newConfiguration);
-                                            Log.d("Language", "Configuration : " + newConfiguration);
-                                        }
-
-                                    } )) {
-                                        Toast.makeText(this, R.string.internet_not_available, Toast.LENGTH_LONG).show();
-                                    }
-                                } catch (Exception e) {
-                                    Log.e(TAG, e.getMessage());
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-            }).show();
-        });
-*/
 
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
 

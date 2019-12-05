@@ -11,6 +11,11 @@ public abstract class AbstractException extends Exception {
     private String mex ;
     private Context context;
 
+    public AbstractException(Context context, int mex){
+        this(context);
+        setMessage(mex);
+    }
+
     public AbstractException(Context context, String mex){
         this(context);
         setMessage(mex);
@@ -41,7 +46,6 @@ public abstract class AbstractException extends Exception {
     public void setMessage(String mex) {
         this.mex = mex;
     }
-
 
     public abstract void alert();
 }

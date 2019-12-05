@@ -2,6 +2,8 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -131,10 +133,12 @@ public class WorkoutsFragment extends Fragment {
 
     private Drawable getDefaultGroupIndicator(){
         //obtain expandableListViewStyle  from theme
-        TypedArray expandableListViewStyle = getContext().getTheme().obtainStyledAttributes(new int[]{android.R.attr.expandableListViewStyle});
+        final TypedArray expandableListViewStyle = getContext().getTheme().obtainStyledAttributes(new int[]{android.R.attr.expandableListViewStyle});
         //obtain attr from style
-        TypedArray groupIndicator = getContext().getTheme().obtainStyledAttributes(expandableListViewStyle.getResourceId(0,0),new int[]{android.R.attr.groupIndicator});
-        return groupIndicator.getDrawable(0);
+        final TypedArray groupIndicator = getContext().getTheme().obtainStyledAttributes(expandableListViewStyle.getResourceId(0,0),new int[]{android.R.attr.groupIndicator});
+        final Drawable indicator = groupIndicator.getDrawable(0);
+        indicator.setColorFilter(getContext().getColor(R.color.divColor), PorterDuff.Mode.MULTIPLY);
+        return indicator;
     }
 
     private void setAdapter(FilterTime filterTime){

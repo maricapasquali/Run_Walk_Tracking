@@ -185,7 +185,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     public void onResponse(JSONObject response) {
         try {
 
-            Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
             Intent returnIntent = new Intent();
             if(response.getBoolean(HttpRequest.Constant.UPDATE)){
                 returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);

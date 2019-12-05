@@ -30,7 +30,6 @@ define("EMAIL", "email");
 define("CITY", "city");
 define("PHONE", "phone");
 define("HEIGHT", "height");
-define("LANGUAGE", "language");
 define("TARGET", "target");
 define("WEIGHT", "weight");
 define("IMG", "img_encode");

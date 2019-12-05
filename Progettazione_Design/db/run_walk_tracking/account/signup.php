@@ -12,7 +12,6 @@ try{
      !isset($new_user[CITY]) ||
      !isset($new_user[PHONE]) ||
      !isset($new_user[HEIGHT]) ||
-     !isset($new_user[LANGUAGE]) ||
      !isset($new_user[TARGET]) ||
      !isset($new_user[WEIGHT]) ||
      !isset($new_user[USERNAME]) ||
@@ -35,7 +34,6 @@ INPUT
     "city": "Milano",
     "phone": "3333333333",
     "height": 1.55,
-    "language": "Italiana",
     "target": 2,
     "weight": 70.5,
     "username": "mariabianchi$1",

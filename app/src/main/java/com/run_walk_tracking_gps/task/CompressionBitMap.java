@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.task;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,16 +15,20 @@ import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 public class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
     private static final String TAG = CompressionBitMap.class.getName();
 
-    private CompressionBitMap(){}
+    private Context context;
+    private CompressionBitMap(Context context){
+        this.context = context;
+    }
 
-    public static CompressionBitMap create(){
-        return new CompressionBitMap();
+    public static CompressionBitMap create(Context context){
+        return new CompressionBitMap(context);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         Log.d(TAG, "Start Compression");
+        Toast.makeText(context, R.string.start_compression_image, Toast.LENGTH_LONG).show();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -43,5 +48,6 @@ public class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
     protected void onPostExecute(String image_encode) {
         super.onPostExecute(image_encode);
         Log.d(TAG, "End Compression");
+        Toast.makeText(context, R.string.end_compression_image, Toast.LENGTH_LONG).show();
     }
 }

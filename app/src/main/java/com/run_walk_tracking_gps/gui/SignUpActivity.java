@@ -102,7 +102,6 @@ public class SignUpActivity extends CommonActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        //Log.d(TAG, "Back :Fragment (Index) = " + fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG)));
         next.setVisible(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=ACCESS_DATA);
     }
 
@@ -120,8 +119,8 @@ public class SignUpActivity extends CommonActivity
             }
             Log.d(TAG, user.toString());
         }catch (NullPointerException e){
-           // if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)
-            //      getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            if(getSupportFragmentManager().findFragmentByTag(TAG) instanceof PhysicalDataFragment)
+               getSupportFragmentManager().popBackStack(fragmentSignUp.get(PHYSICAL_DATA).getClass().getName(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -149,7 +148,6 @@ public class SignUpActivity extends CommonActivity
     public void accessData(JSONObject jsonAccess) {
         try{
             user = JSONUtilities.merge(user, jsonAccess);
-            user.put(HttpRequest.Constant.LANGUAGE, getString(Language.defaultForUser(this).getCode()));
             Log.d(TAG, user.toString());
 
             HttpRequest.requestSignUp(this, user,this);
@@ -204,7 +202,7 @@ public class SignUpActivity extends CommonActivity
                     imageView.setImageURI(imageUri);
                     Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
-                    async = CompressionBitMap.create();
+                    async = CompressionBitMap.create(this);
                     async.execute(bitmap);
 
                 }).setWithImageCrop(1,1);

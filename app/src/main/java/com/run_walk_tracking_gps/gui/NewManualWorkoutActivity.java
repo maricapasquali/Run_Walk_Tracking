@@ -65,7 +65,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
                 SportDialog.create(NewManualWorkoutActivity.this, detail.getText(), (val, description) -> {
                     detail.setText(val.getStrId());
                     detail.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null, null);
-                    Toast.makeText(NewManualWorkoutActivity.this, description, Toast.LENGTH_SHORT).show();
+
                     workout.setSport(val);
                 }).show();
                 break;
@@ -108,7 +108,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
     public void onClickAddInfo() {
         // Set workout
         try{
-            Log.e(TAG, "" +workout.getDistance().getValue(false));
+            Log.d(TAG, "" +workout.getDistance().getValue(false));
             if(!workout.isMinimalSet())
                 throw new DataException(this, Workout.class);
 
@@ -122,11 +122,6 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
 
             HttpRequest.requestNewWorkout(this, bodyJson, this);
 
-        }catch (NullPointerException e){
-            e.printStackTrace();
-            //Log.e(TAG, e.getMessage());
-            //new InfoA.Builder(this).setMessage(R.string.workout_not_set_correctly)
-            Toast.makeText(this, R.string.workout_not_set_correctly, Toast.LENGTH_LONG).show();
         }catch (JSONException je){
             je.printStackTrace();
         } catch (InternetNoAvailableException e) {

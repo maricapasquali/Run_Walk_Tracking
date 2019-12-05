@@ -14,9 +14,6 @@ try{
     case TARGET :
       print json_encode(SettingsDao::updateTargetFor($changed_setting[VALUE], $changed_setting[ID_USER]));
       break;
-    case LANGUAGE :
-      print json_encode(SettingsDao::updateLanguageFor($changed_setting[VALUE], $changed_setting[ID_USER]));
-      break;
     case DISTANCE :
       print json_encode(SettingsDao::updateUnitDistanceFor($changed_setting[VALUE],  $changed_setting[ID_USER]));
       break;

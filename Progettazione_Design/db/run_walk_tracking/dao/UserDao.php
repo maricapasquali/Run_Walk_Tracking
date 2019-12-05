@@ -41,13 +41,6 @@ class UserDao {
           if(!$stmt->execute()) throw new Exception("Target : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
 
-          $stmt = getConnection()->prepare("INSERT INTO language_default(id_user, language) VALUES (?, ?)");
-          if(!$stmt) throw new Exception("Language : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("is", $id,$language);
-          $language = $user[LANGUAGE];
-          if(!$stmt->execute()) throw new Exception("Language : Inserimento fallito. Errore: ". getErrorConnection());
-          $stmt->close();
-
 
           $stmt = getConnection()->prepare("INSERT INTO weight(id_user, date, value) VALUES (?, CURRENT_DATE, ?)");
           if(!$stmt) throw new Exception("Weight : Preparazione fallita. Errore: ". getErrorConnection());

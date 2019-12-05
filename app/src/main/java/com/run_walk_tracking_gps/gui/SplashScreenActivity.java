@@ -69,8 +69,7 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
 
     public static boolean dataAccessResponse(final Context context, final JSONObject response){
         try {
-            if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.FIRST_LOGIN))
-                    && response.getBoolean(HttpRequest.Constant.FIRST_LOGIN)){
+            if(response.has(HttpRequest.Constant.FIRST_LOGIN) && response.getBoolean(HttpRequest.Constant.FIRST_LOGIN)){
 
                 final Intent intent = new Intent(context, TokenActivity.class);
                 intent.putExtra(HttpRequest.Constant.ID_USER, response.getInt(HttpRequest.Constant.ID_USER));

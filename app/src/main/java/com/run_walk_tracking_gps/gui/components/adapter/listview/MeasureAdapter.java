@@ -3,17 +3,23 @@ package com.run_walk_tracking_gps.gui.components.adapter.listview;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -21,14 +27,17 @@ import java.util.Map;
 
 public class MeasureAdapter extends BaseAdapter {
 
+    private static final String TAG = MeasureAdapter.class.getName();
+
     private Context context;
-    private static RadioGroup.OnCheckedChangeListener listener;
 
     private LinkedHashMap<Measure.Type, Measure.Unit> defaultMeasure;
 
-    public MeasureAdapter(Context context, RadioGroup.OnCheckedChangeListener listener, LinkedHashMap<Measure.Type, Measure.Unit> defaultMeasure) {
+    private OnCheckNewMeasureListener onCheckNewMeasureListener;
+
+    public MeasureAdapter(Context context, OnCheckNewMeasureListener onCheckNewMeasureListener, LinkedHashMap<Measure.Type, Measure.Unit> defaultMeasure) {
         this.context = context;
-        MeasureAdapter.listener = listener;
+        this.onCheckNewMeasureListener = onCheckNewMeasureListener;
         this.defaultMeasure = defaultMeasure;
     }
 
@@ -61,18 +70,14 @@ public class MeasureAdapter extends BaseAdapter {
             final TextView textViewMeasure = view.findViewById(R.id.measure);
             final RadioButton unit_1 = view.findViewById(R.id.unit_1);
             final RadioButton unit_2 = view.findViewById(R.id.unit_2);
-            final RadioGroup choose_unit = (RadioGroup) view.findViewById(R.id.choose_unit);
 
-            viewHolder = new ListHolder(textViewMeasure, unit_1, unit_2, choose_unit);
+            viewHolder = new ListHolder(textViewMeasure, unit_1, unit_2);
 
             view.setTag(viewHolder);
         } else {
-
             view = convertView;
-
             viewHolder = (ListHolder) convertView.getTag();
         }
-
 
         viewHolder.textViewMeasure.setText(measure.getStrId());
         viewHolder.textViewMeasure.setCompoundDrawablesWithIntrinsicBounds(
@@ -91,21 +96,55 @@ public class MeasureAdapter extends BaseAdapter {
                 viewHolder.unit_2.setChecked(true);
             }
         }
+
+        if(convertView==null){
+            final RadioGroup choose_unit = (RadioGroup) view.findViewById(R.id.choose_unit);
+            choose_unit.setOnCheckedChangeListener((group, checkedId) -> {
+                Log.d(TAG, "setOnCheckedChangeListener");
+
+                final String measureS = viewHolder.textViewMeasure.getText().toString();
+                final Measure.Type type = (Measure.Type) EnumUtilities.getEnumFromString(Measure.Type.class, context, measureS);
+
+                if(type!=null){
+                    Measure.Unit unitChecked;
+                    switch (checkedId){
+                        case R.id.unit_1:
+                            unitChecked = Measure.Unit.of(viewHolder.unit_1.getText().toString());
+                            break;
+                        case R.id.unit_2:
+                            unitChecked = Measure.Unit.of(viewHolder.unit_2.getText().toString());
+                            break;
+                        default:
+                            throw new IllegalArgumentException();
+                    }
+                    if(unitChecked!=null){
+                        Log.d(TAG, "Filter = "+ type.toString().toLowerCase() +", Value = "+unitChecked);
+                        onCheckNewMeasureListener.onCheckNewMeasure(type.toString().toLowerCase(), unitChecked);
+                    }
+                }
+            });
+        }
+
         return view;
     }
+
 
     private static class ListHolder {
 
         private TextView textViewMeasure;
+
         private RadioButton unit_1;
         private RadioButton unit_2;
 
-        private ListHolder(TextView textViewMeasure, RadioButton unit_1,RadioButton unit_2, RadioGroup choose_unit) {
+        private ListHolder(TextView textViewMeasure, RadioButton unit_1,RadioButton unit_2) {
             this.textViewMeasure = textViewMeasure;
             this.unit_1 = unit_1;
             this.unit_2 = unit_2;
-            choose_unit.setOnCheckedChangeListener(listener);
         }
+    }
+
+    public interface OnCheckNewMeasureListener{
+        void onCheckNewMeasure(String filter, Measure.Unit unit);
     }
 
 }

@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
 
@@ -29,7 +30,7 @@ public class PersonalDataFragment extends Fragment {
 
     private static final String TAG = PersonalDataFragment.class.getName();
 
-    private ImageView img;
+    private Factory.CustomImageView img;
     private EditText name ;
     private EditText last_name ;
     private EditText birthDate;

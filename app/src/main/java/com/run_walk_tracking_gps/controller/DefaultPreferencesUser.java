@@ -127,12 +127,6 @@ public class DefaultPreferencesUser {
        return null;
     }
 
-
-    public static String getLanguageDefault(Context context) throws JSONException {
-        return ((JSONObject)getSettingsJsonUserLogged(context, getIdUserLogged(context))).getString(HttpRequest.Constant.LANGUAGE);
-    }
-
-
  // SETTER SharedPreferences
     private static void setUserLogged(Context context, String id_user){
         getSharedPreferencesUserLogged(context).edit()
@@ -182,16 +176,6 @@ public class DefaultPreferencesUser {
                     .putString(id_user, app.toString())
                     .apply();
         }
-    }
-
-    public static void setLanguage(Context context, String language) throws JSONException {
-        final String id_user = getIdUserLogged(context);
-        final JSONObject appJson = getAppJsonUserLogged(context, id_user);
-        final JSONObject settingsJson = (JSONObject)appJson.get(HttpRequest.Constant.SETTINGS);
-        settingsJson.put(HttpRequest.Constant.LANGUAGE, language);
-
-        appJson.put(HttpRequest.Constant.SETTINGS, settingsJson);
-        DefaultPreferencesUser.getSharedPreferencesSettingUserLogged(context).edit().putString(id_user, appJson.toString()).apply();
     }
 
     public static void setUnitMeasure(Context context, String measure, Measure.Unit unit) throws JSONException {

@@ -51,7 +51,6 @@ o
         "id_target": 2,
         "name": "LOSE_WEIGHT"
       },
-      "language": "Inglese",
       "unit_measure": {
         "energy": {
           "id_unit": 1,

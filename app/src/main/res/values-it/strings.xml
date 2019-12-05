@@ -2,14 +2,9 @@
 <resources>
 
     <string name="cancel">Annulla</string>
-    <string name="loading">Caricamento ...</string>
+    <string name="saving">Salvataggio ...</string>
+    <string name="request">Richiesta ...</string>
 
-    <!-- Language -->
-    <string-array name="language">
-        <item name="english">Inglese</item>
-        <item name="italian">Italiano</item>
-        <item name="spanish">Spagnolo</item>
-    </string-array>
 
     <!-- BootApp -->
     <string name="rec">Iscriviti</string>
@@ -126,9 +121,11 @@
 
     <!-- Informazioni account -->
     <string name="info_description">
-        <i>Run/Walk Tracking</i> è un\' innovativa suite di applicazioni,
-        prodotti e servizi che tracciano e gestiscono dati sulla salute ed il fitness per moticare
-        i singoli individui a mantenersi in forma e a migliorare il proprio benessere personale.
+        <b>Lingue supportate</b>:\n
+        <string-array name="language">- <item name="english">Inglese</item>,\n
+            - <item name="italian">Italiano</item>,\n
+            - <item name="spanish">Spagnolo</item>
+        </string-array>
     </string>
 
     <!-- Messaggi di info -->
@@ -147,7 +144,8 @@
     <string name="not_empty">\u0020 non può essere vuoto</string>
     <string name="user_not_set">User non settato</string>
     <string name="account_not_checked">Account non verificato!</string>
-    <string name="uploadImageOk">Compressione Immagine Finita</string>
+    <string name="start_compression_image">Inizio Compressione Immagine</string>
+    <string name="end_compression_image">Compressione Immagine Finita</string>
     <string name="internet_not_available_title">Dati cellulare disattivati</string>
     <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
 

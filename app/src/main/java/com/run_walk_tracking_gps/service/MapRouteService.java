@@ -1,11 +1,8 @@
 package com.run_walk_tracking_gps.service;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Looper;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -14,7 +11,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.run_walk_tracking_gps.gui.components.FactoryPolyLine;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.ArrayList;
@@ -24,7 +21,7 @@ public class MapRouteService {
 
     private static final String TAG = MapRouteService.class.getName();
 
-    private PolylineOptions polylineOptions = FactoryPolyLine.create();
+    private PolylineOptions polylineOptions = Factory.CustomPolylineOptions.create();
     private List<LatLng> route = new ArrayList<>();
 
     private final LocationRequest locationRequest;

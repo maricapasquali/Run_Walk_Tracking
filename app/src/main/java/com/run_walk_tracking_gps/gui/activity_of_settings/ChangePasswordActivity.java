@@ -50,7 +50,7 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.save_profile:{
-                Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
 
                 if(check()){
                     try{
@@ -62,7 +62,8 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
                         saveChangedPassword(CryptographicHashFunctions.md5(password.getText().toString()));
 
                     }catch (PasswordNotCorrectException e){
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.alert();
+                        //Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }

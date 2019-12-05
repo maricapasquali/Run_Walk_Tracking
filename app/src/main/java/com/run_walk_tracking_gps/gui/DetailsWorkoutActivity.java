@@ -105,10 +105,9 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.summary_modify_workout:
-                Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
 
                 final Intent intentModify = new Intent(this, ModifyWorkoutActivity.class);
-                //intentModify.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intentModify.putExtra(KeysIntent.MODIFY_WORKOUT, workout);
                 startActivityForResult(intentModify, REQUEST_MODIFY);
                 break;

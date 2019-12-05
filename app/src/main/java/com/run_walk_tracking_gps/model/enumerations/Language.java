@@ -15,11 +15,6 @@ public enum Language {
     ITALIAN(R.string.it_code),
     SPANISH(R.string.es_code);
 
-    /*
-    *  Se si aggiunge una lingua, si deve aggiungere in:
-    *
-    *  -  Resourses : array-string (di tutti i file 'string.xml' )
-    */
 
     private int code;
 
@@ -36,14 +31,7 @@ public enum Language {
     }
 
     public static Language defaultForUser(final Context context){
-        String current = null;
-        /*try {
-            current = Preferences.isJustUserLogged(context) ? Preferences.getLanguageDefault(context) : Locale.getDefault().getLanguage();
-            Log.e("Language", "Language current : " + current);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-        current = Locale.getDefault().getLanguage();
+        final String current = Locale.getDefault().getLanguage();
         return  supported(context, current);
     }
 

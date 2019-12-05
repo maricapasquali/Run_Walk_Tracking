@@ -2,7 +2,10 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,20 +25,21 @@ import org.json.JSONObject;
 
 import java.util.LinkedHashMap;
 
-public class MeasureUnitActivity extends CommonActivity implements RadioGroup.OnCheckedChangeListener,  Response.Listener<JSONObject>{
+public class MeasureUnitActivity extends CommonActivity implements MeasureAdapter.OnCheckNewMeasureListener,  Response.Listener<JSONObject>{
 
     private final static String TAG = MeasureUnitActivity.class.getName();
+
 
     private String filter;
     private Measure.Unit unit;
 
     @Override
     protected void init(Bundle savedInstanceState) {
+        Log.d(TAG, "init");
         setContentView(R.layout.activity_measure_unit);
         getSupportActionBar().setTitle(R.string.measure_unit);
 
         final ListView measure_unit = findViewById(R.id.measures_units);
-
         measure_unit.setAdapter(new MeasureAdapter(this,this, getUnitDefaultForUser()));
     }
 
@@ -54,52 +58,34 @@ public class MeasureUnitActivity extends CommonActivity implements RadioGroup.On
     }
 
     @Override
-    public void onCheckedChanged(RadioGroup group, int checkedId) {
+    public void onCheckNewMeasure(String filter, Measure.Unit unit) {
+        try {
+            this.filter = filter;
+            this.unit = unit;
+            final String  id_user = DefaultPreferencesUser.getIdUserLogged(this);
+            JSONObject bodyJson = new JSONObject()
+                    .put(HttpRequest.Constant.ID_USER, id_user)
+                    .put(HttpRequest.Constant.FILTER, filter)
+                    .put(HttpRequest.Constant.VALUE, unit);
 
-        // TODO: 11/17/2019 MIGLIORARE
-        final String measure = ((TextView)((RelativeLayout)group.getParent()).getChildAt(0)).getText().toString();
-        final Measure.Type type = (Measure.Type) EnumUtilities.getEnumFromString(Measure.Type.class, MeasureUnitActivity.this, measure);
+            HttpRequest.requestUpdateSetting(this, bodyJson, this);
 
-        if(type!=null){
-            filter = type.toString().toLowerCase();
-
-            switch (checkedId){
-                case R.id.unit_1:
-                    unit = type.getMeasureUnitDefault();
-                    break;
-                case R.id.unit_2:
-                    unit = type.getMeasureUnit()[1];
-                    break;
-                default:
-                    throw new IllegalArgumentException();
-            }
-            if(unit!=null){
-                Log.e(TAG, "Filter = "+ filter +", Value = "+unit);
-                try {
-                    final String  id_user = DefaultPreferencesUser.getIdUserLogged(this);
-                    JSONObject bodyJson = new JSONObject();
-                    bodyJson.put(HttpRequest.Constant.ID_USER, id_user)
-                            .put(HttpRequest.Constant.FILTER, filter)
-                            .put(HttpRequest.Constant.VALUE, unit);
-
-                    HttpRequest.requestUpdateSetting(this, bodyJson, this);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (InternetNoAvailableException e) {
-                    e.alert();
-                }
-            }
-
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InternetNoAvailableException e) {
+            e.alert();
         }
-
     }
+
 
     @Override
     public void onResponse(JSONObject response) {
+        Log.d(TAG, "onResponse");
         try {
             DefaultPreferencesUser.setUnitMeasure(this, filter, unit);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
 }

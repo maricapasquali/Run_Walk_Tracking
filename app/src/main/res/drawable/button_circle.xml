@@ -14,7 +14,7 @@
     <item>
         <shape  android:shape="oval">
             <!--<solid android:color="@android:color/transparent"/>-->
-            <solid android:color="#E6FF9900"/>
+            <solid android:color="@color/colorPrimary"/>
             <padding
                 android:bottom="10dp"
                 android:left="10dp"

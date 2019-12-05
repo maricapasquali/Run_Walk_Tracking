@@ -85,12 +85,12 @@
                     android:layout_width="49dp"
                     android:layout_height="49dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="2.5dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/profile"
                     android:elevation="8dp"
                     android:padding="2dp"
-                    app:srcCompat="@drawable/ic_user" />
+                    app:srcCompat="@drawable/ic_user_empty_light" />
 
                 <TextView
                     android:id="@+id/setting_profile"
@@ -227,46 +227,6 @@
                     android:paddingEnd="0dp"
                     android:paddingBottom="15dp"
                     android:text="@string/measure_unit"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/language"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="2dp"
-                android:background="@drawable/custom_item_setting"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/setting_language_icon"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="2dp"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/language"
-                    android:elevation="8dp"
-                    android:paddingTop="2dp"
-                    app:srcCompat="@drawable/ic_language" />
-
-                <TextView
-                    android:id="@+id/setting_language"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-
-                    android:layout_marginStart="0dp"
-                    android:layout_marginEnd="0dp"
-                    android:paddingStart="20dp"
-                    android:paddingTop="15dp"
-                    android:paddingEnd="0dp"
-                    android:paddingBottom="15dp"
-                    android:text="@string/language"
                     android:textColor="@android:color/background_light"
                     android:textSize="18sp" />
 

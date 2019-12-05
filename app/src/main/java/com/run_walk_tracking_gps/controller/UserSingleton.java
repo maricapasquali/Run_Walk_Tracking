@@ -10,18 +10,17 @@ import org.json.JSONObject;
 
 public class UserSingleton {
 
-    private static UserSingleton instance;
-
     private User user;
 
+    private static class LazySingleton {
+        private static final UserSingleton instance = new UserSingleton();
+    }
+    
     private UserSingleton() {
     }
 
     public static UserSingleton getInstance() {
-        if (instance == null) {
-            instance = new UserSingleton();
-        }
-        return instance;
+        return LazySingleton.instance;
     }
 
     public User getUser(){

@@ -41,6 +41,7 @@ public class User implements Parcelable {
         this.city = user.city;
         this.phone = user.phone;
         this.height = user.height.clone();
+        this.username = user.username;
     }
 
     public JSONObject toJson() throws JSONException {
@@ -196,6 +197,10 @@ public class User implements Parcelable {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

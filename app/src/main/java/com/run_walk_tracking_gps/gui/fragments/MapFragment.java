@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -23,7 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.exception.NoGPSException;
-import com.run_walk_tracking_gps.gui.components.FactoryPolyLine;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
@@ -158,7 +157,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void addPolyLine(String mapRoute) {
-        final PolylineOptions polylineOptions = FactoryPolyLine.create();
+        final PolylineOptions polylineOptions = Factory.CustomPolylineOptions.create();
         final List<LatLng> route = CollectionsUtilities.convertStringToListLatLng(mapRoute);
         route.forEach(polylineOptions::add);
         googleMap.addPolyline(polylineOptions);
