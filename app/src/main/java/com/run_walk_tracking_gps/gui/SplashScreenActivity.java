@@ -30,6 +30,7 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
     private final static String TAG = SplashScreenActivity.class.getName();
     private static Intent intent;
 
+    private JSONObject bodyJson;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +45,7 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
 
             try {
                 // REQUEST IMAGE PROFILE, WEIGHTS AND WORKOUTS
-                JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user);
+                bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user);
                 HttpRequest.requestDataAfterAccess(this, bodyJson, this);
 
             } catch (JSONException e) {
@@ -60,6 +61,12 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
             startActivity(intent);
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        HttpRequest.cancelAllRequestPending(bodyJson);
+        super.onBackPressed();
     }
 
     @Override

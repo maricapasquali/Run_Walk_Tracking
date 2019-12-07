@@ -22,39 +22,32 @@ public class BitmapUtilities {
      */
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static String BitMapToString(Bitmap bitmap){
+    public static String BitMapToString(Bitmap bitmap) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.WEBP,100, bos);
         byte[] compressByte = compressByteArray(bos.toByteArray());
         return Base64.getEncoder().encodeToString(compressByte);
     }
 
-    public static byte[] compressByteArray(byte[] in){
+    private static byte[] compressByteArray(byte[] in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DeflaterOutputStream defl = new DeflaterOutputStream(out);
 
-        try {
-            defl.write(in);
-            defl.flush();
-            defl.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        defl.write(in);
+        defl.flush();
+        defl.close();
 
         return out.toByteArray();
     }
 
-    public static byte[] decompress(byte[] in) {
+    private static byte[] decompress(byte[] in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         InflaterOutputStream infl = new InflaterOutputStream(out);
-        try {
-            infl.write(in);
-            infl.flush();
-            infl.close();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        infl.write(in);
+        infl.flush();
+        infl.close();
+
         return out.toByteArray();
     }
 
@@ -62,9 +55,8 @@ public class BitmapUtilities {
      * @param encodedString
      * @return bitmap (from given string)
      */
-
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static Bitmap StringToBitMap(String encodedString){
+    public static Bitmap StringToBitMap(String encodedString) throws IOException {
         byte[] b = Base64.getDecoder().decode(encodedString);
         byte[] decompress = decompress(b);
         return BitmapFactory.decodeByteArray(decompress, 0, decompress.length);

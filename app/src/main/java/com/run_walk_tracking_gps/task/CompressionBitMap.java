@@ -11,6 +11,8 @@ import android.widget.Toast;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
+import java.io.IOException;
+
 
 public class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
     private static final String TAG = CompressionBitMap.class.getName();
@@ -35,7 +37,12 @@ public class CompressionBitMap extends AsyncTask<Bitmap, Void, String>{
     @Override
     protected String doInBackground(Bitmap... bitmaps) {
         publishProgress();
-        return BitmapUtilities.BitMapToString(bitmaps[0]);
+        try {
+            return BitmapUtilities.BitMapToString(bitmaps[0]);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

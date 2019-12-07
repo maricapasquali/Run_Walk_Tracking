@@ -157,7 +157,6 @@ public class HttpRequest {
     }
 
     private static final String TAG = HttpRequest.class.getName();
-
     private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
 
     private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
@@ -193,6 +192,9 @@ public class HttpRequest {
     private static final String NEW_WEIGHT = STATISTICS + "new_weight.php";
     private static final String UPDATE_WEIGHT = STATISTICS + "update_weight.php";
     private static final String DELETE_WEIGHT = STATISTICS + "delete_weight.php";
+
+
+    private static RequestQueue queue;
 
 
     // ACCOUNT
@@ -379,10 +381,19 @@ public class HttpRequest {
         return true;
     }
 
+
+
+    public static void cancelAllRequestPending(Object tag){
+        if(tag!=null){
+            queue.cancelAll(tag);
+            Log.d(TAG, "Richiesta ANNULLATA..");
+        }
+    }
+
     private static RequestQueue createRequest(Context context, int method, String url, JSONObject bodyJson,
                                               Response.Listener<JSONObject>  responseJsonListener){
 
-        final RequestQueue queue = Volley.newRequestQueue(context);
+        queue = Volley.newRequestQueue(context);
 
         final StringRequest jsonRequest = new StringRequest(method, url, response -> {
             Log.d(TAG, "onResponse");
@@ -411,8 +422,12 @@ public class HttpRequest {
                return bodyJson.toString().getBytes();
            }
         };
+
+        jsonRequest.setTag(bodyJson);
 // TODO: 12/5/2019 DA RIGUARDARE
-        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(jsonRequest);
         return queue;
     }

@@ -35,12 +35,4 @@ public abstract class CommonActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    /*@Override
-    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Log.e(TAG, "onConfigurationChanged ");
-        init(null);
-        listenerAction();
-    }*/
-
 }

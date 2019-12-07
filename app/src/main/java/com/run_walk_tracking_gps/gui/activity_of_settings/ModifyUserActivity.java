@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
 import com.myhexaville.smartimagepicker.ImagePicker;
@@ -35,8 +36,12 @@ import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
+
+import kotlin.jvm.internal.PropertyReference0Impl;
 
 public class ModifyUserActivity extends CommonActivity implements Response.Listener<JSONObject>{
 
@@ -59,6 +64,9 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
     private CompressionBitMap async =  null;
 
+    private RequestDialog dialog;
+    private JSONObject bodyJson;
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -80,10 +88,13 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             oldUser = (User)getIntent().getParcelableExtra(KeysIntent.PROFILE);
             oldUser.setContext(this);
             Log.d(TAG, oldUser.toString());
+            try {
+                String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
+                if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
-            String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
-            if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
-
+            }catch (IOException e){
+                img.setImageResource(R.drawable.ic_user_empty);
+            }
             name.setText(oldUser.getName());
             lastName.setText(oldUser.getLastName());
             gender.setText(oldUser.getGender().getStrId());
@@ -109,7 +120,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     private void saveUserChanged(RequestDialog dialog){
         try {
 
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, user.getIdUser());
+            bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, user.getIdUser());
             if(!user.getName().equals(oldUser.getName())){
                 bodyJson.put(HttpRequest.Constant.NAME, user.getName());
             }
@@ -141,9 +152,14 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                     bodyJson.put(HttpRequest.Constant.IMG_ENCODE, image_encode);
             }
 
-            Log.d(TAG, bodyJson.toString());
-
-            HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog);
+            Log.d(TAG, bodyJson.toString() + ", count = "+Stream.of(bodyJson.keys()).count());
+            if(Stream.of(bodyJson.keys()).count()>1){
+                HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog);
+            }else{
+                dialog.dismiss();
+                setResult(RESULT_CANCELED, new Intent());
+                finish();
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -162,7 +178,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         switch (item.getItemId()){
             case R.id.save_profile:{
                 Log.e(TAG, "SALVA MODIFICHE");
-                RequestDialog dialog = RequestDialog.create(ModifyUserActivity.this);
+                dialog = RequestDialog.create(ModifyUserActivity.this);
                 dialog.show();
 
                 user.setName(name.getText().toString());
@@ -250,14 +266,28 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     @Override
     public void onResponse(JSONObject response) {
 
-        DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
+        Log.d(TAG, response.toString());
 
-        UserSingleton.getInstance().setUser(user);
-        Log.d(TAG, UserSingleton.getInstance().getUser().toString());
+        try {
+            if(response.has(HttpRequest.Constant.UPDATE) && response.getBoolean(HttpRequest.Constant.UPDATE)){
+                DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
+
+                UserSingleton.getInstance().setUser(user);
+                Log.d(TAG, UserSingleton.getInstance().getUser().toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         final Intent returnIntent = new Intent();
         returnIntent.putExtra(KeysIntent.CHANGED_USER, user);
         setResult(RESULT_OK, returnIntent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        HttpRequest.cancelAllRequestPending(bodyJson);
+        super.onBackPressed();
     }
 }

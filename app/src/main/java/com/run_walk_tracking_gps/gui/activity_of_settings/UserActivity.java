@@ -30,6 +30,8 @@ import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 
 public class UserActivity extends CommonActivity {
 
@@ -174,9 +176,13 @@ public class UserActivity extends CommonActivity {
 
         height.setText(user.getHeight().toString());
 
-        String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
-        Log.e(TAG, "IMAGE ENCODE = " + img_encode);
-        if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+        try{
+            String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
+            Log.e(TAG, "IMAGE ENCODE = " + img_encode);
+            if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
+        }catch (IOException e){
+            img.setImageResource(R.drawable.ic_user_empty);
+        }
 
         this.user = user;
         Log.d(TAG, "User = " + user);

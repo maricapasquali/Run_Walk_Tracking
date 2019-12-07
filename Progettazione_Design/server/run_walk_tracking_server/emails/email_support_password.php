@@ -20,7 +20,7 @@
       <p>Dear User, <br /> if you have requested a password reset, click on the button below. </p>
       <p>Otherwise, ignore this email.</p>
       <div class="mt-5 mb-5">
-        <p><a id='link_change_password' class="btn btn-primary">clicca qui</a> </p>
+        <p><a id='link_change_password' class="btn btn-primary">Click here</a> </p>
         <strong>ATTENTION:<p> The link will be valid only for 30 minutes after receiving this email. </p></strong>
       </div>
       <p>Team <strong><?= APP_NAME ?></strong></p>
