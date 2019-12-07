@@ -218,10 +218,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
         birthDate.setOnClickListener(v ->{
             final TextView d = ((TextView) v);
-            DateTimePickerDialog.create(this, d.getText().toString() , (date, calendar) -> {
+            DateTimePickerDialog.createDatePicker(this, (date, calendar) -> {
                 d.setText(date);
                 user.setBirthDate(calendar.getTime());
-            }, false).show();
+            }).show();
         });
 
         height.setOnClickListener(v ->{

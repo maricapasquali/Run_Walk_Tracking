@@ -56,11 +56,11 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
         switch (title){
             case DATE:
-                DateTimePickerDialog.create(NewWeightActivity.this, detail.getText().toString(),
+                DateTimePickerDialog.createDatePicker(NewWeightActivity.this,
                         (date, calendar) -> {
                             detail.setText(date);
                             statisticsData.setDate(calendar.getTime());
-                        }, false).show();
+                        }).show();
                 break;
             case WEIGHT:
                 WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {

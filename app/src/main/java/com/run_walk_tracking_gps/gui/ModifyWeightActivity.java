@@ -70,12 +70,12 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
 
             switch (title){
                 case DATE:
-                    DateTimePickerDialog.create(ModifyWeightActivity.this, detail.getText().toString(),
+                    DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
                             (date, calendar) -> {
                                 detail.setText(date);
                                 statisticsData.setDate(calendar.getTime());
                                 Log.e(TAG, statisticsData.getDateStr());
-                            }, false).show();
+                            }).show();
                     break;
                 case WEIGHT:
                     WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {

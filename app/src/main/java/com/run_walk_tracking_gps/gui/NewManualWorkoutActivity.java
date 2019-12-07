@@ -56,7 +56,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
 
         switch (title){
             case DATE:
-                DateTimePickerDialog.create(NewManualWorkoutActivity.this, (date, calendar) -> {
+                DateTimePickerDialog.createDateTimePicker(NewManualWorkoutActivity.this, (date, calendar) -> {
                     workout.setDate(calendar.getTime());
                     detail.setText(date);
                 }).show();

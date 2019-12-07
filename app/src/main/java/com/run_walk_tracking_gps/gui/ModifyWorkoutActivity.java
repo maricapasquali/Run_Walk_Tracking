@@ -79,7 +79,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
 
             switch (info){
                 case DATE:
-                    DateTimePickerDialog.create(ModifyWorkoutActivity.this, (date, calendar) -> {
+                    DateTimePickerDialog.createDateTimePicker(ModifyWorkoutActivity.this, (date, calendar) -> {
                         detail.setText(date);
                         workout.setDate(calendar.getTime());
                     }).show();

@@ -75,12 +75,12 @@ public class PersonalDataFragment extends Fragment {
 
         birthDate.setOnClickListener(v ->{
             final TextView  birthText = (TextView)v;
-            DateTimePickerDialog.create(getContext(), birthText.getText().toString(),
+            DateTimePickerDialog.createDatePicker(getContext(),
                     (date, calendar) -> {
                 birthText.setText(date);
                 userBuilder.setBirthDate(calendar.getTime());
                 birthDate.setError(null);
-            },false ).show();
+            } ).show();
         });
 
         img.setOnClickListener( v -> imagePickerHandlerListener.imagePickerHandler((ImageView)v));

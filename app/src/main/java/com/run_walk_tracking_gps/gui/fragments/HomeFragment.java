@@ -271,13 +271,15 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         final LinearLayout info_workout = rootView.findViewById(R.id.info_workout);
         final LinearLayout info_workout_numbers = rootView.findViewById(R.id.info_workout_numbers);
 
-        workout_distance = rootView.findViewById(R.id.distance_workout_indoor);
-        workout_energy = rootView.findViewById(R.id.calories_workout_indoor);
-        workout_duration = rootView.findViewById(R.id.time_workout_indoor);
-
-        workout_distance = rootView.findViewById(R.id.distance_workout);
-        workout_energy = rootView.findViewById(R.id.calories_workout);
-        workout_duration = rootView.findViewById(R.id.time_workout);
+        if(isIndoor){
+            workout_distance = rootView.findViewById(R.id.distance_workout_indoor);
+            workout_energy = rootView.findViewById(R.id.calories_workout_indoor);
+            workout_duration = rootView.findViewById(R.id.time_workout_indoor);
+        }else {
+            workout_distance = rootView.findViewById(R.id.distance_workout);
+            workout_energy = rootView.findViewById(R.id.calories_workout);
+            workout_duration = rootView.findViewById(R.id.time_workout);
+        }
 
         duration.setVisibility(isIndoor?View.VISIBLE : View.GONE);
         distance.setVisibility(isIndoor?View.VISIBLE : View.GONE);

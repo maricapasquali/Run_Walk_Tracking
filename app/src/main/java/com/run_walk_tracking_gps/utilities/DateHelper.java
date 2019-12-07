@@ -11,11 +11,14 @@ import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 import java.util.zip.DataFormatException;
 
 
@@ -29,10 +32,12 @@ public final class DateHelper {
 
     private DateHelper(Context context){
         locale = Language.getLocale(context);
+
         calendar = Calendar.getInstance(locale);
         is24H = !locale.equals(Locale.ENGLISH);
         HOUR = is24H ? Calendar.HOUR_OF_DAY : Calendar.HOUR;
         Log.d(TAG, "Is 24 H = "+is24H);
+        Log.d(TAG, "Time Zone = "+ TimeZone.getDefault().getID());
     }
 
     public static DateHelper create(Context context){
@@ -79,10 +84,6 @@ public final class DateHelper {
         return DateFormat.getDateInstance(style, locale).format(date);
     }
 
-    private String formatDateTimeToString(int styleDate,int styleTime,Date dateWithTime) {
-        return DateFormat.getDateTimeInstance(styleDate, styleTime, locale).format(dateWithTime);
-    }
-
 
     public String formatShortToString(Date date){
         if(date==null) return "";
@@ -96,8 +97,9 @@ public final class DateHelper {
 
     public String formatShortDateTimeToString(Date dateWithTime) {
         if(dateWithTime==null) return "";
-        //return formatDateTimeToString(DateFormat.SHORT, DateFormat.SHORT, dateWithTime);
-        return new SimpleDateFormat(is24H? "dd/MM/yyyy HH:mm" : "MM/dd/yyyy hh:mm aa", locale).format(dateWithTime);
+        final Calendar c = Calendar.getInstance(TimeZone.getDefault(), locale);
+        c.setTime(dateWithTime);
+        return new SimpleDateFormat(is24H? "dd/MM/yyyy HH:mm" : "MM/dd/yyyy hh:mm a", locale).format(c.getTime());
     }
 
 // ------------------ //
@@ -107,7 +109,9 @@ public final class DateHelper {
     }
 
     public Date parseShortDateTimeToDate(String dateWithTime) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm", locale).parse(dateWithTime);
+        final Calendar c = Calendar.getInstance(TimeZone.getDefault(), locale);
+        c.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm", locale).parse(dateWithTime));
+        return c.getTime();
     }
 
 

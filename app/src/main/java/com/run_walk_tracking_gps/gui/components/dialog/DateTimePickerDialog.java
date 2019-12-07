@@ -28,26 +28,9 @@ public class DateTimePickerDialog {
         calendar = dateHelper.getCalendar();
     }
 
-    private DateTimePickerDialog(Context context, OnSelectDateTime onSelectDateTime) {
+
+    private DateTimePickerDialog(Context context, OnSelectDateTime onSelectDateTime, boolean alsoTime) {
         this(context);
-
-        datePickerDialog = new DatePickerDialog(context, (datePicker, year, month, dayOfMonth) -> {
-            calendar.set(year, month, dayOfMonth);
-
-            createTimePicker(context, onSelectDateTime).show();
-
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-    }
-
-
-    private DateTimePickerDialog(Context context, String dateString, OnSelectDateTime onSelectDateTime, boolean alsoTime) {
-        this(context);
-        try {
-            calendar.setTime(dateHelper.parseShortToDate(dateString));
-        } catch (ParseException e) {
-            Log.e(TAG, e.getMessage());
-            //Toast.makeText(context, "Data non valida", Toast.LENGTH_SHORT).show();
-        }
 
         datePickerDialog = new DatePickerDialog(context, (datePicker, year, month, dayOfMonth) -> {
             calendar.set(year, month, dayOfMonth);
@@ -62,7 +45,7 @@ public class DateTimePickerDialog {
 
     private TimePickerDialog createTimePicker(Context context, OnSelectDateTime onSelectDateTime){
         return new TimePickerDialog(context, (timePicker, hourOfDay, minute) -> {
-            calendar.set(dateHelper.getHour(), hourOfDay);
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
             calendar.set(Calendar.MINUTE, minute);
 
             onSelectDateTime.setTextView(dateHelper.formatShortDateTimeToString(calendar.getTime()), calendar);
@@ -71,13 +54,13 @@ public class DateTimePickerDialog {
     }
 
 
-    public static DateTimePickerDialog create(Context context, OnSelectDateTime listener) {
-        return new DateTimePickerDialog(context, listener);
+    public static DateTimePickerDialog createDateTimePicker(Context context, OnSelectDateTime listener) {
+        return new DateTimePickerDialog(context, listener, true);
     }
 
 
-    public static DateTimePickerDialog create(Context context, String dateString, OnSelectDateTime listener, boolean alsoTime) {
-        return new DateTimePickerDialog(context, dateString, listener, alsoTime);
+    public static DateTimePickerDialog createDatePicker(Context context, OnSelectDateTime listener) {
+        return new DateTimePickerDialog(context, listener, false);
     }
 
     public void show(){

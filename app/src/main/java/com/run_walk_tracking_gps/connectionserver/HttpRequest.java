@@ -159,8 +159,8 @@ public class HttpRequest {
     private static final String TAG = HttpRequest.class.getName();
 
     private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
-    private static final String ip = "192.168.1.132"; //"10.10.10.3";//
-    private static final String SERVER = "http://"+ip+"/run_walk_tracking/";
+
+    private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
 
     private static final String ACCOUNT = SERVER + "account/";
     private static final String WORKOUT = SERVER + "workout/";
