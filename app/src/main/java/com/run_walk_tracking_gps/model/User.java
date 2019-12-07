@@ -69,7 +69,8 @@ public class User implements Parcelable {
             city = userJson.getString(HttpRequest.Constant.CITY);
             phone = userJson.getString(HttpRequest.Constant.PHONE);
             height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble(HttpRequest.Constant.HEIGHT));
-        } catch (ParseException e) {
+        }
+        catch (ParseException e) {
             e.printStackTrace();
         }
     }
@@ -152,7 +153,7 @@ public class User implements Parcelable {
     }
 
     public String getBirthDateString() {
-        return DateHelper.create(height.getContext()).parseToString(DateFormat.SHORT, birth_date);
+        return DateHelper.create(height.getContext()).formatShortToString(birth_date);
     }
 
     public String getEmail() {

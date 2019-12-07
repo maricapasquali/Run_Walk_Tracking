@@ -29,7 +29,7 @@ public class MapRouteService {
     private FusedLocationProviderClient fusedLocationClient;
 
     private OnChangeLocationListener onChangeLocationListener;
-
+    // TODO: 12/6/2019 RIGUARDARE 
     private LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {

@@ -8,7 +8,7 @@ class StatisticsDao{
 
     if(connect()){
 
-      $sql = ($type==WEIGHT ? "SELECT id_weight, DATE_FORMAT(date,'%d/%m/%Y') as date, value as weight FROM weight WHERE id_user=? ORDER BY UNIX_TIMESTAMP(date)  DESC;" :
+      $sql = ($type==WEIGHT ? "SELECT id_weight, date, value as weight FROM weight WHERE id_user=? ORDER BY UNIX_TIMESTAMP(date)  DESC;" :
       "SELECT date, $type FROM workout WHERE id_user=? and $type is not null ORDER BY UNIX_TIMESTAMP(date) DESC;");
 
        $stmt = getConnection()->prepare($sql);

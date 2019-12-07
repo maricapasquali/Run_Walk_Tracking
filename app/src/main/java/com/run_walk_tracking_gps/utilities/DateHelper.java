@@ -2,7 +2,9 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.support.v4.util.Pair;
+import android.util.Log;
 
+import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Language;
 
 import java.text.DateFormat;
@@ -13,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.zip.DataFormatException;
 
 
 public final class DateHelper {
@@ -24,10 +28,11 @@ public final class DateHelper {
     private Calendar calendar;
 
     private DateHelper(Context context){
-        locale = Language.Utilities.createLocale(context);
+        locale = Language.getLocale(context);
         calendar = Calendar.getInstance(locale);
         is24H = !locale.equals(Locale.ENGLISH);
         HOUR = is24H ? Calendar.HOUR_OF_DAY : Calendar.HOUR;
+        Log.d(TAG, "Is 24 H = "+is24H);
     }
 
     public static DateHelper create(Context context){
@@ -48,7 +53,7 @@ public final class DateHelper {
         return getRangeOne(Calendar.DAY_OF_MONTH, lastInsert);
     }
 
-    public Pair<Date, Date> getRangeLastMonth( Date lastInsert){
+    public Pair<Date, Date> getRangeLastMonth(Date lastInsert){
         return getRangeOne(Calendar.MONTH, lastInsert);
     }
 
@@ -70,52 +75,43 @@ public final class DateHelper {
 
 // FORMATTER
 
-    public Date parseShortToDate(String stringDate) throws ParseException {
-        return parseToDate(DateFormat.SHORT, stringDate);
-    }
-
-    public String parseShortToString(Date dateWithTime){
-        if(dateWithTime==null) return "";
-        final Calendar c = (Calendar)getCalendar().clone();
-        c.setTime(dateWithTime);
-
-        //final String pattern =(is24H? "dd/MM/yy HH:mm":"MM/dd/yy hh:mm aa"); return new SimpleDateFormat(pattern).format(dateWithTime);
-
-        final String pattern =(is24H? "HH:mm":"hh:mm aa");
-        return parseToString(DateFormat.SHORT, dateWithTime) + " " + new SimpleDateFormat(pattern).format(dateWithTime);
-    }
-
-    public String parseShortToStringNoTime(Date date){
-        return parseToString(DateFormat.SHORT, date);
-    }
-
-    public Date parseStringWithTimeToDateString(String dateWithTime){
-        final Calendar c = (Calendar)getCalendar().clone();
-        try {
-            final SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm");
-            c.setTime(df.parse(dateWithTime));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return c.getTime();
-    }
-
-    public String parseFullToString(Date date){
-        if(date==null) return "";
-        return DateFormat.getDateInstance(DateFormat.FULL, locale).format(date);
-    }
-
-    public Date parseToDate(int style, String stringDate) throws ParseException {
-        final DateFormat df = DateFormat.getDateInstance(style, locale);
-        return df.parse(stringDate);
-    }
-
-    public String parseToString(int style, Date date) {
+    private String formatToString(int style, Date date) {
         return DateFormat.getDateInstance(style, locale).format(date);
     }
 
-// GETTER
+    private String formatDateTimeToString(int styleDate,int styleTime,Date dateWithTime) {
+        return DateFormat.getDateTimeInstance(styleDate, styleTime, locale).format(dateWithTime);
+    }
 
+
+    public String formatShortToString(Date date){
+        if(date==null) return "";
+        return new SimpleDateFormat(is24H? "dd/MM/yyyy" : "MM/dd/yyyy", locale).format(date);
+    }
+
+    public String formatFullToString(Date date){
+        if(date==null) return "";
+        return formatToString(DateFormat.FULL, date);
+    }
+
+    public String formatShortDateTimeToString(Date dateWithTime) {
+        if(dateWithTime==null) return "";
+        //return formatDateTimeToString(DateFormat.SHORT, DateFormat.SHORT, dateWithTime);
+        return new SimpleDateFormat(is24H? "dd/MM/yyyy HH:mm" : "MM/dd/yyyy hh:mm aa", locale).format(dateWithTime);
+    }
+
+// ------------------ //
+
+    public Date parseShortToDate(String stringDate) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd", locale).parse(stringDate);
+    }
+
+    public Date parseShortDateTimeToDate(String dateWithTime) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm", locale).parse(dateWithTime);
+    }
+
+
+// GETTER
     public String getMonth(int month){
         return (new DateFormatSymbols(locale).getMonths()[month-1]).toUpperCase();
     }

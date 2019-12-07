@@ -91,9 +91,9 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 for(int i = 0; i < array.length(); i++){
                     JSONObject s = (JSONObject)array.get(i);
                     StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(context)
-                                                                         .setDate(s.getString(HttpRequest.Constant.DATE))
-                                                                         .setValue(s.getDouble(HttpRequest.Constant.WEIGHT))
-                                                                         .build();
+                                                                     .setDate(s.getString(HttpRequest.Constant.DATE))
+                                                                     .setValue(s.getDouble(HttpRequest.Constant.WEIGHT))
+                                                                     .build();
                         statisticsData.setId(s.getInt(HttpRequest.Constant.ID_WEIGHT));
                         statisticsWeight.add(statisticsData);
                 }

@@ -47,8 +47,8 @@ class WorkoutDao {
      $workouts = array();
 
      if(connect()){
-        $stmt = getConnection()->prepare("SELECT id_workout, map_route, DATE_FORMAT(date,'%d/%m/%Y %H:%i') AS date,
-                                                 duration, distance, calories, sport FROM workout  WHERE id_user =? ORDER BY UNIX_TIMESTAMP(date) DESC;");
+        $stmt = getConnection()->prepare("SELECT id_workout, map_route, date, duration, distance, calories, sport
+                                          FROM workout  WHERE id_user =? ORDER BY UNIX_TIMESTAMP(date) DESC;");
         if(!$stmt) throw new Exception("Workouts : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("i", $id_user);
         if(!$stmt->execute()) throw new Exception("Workouts : Selezione fallita. Errore: ". getErrorConnection());

@@ -162,7 +162,7 @@ public class WorkoutsFilterAdapter extends BaseExpandableListAdapter  {
             vH = (ListHolderChild) convertView.getTag();
         }
 
-        vH.date.setText(DateHelper.create(context).parseFullToString(workout.getDate()));
+        vH.date.setText(DateHelper.create(context).formatFullToString(workout.getDate()));
         vH.time.setText(workout.getDuration().toString());
 
         vH.distance.setText(workout.getDistance().toString());

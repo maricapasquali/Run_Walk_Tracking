@@ -31,7 +31,7 @@ public class FilterTest {
     private Map<Integer, List<Workout>> mapYearWorkouts = new HashMap<>();
 
     //@Before
-    public void initWorkout(){
+   /* public void initWorkout(){
 
        Workout workout = WorkoutBuilder.create(context)
                 .setDate(DateHelper.create(context).parseStringWithTimeToDateString("05/11/2019 11:42"))
@@ -162,5 +162,5 @@ public class FilterTest {
         final  List<StatisticsData> sLastYear = FilterUtilities.createListFilteredStatisticsData(context,statistics, FilterTime.YEAR);
         Assert.assertEquals(sLastYear, statisticsLastYear);
     }
-
+*/
 }

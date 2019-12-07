@@ -20,7 +20,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class HttpRequestVolleyTest {
-
+/*
     private final static String ERROR ="Error";
     private final Context context = InstrumentationRegistry.getTargetContext();
     private static final String TAG = HttpRequestVolleyTest.class.getName();
@@ -38,7 +38,6 @@ public class HttpRequestVolleyTest {
             bodyJson.put( HttpRequest.Constant.EMAIL, "marica@gmail.com");
             bodyJson.put( HttpRequest.Constant.CITY, "Roma");
             bodyJson.put( HttpRequest.Constant.PHONE, "324242342342");
-            bodyJson.put( HttpRequest.Constant.LANGUAGE,  Locale.getDefault().getDisplayLanguage());
             bodyJson.put( HttpRequest.Constant.WEIGHT, 50.6);
             bodyJson.put( HttpRequest.Constant.HEIGHT, 1.66);
             bodyJson.put( HttpRequest.Constant.TARGET, Target.LOSE_WEIGHT);
@@ -249,5 +248,5 @@ public class HttpRequestVolleyTest {
             Log.d(TAG, response.toString());
         }
     }
-
+*/
 }

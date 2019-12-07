@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -80,6 +81,8 @@ public class Workout implements Parcelable, Cloneable{
                 double distance = workoutsList.get(i).getDistance().getValue(true);
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
             }catch (JSONException e){
+                e.printStackTrace();
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
@@ -152,7 +155,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private String getDateStr() {
-        return DateHelper.create(getContext()).parseShortToString(date);
+        return DateHelper.create(getContext()).formatShortDateTimeToString(date);
     }
 
     public Sport getSport() {
@@ -191,8 +194,8 @@ public class Workout implements Parcelable, Cloneable{
         this.date = date;
     }
 
-    public void setDate(String date) {
-        this.date = DateHelper.create(getContext()).parseStringWithTimeToDateString(date);
+    public void setDate(String date) throws ParseException {
+        this.date = DateHelper.create(getContext()).parseShortDateTimeToDate(date);
     }
 
     public void setSport(Sport sport) {

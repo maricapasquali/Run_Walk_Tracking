@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -89,7 +90,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public String getDateStr(){
-        return DateHelper.create(measure.getContext()).parseFullToString(date);
+        return DateHelper.create(measure.getContext()).formatFullToString(date);
     }
 
     public Double getValue() {
@@ -101,7 +102,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public void setDate(String date) throws ParseException {
-        this.date = DateHelper.create(measure.getContext()).parseShortToDate(date);
+       this.date = DateHelper.create(measure.getContext()).parseShortToDate(date);
     }
 
     public void setDate(Date date) {
@@ -113,7 +114,7 @@ public class StatisticsData implements Parcelable{
     }
 
     public List<String> toArrayListString(){
-        return Arrays.asList(getMeasure().toString(), DateHelper.create(measure.getContext()).parseShortToStringNoTime(date));
+        return Arrays.asList(getMeasure().toString(), DateHelper.create(measure.getContext()).formatShortToString(date));
     }
 
     public boolean isSet() {

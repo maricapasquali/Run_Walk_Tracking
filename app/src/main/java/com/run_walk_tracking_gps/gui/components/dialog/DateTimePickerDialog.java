@@ -5,11 +5,13 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.util.Log;
 
+import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Locale;
 
 
 public class DateTimePickerDialog {
@@ -52,8 +54,7 @@ public class DateTimePickerDialog {
 
             if(alsoTime)
                 createTimePicker(context, onSelectDateTime).show();
-            else
-               onSelectDateTime.setTextView(dateHelper.parseToString(DateFormat.SHORT, calendar.getTime()), calendar);
+            else onSelectDateTime.setTextView(dateHelper.formatShortToString(calendar.getTime()), calendar);
 
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
@@ -64,7 +65,7 @@ public class DateTimePickerDialog {
             calendar.set(dateHelper.getHour(), hourOfDay);
             calendar.set(Calendar.MINUTE, minute);
 
-            onSelectDateTime.setTextView(dateHelper.parseShortToString(calendar.getTime()), calendar);
+            onSelectDateTime.setTextView(dateHelper.formatShortDateTimeToString(calendar.getTime()), calendar);
 
         },calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), dateHelper.isIs24Hour());
     }

@@ -79,7 +79,7 @@ public class StatisticsFragment extends Fragment {
                 weights.clear();
                 weights = getArguments().getParcelableArrayList(LIST_WEIGHT_KEY);
             }
-            Log.d(TAG, "List Workouts = "+ workouts);
+            //Log.d(TAG, "List Workouts = "+ workouts);
             Log.d(TAG, "List Weights = "+ weights);
         }
     }

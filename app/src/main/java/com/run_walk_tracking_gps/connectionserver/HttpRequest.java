@@ -195,10 +195,6 @@ public class HttpRequest {
     private static final String DELETE_WEIGHT = STATISTICS + "delete_weight.php";
 
 
-    /*private static boolean someError(JSONObject response){
-        return Stream.of(response.keys()).anyMatch(i -> i.next().equals(Constant.ERROR));
-    }*/
-
     // ACCOUNT
     public static boolean requestSignUp(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
             throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {

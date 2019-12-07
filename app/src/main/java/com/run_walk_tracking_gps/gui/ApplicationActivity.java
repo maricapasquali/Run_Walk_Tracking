@@ -155,17 +155,6 @@ public class ApplicationActivity extends CommonActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG,"OnResume");
-        // TODO: 12/2/2019 ELIMINARE SE DECIDO DI CANCELLARE  "LANGUAGE_DEFAULT"  
-        /*final Language languageDefault = Language.defaultForUser(this);
-        if(!getString(languageDefault.getCode()).equals(Locale.getDefault().getLanguage())){
-            onConfigurationChanged(Language.Utilities.changeConfiguration(this, languageDefault));
-        }*/
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState : " + outState);
