@@ -177,11 +177,47 @@ class UserDao {
    }
 
    static function dataAfterAccess($user){
-     return array(USER => $user + self:: getUserForId($user[ID_USER]) +  self::getImageProfileForIdUser($user[ID_USER]),
-                  WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
-                  WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
-                  APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER])));
-   }
+    try{
+        if(connect()){
+            
+            $stmt = getConnection()->prepare("SELECT id_phone FROM login WHERE id_user=? and id_phone IS NOT NULL");
+            if(!$stmt) throw new Exception("id phone : Preparazione fallita. Errore: ". getErrorConnection());
+            $stmt->bind_param("i", $user[ID_USER]);
+            if(!$stmt->execute()) throw new Exception("id phone : Selezione fallita. Errore: ". getErrorConnection());
+            $stmt->bind_result($id_phone);
+            $stmt->fetch();
+            $stmt->close();
+    
+            if(strcmp($id_phone, $user[IMEI])!=0){
+              startTransaction();
+              $stmt = getConnection()->prepare("UPDATE login SET id_phone = ? WHERE id_user=? ");
+              if(!$stmt) throw new Exception("id phone : Preparazione fallita. Errore: ". getErrorConnection());
+              $stmt->bind_param("si", $user[IMEI], $user[ID_USER]);
+              if(!$stmt->execute()) throw new Exception("id phone : Update fallito. Errore: ". getErrorConnection());
+              $stmt->close();
+              commitTransaction();
+              $img = self::getImageProfileForIdUser($user[ID_USER]);
+            }
+     }
+    }catch(Exception $e){
+      rollbackTransaction();
+      throw new Exception($e->getMessage());
+    }
+    closeConnection();
+    
+    if($img==null){
+        return array(USER => $user + self:: getUserForId($user[ID_USER]),
+                    WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
+                    WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
+                    APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))) ;
+    }else{
+        return array(USER => $user + self:: getUserForId($user[ID_USER]) + $img,
+                     WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
+                     WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
+                     APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))) ;
+
+    }
+  }
 
   static function getImageProfileForIdUser($id){
         if(connect()){

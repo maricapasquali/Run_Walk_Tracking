@@ -76,9 +76,6 @@ public class ApplicationActivity extends CommonActivity
             }
             if(workouts==null) workouts = new ArrayList<>();
             if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
-            // TODO: 11/26/2019 PER TEST MAPROUTE
-            // StatisticsData statisticsData = StatisticsData.create(this, Measure.Type.WEIGHT);statisticsData.setValue(70.0);
-            // statisticsWeight.add(statisticsData);
         }
     }
 
@@ -86,7 +83,7 @@ public class ApplicationActivity extends CommonActivity
         navigationBarBottom = findViewById(R.id.nav_bar);
 
         navigationBarBottom.setOnNavigationItemSelectedListener(menuItem -> {
-            Log.e(TAG, "setOnNavigationItemSelectedListener");
+            Log.d(TAG, "setOnNavigationItemSelectedListener");
             final int previousItem = navigationBarBottom.getSelectedItemId();
             final int nextItem = menuItem.getItemId();
             if(previousItem!=nextItem){
@@ -159,6 +156,19 @@ public class ApplicationActivity extends CommonActivity
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState : " + outState);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "onRestart");
+    }
+
 
     @Override
     public void onBackPressed() {

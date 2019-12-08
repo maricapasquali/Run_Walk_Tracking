@@ -21,6 +21,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.exception.SomeErrorHttpException;
 import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
@@ -45,6 +46,8 @@ public class HttpRequest {
     public static class Constant{
         private static final String ERROR = "Error";
 
+        public static final String RESET = "reset";
+        public static final String IMEI = "imei";
         public static final String FIRST_LOGIN ="first_login";
         public static final String TOKEN = "token";
         public static final String ID_USER = "id_user";
@@ -86,6 +89,10 @@ public class HttpRequest {
 
         public static final String ENERGY = "energy";
 
+
+        private static List<String> fieldRequiredForReset(){
+            return Arrays.asList(IMEI);
+        }
         //ACCOUNT
         private static List<String> fieldRequiredForSignUp(){
             return Arrays.asList(NAME, LAST_NAME, GENDER, BIRTH_DATE, EMAIL,
@@ -94,15 +101,15 @@ public class HttpRequest {
         }
 
         private static List<String> fieldRequiredForSignIn(){
-            return Arrays.asList(USERNAME, PASSWORD);
+            return Arrays.asList(USERNAME, PASSWORD, IMEI);
         }
 
         private static List<String> fieldRequiredForFirstSignIn(){
-            return Arrays.asList(ID_USER, TOKEN);
+            return Arrays.asList(ID_USER, TOKEN, IMEI);
         }
 
         private static List<String> fieldRequiredForImgProfile() {
-            return Collections.singletonList(ID_USER);
+            return Arrays.asList(ID_USER, IMEI);
         }
 
         private static List<String> fieldRequiredForUpdatePassword(){
@@ -169,6 +176,8 @@ public class HttpRequest {
 
     private static final String DATA_AFTER_ACCESS = ACCOUNT + "data_after_access.php";
 
+    private static final String RESET = SERVER +"reset.php";
+
     // ACCOUNT
     private static final String SIGN_UP = ACCOUNT + "signup.php";
     private static final String FIRST_SIGN_IN = ACCOUNT + "first_signin.php";
@@ -196,6 +205,11 @@ public class HttpRequest {
 
     private static RequestQueue queue;
 
+    public static boolean requestReset(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+            throws InternetNoAvailableException {
+        check(bodyJson, HttpRequest.Constant.fieldRequiredForReset());
+        return HttpRequest.requestJsonPostToServerVolley(context, RESET, bodyJson,responseJsonListener);
+    }
 
     // ACCOUNT
     public static boolean requestSignUp(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
@@ -410,6 +424,8 @@ public class HttpRequest {
                 queue.stop();
             } catch (SomeErrorHttpException e) {
                 error(context, e.getMessage(), e);
+                // TODO: 12/8/2019 NON LO SO 
+                DefaultPreferencesUser.unSetUserLogged(context);
             }
         }, error -> error(context, error.toString(), null)){
            @Override

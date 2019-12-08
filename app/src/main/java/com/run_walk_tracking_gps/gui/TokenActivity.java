@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +12,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.utilities.DeviceUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +37,7 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void listenerAction() {
         access.setOnClickListener(v ->{
@@ -43,7 +47,8 @@ public class TokenActivity extends CommonActivity implements  Response.Listener<
             else{
                 try {
                     JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
-                                                          .put(HttpRequest.Constant.TOKEN, token.getText().toString());
+                                                          .put(HttpRequest.Constant.TOKEN, token.getText().toString())
+                                                          .put(HttpRequest.Constant.IMEI, DeviceUtilities.getIdDevice(this));
 
                     HttpRequest.requestFirstSignIn(this, bodyJson, this );
 

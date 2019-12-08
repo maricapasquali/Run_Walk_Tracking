@@ -9,6 +9,7 @@ define("FILTER_NOT_VALID", "Filtro non valido");
 define("WORKOUTS", "workouts");
 define("WORKOUT", "workout");
 define("FILTER", "filter");
+define("RESET", "reset");
 
 define("ID", "id");
 define("ID_NOT_SET", "id non settato");
@@ -23,6 +24,7 @@ define("UPDATE", "update");
 define("DELETE", "delete");
 
 //User
+define("IMEI", "imei");
 define("ID_USER", "id_user");
 define("NAME", "name");
 define("LAST_NAME", "last_name");

@@ -20,9 +20,9 @@ public class LocationUtilities {
     // TODO: 12/5/2019 DA RIGUARDARE
     public static LocationRequest createLocationRequest() {
         return LocationRequest.create()
-                              .setInterval(10000)
+                              .setInterval(5000)
                               .setFastestInterval(5000)
-                              .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                              .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     public static void setLocationPermission(final Activity activity) {

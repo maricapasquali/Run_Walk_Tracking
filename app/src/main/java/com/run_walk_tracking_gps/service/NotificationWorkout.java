@@ -45,7 +45,7 @@ public class NotificationWorkout {
         this.remoteViewBig = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_big);
 
 
-        Intent notificationIntent = new Intent(context, context.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent notificationIntent = new Intent(context, context.getClass()).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent onClickNotificationIntent = PendingIntent.getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 

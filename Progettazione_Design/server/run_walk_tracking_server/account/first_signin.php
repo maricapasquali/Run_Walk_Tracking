@@ -6,11 +6,11 @@ require_once("../dao/StatisticsDao.php");
 require_once("../dao/WorkoutDao.php");
 try{
   $code = bodyRequest();
-  if(!isset($code[ID_USER]) || !isset($code[TOKEN])) throw new Exception(URL_NOT_VALID);
+  if(!isset($code[ID_USER]) || !isset($code[TOKEN])|| !isset($code[IMEI])) throw new Exception(URL_NOT_VALID);
 
    UserDao::checkToken($code[ID_USER], $code[TOKEN]);
 
-   print json_encode(UserDao::dataAfterAccess(array(ID_USER =>$code[ID_USER])));
+   print json_encode(UserDao::dataAfterAccess(array(ID_USER =>$code[ID_USER], IMEI=>$code[IMEI])));
 
 }catch(Exception $e){
   print json_errors($e->getMessage());

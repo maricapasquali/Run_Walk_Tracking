@@ -30,7 +30,7 @@ import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.List;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback{
+public class MapFragment extends Fragment implements OnMapReadyCallback, HomeFragment.OnBlockScreenClickListener {
 
     private static final String TAG = MapFragment.class.getName();
 
@@ -109,32 +109,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
         mapView.onResume();
         super.onResume();
-        Log.d(TAG, "onResume");
-        /* if (LocationUtilities.needPermission() || !LocationUtilities.isGpsEnable(getContext())) {
-            mapView.getMapAsync(this);
-        }
-
-       String id_user = Preferences.getIdUserLogged(getContext());
-        if(!LocationUtilities.Request.setLocationOnOff(getContext(),Integer.valueOf(id_user), response -> {
-            try {
-                if(HttpRequest.someError(response) || !response.getBoolean(HttpRequest.Constant.UPDATE)){
-                    Toast.makeText(getContext(), response.toString(), Toast.LENGTH_LONG).show();
-                }else {
-                    JSONObject appJson = Preferences.getAppJsonUserLogged(getContext(), id_user);
-                    ((JSONObject)appJson.get(FieldDataBase.SETTINGS.toName())).put(FieldDataBase.LOCATION.toName(),
-                            LocationUtilities.isGpsEnable(getContext()));
-                    Preferences.getSharedPreferencesSettingUserLogged(getContext()).edit().putString(id_user, appJson.toString()).apply();
-                    Log.e(TAG, "Location Settings Changed");
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, e.getMessage());
-            }
-        })){
-            Log.e(TAG, "Not change");
-        }
-        */
     }
 
     @Override
@@ -198,6 +175,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         catch (NoGPSException ex) { ex.alert();  }
     }
 
+    @Override
     public void onBlockScreenClickListener(boolean is) {
         Log.d(TAG, "Block/Unblock into map_fragment");
         myLocation.setClickable(is);

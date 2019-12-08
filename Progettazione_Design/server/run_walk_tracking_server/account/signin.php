@@ -6,12 +6,12 @@ require_once("../dao/WorkoutDao.php");
 require_once("../dao/SettingsDao.php");
 try{
   $userCredentials = bodyRequest();
-  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD]))
+  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD]) || !isset($userCredentials[IMEI]))
       throw new Exception(URL_NOT_VALID);
 
    $user = UserDao::checkCredential($userCredentials[USERNAME], $userCredentials[PASSWORD]);
    if($user[ID_USER]==NULL) throw new Exception("USER NON TROVATO");
-
+   $user[IMEI]=$userCredentials[IMEI];
    // NEL CASO SIA LA PRIMA VOLTA USA TOKEN INVIATO
    $result = UserDao::checkFirstLogin($user);
    if($result)

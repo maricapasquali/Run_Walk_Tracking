@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 

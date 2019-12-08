@@ -1,8 +1,13 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -16,6 +21,7 @@ import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.utilities.DeviceUtilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,29 +29,71 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 public class SplashScreenActivity extends AppCompatActivity implements Response.Listener<JSONObject> {
+
 
     private final static String TAG = SplashScreenActivity.class.getName();
     private static Intent intent;
 
     private JSONObject bodyJson;
+
+    private boolean requestPermission = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onResume() {
         super.onResume();
+        String idDevice;
+        try {
+            idDevice = DeviceUtilities.getIdDevice(this);
+            Log.d(TAG, "IMEI = "+idDevice);
+        }catch (SecurityException e){
+            DeviceUtilities.requestStatePhonePermission(this);
+            requestPermission=true;
+            return;
+        }
+
+        if(requestPermission){
+            Log.e(TAG, "SET NULL ID="+idDevice);
+
+            try {
+                bodyJson = new JSONObject().put(HttpRequest.Constant.IMEI, idDevice);
+                HttpRequest.requestReset(this, bodyJson, response -> {
+                    try {
+                        if(response.has(HttpRequest.Constant.RESET) && response.getBoolean(HttpRequest.Constant.RESET)){
+                            go(idDevice);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (InternetNoAvailableException e) {
+                e.alert();
+            }
+        }else {
+            go(idDevice);
+        }
+
+    }
+
+    private void go(final String idDevice){
         if(DefaultPreferencesUser.isJustUserLogged(this)){
             int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
 
             try {
                 // REQUEST IMAGE PROFILE, WEIGHTS AND WORKOUTS
-                bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user);
+                bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
+                                           .put(HttpRequest.Constant.IMEI, idDevice);
                 HttpRequest.requestDataAfterAccess(this, bodyJson, this);
 
             } catch (JSONException e) {
@@ -53,8 +101,6 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
             } catch (InternetNoAvailableException e) {
                 e.alert();
             }
-            // TODO: 11/26/2019 PER TEST MAPROUTE
-            //startActivity(new Intent(this, ApplicationActivity.class));
 
         }else {
             intent = new Intent(SplashScreenActivity.this, BootAppActivity.class);
@@ -83,11 +129,14 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 context.startActivity(intent);
 
             } else {
-
-                UserSingleton.getInstance().setUser(context, new JSONObject(response.getString(HttpRequest.Constant.USER)));
+                JSONObject user = (JSONObject)response.get(HttpRequest.Constant.USER);
+                UserSingleton.getInstance().setUser(context, user);
                 Log.d(TAG, UserSingleton.getInstance().getUser().toString());
 
-                DefaultPreferencesUser.setImage(context, response);
+                if(user.has(HttpRequest.Constant.IMG_ENCODE)) {
+                    DefaultPreferencesUser.setImage(context, response);
+                    Log.e(TAG, "Set Image");
+                }
                 DefaultPreferencesUser.setSettings(context, response);
 
                 intent = new Intent(context, ApplicationActivity.class);

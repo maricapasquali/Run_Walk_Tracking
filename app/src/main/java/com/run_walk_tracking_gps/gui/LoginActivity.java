@@ -1,7 +1,9 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,6 +17,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
+import com.run_walk_tracking_gps.utilities.DeviceUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +31,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
     private TextView forgotPassword;
     private Button login;
 
+    private JSONObject bodyJson;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -40,6 +44,7 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
         login = findViewById(R.id.login);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void listenerAction() {
         forgotPassword.setOnClickListener(v ->{
@@ -54,8 +59,9 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                 try {
                     final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
 
-                    final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText().toString())
-                                                                .put(HttpRequest.Constant.PASSWORD, hash_password);
+                    bodyJson = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText().toString())
+                                               .put(HttpRequest.Constant.PASSWORD, hash_password)
+                                               .put(HttpRequest.Constant.IMEI, DeviceUtilities.getIdDevice(this));
 
                     HttpRequest.requestSignIn(this, bodyJson, this);
 
@@ -66,6 +72,12 @@ public class LoginActivity extends CommonActivity implements  Response.Listener<
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        HttpRequest.cancelAllRequestPending(bodyJson);
     }
 
     @Override

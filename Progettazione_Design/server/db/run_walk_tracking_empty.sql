@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Creato il: Dic 07, 2019 alle 18:07
+-- Creato il: Dic 08, 2019 alle 20:23
 -- Versione del server: 10.3.16-MariaDB
 -- Versione PHP: 7.3.10
 
@@ -19,10 +19,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `id11862809_run_walk_tracking`
+-- Database: `id11865186_runwalktracking`
 --
-CREATE DATABASE IF NOT EXISTS `id11862809_run_walk_tracking` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `id11862809_run_walk_tracking`;
+CREATE DATABASE IF NOT EXISTS `id11865186_runwalktracking` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+USE `id11865186_runwalktracking`;
 
 -- --------------------------------------------------------
 
@@ -45,7 +45,8 @@ CREATE TABLE `login` (
   `id_user` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `hash_password` char(60) NOT NULL,
-  `date` datetime DEFAULT NULL
+  `date` datetime DEFAULT NULL,
+  `id_phone` char(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -98,21 +99,21 @@ CREATE TABLE `target_default` (
 --
 DELIMITER $$
 CREATE TRIGGER `after_insert_target_default` AFTER INSERT ON `target_default` FOR EACH ROW BEGIN
-DECLARE run_sport int DEFAULT "RUN";
-DECLARE walk_sport int DEFAULT "WALK";
+DECLARE run_sport varchar(20) DEFAULT "RUN";
+DECLARE walk_sport varchar(20) DEFAULT "WALK";
 
 if new.target="MARATHON"
 THEN
 
-	INSERT INTO sport_default (id_user, sport) 
+	INSERT INTO sport_default (id_user, sport)
     VALUES(new.id_user, run_sport);
 
 ELSEIF new.target="LOSE_WEIGHT"
 THEN
 
-	INSERT INTO sport_default (id_user, sport) 
+	INSERT INTO sport_default (id_user, sport)
     VALUES(new.id_user, walk_sport);
-    
+
 end if;
 
 END

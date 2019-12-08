@@ -25,7 +25,6 @@ import java.util.zip.DataFormatException;
 public final class DateHelper {
     private final static String TAG = DateHelper.class.getName();
 
-    private int HOUR;
     private boolean is24H;
     private static Locale locale;
     private Calendar calendar;
@@ -35,9 +34,9 @@ public final class DateHelper {
 
         calendar = Calendar.getInstance(locale);
         is24H = !locale.equals(Locale.ENGLISH);
-        HOUR = is24H ? Calendar.HOUR_OF_DAY : Calendar.HOUR;
-        Log.d(TAG, "Is 24 H = "+is24H);
-        Log.d(TAG, "Time Zone = "+ TimeZone.getDefault().getID());
+
+        /*Log.d(TAG, "Is 24 H = "+is24H);
+        Log.d(TAG, "Time Zone = "+ TimeZone.getDefault().getID());*/
     }
 
     public static DateHelper create(Context context){
@@ -118,9 +117,5 @@ public final class DateHelper {
 // GETTER
     public String getMonth(int month){
         return (new DateFormatSymbols(locale).getMonths()[month-1]).toUpperCase();
-    }
-
-    public int getHour() {
-        return HOUR;
     }
 }

@@ -2,34 +2,33 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.run_walk_tracking_gps">
-    <!-- permissions for map -->
+
+    <!-- Permission for IMEI code -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+    <!-- Permission for map -->
     <uses-permission android:name="com.example.permission.MAPS_RECEIVE" />
-    <!--
-     The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-     Google Maps Android API v2, but you must specify either coarse or fine
-     location permissions for the 'MyLocation' functionality.
-    -->
+
+    <!-- Permission Position  -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Permission to Take or Write image -->
+
+    <!-- Permissions to Take or Write image -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <!-- Permission to speech with server -->
+    <!-- Permissions to speech with server -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <!-- Permission to FOREGROUND SERVICE -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-    <!-- Permission to SENSOR (distance) -->
-    <uses-feature android:name="android.hardware.sensor.stepcounter" />
-
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
+    <!-- Feature SENSOR (distance) -->
+    <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
 
 
-    <!--<protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />-->
 
     <application
         android:allowBackup="true"
@@ -138,6 +137,7 @@
         <service android:name=".service.TimeService" />
 
         <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
+
     </application>
 
 </manifest>

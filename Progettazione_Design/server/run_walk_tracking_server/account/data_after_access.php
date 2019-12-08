@@ -8,7 +8,7 @@ try{
 
   $user = bodyRequest();
 
-  if(!isset($user[ID_USER]))
+  if(!isset($user[ID_USER]) || !isset($user[IMEI]))
     throw new Exception(URL_NOT_VALID);
 
   print json_encode(UserDao::dataAfterAccess($user));
