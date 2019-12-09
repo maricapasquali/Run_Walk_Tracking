@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.service;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -18,7 +19,7 @@ import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
 public class NotificationWorkout {
 
-    private static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
     // REQUEST
     private static final int REQUEST_CODE_RESUME = 5;
@@ -27,7 +28,6 @@ public class NotificationWorkout {
     private static final int REQUEST_CODE_STOP = 4;
 
     private Context context;
-    private Service service;
 
     private NotificationHelper notificationHelper;
     private NotificationCompat.Builder notificationBuilder;
@@ -36,17 +36,17 @@ public class NotificationWorkout {
     private RemoteViews remoteViewBig;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public NotificationWorkout(Context c, Service service){
+    private NotificationWorkout(Context c){
         this.context = c;
-        this.service = service;
+
         this.notificationHelper = new NotificationHelper(context);
 
         this.remoteViewSmall  = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_small);
         this.remoteViewBig = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_big);
 
 
-        Intent notificationIntent = new Intent(context, context.getClass()).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent onClickNotificationIntent = PendingIntent.getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final Intent notificationIntent = new Intent(context, context.getClass()).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        final PendingIntent onClickNotificationIntent = PendingIntent.getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
         this.notificationBuilder = this.notificationHelper.getNotificationBuilder(context, NotificationHelper.CHANNEL_1)
@@ -64,6 +64,11 @@ public class NotificationWorkout {
         setListener();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static NotificationWorkout create(Context context){
+        return new NotificationWorkout(context);
+    }
+
     private void setListener(){
         Intent pauseClick = new Intent(context, ReceiverNotificationButtonHandler.class).setAction(ActionReceiver.PAUSE_ACTION);
         PendingIntent pausePendingClick = PendingIntent.getBroadcast(context, REQUEST_CODE_PAUSE, pauseClick, 0);
@@ -79,28 +84,35 @@ public class NotificationWorkout {
         remoteViewBig.setOnClickPendingIntent(R.id.restart_workout, restartPendingClick );
     }
 
-    public void startForeground() {
-        service.startForeground(NOTIFICATION_ID, notificationBuilder.build());
+    public Notification build() {
+        return notificationBuilder.build();
     }
 
-    public void update(int sec, double distanceInKm, double energyInKcal) {
+    public void updateDuration(int sec) {
         // aggiorno tramite builder il contenuto della notifica
-        updateRemoteView(remoteViewBig, sec, distanceInKm, energyInKcal);
-        updateRemoteView(remoteViewSmall, sec, distanceInKm, energyInKcal);
+        remoteViewBig.setTextViewText(R.id.time_workout, Measure.DurationUtilities.format(sec));
+        remoteViewSmall.setTextViewText(R.id.time_workout, Measure.DurationUtilities.format(sec));
 
         // invio la notifica aggiornata, per indicare che è sempre la stessa basta usere lo stesso ID di notifica.
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    private void updateRemoteView(RemoteViews view, int sec, double distanceInKm, double energyInKcal){
-        view.setTextViewText(R.id.time_workout, Measure.DurationUtilities.format(sec));
-        view.setTextViewText(R.id.distance_workout, Measure.create(context, Measure.Type.DISTANCE , distanceInKm).toString(true));
-        view.setTextViewText(R.id.calories_workout, Measure.create(context, Measure.Type.ENERGY , energyInKcal).toString(true));
+    public void updateDistance(double distanceInKm) {
+        // aggiorno tramite builder il contenuto della notifica
+        remoteViewBig.setTextViewText(R.id.distance_workout, Measure.create(context, Measure.Type.DISTANCE , distanceInKm).toString(true));
+        remoteViewSmall.setTextViewText(R.id.distance_workout, Measure.create(context, Measure.Type.DISTANCE , distanceInKm).toString(true));
+
+        // invio la notifica aggiornata, per indicare che è sempre la stessa basta usere lo stesso ID di notifica.
+        notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    public void cancel(){
-        notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
-        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    public void updateEnergy(double energyInKcal) {
+        // aggiorno tramite builder il contenuto della notifica
+        remoteViewBig.setTextViewText(R.id.calories_workout, Measure.create(context, Measure.Type.ENERGY , energyInKcal).toString(true));
+        remoteViewSmall.setTextViewText(R.id.calories_workout, Measure.create(context, Measure.Type.ENERGY , energyInKcal).toString(true));
+
+        // invio la notifica aggiornata, per indicare che è sempre la stessa basta usere lo stesso ID di notifica.
+        notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     public void pauseClicked() {
@@ -119,13 +131,18 @@ public class NotificationWorkout {
     }
 
     public void stopClicked() {
-        cancel();
+        notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
+        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
-    public void setInvisibleButton() {
+    public void lockClicked() {
         remoteViewBig.setViewVisibility(R.id.restart_workout, View.GONE);
         remoteViewBig.setViewVisibility(R.id.stop_workout, View.GONE );
         remoteViewBig.setViewVisibility(R.id.pause_workout, View.GONE);
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    public void unlockClicked() {
+        setVisibleButton(true);
     }
 }

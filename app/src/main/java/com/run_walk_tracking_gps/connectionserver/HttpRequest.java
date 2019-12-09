@@ -425,7 +425,7 @@ public class HttpRequest {
             } catch (SomeErrorHttpException e) {
                 error(context, e.getMessage(), e);
                 // TODO: 12/8/2019 NON LO SO 
-                DefaultPreferencesUser.unSetUserLogged(context);
+                //DefaultPreferencesUser.unSetUserLogged(context);
             }
         }, error -> error(context, error.toString(), null)){
            @Override

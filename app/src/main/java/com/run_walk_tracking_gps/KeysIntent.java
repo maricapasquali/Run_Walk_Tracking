@@ -1,5 +1,7 @@
 package com.run_walk_tracking_gps;
 
+import java.text.SimpleDateFormat;
+
 public class KeysIntent {
 
     public final static String WORKOUTS = "Workouts";
@@ -25,8 +27,8 @@ public class KeysIntent {
     public final static String CHANGED_USER = "Changed User";
 
 
-    public static final String CHANGED_LANGUAGE = "Changed Language";
-
-
+    public static final String NOTIFICATION = "Notification";
     public static final String SECONDS = "Seconds" ;
+    public static final String DISTANCE = "Distance" ;
+    public static final String ENERGY = "Energy" ;
 }

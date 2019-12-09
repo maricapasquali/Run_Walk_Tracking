@@ -134,10 +134,9 @@
             android:parentActivityName=".gui.SettingActivity" />
 
         <!-- SERVICE -->
-        <service android:name=".service.TimeService" />
-
+        <!--<service android:name=".service.TimeService" />-->
+        <service android:name=".service.WorkoutService"/>
         <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
-
     </application>
 
 </manifest>

@@ -26,7 +26,7 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.service.MapRouteService;
-import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
+import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @SuppressLint("StaticFieldLeak")
-public class HomeFragment extends Fragment implements MapRouteService.OnChangeLocationListener{
+public class HomeFragment extends Fragment{
 
     private static final String TAG = HomeFragment.class.getName();
 
@@ -59,12 +59,10 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
 
     private ArrayList<Measure> workoutMeasure = new ArrayList<>();
 
-    private Workout workout;
-    private WorkoutServiceHandler workoutService;
+    //private Workout workout;
+    private WorkoutService workoutService;
 
-
-
-     public static HomeFragment createWithArgument(double w) {
+    public static HomeFragment createWithArgument(double w) {
         final HomeFragment homeFragment = new HomeFragment();
         Bundle args = new Bundle();
         args.putDouble(WEIGHT, w);
@@ -92,27 +90,32 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
         if (bundle != null) {
                 double weight = bundle.getDouble(WEIGHT);
+                workoutService = WorkoutService.createService(getContext(), weight, new WorkoutService.OnReceiverListener() {
+                    @Override
+                    public void onReceiverDuration(int sec) {
+                        workout_duration.setText(Measure.DurationUtilities.format(sec));
+                    }
 
-                workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
-                    workout_duration.setText(Measure.DurationUtilities.format(sec));
-                    workout.getDuration().setValue(true, (double) sec);
+                    @Override
+                    public void onReceiverDistance(double distance) {
+                        workout_distance.setText(Measure.create(getContext(), Measure.Type.DISTANCE,distance).toString(true));
+                    }
 
-                    workout.getDistance().setValue(true, distance);
-                    workout_distance.setText(workout.getDistance().toString(true));
+                    @Override
+                    public void onReceiverEnergy(double energy) {
+                        workout_energy.setText(Measure.create(getContext(), Measure.Type.ENERGY, energy).toString(true));
+                    }
+                }, (polylineOptions)->{
+                    Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
+                    if(fragment instanceof MapFragment) ((MapFragment)fragment).addPolyLine(polylineOptions);
 
-                    workout.getCalories().setValue(true, energy);
-                    workout_energy.setText(workout.getCalories().toString(true));
-                    //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: " + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
-                }, this);
+                });
             }
      }
-
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -143,7 +146,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
 
         setListener();
 
-        workout = WorkoutBuilder.create(getContext()).build();
+        //workout = WorkoutBuilder.create(getContext()).build();
         return rootView;
     }
 
@@ -193,19 +196,12 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         });
 
         stop.setOnClickListener(v -> {
-            String listCoord = workoutService.getMapRouteService().getListCoordinates();
+
+            final Workout workout = workoutService.getWorkout();
             // STOP SERVICE
             workoutService.stop();
             // Auto - Workout
-            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
-                    .setMapRoute(listCoord)
-                    .setDate(Calendar.getInstance().getTime())
-                    .setDistance(workout.getDistance().getValue(false))
-                    .setDuration(workout.getDuration().getValue(true).intValue())
-                    .setCalories(workout.getCalories().getValue(false))
-                    .setMiddleSpeed()
-                    .setSport(workout.getSport())
-                    .build());
+            onStopWorkoutClickListener.OnStopWorkoutClick(workout);
         });
 
         block_screen.setOnClickListener(v -> {
@@ -214,7 +210,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             unlock_screen.setVisibility(View.VISIBLE);
             setClickable(false);
             // BLOCK (remove controller button) NOTIFICATION SERVICE
-            workoutService.block();
+            workoutService.lock();
         });
 
         unlock_screen.setOnSlideCompleteListener(v ->{
@@ -225,7 +221,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             block_screen.setVisibility(View.VISIBLE);
             setClickable(true);
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
-            workoutService.unblock();
+            workoutService.unlock();
         });
 
     }
@@ -287,9 +283,9 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         info_workout.setVisibility(isIndoor?View.GONE : View.VISIBLE);
         info_workout_numbers.setVisibility(isIndoor?View.GONE : View.VISIBLE);
 
-        workout_duration.setText(isWorkoutRunning() ? workout.getDuration().toString(true): workoutMeasure.get(0).toString(true));
-        workout_distance.setText(isWorkoutRunning() ? workout.getDistance().toString(true) : workoutMeasure.get(1).toString(true));
-        workout_energy.setText(isWorkoutRunning() ? workout.getCalories().toString(true): workoutMeasure.get(2).toString(true));
+        workout_duration.setText(isWorkoutRunning() ? workoutService.getWorkout().getDuration().toString(true): workoutMeasure.get(0).toString(true));
+        workout_distance.setText(isWorkoutRunning() ? workoutService.getWorkout().getDistance().toString(true) : workoutMeasure.get(1).toString(true));
+        workout_energy.setText(isWorkoutRunning() ? workoutService.getWorkout().getCalories().toString(true): workoutMeasure.get(2).toString(true));
 
     }
 
@@ -297,8 +293,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
 
-        if(isWorkoutRunning())
-            workoutService.stop();
+        if(isWorkoutRunning()) workoutService.stop();
         super.onDestroy();
     }
 
@@ -310,14 +305,6 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         return Arrays.asList(pause, restart, stop);
     }
 
-    // COMMUNICATION WITH MAP FRAGMENT
-    @Override
-    public void addPolyLineOnMap(PolylineOptions options) {
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
-        if(fragment instanceof MapFragment){
-            ((MapFragment)fragment).addPolyLine(options);
-        }
-    }
 
     // COMMUNICATION WITH ACTIVITY
     public interface OnStopWorkoutClickListener{

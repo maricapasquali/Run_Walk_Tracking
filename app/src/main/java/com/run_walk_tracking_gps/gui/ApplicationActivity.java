@@ -1,9 +1,12 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,13 +15,24 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.UserSingleton;
+import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
+import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
+import com.run_walk_tracking_gps.utilities.DeviceUtilities;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 
 public class ApplicationActivity extends CommonActivity
@@ -51,6 +65,7 @@ public class ApplicationActivity extends CommonActivity
     private ArrayList<Workout> workouts = new ArrayList<>();
     private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         Log.d(TAG,"init");
@@ -69,7 +84,7 @@ public class ApplicationActivity extends CommonActivity
                 statisticsWeight.forEach(s -> s.setContext(this));
 
                 if(savedInstanceState==null){
-                    selectActiveFragment(HomeFragment.class);
+                   selectActiveFragment(HomeFragment.class);
                 }else {
                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
                 }
@@ -103,7 +118,6 @@ public class ApplicationActivity extends CommonActivity
             }
             return true;
         });
-
     }
 
 
@@ -168,7 +182,6 @@ public class ApplicationActivity extends CommonActivity
         super.onRestart();
         Log.d(TAG, "onRestart");
     }
-
 
     @Override
     public void onBackPressed() {

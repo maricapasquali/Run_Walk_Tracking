@@ -18,6 +18,7 @@ import com.run_walk_tracking_gps.utilities.LocationUtilities;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: 12/9/2019 METTERLO IN 'WORKOUTSERVICE' 
 public class MapRouteService {
 
     private static final String TAG = MapRouteService.class.getName();
