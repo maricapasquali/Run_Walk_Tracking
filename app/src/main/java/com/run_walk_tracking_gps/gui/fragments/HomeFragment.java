@@ -296,9 +296,10 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        super.onDestroy();
 
-        if(isWorkoutRunning()) workoutService.stop();
+        if(isWorkoutRunning())
+            workoutService.stop();
+        super.onDestroy();
     }
 
     public boolean isWorkoutRunning(){

@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,7 @@ import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -83,7 +85,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         gender = findViewById(R.id.modify_profile_gender);
         birthDate = findViewById(R.id.modify_profile_birth_date);
         height = findViewById(R.id.modify_profile_height);
-// TODO: 11/27/2019  CHECK SE EDITTEXT SONO VUOTI
+
         if(getIntent()!=null){
             oldUser = (User)getIntent().getParcelableExtra(KeysIntent.PROFILE);
             oldUser.setContext(this);
@@ -181,11 +183,11 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 dialog = RequestDialog.create(ModifyUserActivity.this);
                 dialog.show();
 
-                user.setName(name.getText().toString());
-                user.setLastName(lastName.getText().toString());
-                user.setEmail(email.getText().toString());
-                user.setCity(city.getText().toString());
-                user.setPhone(tel.getText().toString());
+                user.setName(TextUtils.isEmpty(name.getText())? oldUser.getName() : name.getText().toString());
+                user.setLastName(TextUtils.isEmpty(lastName.getText())? oldUser.getName() : lastName.getText().toString());
+                user.setEmail(TextUtils.isEmpty(email.getText())? oldUser.getName() : email.getText().toString());
+                user.setCity(TextUtils.isEmpty(city.getText())? oldUser.getName() : city.getText().toString());
+                user.setPhone(TextUtils.isEmpty(tel.getText())? oldUser.getName() : tel.getText().toString());
 
                 // REQUEST UPDATE USER
                 saveUserChanged(dialog);
