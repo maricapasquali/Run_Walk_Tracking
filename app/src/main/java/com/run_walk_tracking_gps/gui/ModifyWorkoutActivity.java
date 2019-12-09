@@ -156,7 +156,7 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
 
             final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
             if(!workout.getDate().equals(oldWorkout.getDate())){
-                bodyJson.put(HttpRequest.Constant.DATE, workout.getDate());
+                bodyJson.put(HttpRequest.Constant.DATE, workout.getDate().getTime());
             }
             if(!workout.getSport().equals(oldWorkout.getSport())){
                 bodyJson.put(HttpRequest.Constant.SPORT, workout.getSport());

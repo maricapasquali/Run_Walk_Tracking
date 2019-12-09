@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 
 import java.util.LinkedHashMap;
@@ -72,7 +73,7 @@ public class Workout implements Parcelable, Cloneable{
                 workoutsList.get(i).setIdWorkout(w.getInt(HttpRequest.Constant.ID_WORKOUT));
                 String map = w.getString(HttpRequest.Constant.MAP_ROUTE);
                 if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
-                workoutsList.get(i).setDate(w.getString(HttpRequest.Constant.DATE));
+                workoutsList.get(i).setDate(w.getLong(HttpRequest.Constant.DATE));
                 workoutsList.get(i).getDuration().setValue(true, (double)w.getInt(HttpRequest.Constant.DURATION));
                 workoutsList.get(i).getDistance().setValue(true, w.getDouble(HttpRequest.Constant.DISTANCE));
                 workoutsList.get(i).getCalories().setValue(true, w.getDouble(HttpRequest.Constant.CALORIES));
@@ -82,11 +83,9 @@ public class Workout implements Parcelable, Cloneable{
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
             }catch (JSONException e){
                 e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
             }
         }
-
+        workoutsList.sort((w1, w2) -> w2.getDate().compareTo(w1.getDate()));
         return workoutsList;
     }
 
@@ -194,7 +193,7 @@ public class Workout implements Parcelable, Cloneable{
         this.date = date;
     }
 
-    public void setDate(String date) throws ParseException {
+    public void setDate(long date) {
         this.date = DateHelper.create(getContext()).parseShortDateTimeToDate(date);
     }
 
@@ -222,7 +221,7 @@ public class Workout implements Parcelable, Cloneable{
         return new JSONObject()
                 .put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
                 .put(HttpRequest.Constant.MAP_ROUTE, this.getMapRoute())
-                .put(HttpRequest.Constant.DATE, this.getDate())
+                .put(HttpRequest.Constant.DATE, this.getDate().getTime())
                 .put(HttpRequest.Constant.DURATION, this.getDuration().getValue(true))
                 .put(HttpRequest.Constant.DISTANCE, this.getDistance().getValue(true))
                 .put(HttpRequest.Constant.CALORIES, this.getCalories().getValue(true))

@@ -9,15 +9,14 @@ class WorkoutDao {
         {
 
           startTransaction();
-          $date = formatDateWithTime($workout[DATE]);
-
+      
           $keys = array();
           $values = array();
           $typeParam ="";
 
           foreach ($workout as $key => $value) {
             array_push($keys, $key);
-            array_push($values, $key==DATE ? $date : $value);
+            array_push($values, $value);
             if($key==ID_USER || $key==DURATION) $typeParam.="i";
             else if($key==DISTANCE || $key==CALORIES) $typeParam.="d";
             else $typeParam.="s";
@@ -48,7 +47,7 @@ class WorkoutDao {
 
      if(connect()){
         $stmt = getConnection()->prepare("SELECT id_workout, map_route, date, duration, distance, calories, sport
-                                          FROM workout  WHERE id_user =? ORDER BY UNIX_TIMESTAMP(date) DESC;");
+                                          FROM workout  WHERE id_user =?;");
         if(!$stmt) throw new Exception("Workouts : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("i", $id_user);
         if(!$stmt->execute()) throw new Exception("Workouts : Selezione fallita. Errore: ". getErrorConnection());
@@ -68,9 +67,7 @@ class WorkoutDao {
        {
 
          startTransaction();
-         if(isset($workout[DATE])){
-           $date = formatDateWithTime($workout[DATE]);
-         }
+    
 
          $keys = array();
          $values = array();
@@ -78,7 +75,7 @@ class WorkoutDao {
          foreach ($workout as $key => $value) {
            if($key!=ID_WORKOUT){
              array_push($keys, $key);
-             array_push($values, $key==DATE ? $date : $value);
+             array_push($values, $value);
              if($key==DURATION) $typeParam.="i";
              else if($key==DISTANCE || $key==CALORIES || $key==MIDDLE_SPEED) $typeParam.="d";
              else $typeParam.="s";

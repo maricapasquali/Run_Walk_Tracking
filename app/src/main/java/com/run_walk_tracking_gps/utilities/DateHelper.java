@@ -107,9 +107,9 @@ public final class DateHelper {
         return new SimpleDateFormat("yyyy-MM-dd", locale).parse(stringDate);
     }
 
-    public Date parseShortDateTimeToDate(String dateWithTime) throws ParseException {
+    public Date parseShortDateTimeToDate(long dateWithTime)  {
         final Calendar c = Calendar.getInstance(TimeZone.getDefault(), locale);
-        c.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm", locale).parse(dateWithTime));
+        c.setTime(new Date(dateWithTime));
         return c.getTime();
     }
 

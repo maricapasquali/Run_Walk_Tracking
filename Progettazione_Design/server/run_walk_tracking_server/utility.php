@@ -84,10 +84,6 @@ function formatDate($date){
   return  date("Y-m-d", strtotime($date));
 }
 
-function formatDateWithTime($dateTime){
-  return  date("Y-m-d H:i:s", strtotime($dateTime));
-}
-
 function date_end_validity_link(){
   return date('Y-m-d H:i:s',strtotime('+30 minutes',strtotime(current_date())));
 }

@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.1
+-- version 4.9.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Creato il: Dic 08, 2019 alle 20:23
+-- Creato il: Dic 09, 2019 alle 20:09
 -- Versione del server: 10.3.16-MariaDB
 -- Versione PHP: 7.3.10
 
@@ -187,7 +187,7 @@ CREATE TABLE `workout` (
   `id_workout` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
   `map_route` longblob DEFAULT NULL,
-  `date` datetime NOT NULL,
+  `date` bigint(20) NOT NULL,
   `duration` int(10) UNSIGNED NOT NULL,
   `distance` float NOT NULL DEFAULT 0,
   `calories` float NOT NULL DEFAULT 0,
