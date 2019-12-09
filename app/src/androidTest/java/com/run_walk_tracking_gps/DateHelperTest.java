@@ -21,8 +21,10 @@ public class DateHelperTest {
     public void testing(){
         Calendar calendar = DateHelper.create(context).getCalendar();
         Date date = calendar.getTime();
+        long mill = 1576007079550L;
+        Log.e(TAG, new Date(mill).toString());
 
-        final String dateShortToDate = DateHelper.create(context).formatShortToString(date);
+        /*final String dateShortToDate = DateHelper.create(context).formatShortToString(date);
         final String dateShortDateTimeToDate = DateHelper.create(context).formatShortDateTimeToString(date);
         final String dateFullToString = DateHelper.create(context).formatFullToString(date);
 
@@ -36,7 +38,7 @@ public class DateHelperTest {
             Log.e(TAG, DateHelper.create(context).parseShortDateTimeToDate(dateShortDateTimeToDate).toString());
         } catch (ParseException e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 }

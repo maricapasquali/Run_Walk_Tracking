@@ -115,10 +115,9 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
                                                         .put(HttpRequest.Constant.SPORT, workout.getSport())
                                                         .put(HttpRequest.Constant.DURATION, workout.getDuration().getValue(true))
-                                                        .put(HttpRequest.Constant.DATE, workout.getDate());
+                                                        .put(HttpRequest.Constant.DATE, workout.getDate().getTime());
             if(!Measure.isNullOrEmpty(workout.getDistance())) bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue(true));
             if(!Measure.isNullOrEmpty(workout.getCalories())) bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
-
 
             HttpRequest.requestNewWorkout(this, bodyJson, this);
 
