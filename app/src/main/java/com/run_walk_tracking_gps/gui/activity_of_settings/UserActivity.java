@@ -158,7 +158,11 @@ public class UserActivity extends CommonActivity {
 
         findViewById(R.id.profile_img).setOnClickListener(v ->{
             ImageView i = (ImageView)v;
-            ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
+            try {
+                ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
+            }catch (ClassCastException e){
+                Log.e(TAG, "Immagine vuota");
+            }
         });
     }
 
