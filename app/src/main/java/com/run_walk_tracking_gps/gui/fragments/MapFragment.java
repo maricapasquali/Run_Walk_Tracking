@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.app.Activity;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,12 +26,13 @@ import com.run_walk_tracking_gps.exception.NoGPSException;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
+import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.List;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, HomeFragment.OnBlockScreenClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = MapFragment.class.getName();
 
@@ -130,7 +132,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, HomeFra
     }
 
     public void addPolyLine(PolylineOptions options) {
-        googleMap.addPolyline(options);
+        if(googleMap!=null) googleMap.addPolyline(options);
     }
 
     private void addPolyLine(String mapRoute) {
@@ -175,10 +177,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, HomeFra
         catch (NoGPSException ex) { ex.alert();  }
     }
 
-    @Override
+
     public void onBlockScreenClickListener(boolean is) {
         Log.d(TAG, "Block/Unblock into map_fragment");
         myLocation.setClickable(is);
         typeMap.setClickable(is);
     }
+
 }

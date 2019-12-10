@@ -62,6 +62,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".gui.NotificationSplashScreenActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"
+            />
 
         <activity
             android:name=".gui.BootAppActivity"
@@ -134,8 +139,9 @@
             android:parentActivityName=".gui.SettingActivity" />
 
         <!-- SERVICE -->
-        <!--<service android:name=".service.TimeService" />-->
         <service android:name=".service.WorkoutService"/>
+
+        <!-- RECEIVER -->
         <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
     </application>
 

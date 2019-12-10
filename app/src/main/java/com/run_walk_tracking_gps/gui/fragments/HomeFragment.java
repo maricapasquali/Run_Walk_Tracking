@@ -1,10 +1,17 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -16,38 +23,41 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.ncorti.slidetoact.SlideToActView;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-import com.run_walk_tracking_gps.service.MapRouteService;
+import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
+import com.run_walk_tracking_gps.service.MapRouteDraw;
 import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
-@SuppressLint("StaticFieldLeak")
 public class HomeFragment extends Fragment{
 
     private static final String TAG = HomeFragment.class.getName();
 
     private static final String WEIGHT = Measure.Type.WEIGHT.toString();
+    private static final String RESTORE = "restore";
 
     private View rootView;
     private TextView sport;
 
+    private String restore = null;
+    private double weight;
+
     private FloatingActionButton start;
     private static FloatingActionButton pause;
     private static FloatingActionButton restart;
-    private static FloatingActionButton stop;
+    private FloatingActionButton stop;
     private FloatingActionButton block_screen;
     private SlideToActView unlock_screen;
     private TextView workout_duration;
@@ -58,9 +68,96 @@ public class HomeFragment extends Fragment{
     private OnBlockScreenClickListener onBlockScreenClickListener;
 
     private ArrayList<Measure> workoutMeasure = new ArrayList<>();
+    private WorkoutService wService = null;
 
-    //private Workout workout;
-    private WorkoutService workoutService;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection connection = new ServiceConnection() {
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @SuppressLint("RestrictedApi")
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Log.e(TAG, "onServiceConnected");
+            final WorkoutService.LocalBinder binder = (WorkoutService.LocalBinder) service;
+            wService = binder.getService();
+
+            wService.setOnReceiverListener(getContext(), new WorkoutService.OnReceiverListener() {
+
+                @Override
+                public void onReceiverDuration(String sec) {
+                    workout_duration.setText(sec);
+                }
+
+                @Override
+                public void onReceiverDistance(String distance) {
+                    workout_distance.setText(distance);
+                }
+
+                @Override
+                public void onReceiverEnergy(String energy) {
+                    workout_energy.setText(energy);
+                }
+
+                @Override
+                public MapRouteDraw.OnChangeLocationListener onReceiverMapRoute() {
+                    return polylineOptions ->{
+                        if(getFragmentManager()!=null){
+                            Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
+                            if(fragment instanceof MapFragment) ((MapFragment)fragment).addPolyLine(polylineOptions);
+                        }
+                    };
+                }
+            });
+
+            if(restore!=null){
+                switch (restore){
+                    case ActionReceiver.STOP_ACTION:
+                        stop();
+                        break;
+                    case ActionReceiver.RUNNING_WORKOUT: {
+                        setIndoor(!LocationUtilities.isGpsEnable(getContext()));
+                        getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+                        start.setVisibility(View.GONE);
+                        if(wService.isPause()){
+                            pause.setVisibility(View.GONE);
+                            block_screen.setVisibility(View.GONE);
+                            restart.setVisibility(View.VISIBLE);
+                            stop.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            if(wService.isLock()){
+
+                                block_screen.setVisibility(View.GONE);
+                                pause.setVisibility(View.GONE);
+                                unlock_screen.setVisibility(View.VISIBLE);
+                                // TODO: 12/10/2019 NON FUNZIONA
+                                //setClickable(false);
+
+                            }else{
+                                block_screen.setVisibility(View.VISIBLE);
+                                pause.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                    break;
+                }
+
+            }else {
+
+                getContext().startService(new Intent(getContext(), wService.getClass())
+                        .putExtra(KeysIntent.WEIGHT_MORE_RECENT, weight)
+                        .putExtra(KeysIntent.SPORT_DEFAULT, DefaultPreferencesUser.getSportDefault(getContext()).toString()));
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.e(TAG, "onServiceDisconnected");
+            getContext().stopService(new Intent(getContext(), WorkoutService.class));
+        }
+    };
 
     public static HomeFragment createWithArgument(double w) {
         final HomeFragment homeFragment = new HomeFragment();
@@ -70,12 +167,21 @@ public class HomeFragment extends Fragment{
         return homeFragment;
     }
 
+    public static HomeFragment createWithArgument(double w, String restore) {
+        final HomeFragment homeFragment = createWithArgument(w);
+        Bundle args = homeFragment.getArguments()==null? new Bundle(): homeFragment.getArguments();
+        args.putString(RESTORE, restore);
+        homeFragment.setArguments(args);
+        return homeFragment;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try {
+
+        try{
             onStopWorkoutClickListener = (OnStopWorkoutClickListener) context;
-        } catch (ClassCastException e) {
+        }catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnStopWorkoutClickListener");
         }
         try {
@@ -85,38 +191,19 @@ public class HomeFragment extends Fragment{
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
         if (bundle != null) {
-                double weight = bundle.getDouble(WEIGHT);
-                workoutService = WorkoutService.createService(getContext(), weight, new WorkoutService.OnReceiverListener() {
-                    @Override
-                    public void onReceiverDuration(int sec) {
-                        workout_duration.setText(Measure.DurationUtilities.format(sec));
-                    }
-
-                    @Override
-                    public void onReceiverDistance(double distance) {
-                        workout_distance.setText(Measure.create(getContext(), Measure.Type.DISTANCE,distance).toString(true));
-                    }
-
-                    @Override
-                    public void onReceiverEnergy(double energy) {
-                        workout_energy.setText(Measure.create(getContext(), Measure.Type.ENERGY, energy).toString(true));
-                    }
-                }, (polylineOptions)->{
-                    Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
-                    if(fragment instanceof MapFragment) ((MapFragment)fragment).addPolyLine(polylineOptions);
-
-                });
-            }
+            weight = bundle.getDouble(WEIGHT);
+            restore = bundle.getString(RESTORE);
+            Log.d(TAG, "Weight : " + weight +", restore = " + restore);
+        }
      }
 
+    @SuppressLint("RestrictedApi")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -143,11 +230,17 @@ public class HomeFragment extends Fragment{
                             .add(R.id.map, isGps? new MapFragment() : new IndoorFragment(), TAG)
                             .commit();
         setIndoor(!isGps);
-
         setListener();
 
-        //workout = WorkoutBuilder.create(getContext()).build();
+
+        if(restore!=null)
+            getContext().bindService(new Intent(getContext(), WorkoutService.class), connection,  Context.BIND_AUTO_CREATE);
+
         return rootView;
+    }
+
+    public void stop(){
+        stop.callOnClick();
     }
 
     private void setSport(){
@@ -156,7 +249,6 @@ public class HomeFragment extends Fragment{
          sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
          sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
     }
-
 
     @SuppressLint("RestrictedApi")
     private void setListener() {
@@ -170,7 +262,7 @@ public class HomeFragment extends Fragment{
                     pause.setVisibility(View.VISIBLE);
 
                     //START SERVICE
-                    workoutService.start();
+                    getContext().bindService(new Intent(getContext(), WorkoutService.class), connection,  Context.BIND_AUTO_CREATE);
 
                 }).show()
         );
@@ -182,7 +274,7 @@ public class HomeFragment extends Fragment{
             stop.setVisibility(View.VISIBLE);
 
             //PAUSE SERVICE
-            workoutService.pause();
+            wService.pause();
         });
 
         restart.setOnClickListener(v -> {
@@ -192,16 +284,19 @@ public class HomeFragment extends Fragment{
             pause.setVisibility(View.VISIBLE);
 
             //RESTART SERVICE
-            workoutService.restart();
+            wService.restart();
         });
 
         stop.setOnClickListener(v -> {
-
-            final Workout workout = workoutService.getWorkout();
-            // STOP SERVICE
-            workoutService.stop();
             // Auto - Workout
-            onStopWorkoutClickListener.OnStopWorkoutClick(workout);
+            final Workout workout = wService.getWorkout();
+
+            // STOP SERVICE
+            if(getContext()!=null){
+                getContext().unbindService(connection);
+                getContext().stopService(new Intent(getContext(), WorkoutService.class));
+                onStopWorkoutClickListener.OnStopWorkoutClick(workout);
+            }
         });
 
         block_screen.setOnClickListener(v -> {
@@ -210,7 +305,7 @@ public class HomeFragment extends Fragment{
             unlock_screen.setVisibility(View.VISIBLE);
             setClickable(false);
             // BLOCK (remove controller button) NOTIFICATION SERVICE
-            workoutService.lock();
+            wService.lock();
         });
 
         unlock_screen.setOnSlideCompleteListener(v ->{
@@ -221,9 +316,8 @@ public class HomeFragment extends Fragment{
             block_screen.setVisibility(View.VISIBLE);
             setClickable(true);
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
-            workoutService.unlock();
+            wService.unlock();
         });
-
     }
 
     private void setClickable(final boolean is) {
@@ -231,7 +325,7 @@ public class HomeFragment extends Fragment{
         if(fragment instanceof MapFragment){
             ((MapFragment)fragment).onBlockScreenClickListener(is);
         }
-        onBlockScreenClickListener.onBlockScreenClickListener(is);
+        onBlockScreenClickListener.onBlockScreenClick(is);
     }
 
     @Override
@@ -283,28 +377,34 @@ public class HomeFragment extends Fragment{
         info_workout.setVisibility(isIndoor?View.GONE : View.VISIBLE);
         info_workout_numbers.setVisibility(isIndoor?View.GONE : View.VISIBLE);
 
-        workout_duration.setText(isWorkoutRunning() ? workoutService.getWorkout().getDuration().toString(true): workoutMeasure.get(0).toString(true));
-        workout_distance.setText(isWorkoutRunning() ? workoutService.getWorkout().getDistance().toString(true) : workoutMeasure.get(1).toString(true));
-        workout_energy.setText(isWorkoutRunning() ? workoutService.getWorkout().getCalories().toString(true): workoutMeasure.get(2).toString(true));
+        if(wService==null){
+            workout_duration.setText(workoutMeasure.get(0).toString(true));
+            workout_distance.setText(workoutMeasure.get(1).toString(true));
+            workout_energy.setText(workoutMeasure.get(2).toString(true));
+        }else{
+            workout_duration.setText(isWorkoutRunning() ? wService.getWorkout().getDuration().toString(true): workoutMeasure.get(0).toString(true));
+            workout_distance.setText(isWorkoutRunning() ? wService.getWorkout().getDistance().toString(true) : workoutMeasure.get(1).toString(true));
+            workout_energy.setText(isWorkoutRunning() ? wService.getWorkout().getCalories().toString(true): workoutMeasure.get(2).toString(true));
+        }
 
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-
-        if(isWorkoutRunning()) workoutService.stop();
+        try{
+            getContext().unbindService(connection);
+        }catch (IllegalArgumentException e){}
         super.onDestroy();
     }
 
     public boolean isWorkoutRunning(){
-        return workoutService.isRunning();
+        return wService!=null && wService.isRunning();
     }
 
-    public static List<FloatingActionButton> getControllerButton() {
-        return Arrays.asList(pause, restart, stop);
+    public static List<FloatingActionButton> getControllerButton(){
+        return Arrays.asList(pause, restart);
     }
-
 
     // COMMUNICATION WITH ACTIVITY
     public interface OnStopWorkoutClickListener{
@@ -312,6 +412,7 @@ public class HomeFragment extends Fragment{
     }
 
     public interface OnBlockScreenClickListener{
-        void onBlockScreenClickListener(boolean isClickable);
+        void onBlockScreenClick(boolean isClickable);
     }
+
 }

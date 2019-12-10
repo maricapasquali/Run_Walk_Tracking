@@ -18,15 +18,14 @@ import com.run_walk_tracking_gps.utilities.LocationUtilities;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: 12/9/2019 METTERLO IN 'WORKOUTSERVICE' 
-public class MapRouteService {
+public class MapRouteDraw {
 
-    private static final String TAG = MapRouteService.class.getName();
+    private static final String TAG = MapRouteDraw.class.getName();
 
     private PolylineOptions polylineOptions = Factory.CustomPolylineOptions.create();
     private List<LatLng> route = new ArrayList<>();
 
-    private final LocationRequest locationRequest;
+    private LocationRequest locationRequest;
 
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -49,9 +48,14 @@ public class MapRouteService {
         }
     };
 
-    public MapRouteService(Context context, OnChangeLocationListener onChangeLocationListener){
+    public MapRouteDraw(){}
+
+    public MapRouteDraw(Context context){
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         this.locationRequest = LocationUtilities.createLocationRequest();
+    }
+
+    public void setOnChangeLocationListener(OnChangeLocationListener onChangeLocationListener) {
         this.onChangeLocationListener = onChangeLocationListener;
     }
 

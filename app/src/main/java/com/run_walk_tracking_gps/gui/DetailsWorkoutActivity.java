@@ -177,15 +177,16 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         Log.d(TAG, "OnBackPressed");
         if(isSummary){
             saveWorkout();
+        }else {
+            if(isChangedWorkout){
+                Log.d(TAG, "Return Workout changed");
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
+                setResult(Activity.RESULT_OK, returnIntent);
+
+            }
+            super.onBackPressed();
         }
-        if(isChangedWorkout){
-            Log.d(TAG, "Return Workout changed");
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-            setResult(Activity.RESULT_OK, returnIntent);
-            finish();
-        }
-        super.onBackPressed();
     }
 
     private void saveWorkout(){

@@ -91,7 +91,7 @@ public class HttpRequest {
 
 
         private static List<String> fieldRequiredForReset(){
-            return Arrays.asList(IMEI);
+            return Collections.singletonList(IMEI);
         }
         //ACCOUNT
         private static List<String> fieldRequiredForSignUp(){

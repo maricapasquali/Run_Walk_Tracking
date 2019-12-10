@@ -342,7 +342,7 @@ public class Measure implements Parcelable {
 
     public Measure getMeasure(int integer, int decimal){
         if(this.getType().equals(Measure.Type.DURATION))
-            setValueFromDb(DurationUtilities.getSecond(integer, decimal));
+            setValueFromDb(Utilities.getSecond(integer, decimal));
         else
             setValueFromGui(Double.valueOf(String.format(this.type.equals(Measure.Type.WEIGHT)?
                     Measure.Format.FORMAT_WEIGHT :
@@ -387,7 +387,7 @@ public class Measure implements Parcelable {
 
     private String toString(Context context) {
         if(this.type.equals(Type.DURATION))
-            return DurationUtilities.format(this.value.intValue());
+            return Utilities.format(this.value.intValue());
 
         if((this.type.equals(Type.DISTANCE) || this.type.equals(Type.ENERGY) || this.type.equals(Type.MIDDLE_SPEED))&&
                 getValueToDb() == 0d)
@@ -407,13 +407,17 @@ public class Measure implements Parcelable {
         if(isHome)
         {
             if(this.type.equals(Type.DURATION))
-                return DurationUtilities.format(this.value.intValue());
+                return Utilities.format(this.value.intValue());
             return getValueToGui() + context.getString(R.string.space) + getUnit().getString();
         }
         return toString();
     }
 
-    public static class DurationUtilities {
+    public static class Utilities {
+
+        public static String formatMeasure(final Double value, final Unit unit){
+            return NumberUtilities.round2(value)+ " " + unit.str;
+        }
 
         private static double getSecond(int integer, int decimal){
             return (decimal*60)+(integer*3600);

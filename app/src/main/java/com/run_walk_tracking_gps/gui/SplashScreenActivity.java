@@ -120,6 +120,47 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
         if(dataAccessResponse(this, response)) finishAffinity();
     }
 
+
+    public static Intent restoreData(final JSONObject response, Context context){
+        try {
+
+            JSONObject user = (JSONObject)response.get(HttpRequest.Constant.USER);
+            UserSingleton.getInstance().setUser(context, user);
+            Log.d(TAG, UserSingleton.getInstance().getUser().toString());
+
+            if(user.has(HttpRequest.Constant.IMG_ENCODE)) {
+                DefaultPreferencesUser.setImage(context, response);
+                Log.e(TAG, "Set Image");
+            }
+            DefaultPreferencesUser.setSettings(context, response);
+
+            intent = new Intent(context, ApplicationActivity.class);
+            final ArrayList<Workout> workouts = Workout.createList(context, (JSONArray)response.get(HttpRequest.Constant.WORKOUTS));
+            final ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
+            // TODO: 11/2/2019 MIGLIORARE
+            final JSONArray array = (JSONArray)response.get(HttpRequest.Constant.WEIGHTS);
+            for(int i = 0; i < array.length(); i++){
+                JSONObject s = (JSONObject)array.get(i);
+                StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(context)
+                        .setDate(s.getString(HttpRequest.Constant.DATE))
+                        .setValue(s.getDouble(HttpRequest.Constant.WEIGHT))
+                        .build();
+                statisticsData.setId(s.getInt(HttpRequest.Constant.ID_WEIGHT));
+                statisticsWeight.add(statisticsData);
+            }
+            /*Log.e(TAG, statisticsWeight.toString()); Log.e(TAG, workouts.toString());*/
+            intent.putExtra(KeysIntent.WORKOUTS, workouts);
+            intent.putExtra(KeysIntent.WEIGHTS, statisticsWeight);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        }catch (JSONException e){
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return intent;
+    }
+
+
     public static boolean dataAccessResponse(final Context context, final JSONObject response){
         try {
             if(response.has(HttpRequest.Constant.FIRST_LOGIN) && response.getBoolean(HttpRequest.Constant.FIRST_LOGIN)){
@@ -129,43 +170,12 @@ public class SplashScreenActivity extends AppCompatActivity implements Response.
                 context.startActivity(intent);
 
             } else {
-                JSONObject user = (JSONObject)response.get(HttpRequest.Constant.USER);
-                UserSingleton.getInstance().setUser(context, user);
-                Log.d(TAG, UserSingleton.getInstance().getUser().toString());
 
-                if(user.has(HttpRequest.Constant.IMG_ENCODE)) {
-                    DefaultPreferencesUser.setImage(context, response);
-                    Log.e(TAG, "Set Image");
-                }
-                DefaultPreferencesUser.setSettings(context, response);
-
-                intent = new Intent(context, ApplicationActivity.class);
-                final ArrayList<Workout> workouts = Workout.createList(context, (JSONArray)response.get(HttpRequest.Constant.WORKOUTS));
-                final ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
-                // TODO: 11/2/2019 MIGLIORARE
-                final JSONArray array = (JSONArray)response.get(HttpRequest.Constant.WEIGHTS);
-                for(int i = 0; i < array.length(); i++){
-                    JSONObject s = (JSONObject)array.get(i);
-                    StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(context)
-                                                                     .setDate(s.getString(HttpRequest.Constant.DATE))
-                                                                     .setValue(s.getDouble(HttpRequest.Constant.WEIGHT))
-                                                                     .build();
-                        statisticsData.setId(s.getInt(HttpRequest.Constant.ID_WEIGHT));
-                        statisticsWeight.add(statisticsData);
-                }
-                /*Log.e(TAG, statisticsWeight.toString());
-                  Log.e(TAG, workouts.toString());*/
-                intent.putExtra(KeysIntent.WORKOUTS, workouts);
-                intent.putExtra(KeysIntent.WEIGHTS, statisticsWeight);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
+                Intent intent = restoreData(response, context);
                 context.startActivity(intent);
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ParseException e) {
             e.printStackTrace();
             return false;
         }
