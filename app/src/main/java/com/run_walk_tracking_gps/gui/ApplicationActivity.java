@@ -2,8 +2,11 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,6 +21,8 @@ import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
+import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
 
 import java.util.ArrayList;
 
@@ -26,8 +31,8 @@ public class ApplicationActivity extends CommonActivity
                     WorkoutsFragment.OnDeleteWorkoutClickedListener,
                     WorkoutsFragment.OnManualAddClickedListener,
                     HomeFragment.OnStopWorkoutClickListener ,
-                    HomeFragment.OnBlockScreenClickListener,
-                    StatisticsFragment.OnWeightListener {
+                    HomeFragment.OnBlockScreenClickListener ,
+                    StatisticsFragment.OnWeightListener{
 
     private final static String TAG = ApplicationActivity.class.getName();
     private final static int REQUEST_SETTINGS = 1;
@@ -51,6 +56,9 @@ public class ApplicationActivity extends CommonActivity
     private ArrayList<Workout> workouts = new ArrayList<>();
     private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
+    private String restore = null;
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         Log.d(TAG,"init");
@@ -62,21 +70,37 @@ public class ApplicationActivity extends CommonActivity
         setNavigationBarBottom();
 
         if(getIntent()!=null){
+            Log.d(TAG, "getIntent : " +getIntent());
+
             workouts = getIntent().getParcelableArrayListExtra(KeysIntent.WORKOUTS);
             statisticsWeight = getIntent().getParcelableArrayListExtra(KeysIntent.WEIGHTS);
-            if(workouts!=null && statisticsWeight!=null){
+
+            if(workouts!=null && statisticsWeight!=null) {
                 workouts.forEach(w -> w.setContext(this));
                 statisticsWeight.forEach(s -> s.setContext(this));
 
-                if(savedInstanceState==null){
+                if(getIntent().getAction()!=null &&
+                        (getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT)
+                        || getIntent().getAction().equals(ActionReceiver.STOP_ACTION))){
+                    restore = getIntent().getAction();
                     selectActiveFragment(HomeFragment.class);
-                }else {
-                   setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
+                    restore = null;
+                }else{
+                    if(savedInstanceState==null)
+                        selectActiveFragment(HomeFragment.class);
+                    else
+                        setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
                 }
             }
+
             if(workouts==null) workouts = new ArrayList<>();
             if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
+
         }
+    }
+
+    @Override
+    protected void listenerAction() {
     }
 
     private void setNavigationBarBottom(){
@@ -92,7 +116,9 @@ public class ApplicationActivity extends CommonActivity
                         addFragment(WorkoutsFragment.createWithArgument(workouts),false);
                         break;
                     case R.id.home:
-                        addFragment(HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()),false);
+                        addFragment(restore==null ?
+                                    HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()) :
+                                    HomeFragment.createWithArgument(statisticsWeight.get(0).getValue(), restore),false);
                         break;
                     case R.id.statistics:
                         addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
@@ -103,12 +129,23 @@ public class ApplicationActivity extends CommonActivity
             }
             return true;
         });
-
     }
 
-
     @Override
-    protected void listenerAction() {
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "New Intent Action = " + intent.getAction());
+        if(intent.getAction()!=null){
+            switch (intent.getAction()){
+                case ActionReceiver.STOP_ACTION:{
+                    final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
+                    if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
+                        ((HomeFragment)fragment).stop();
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private void selectActiveFragment(final Class fragment_class) {
@@ -152,28 +189,9 @@ public class ApplicationActivity extends CommonActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState : " + outState);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG, "onRestart");
-    }
-
-
-    @Override
     public void onBackPressed() {
         final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
-        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).isWorkoutRunning()){
+        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
             moveTaskToBack(true);
         } else{
             finish();
@@ -201,16 +219,15 @@ public class ApplicationActivity extends CommonActivity
     }
 
     // Summary (DetailsWorkoutActivity) Listener
+
     @Override
     public void OnStopWorkoutClick(Workout workout) {
-        final Intent intentSummary = new Intent(this, DetailsWorkoutActivity.class);
-        intentSummary.putExtra(KeysIntent.SUMMARY, workout);
-        intentSummary.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivityForResult(intentSummary, REQUEST_SUMMARY);
+        startActivityForResult( new Intent(this, DetailsWorkoutActivity.class)
+                .putExtra(KeysIntent.SUMMARY, workout), REQUEST_SUMMARY);
     }
 
     @Override
-    public void onBlockScreenClickListener(boolean isClickable) {
+    public void onBlockScreenClick(boolean isClickable) {
         menuApp.findItem(R.id.setting).setEnabled(isClickable);
     }
 

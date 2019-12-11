@@ -3,54 +3,73 @@ package com.run_walk_tracking_gps.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
+
+import android.os.Handler;
+import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.service.NotificationWorkout;
-import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
+import com.run_walk_tracking_gps.service.WorkoutService;
+
 
 public class ReceiverWorkoutElement extends BroadcastReceiver {
 
-    private WorkoutServiceHandler.OnDistanceListener onDistanceListener;
-    private WorkoutServiceHandler.OnEnergyListener onEnergyListener;
-    private WorkoutServiceHandler.OnReceiverListener broadcastReceiver;
-
+    private static final String TAG = ReceiverWorkoutElement.class.getName();
     private NotificationWorkout notificationWorkout;
+    private WorkoutService.OnReceiverListener broadcastReceiver;
 
-
-    public ReceiverWorkoutElement(WorkoutServiceHandler.OnReceiverListener broadcastReceiver,
-                                  WorkoutServiceHandler.OnDistanceListener onDistanceListener,
-                                  WorkoutServiceHandler.OnEnergyListener onEnergyListener,
-                                  NotificationWorkout notificationWorkout){
+    private ReceiverWorkoutElement(NotificationWorkout notificationWorkout){
         super();
-        this.onDistanceListener = onDistanceListener;
-        this.onEnergyListener = onEnergyListener;
-        this.broadcastReceiver = broadcastReceiver;
         this.notificationWorkout = notificationWorkout;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    private ReceiverWorkoutElement(NotificationWorkout notificationWorkout, WorkoutService.OnReceiverListener broadcastReceiver){
+        this(notificationWorkout);
+        this.broadcastReceiver = broadcastReceiver;
+    }
+
+    public static ReceiverWorkoutElement create(NotificationWorkout notificationWorkout){
+        return new ReceiverWorkoutElement(notificationWorkout);
+    }
+
+    public static ReceiverWorkoutElement create(NotificationWorkout notificationWorkout, WorkoutService.OnReceiverListener broadcastReceiver){
+        return new ReceiverWorkoutElement(notificationWorkout, broadcastReceiver);
+    }
+
+    public void setBroadcastReceiver(WorkoutService.OnReceiverListener broadcastReceiver) {
+        this.broadcastReceiver = broadcastReceiver;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if(intent!=null && intent.getAction()!=null){
-            switch (intent.getAction()){
-                case ActionReceiver.TIMER_ACTION: {
+        new Handler().post(()->{
 
-                    final int sec = intent.getIntExtra(KeysIntent.SECONDS, 0);
+            if(intent!=null && intent.getAction()!=null){
+                switch (intent.getAction()){
 
-                    final double distanceInKm = onDistanceListener.getDistanceInKm();
-                    final double energyInKcal  = onEnergyListener.getEnergyInKcal(distanceInKm) ;
-                    broadcastReceiver.onReceiver(sec, distanceInKm, energyInKcal);
+                    case ActionReceiver.TIMER_ACTION: {
+                        final String sec = intent.getStringExtra(KeysIntent.SECONDS);
+                        Log.d(TAG, "Duration (Sec) = " + sec);
+                        broadcastReceiver.onReceiverDuration(sec);
+                        notificationWorkout.updateDuration(sec);
+                    }
+                    break;
+                    case ActionReceiver.DISTANCE_ENERGY_ACTION: {
 
-                    notificationWorkout.update(sec, distanceInKm, energyInKcal);
+                        final String distanceInKm = intent.getStringExtra(KeysIntent.DISTANCE);
+                        final String energyInKcal  = intent.getStringExtra(KeysIntent.ENERGY) ;
+                        Log.d(TAG, "Distance (km) = " + distanceInKm + ", Energy (kcal) = "+energyInKcal );
+                        broadcastReceiver.onReceiverEnergy(energyInKcal);
+                        broadcastReceiver.onReceiverDistance(distanceInKm);
+
+                        notificationWorkout.updateDistance(distanceInKm);
+                        notificationWorkout.updateEnergy(energyInKcal);
+                    }
+                    break;
                 }
-                break;
-
             }
 
-        }
-
+        });
     }
 }

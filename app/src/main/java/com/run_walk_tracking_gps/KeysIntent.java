@@ -25,8 +25,9 @@ public class KeysIntent {
     public final static String CHANGED_USER = "Changed User";
 
 
-    public static final String CHANGED_LANGUAGE = "Changed Language";
-
-
+    public static final String SPORT_DEFAULT = "Sport Default";
+    public static final String WEIGHT_MORE_RECENT = "Weight More Recent";
     public static final String SECONDS = "Seconds" ;
+    public static final String DISTANCE = "Distance" ;
+    public static final String ENERGY = "Energy" ;
 }

@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.controller;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.Measure;
@@ -11,6 +12,7 @@ import com.run_walk_tracking_gps.model.enumerations.Target;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 public class DefaultPreferencesUser {

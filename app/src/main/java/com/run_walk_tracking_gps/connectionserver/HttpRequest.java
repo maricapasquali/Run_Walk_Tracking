@@ -91,7 +91,7 @@ public class HttpRequest {
 
 
         private static List<String> fieldRequiredForReset(){
-            return Arrays.asList(IMEI);
+            return Collections.singletonList(IMEI);
         }
         //ACCOUNT
         private static List<String> fieldRequiredForSignUp(){
@@ -172,7 +172,6 @@ public class HttpRequest {
     private static final String WORKOUT = SERVER + "workout/";
     private static final String STATISTICS = SERVER + "statistics/";
     private static final String SETTINGS = SERVER + "settings/";
-
 
     private static final String DATA_AFTER_ACCESS = ACCOUNT + "data_after_access.php";
 
@@ -395,8 +394,6 @@ public class HttpRequest {
         return true;
     }
 
-
-
     public static void cancelAllRequestPending(Object tag){
         if(tag!=null){
             queue.cancelAll(tag);
@@ -425,7 +422,7 @@ public class HttpRequest {
             } catch (SomeErrorHttpException e) {
                 error(context, e.getMessage(), e);
                 // TODO: 12/8/2019 NON LO SO 
-                DefaultPreferencesUser.unSetUserLogged(context);
+                //DefaultPreferencesUser.unSetUserLogged(context);
             }
         }, error -> error(context, error.toString(), null)){
            @Override
@@ -448,7 +445,7 @@ public class HttpRequest {
         return queue;
     }
 
-    private static  void error(Context context, String response, SomeErrorHttpException someErrorHttpException){
+    private static void error(Context context, String response, SomeErrorHttpException someErrorHttpException){
         Log.e(TAG, response);
         if(someErrorHttpException==null) new SomeErrorHttpException(context, response).alert();
         else someErrorHttpException.alert();

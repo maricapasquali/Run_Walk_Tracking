@@ -1,10 +1,17 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -16,38 +23,145 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.ncorti.slidetoact.SlideToActView;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
-import com.run_walk_tracking_gps.service.MapRouteService;
-import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
+import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
+import com.run_walk_tracking_gps.service.MapRouteDraw;
+import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
-@SuppressLint("StaticFieldLeak")
-public class HomeFragment extends Fragment implements MapRouteService.OnChangeLocationListener{
+public class HomeFragment extends Fragment implements WorkoutService.OnReceiverListener{
+
+    public class ServiceHandler implements ServiceConnection{
+
+        private Context context;
+
+        private double weight;
+        private String restore = null;
+        private WorkoutService wService;
+
+        private WorkoutService.OnReceiverListener  onReceiverListener;
+
+        private ServiceHandler(Context context, double weight, String restore){
+            this.context = context;
+            this.weight = weight;
+            this.restore = restore;
+        }
+
+        private void setOnReceiverListener(WorkoutService.OnReceiverListener onReceiverListener){
+            if(this.onReceiverListener==null) this.onReceiverListener = onReceiverListener;
+        }
+
+        private Workout getWorkout(){
+            return wService.getWorkout();
+        }
+
+        private void bindService(){
+            context.bindService(new Intent(context, WorkoutService.class), this,  Context.BIND_AUTO_CREATE);
+        }
+
+        private void unBindService(){
+            context.unbindService(this);
+        }
+
+        private void startService(){
+            context.startService(new Intent(context, wService.getClass())
+                    .putExtra(KeysIntent.WEIGHT_MORE_RECENT, weight)
+                    .putExtra(KeysIntent.SPORT_DEFAULT, DefaultPreferencesUser.getSportDefault(getContext()).toString()));
+        }
+
+        private void pauseService(){
+            wService.pause();
+        }
+
+        private void restartService(){
+            wService.restart();
+        }
+
+        private void lockService(){
+            wService.lock();
+        }
+
+        private void unLockService(){
+            wService.unlock();
+        }
+
+        private void stopService(){
+            context.unbindService(this);
+            context.stopService(new Intent(context, WorkoutService.class));
+        }
+
+        public boolean isWorkoutRunning(){
+            return wService!=null && wService.isRunning();
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "onServiceConnected");
+            final WorkoutService.LocalBinder binder = (WorkoutService.LocalBinder) service;
+            wService = binder.getService();
+
+            wService.setOnReceiverListener(context, onReceiverListener);
+
+            if(restore!=null){
+                switch (restore){
+                    case ActionReceiver.STOP_ACTION:
+                        HomeFragment.this.stop();
+                        break;
+                    case ActionReceiver.RUNNING_WORKOUT: {
+                        HomeFragment.this.setIndoor(!LocationUtilities.isGpsEnable(context));
+                        HomeFragment.this.startState();
+                        if(wService.isPause())  HomeFragment.this.pauseState();
+                        else{
+                            if(wService.isLock()){
+                                HomeFragment.this.lockState();
+                                // TODO: 12/10/2019 NON FUNZIONA perchè menu viene creato dopo
+                                //setClickable(false);
+                            }else
+                                HomeFragment.this.unlockState();
+                        }
+                    }
+                    break;
+                }
+            }else {
+                startService();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "onServiceDisconnected");
+            context.stopService(new Intent(context, WorkoutService.class));
+        }
+    }
+
 
     private static final String TAG = HomeFragment.class.getName();
 
     private static final String WEIGHT = Measure.Type.WEIGHT.toString();
+    private static final String RESTORE = "restore";
 
     private View rootView;
     private TextView sport;
 
     private FloatingActionButton start;
+    @SuppressLint("StaticFieldLeak")
     private static FloatingActionButton pause;
+    @SuppressLint("StaticFieldLeak")
     private static FloatingActionButton restart;
-    private static FloatingActionButton stop;
+    private FloatingActionButton stop;
     private FloatingActionButton block_screen;
     private SlideToActView unlock_screen;
     private TextView workout_duration;
@@ -59,12 +173,9 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
 
     private ArrayList<Measure> workoutMeasure = new ArrayList<>();
 
-    private Workout workout;
-    private WorkoutServiceHandler workoutService;
+    private ServiceHandler serviceHandler;
 
-
-
-     public static HomeFragment createWithArgument(double w) {
+    public static HomeFragment createWithArgument(double w) {
         final HomeFragment homeFragment = new HomeFragment();
         Bundle args = new Bundle();
         args.putDouble(WEIGHT, w);
@@ -72,12 +183,21 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         return homeFragment;
     }
 
+    public static HomeFragment createWithArgument(double w, String restore) {
+        final HomeFragment homeFragment = createWithArgument(w);
+        Bundle args = homeFragment.getArguments()==null? new Bundle(): homeFragment.getArguments();
+        args.putString(RESTORE, restore);
+        homeFragment.setArguments(args);
+        return homeFragment;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try {
+
+        try{
             onStopWorkoutClickListener = (OnStopWorkoutClickListener) context;
-        } catch (ClassCastException e) {
+        }catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnStopWorkoutClickListener");
         }
         try {
@@ -87,33 +207,15 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
-        if (bundle != null) {
-                double weight = bundle.getDouble(WEIGHT);
-
-                workoutService = WorkoutServiceHandler.createService(getContext(), weight, (sec, distance, energy) -> {
-                    workout_duration.setText(Measure.DurationUtilities.format(sec));
-                    workout.getDuration().setValue(true, (double) sec);
-
-                    workout.getDistance().setValue(true, distance);
-                    workout_distance.setText(workout.getDistance().toString(true));
-
-                    workout.getCalories().setValue(true, energy);
-                    workout_energy.setText(workout.getCalories().toString(true));
-                    //Toast.makeText(getContext(), "Duration (sec): "+sec+", Distance passed: " + distance+" = Calories work: " +energy , Toast.LENGTH_SHORT).show();
-                }, this);
-            }
+        if (bundle != null) serviceHandler = new ServiceHandler(getContext(), bundle.getDouble(WEIGHT),  bundle.getString(RESTORE));
      }
 
-
-
+    @SuppressLint("RestrictedApi")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -136,50 +238,79 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
 
         //initialize map
         final boolean isGps = LocationUtilities.isGpsEnable(getContext());
-        getFragmentManager().beginTransaction()
-                            .add(R.id.map, isGps? new MapFragment() : new IndoorFragment(), TAG)
-                            .commit();
+        getFragmentManager().beginTransaction().add(R.id.map, isGps ? new MapFragment() : new IndoorFragment(), TAG).commit();
         setIndoor(!isGps);
-
         setListener();
 
-        workout = WorkoutBuilder.create(getContext()).build();
         return rootView;
     }
 
     private void setSport(){
-         final Sport sport_e = DefaultPreferencesUser.getSportDefault(getContext());
-         sport.setText(getString(sport_e.getStrId()));
-         sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
-         sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+        final Sport sport_e = DefaultPreferencesUser.getSportDefault(getContext());
+        sport.setText(getString(sport_e.getStrId()));
+        sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
+        sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        serviceHandler.setOnReceiverListener(this);
+        if(serviceHandler.restore!=null) serviceHandler.bindService();
+
+    }
+
+    public void stop(){
+        stop.callOnClick();
+    }
+
+    /* -- UPDATE GUI ACTION RUNNING WORKOUTSERVICE -- */
+    @SuppressLint("RestrictedApi")
+    private void startState(){
+        getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+        start.setVisibility(View.GONE);
+        block_screen.setVisibility(View.VISIBLE);
+        pause.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void pauseState(){
+        pause.setVisibility(View.GONE);
+        block_screen.setVisibility(View.GONE);
+        restart.setVisibility(View.VISIBLE);
+        stop.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void lockState(){
+        block_screen.setVisibility(View.GONE);
+        pause.setVisibility(View.GONE);
+        unlock_screen.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void unlockState(){
+        unlock_screen.setVisibility(View.GONE);
+        pause.setVisibility(View.VISIBLE);
+        block_screen.setVisibility(View.VISIBLE);
+    }
+    /* -- FINE UPDATE GUI ACTION RUNNING WORKOUTSERVICE -- */
 
     @SuppressLint("RestrictedApi")
     private void setListener() {
 
         start.setOnClickListener(v ->
                 DelayedStartWorkoutDialog.create(getContext(), () -> {
-
-                    getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
-                    start.setVisibility(View.GONE);
-                    block_screen.setVisibility(View.VISIBLE);
-                    pause.setVisibility(View.VISIBLE);
-
+                    startState();
                     //START SERVICE
-                    workoutService.start();
-
+                    serviceHandler.bindService();
                 }).show()
         );
 
         pause.setOnClickListener(v -> {
-            v.setVisibility(View.GONE);
-            block_screen.setVisibility(View.GONE);
-            restart.setVisibility(View.VISIBLE);
-            stop.setVisibility(View.VISIBLE);
-
+            pauseState();
             //PAUSE SERVICE
-            workoutService.pause();
+            serviceHandler.pauseService();
         });
 
         restart.setOnClickListener(v -> {
@@ -187,47 +318,31 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             stop.setVisibility(View.GONE);
             block_screen.setVisibility(View.VISIBLE);
             pause.setVisibility(View.VISIBLE);
-
             //RESTART SERVICE
-            workoutService.restart();
+            serviceHandler.restartService();
         });
 
         stop.setOnClickListener(v -> {
-            String listCoord = workoutService.getMapRouteService().getListCoordinates();
             // STOP SERVICE
-            workoutService.stop();
-            // Auto - Workout
-            onStopWorkoutClickListener.OnStopWorkoutClick(WorkoutBuilder.create(getContext())
-                    .setMapRoute(listCoord)
-                    .setDate(Calendar.getInstance().getTime())
-                    .setDistance(workout.getDistance().getValue(false))
-                    .setDuration(workout.getDuration().getValue(true).intValue())
-                    .setCalories(workout.getCalories().getValue(false))
-                    .setMiddleSpeed()
-                    .setSport(workout.getSport())
-                    .build());
+            final Workout workout = serviceHandler.getWorkout();
+            serviceHandler.stopService();
+            onStopWorkoutClickListener.OnStopWorkoutClick(workout);
         });
 
         block_screen.setOnClickListener(v -> {
-            v.setVisibility(View.GONE);
-            pause.setVisibility(View.GONE);
-            unlock_screen.setVisibility(View.VISIBLE);
+            lockState();
             setClickable(false);
             // BLOCK (remove controller button) NOTIFICATION SERVICE
-            workoutService.block();
+            serviceHandler.lockService();
         });
 
         unlock_screen.setOnSlideCompleteListener(v ->{
             v.resetSlider();
-
-            v.setVisibility(View.GONE);
-            pause.setVisibility(View.VISIBLE);
-            block_screen.setVisibility(View.VISIBLE);
+            unlockState();
             setClickable(true);
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
-            workoutService.unblock();
+            serviceHandler.unLockService();
         });
-
     }
 
     private void setClickable(final boolean is) {
@@ -235,7 +350,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
         if(fragment instanceof MapFragment){
             ((MapFragment)fragment).onBlockScreenClickListener(is);
         }
-        onBlockScreenClickListener.onBlockScreenClickListener(is);
+        onBlockScreenClickListener.onBlockScreenClick(is);
     }
 
     @Override
@@ -281,42 +396,66 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
             workout_duration = rootView.findViewById(R.id.time_workout);
         }
 
-        duration.setVisibility(isIndoor?View.VISIBLE : View.GONE);
-        distance.setVisibility(isIndoor?View.VISIBLE : View.GONE);
-        calories.setVisibility(isIndoor?View.VISIBLE : View.GONE);
-        info_workout.setVisibility(isIndoor?View.GONE : View.VISIBLE);
-        info_workout_numbers.setVisibility(isIndoor?View.GONE : View.VISIBLE);
+        duration.setVisibility(isIndoor ? View.VISIBLE : View.GONE);
+        distance.setVisibility(isIndoor ? View.VISIBLE : View.GONE);
+        calories.setVisibility(isIndoor ? View.VISIBLE : View.GONE);
+        info_workout.setVisibility(isIndoor ? View.GONE : View.VISIBLE);
+        info_workout_numbers.setVisibility(isIndoor ? View.GONE : View.VISIBLE);
 
-        workout_duration.setText(isWorkoutRunning() ? workout.getDuration().toString(true): workoutMeasure.get(0).toString(true));
-        workout_distance.setText(isWorkoutRunning() ? workout.getDistance().toString(true) : workoutMeasure.get(1).toString(true));
-        workout_energy.setText(isWorkoutRunning() ? workout.getCalories().toString(true): workoutMeasure.get(2).toString(true));
-
+        if(serviceHandler.isWorkoutRunning()){
+            workout_duration.setText(serviceHandler.getWorkout().getDuration().toString(true));
+            workout_distance.setText(serviceHandler.getWorkout().getDistance().toString(true) );
+            workout_energy.setText(serviceHandler.getWorkout().getCalories().toString(true));
+        }else{
+            workout_duration.setText(workoutMeasure.get(0).toString(true));
+            workout_distance.setText(workoutMeasure.get(1).toString(true));
+            workout_energy.setText(workoutMeasure.get(2).toString(true));
+        }
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-
-        if(isWorkoutRunning())
-            workoutService.stop();
+        try{
+            serviceHandler.unBindService();
+        }catch (IllegalArgumentException e){
+            Log.e(TAG, "Service just unbind");
+        }
         super.onDestroy();
     }
 
-    public boolean isWorkoutRunning(){
-        return workoutService.isRunning();
+    public ServiceHandler getServiceHandler(){
+        return serviceHandler;
     }
 
-    public static List<FloatingActionButton> getControllerButton() {
-        return Arrays.asList(pause, restart, stop);
+    public static List<FloatingActionButton> getControllerButton(){
+        return Arrays.asList(pause, restart);
     }
 
-    // COMMUNICATION WITH MAP FRAGMENT
+    // RECEIVER LISTENER
     @Override
-    public void addPolyLineOnMap(PolylineOptions options) {
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
-        if(fragment instanceof MapFragment){
-            ((MapFragment)fragment).addPolyLine(options);
-        }
+    public void onReceiverDuration(String sec) {
+        workout_duration.setText(sec);
+    }
+
+    @Override
+    public void onReceiverDistance(String distance) {
+        workout_distance.setText(distance);
+    }
+
+    @Override
+    public void onReceiverEnergy(String energy) {
+        workout_energy.setText(energy);
+    }
+
+    @Override
+    public MapRouteDraw.OnChangeLocationListener onReceiverMapRoute() {
+        return polylineOptions ->{
+            if(getFragmentManager()!=null){
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
+                if(fragment instanceof MapFragment) ((MapFragment)fragment).addPolyLine(polylineOptions);
+            }
+        };
     }
 
     // COMMUNICATION WITH ACTIVITY
@@ -325,6 +464,7 @@ public class HomeFragment extends Fragment implements MapRouteService.OnChangeLo
     }
 
     public interface OnBlockScreenClickListener{
-        void onBlockScreenClickListener(boolean isClickable);
+        void onBlockScreenClick(boolean isClickable);
     }
+
 }
