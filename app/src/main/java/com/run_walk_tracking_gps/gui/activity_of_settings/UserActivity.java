@@ -149,6 +149,9 @@ public class UserActivity extends CommonActivity {
                 if(resultCode== Activity.RESULT_OK){
                     setGui((User) data.getParcelableExtra(KeysIntent.CHANGED_USER));
                 }
+                else if(resultCode== Activity.RESULT_CANCELED){
+                    Log.e(TAG, "USER NON MODIFICATO");
+                }
                 break;
         }
     }

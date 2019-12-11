@@ -24,4 +24,9 @@ public class JSONUtilities {
     private static Stream<String> getNames(Iterable<String> itr) {
         return StreamSupport.stream(itr.spliterator(), false);
     }
+
+    public static long countKey(final JSONObject jsonObject){
+        final Iterable<String> itr = jsonObject::keys;
+        return StreamSupport.stream(itr.spliterator(), false).count();
+    }
 }

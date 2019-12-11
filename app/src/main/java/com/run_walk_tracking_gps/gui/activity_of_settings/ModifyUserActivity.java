@@ -33,6 +33,8 @@ import com.run_walk_tracking_gps.connectionserver.HttpRequest;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
+import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
+import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,8 +42,11 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import kotlin.jvm.internal.PropertyReference0Impl;
 
@@ -154,8 +159,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                     bodyJson.put(HttpRequest.Constant.IMG_ENCODE, image_encode);
             }
 
-            Log.d(TAG, bodyJson.toString() + ", count = "+Stream.of(bodyJson.keys()).count());
-            if(Stream.of(bodyJson.keys()).count()>1){
+            Log.d(TAG, bodyJson.toString() + ", count = "+ JSONUtilities.countKey(bodyJson));
+            if(JSONUtilities.countKey(bodyJson) >1){
                 HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog);
             }else{
                 dialog.dismiss();
