@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.service;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -42,20 +43,32 @@ public class MapRouteDraw {
                 final LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 polylineOptions.add(latLng);
                 route.add(latLng);
-                //Log.e(TAG, latLng.toString()); Toast.makeText(context, latLng.toString(), Toast.LENGTH_LONG).show();
+                Log.e(TAG, latLng.toString());
+                //Toast.makeText(context, latLng.toString(), Toast.LENGTH_LONG).show();
             }
             onChangeLocationListener.addPolyLineOnMap(polylineOptions);
         }
     };
 
-    public MapRouteDraw(){}
-
-    public MapRouteDraw(Context context){
+    private MapRouteDraw(Context context){
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         this.locationRequest = LocationUtilities.createLocationRequest();
     }
 
-    public void setOnChangeLocationListener(OnChangeLocationListener onChangeLocationListener) {
+    private MapRouteDraw(Context context, OnChangeLocationListener onChangeLocationListener){
+        this(context);
+        this.onChangeLocationListener = onChangeLocationListener;
+    }
+
+    public static MapRouteDraw create(Context context){
+        return new MapRouteDraw(context);
+    }
+
+    public static MapRouteDraw create(Context context, OnChangeLocationListener onChangeLocationListener){
+        return new MapRouteDraw(context, onChangeLocationListener);
+    }
+
+    void setOnChangeLocationListener(OnChangeLocationListener onChangeLocationListener) {
         this.onChangeLocationListener = onChangeLocationListener;
     }
 
@@ -82,7 +95,7 @@ public class MapRouteDraw {
         }
     }
 
-    public String getListCoordinates() {
+    String getListCoordinates() {
         return route.isEmpty() ? null : route.toString();
     }
 

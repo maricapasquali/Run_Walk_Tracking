@@ -70,7 +70,7 @@ public class ApplicationActivity extends CommonActivity
         setNavigationBarBottom();
 
         if(getIntent()!=null){
-            Log.d(TAG, "init () : " +getIntent().getAction());
+            Log.d(TAG, "getIntent : " +getIntent());
 
             workouts = getIntent().getParcelableArrayListExtra(KeysIntent.WORKOUTS);
             statisticsWeight = getIntent().getParcelableArrayListExtra(KeysIntent.WEIGHTS);
@@ -97,6 +97,10 @@ public class ApplicationActivity extends CommonActivity
             if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
 
         }
+    }
+
+    @Override
+    protected void listenerAction() {
     }
 
     private void setNavigationBarBottom(){
@@ -135,17 +139,13 @@ public class ApplicationActivity extends CommonActivity
             switch (intent.getAction()){
                 case ActionReceiver.STOP_ACTION:{
                     final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
-                    if(fragment instanceof HomeFragment && ((HomeFragment)fragment).isWorkoutRunning()){
+                    if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
                         ((HomeFragment)fragment).stop();
                     }
                 }
                 break;
             }
         }
-    }
-
-    @Override
-    protected void listenerAction() {
     }
 
     private void selectActiveFragment(final Class fragment_class) {
@@ -172,7 +172,6 @@ public class ApplicationActivity extends CommonActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.e(TAG, "MENU CREATO");
         menuApp = menu;
         getMenuInflater().inflate(R.menu.menu_application, menu);
         return super.onCreateOptionsMenu(menu);
@@ -190,27 +189,9 @@ public class ApplicationActivity extends CommonActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState : " + outState);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG, "onRestart");
-    }
-
-    @Override
     public void onBackPressed() {
         final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
-        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).isWorkoutRunning()){
+        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
             moveTaskToBack(true);
         } else{
             finish();

@@ -3,19 +3,14 @@ package com.run_walk_tracking_gps.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
-import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.service.NotificationWorkout;
 import com.run_walk_tracking_gps.service.WorkoutService;
 
-import java.util.List;
 
 public class ReceiverWorkoutElement extends BroadcastReceiver {
 
@@ -23,18 +18,28 @@ public class ReceiverWorkoutElement extends BroadcastReceiver {
     private NotificationWorkout notificationWorkout;
     private WorkoutService.OnReceiverListener broadcastReceiver;
 
-    public ReceiverWorkoutElement(){}
-
-    public ReceiverWorkoutElement(NotificationWorkout notificationWorkout){
+    private ReceiverWorkoutElement(NotificationWorkout notificationWorkout){
         super();
         this.notificationWorkout = notificationWorkout;
+    }
+
+    private ReceiverWorkoutElement(NotificationWorkout notificationWorkout, WorkoutService.OnReceiverListener broadcastReceiver){
+        this(notificationWorkout);
+        this.broadcastReceiver = broadcastReceiver;
+    }
+
+    public static ReceiverWorkoutElement create(NotificationWorkout notificationWorkout){
+        return new ReceiverWorkoutElement(notificationWorkout);
+    }
+
+    public static ReceiverWorkoutElement create(NotificationWorkout notificationWorkout, WorkoutService.OnReceiverListener broadcastReceiver){
+        return new ReceiverWorkoutElement(notificationWorkout, broadcastReceiver);
     }
 
     public void setBroadcastReceiver(WorkoutService.OnReceiverListener broadcastReceiver) {
         this.broadcastReceiver = broadcastReceiver;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -45,7 +50,7 @@ public class ReceiverWorkoutElement extends BroadcastReceiver {
 
                     case ActionReceiver.TIMER_ACTION: {
                         final String sec = intent.getStringExtra(KeysIntent.SECONDS);
-                        Log.e(TAG, "Duration (Sec) = " + sec);
+                        Log.d(TAG, "Duration (Sec) = " + sec);
                         broadcastReceiver.onReceiverDuration(sec);
                         notificationWorkout.updateDuration(sec);
                     }
@@ -54,7 +59,7 @@ public class ReceiverWorkoutElement extends BroadcastReceiver {
 
                         final String distanceInKm = intent.getStringExtra(KeysIntent.DISTANCE);
                         final String energyInKcal  = intent.getStringExtra(KeysIntent.ENERGY) ;
-                        Log.e(TAG, "Distance (km) = " + distanceInKm + ", Energy (kcal) = "+energyInKcal );
+                        Log.d(TAG, "Distance (km) = " + distanceInKm + ", Energy (kcal) = "+energyInKcal );
                         broadcastReceiver.onReceiverEnergy(energyInKcal);
                         broadcastReceiver.onReceiverDistance(distanceInKm);
 

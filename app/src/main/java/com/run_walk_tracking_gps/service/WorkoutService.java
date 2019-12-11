@@ -20,13 +20,11 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
-import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
 import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
 
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 public class WorkoutService extends Service {
 
@@ -49,10 +47,8 @@ public class WorkoutService extends Service {
     private boolean isWorkoutServiceRunning = false;
     private boolean isWorkoutServicePause = false;
 
-
     private Context context;
     private ReceiverWorkoutElement receiver;
-    private ReceiverNotificationButtonHandler receiverPressAction;
     private NotificationWorkout notificationWorkout;
     private Workout workout;
 
@@ -65,7 +61,6 @@ public class WorkoutService extends Service {
 
     /* DISTANCE */
     private static final double STEPS_TO_KM = 0.000762;
-
     private SensorManager sensorManager;
     private Sensor stepCounterSensor;
     private boolean firstTime = true;
@@ -74,7 +69,7 @@ public class WorkoutService extends Service {
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            //Log.d(TAG, "onSensorChanged");
+            Log.d(TAG, "onSensorChanged");
             if(isRunning()&& !isPause()){
                 if(firstTime) {
                     Log.d(TAG, "Reset milestoneStep");
@@ -124,16 +119,21 @@ public class WorkoutService extends Service {
 
     public WorkoutService(){}
 
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void setOnReceiverListener(Context context, final OnReceiverListener onReceiverListener){
         if(this.receiver==null){
             this.notificationWorkout = NotificationWorkout.create(context);
-            this.receiver = new ReceiverWorkoutElement(notificationWorkout);
+            this.receiver = ReceiverWorkoutElement.create(notificationWorkout, onReceiverListener);
         }
-        if(this.mapRouteDraw ==null) this.mapRouteDraw = new MapRouteDraw(context);
+        else
+            this.receiver.setBroadcastReceiver(onReceiverListener);
 
-        this.receiver.setBroadcastReceiver(onReceiverListener);
-        this.mapRouteDraw.setOnChangeLocationListener(onReceiverListener.onReceiverMapRoute());
+        if(this.mapRouteDraw ==null)
+            this.mapRouteDraw = MapRouteDraw.create(context, onReceiverListener.onReceiverMapRoute());
+        else
+            this.mapRouteDraw.setOnChangeLocationListener(onReceiverListener.onReceiverMapRoute());
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -145,25 +145,20 @@ public class WorkoutService extends Service {
 
         /* notifiation */
         this.notificationWorkout = NotificationWorkout.create(context);
-        this.receiver = new ReceiverWorkoutElement(notificationWorkout);
-        this.receiverPressAction = new ReceiverNotificationButtonHandler();
-
+        this.receiver = ReceiverWorkoutElement.create(notificationWorkout);
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ActionReceiver.TIMER_ACTION);
         intentFilter.addAction(ActionReceiver.DISTANCE_ENERGY_ACTION);
         context.registerReceiver(receiver, intentFilter);
 
-        final IntentFilter intentFilterPress = new IntentFilter();
-        intentFilter.addAction(ActionReceiver.PAUSE_ACTION);
-        intentFilter.addAction(ActionReceiver.RESTART_ACTION);
-        context.registerReceiver(receiverPressAction, intentFilterPress);
-
         /* map */
-        this.mapRouteDraw = new MapRouteDraw(context);
+        this.mapRouteDraw = MapRouteDraw.create(context);
+
         /* distance*/
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
+
         /* timer */
         this.mTimer = new Timer();
         this.time = 0;
@@ -171,45 +166,42 @@ public class WorkoutService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, "onStartCommand");
+        Log.d(TAG, "onStartCommand");
         if(intent!=null){
             weight = intent.getDoubleExtra(KeysIntent.WEIGHT_MORE_RECENT, 0d);
             sport = Sport.valueOf(intent.getStringExtra(KeysIntent.SPORT_DEFAULT));
         }
         if(isWorkoutServiceRunning) return super.onStartCommand(intent, flags, startId);
         isWorkoutServiceRunning = true;
-        /* map */
-        mapRouteDraw.start();
         /* notification */
         startForeground(NotificationWorkout.NOTIFICATION_ID, notificationWorkout.build());
         /* timer */
         mTimer.scheduleAtFixedRate(timerTask, 0, TIMER_INTERVAL);
+        /* map */
+        mapRouteDraw.start();
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        Log.e(TAG, "onUnbind");
-        return super.onUnbind(intent);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
         isWorkoutServiceRunning = false;
+
         /* timer */
         this.mTimer.cancel();
         this.mTimer.purge();
         this.mTimer = null;
+
         /* distance*/
         oldValue = 0;
         firstTime = true;
         context.unregisterReceiver(receiver);
-        context.unregisterReceiver(receiverPressAction);
         sensorManager.unregisterListener(sensorEventListener);
+
         /* map */
         mapRouteDraw.stop();
+
         /* notification */
         notificationWorkout.stopClicked();
     }

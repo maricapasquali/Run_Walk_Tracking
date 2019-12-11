@@ -10,11 +10,9 @@ import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 import com.run_walk_tracking_gps.gui.NotificationSplashScreenActivity;
-import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
@@ -22,7 +20,7 @@ import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
 public class NotificationWorkout {
 
-    public static final int NOTIFICATION_ID = 1;
+    static final int NOTIFICATION_ID = 1;
 
     // REQUEST
     private static final int REQUEST_CODE_RESUME = 5;
@@ -71,13 +69,6 @@ public class NotificationWorkout {
         setListener();
     }
 
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static NotificationWorkout create(Context context){
-        return new NotificationWorkout(context);
-    }
-
     private void setListener(){
         Intent pauseClick = new Intent(context, ReceiverNotificationButtonHandler.class).setAction(ActionReceiver.PAUSE_ACTION);
         PendingIntent pausePendingClick = PendingIntent.getBroadcast(context, REQUEST_CODE_PAUSE, pauseClick, 0);
@@ -91,6 +82,12 @@ public class NotificationWorkout {
         remoteViewBig.setOnClickPendingIntent(R.id.pause_workout, pausePendingClick);
         remoteViewBig.setOnClickPendingIntent(R.id.stop_workout, stopPendingClick);
         remoteViewBig.setOnClickPendingIntent(R.id.restart_workout, restartPendingClick);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static NotificationWorkout create(Context context){
+        return new NotificationWorkout(context);
     }
 
     public Notification build() {
@@ -124,11 +121,27 @@ public class NotificationWorkout {
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    public void pauseClicked() {
+    void pauseClicked() {
         setVisibleButton(false);
     }
 
-    public void restartClicked() {
+    void restartClicked() {
+        setVisibleButton(true);
+    }
+
+    void stopClicked() {
+        notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
+        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    }
+
+    void lockClicked() {
+        remoteViewBig.setViewVisibility(R.id.restart_workout, View.GONE);
+        remoteViewBig.setViewVisibility(R.id.stop_workout, View.GONE );
+        remoteViewBig.setViewVisibility(R.id.pause_workout, View.GONE);
+        notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    void unlockClicked() {
         setVisibleButton(true);
     }
 
@@ -137,22 +150,5 @@ public class NotificationWorkout {
         remoteViewBig.setViewVisibility(R.id.stop_workout, isPause ?  View.GONE: View.VISIBLE );
         remoteViewBig.setViewVisibility(R.id.pause_workout, isPause ? View.VISIBLE : View.GONE);
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
-    }
-
-
-    public void stopClicked() {
-        notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
-        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-    }
-
-    public void lockClicked() {
-        remoteViewBig.setViewVisibility(R.id.restart_workout, View.GONE);
-        remoteViewBig.setViewVisibility(R.id.stop_workout, View.GONE );
-        remoteViewBig.setViewVisibility(R.id.pause_workout, View.GONE);
-        notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
-    }
-
-    public void unlockClicked() {
-        setVisibleButton(true);
     }
 }
