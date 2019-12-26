@@ -12,12 +12,12 @@ class WeightDao {
           startTransaction();
           $date = formatDate($weight[DATE]);
 
-          $stmt = getConnection()->prepare("INSERT INTO weight(id_user, date, value) VALUES (?, ?, ?)");
+          $stmt = getConnection()->prepare("INSERT INTO weight(id_weight, id_user, date, value) VALUES (?, ?, ?, ?)");
           if(!$stmt) throw new Exception("Weight : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("isd",$weight[ID_USER], $date, $weight[VALUE]);
+          $stmt->bind_param("iisd",$weight[ID_WEIGHT], $weight[ID_USER], $date, $weight[VALUE]);
           if(!$stmt->execute()) throw new Exception("Weight : Inserimento fallito. Errore: ". getErrorConnection());
+          if(!$stmt->affected_rows) return;
           $stmt->close();
-          $id = getConnection()->insert_id;
           commitTransaction();
         }
       }catch (Exception $e) {
@@ -25,14 +25,13 @@ class WeightDao {
         throw new Exception($e->getMessage());
       }
       closeConnection();
-      return array(ID_WEIGHT => $id);//+ $weight;
+      return true;
    }
 
-   static function update($weight){
+   static function update($weight, $id_user){
      try {
        if(connect())
        {
-
          startTransaction();
 
          $keys = array();
@@ -47,14 +46,18 @@ class WeightDao {
            else if($key==VALUE) $typeParam.="d";
          }
          array_push($values, $weight[ID_WEIGHT]);
+         array_push($values, $id_user);
 
+         if(count($values) <= 2) return;
 
-         $stmt = getConnection()->prepare("UPDATE weight SET " . join("=?,", $keys) ."=? WHERE id_weight=?");
+         $stmt = getConnection()->prepare("UPDATE weight SET " . join("=?,", $keys) ."=? WHERE id_weight=? and id_user=?");
          if(!$stmt) throw new Exception("Weight update : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param($typeParam."i" , ...array_values($values));
+         $stmt->bind_param($typeParam."ii" , ...array_values($values));
          if(!$stmt->execute()) throw new Exception("Weight : Update fallito. Errore: ". getErrorConnection());
+
+         if(!$stmt->affected_rows) return;
+
          $stmt->close();
-         
          commitTransaction();
        }
      }catch (Exception $e) {
@@ -62,6 +65,7 @@ class WeightDao {
        throw new Exception($e->getMessage());
      }
      closeConnection();
+
      return true;
    }
 
@@ -76,6 +80,7 @@ class WeightDao {
          if(!$stmt) throw new Exception("Workout delete : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("i", $id_weight);
          if(!$stmt->execute()) throw new Exception("Workout : Delete fallito. Errore: ". getErrorConnection());
+         if(!$stmt->affected_rows) return;
          $stmt->close();
 
          commitTransaction();

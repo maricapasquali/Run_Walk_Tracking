@@ -48,24 +48,25 @@ class SettingsDao{
   /**
   * Update Settings
   */
-  static function updateSportFor($val, $id_user){
-    return self::updateDeafult(SPORT, $val, $id_user);
+  static function updateSportFor($sport, $id_user){
+    return self::updateDeafult(SPORT, $sport[VALUE], $id_user);
   }
 
-  static function updateTargetFor($val, $id_user){
-    return self::updateDeafult(TARGET, $val, $id_user);
+  static function updateTargetFor($target, $id_user){
+    return self::updateDeafult(TARGET, $target[VALUE], $id_user);
   }
 
-  static function updateUnitHeightFor($val, $id_user){
-    return self::updateUnitMeasure(HEIGHT, $val, $id_user);
+  static function updateUnitHeightFor($height, $id_user){
+
+    return self::updateUnitMeasure(HEIGHT, $height[VALUE], $id_user);
   }
 
-  static function updateUnitWeightFor($val, $id_user){
-    return self::updateUnitMeasure(WEIGHT, $val, $id_user);
+  static function updateUnitWeightFor($weight, $id_user){
+    return self::updateUnitMeasure(WEIGHT, $weight[VALUE], $id_user);
   }
 
-  static function updateUnitDistanceFor($val, $id_user){
-    return self::updateUnitMeasure(DISTANCE, $val, $id_user);
+  static function updateUnitDistanceFor($distance, $id_user){
+    return self::updateUnitMeasure(DISTANCE, $distance[VALUE], $id_user);
   }
 
   private function updateDeafult($type, $val, $id_user){
@@ -78,9 +79,8 @@ class SettingsDao{
         if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("si" , $val, $id_user);
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->affected_rows) return;
         $stmt->close();
-
-        $value_update = self::getDefault($type, $id_user);
 
         commitTransaction();
 
@@ -90,20 +90,20 @@ class SettingsDao{
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    return array(UPDATE => true) + array($type => $value_update[$type]);
+    return true;
   }
 
   private function updateUnitMeasure($type, $id_unit, $id_user){
     try {
       if(connect())
       {
-
         startTransaction();
 
         $stmt = getConnection()->prepare("UPDATE unit_measure_default SET $type=? WHERE id_user=?");
         if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
         $stmt->bind_param("si" , $id_unit, $id_user);
         if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->affected_rows) return;
         $stmt->close();
 
         commitTransaction();
@@ -113,7 +113,7 @@ class SettingsDao{
       throw new Exception($e->getMessage());
     }
     closeConnection();
-    return array(UPDATE => true);
+    return true;
   }
 
 }

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.2
+-- version 4.9.0.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Creato il: Dic 09, 2019 alle 20:09
--- Versione del server: 10.3.16-MariaDB
--- Versione PHP: 7.3.10
+-- Host: 127.0.0.1
+-- Creato il: Dic 26, 2019 alle 14:48
+-- Versione del server: 10.4.6-MariaDB
+-- Versione PHP: 7.3.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -19,21 +19,8 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `id11865186_runwalktracking`
+-- Database: `run_walk_tracking_db_server`
 --
-CREATE DATABASE IF NOT EXISTS `id11865186_runwalktracking` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `id11865186_runwalktracking`;
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `check_registration`
---
-
-CREATE TABLE `check_registration` (
-  `id_user` int(11) NOT NULL,
-  `token` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -44,9 +31,7 @@ CREATE TABLE `check_registration` (
 CREATE TABLE `login` (
   `id_user` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `hash_password` char(60) NOT NULL,
-  `date` datetime DEFAULT NULL,
-  `id_phone` char(15) DEFAULT NULL
+  `hash_password` char(60) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -67,9 +52,33 @@ CREATE TABLE `profile_image` (
 --
 
 CREATE TABLE `request_forgot_password` (
-  `email` varchar(30) NOT NULL,
-  `c_key` text NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `c_key` char(10) NOT NULL,
   `end_validity` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `session`
+--
+
+CREATE TABLE `session` (
+  `id_user` int(11) NOT NULL,
+  `token` varchar(100) NOT NULL,
+  `last_update` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `signup`
+--
+
+CREATE TABLE `signup` (
+  `id_user` int(11) NOT NULL,
+  `token` char(10) NOT NULL,
+  `date` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -91,14 +100,14 @@ CREATE TABLE `sport_default` (
 
 CREATE TABLE `target_default` (
   `id_user` int(11) NOT NULL,
-  `target` varchar(30) NOT NULL
+  `target` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Trigger `target_default`
 --
 DELIMITER $$
-CREATE TRIGGER `after_insert_target_default` AFTER INSERT ON `target_default` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_insert_target` AFTER INSERT ON `target_default` FOR EACH ROW BEGIN
 DECLARE run_sport varchar(20) DEFAULT "RUN";
 DECLARE walk_sport varchar(20) DEFAULT "WALK";
 
@@ -128,9 +137,9 @@ DELIMITER ;
 
 CREATE TABLE `unit_measure_default` (
   `id_user` int(11) NOT NULL,
-  `energy` varchar(20) NOT NULL DEFAULT 'KILO_CALORIES',
+  `energy` varchar(20) DEFAULT 'KILO_CALORIES',
   `weight` varchar(20) NOT NULL DEFAULT 'KILOGRAM',
-  `distance` varchar(20) NOT NULL DEFAULT 'KILOMETER',
+  `distance` varchar(20) DEFAULT 'KILOMETER',
   `height` varchar(20) NOT NULL DEFAULT 'METER'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -147,8 +156,8 @@ CREATE TABLE `user` (
   `gender` varchar(10) NOT NULL,
   `birth_date` date NOT NULL,
   `email` varchar(50) NOT NULL,
-  `city` varchar(30) NOT NULL,
   `phone` varchar(20) NOT NULL,
+  `city` varchar(30) NOT NULL,
   `height` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -157,9 +166,7 @@ CREATE TABLE `user` (
 --
 DELIMITER $$
 CREATE TRIGGER `after_insert_user` AFTER INSERT ON `user` FOR EACH ROW BEGIN
-
-INSERT INTO unit_measure_default (id_user) VALUES(new.id_user);
-
+INSERT INTO unit_measure_default(id_user) VALUES(new.id_user);
 END
 $$
 DELIMITER ;
@@ -173,7 +180,7 @@ DELIMITER ;
 CREATE TABLE `weight` (
   `id_weight` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
-  `date` date NOT NULL,
+  `date` date NOT NULL DEFAULT current_timestamp(),
   `value` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -188,22 +195,15 @@ CREATE TABLE `workout` (
   `id_user` int(11) NOT NULL,
   `map_route` longblob DEFAULT NULL,
   `date` bigint(20) NOT NULL,
-  `duration` int(10) UNSIGNED NOT NULL,
-  `distance` float NOT NULL DEFAULT 0,
-  `calories` float NOT NULL DEFAULT 0,
+  `duration` float NOT NULL,
+  `distance` float DEFAULT NULL,
+  `calories` float DEFAULT NULL,
   `sport` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Indici per le tabelle scaricate
 --
-
---
--- Indici per le tabelle `check_registration`
---
-ALTER TABLE `check_registration`
-  ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKachieve_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `login`
@@ -225,30 +225,44 @@ ALTER TABLE `profile_image`
 -- Indici per le tabelle `request_forgot_password`
 --
 ALTER TABLE `request_forgot_password`
-  ADD PRIMARY KEY (`email`) USING BTREE;
+  ADD PRIMARY KEY (`email`),
+  ADD UNIQUE KEY `ID_Request_Forgot_Password_IND` (`email`);
+
+--
+-- Indici per le tabelle `session`
+--
+ALTER TABLE `session`
+  ADD PRIMARY KEY (`id_user`),
+  ADD UNIQUE KEY `FKreport_IND` (`id_user`),
+  ADD UNIQUE KEY `token` (`token`);
+
+--
+-- Indici per le tabelle `signup`
+--
+ALTER TABLE `signup`
+  ADD PRIMARY KEY (`id_user`),
+  ADD UNIQUE KEY `FKachieve_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `sport_default`
 --
 ALTER TABLE `sport_default`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKchange_IND` (`id_user`),
-  ADD KEY `FKR_1_IND` (`sport`);
+  ADD UNIQUE KEY `FKchange_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `target_default`
 --
 ALTER TABLE `target_default`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKpossess_IND` (`id_user`),
-  ADD KEY `FKR_IND` (`target`);
+  ADD UNIQUE KEY `FKpossess_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `unit_measure_default`
 --
 ALTER TABLE `unit_measure_default`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `FKchoose_1_IND` (`id_user`) USING BTREE;
+  ADD UNIQUE KEY `FKchoose_IND` (`id_user`);
 
 --
 -- Indici per le tabelle `user`
@@ -256,15 +270,17 @@ ALTER TABLE `unit_measure_default`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id_user`),
   ADD UNIQUE KEY `SID_User_ID` (`name`,`last_name`),
-  ADD UNIQUE KEY `ID_User_IND` (`id_user`);
+  ADD UNIQUE KEY `ID_User_IND` (`id_user`),
+  ADD UNIQUE KEY `SID_User_IND` (`name`,`last_name`);
 
 --
 -- Indici per le tabelle `weight`
 --
 ALTER TABLE `weight`
-  ADD PRIMARY KEY (`id_weight`) USING BTREE,
-  ADD UNIQUE KEY `SID_Weight_IND` (`id_user`,`date`) USING BTREE,
-  ADD UNIQUE KEY `ID_Weight_IND` (`id_weight`) USING BTREE;
+  ADD PRIMARY KEY (`id_weight`),
+  ADD UNIQUE KEY `SID_Weight_ID` (`id_user`,`date`),
+  ADD UNIQUE KEY `ID_Weight_IND` (`id_weight`),
+  ADD UNIQUE KEY `SID_Weight_IND` (`id_user`,`date`);
 
 --
 -- Indici per le tabelle `workout`
@@ -272,7 +288,7 @@ ALTER TABLE `weight`
 ALTER TABLE `workout`
   ADD PRIMARY KEY (`id_workout`),
   ADD UNIQUE KEY `ID_Workout_IND` (`id_workout`),
-  ADD KEY `FKcarry_out_IND` (`id_user`) USING BTREE;
+  ADD KEY `FKcarry_out_IND` (`id_user`);
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate
@@ -301,12 +317,6 @@ ALTER TABLE `workout`
 --
 
 --
--- Limiti per la tabella `check_registration`
---
-ALTER TABLE `check_registration`
-  ADD CONSTRAINT `FKachieve_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
-
---
 -- Limiti per la tabella `login`
 --
 ALTER TABLE `login`
@@ -317,6 +327,18 @@ ALTER TABLE `login`
 --
 ALTER TABLE `profile_image`
   ADD CONSTRAINT `FKhave_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `session`
+--
+ALTER TABLE `session`
+  ADD CONSTRAINT `FKreport_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `signup`
+--
+ALTER TABLE `signup`
+  ADD CONSTRAINT `FKachieve_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `sport_default`
@@ -334,7 +356,19 @@ ALTER TABLE `target_default`
 -- Limiti per la tabella `unit_measure_default`
 --
 ALTER TABLE `unit_measure_default`
-  ADD CONSTRAINT `FKchoose_1_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+  ADD CONSTRAINT `FKchoose_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `weight`
+--
+ALTER TABLE `weight`
+  ADD CONSTRAINT `FKadd` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `workout`
+--
+ALTER TABLE `workout`
+  ADD CONSTRAINT `FKcarry_out_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

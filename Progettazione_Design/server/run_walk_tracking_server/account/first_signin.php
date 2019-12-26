@@ -1,18 +1,21 @@
 <?php
 require_once("../utility.php");
+require_once("../dao/SessionDao.php");
 require_once("../dao/UserDao.php");
 require_once("../dao/SettingsDao.php");
 require_once("../dao/StatisticsDao.php");
 require_once("../dao/WorkoutDao.php");
 try{
-  $code = bodyRequest();
-  if(!isset($code[ID_USER]) || !isset($code[TOKEN])|| !isset($code[IMEI])) throw new Exception(URL_NOT_VALID);
+  $userCredentials = bodyRequest();
+  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD]) || !isset($userCredentials[TOKEN]))
+  throw new Exception(URL_NOT_VALID);
 
-   UserDao::checkToken($code[ID_USER], $code[TOKEN]);
+   $session=UserDao::checkSignUp($userCredentials);
+   if($session==NULL)  throw new Exception(SESSION_TOKEN_NOT_VALID);
 
-   print json_encode(UserDao::dataAfterAccess(array(ID_USER =>$code[ID_USER], IMEI=>$code[IMEI])));
+   print json_encode(array(SESSION => $session, DATA =>UserDao::allData($session[TOKEN])));
 
-}catch(Exception $e){
+ }catch(Exception $e){
   print json_errors($e->getMessage());
 }
 

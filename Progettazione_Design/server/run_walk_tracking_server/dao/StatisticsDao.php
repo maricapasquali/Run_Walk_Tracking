@@ -28,38 +28,18 @@ class StatisticsDao{
   static function getAllMiddleSpeedFor($id_user){
     return self::getAll(MIDDLE_SPEED,$id_user);
   }
+
   static function getAllCaloriesFor($id_user){
     return self::getAll(CALORIES, $id_user);
   }
+
   static function getAllDistanceFor($id_user){
     return self::getAll(DISTANCE, $id_user);
   }
+
   static function getAllWeightFor($id_user){
     return self::getAll(WEIGHT, $id_user);
   }
 
-  static function deleteWeight($id_weight){
-    try {
-      if(connect())
-      {
-
-        startTransaction();
-
-        $stmt = getConnection()->prepare("DELETE FROM weight WHERE id_weight=?");
-        if(!$stmt) throw new Exception("Weight delete : Preparazione fallita. Errore: ". getErrorConnection());
-        $stmt->bind_param("i", $id_weight);
-        if(!$stmt->execute()) throw new Exception("Weight : Delete fallito. Errore: ". getErrorConnection());
-        $stmt->close();
-
-        commitTransaction();
-      }
-    }catch (Exception $e) {
-      rollbackTransaction();
-      throw new Exception($e->getMessage());
-      return;
-    }
-    closeConnection();
-    return true;
-  }
 }
 ?>

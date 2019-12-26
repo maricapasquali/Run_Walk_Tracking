@@ -21,10 +21,15 @@ class UserDao {
           $phone = $user[PHONE];
           $city = $user[CITY];
           $height = $user[HEIGHT];
-          if(!$stmt->execute()) throw new Exception("User : Inserimento fallito. Errore: ". getErrorConnection());
+          if(!$stmt->execute()) {
+            if(isDuplicate()) throw new Exception(USER_JUST_SIGN_UP);
+            throw new Exception("User : Inserimento fallito. Errore: ". getErrorConnection());
+          }
+          if(!$stmt->affected_rows) return;
           $stmt->close();
 
           $id = getConnection()->insert_id;
+
 
           $stmt = getConnection()->prepare("INSERT INTO login(id_user, username, hash_password) VALUES (?, ?, ?)");
           if(!$stmt) throw new Exception("Login : Preparazione fallita. Errore: ". getErrorConnection());
@@ -42,7 +47,7 @@ class UserDao {
           $stmt->close();
 
 
-          $stmt = getConnection()->prepare("INSERT INTO weight(id_user, date, value) VALUES (?, CURRENT_DATE, ?)");
+          $stmt = getConnection()->prepare("INSERT INTO weight(id_user, value) VALUES (?,?)");
           if(!$stmt) throw new Exception("Weight : Preparazione fallita. Errore: ". getErrorConnection());
           $stmt->bind_param("id", $id, $weight);
           $weight = $user[WEIGHT];
@@ -58,34 +63,54 @@ class UserDao {
             if(!$stmt->execute()) throw new Exception("Image : Inserimento fallito. Errore: ". getErrorConnection());
             $stmt->close();
           }
-          $user[ID_USER]= $id;
+          //$user[ID_USER]= $id;
 
           $token = getToken(10);
 
-          $stmt = getConnection()->prepare("INSERT INTO check_registration(id_user, token) VALUES (?,?)");
+          $stmt = getConnection()->prepare("INSERT INTO signup(id_user, token, date) VALUES (?, ?, ?)");
           if(!$stmt) throw new Exception("Token : Preparazione fallita. Errore: ". getErrorConnection());
-          $stmt->bind_param("is", $id, $token);
+          $stmt->bind_param("iss", $id, $token, current_unixdatetime());
           if(!$stmt->execute()) throw new Exception("Token : Inserimento fallito. Errore: ". getErrorConnection());
           $stmt->close();
-
           commitTransaction();
 
           // Invio email con token
           $doc = docHtml(_SERVER_."/emails/sign_up.php?id=".$id);
           $findMe = $doc->getElementById("token");
-          if (is_object($findMe)) $findMe->nodeValue = $token;
+          if(is_object($findMe)) $findMe->nodeValue = $token;
           sendEmail($email, "Sign Up", $doc->saveHTML());
         }
       }catch (Exception $e) {
         rollbackTransaction();
+
         throw new Exception($e->getMessage());
         return;
       }
       closeConnection();
-      return array(ID_USER => $id, TOKEN=>$token);
+      return true;
    }
 
-   static function checkCredential($username, $password){
+   static function checkSignUp($userCredentials){
+      $user = self::checkSignIn($userCredentials[USERNAME], $userCredentials[PASSWORD]);
+     if(connect()){
+
+         $stmt = getConnection()->prepare("SELECT count(*) FROM signup WHERE id_user=? and token=?");
+         if(!$stmt) throw new Exception("Check Token : Preparazione fallita. Errore: ". getErrorConnection());
+         $stmt->bind_param("is", $user[ID_USER], $userCredentials[TOKEN]);
+         if(!$stmt->execute()) throw new Exception("Check Token: Selezione fallita. Errore: ". getErrorConnection());
+         $stmt->bind_result($isCorrect);
+         $stmt->fetch();
+         $stmt->close();
+
+         if($isCorrect==0) throw new Exception(SIGN_UP_TOKEN_NOT_VALID);
+
+         $session = SessionDao::create($user[ID_USER]);
+     }
+     closeConnection();
+     return $session;
+   }
+
+   static function checkSignIn($username, $password){
      if(connect()){
          $stmt = getConnection()->prepare("SELECT id_user, hash_password FROM login WHERE username=?");
          if(!$stmt) throw new Exception("user id : Preparazione fallita. Errore: ". getErrorConnection());
@@ -95,48 +120,12 @@ class UserDao {
          $stmt->fetch();
          $stmt->close();
 
-         if($id_user==NULL && $hash_password==NULL) throw new Exception("USER NON REGISTRATO!");
+         if($id_user==NULL && $hash_password==NULL) throw new Exception(USER_NOT_FOUND);
 
-         if(!password_verify($password, $hash_password)) throw new Exception("PASSWORD NON CORRETTA!");
+         if(!password_verify($password, $hash_password)) throw new Exception(PASSWORD_NOT_CORRECT);
      }
      closeConnection();
      return array(ID_USER => $id_user);
-   }
-
-   static function checkToken($id_user, $token){
-     if(connect()){
-         $stmt = getConnection()->prepare("SELECT count(*) FROM check_registration WHERE id_user=? and token=?");
-         if(!$stmt) throw new Exception("Check Token : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param("is", $id_user, $token);
-         if(!$stmt->execute()) throw new Exception("Check Token: Selezione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_result($isCorrect);
-         $stmt->fetch();
-         $stmt->close();
-
-         if($isCorrect==0) throw new Exception("Token non corretto");
-
-         $stmt = getConnection()->prepare("UPDATE login SET date = CURRENT_TIMESTAMP WHERE id_user=?");
-         if(!$stmt) throw new Exception("Date login update : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param("i",$id_user );
-         if(!$stmt->execute()) throw new Exception("Date login : Update fallito. Errore: ". getErrorConnection());
-         $stmt->close();
-     }
-     closeConnection();
-     return true;
-   }
-
-   static function checkFirstLogin($user){
-     if(connect()){
-         $stmt = getConnection()->prepare("SELECT count(*) FROM login WHERE id_user=? and date is null");
-         if(!$stmt) throw new Exception("Check first login : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param("i", $user[ID_USER]);
-         if(!$stmt->execute()) throw new Exception("Check first login: Selezione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_result($isFirstlogin);
-         $stmt->fetch();
-         $stmt->close();
-     }
-     closeConnection();
-     return $isFirstlogin;
    }
 
    static function getUserForId($id){
@@ -145,18 +134,15 @@ class UserDao {
      if(connect()){
         $stmt = getConnection()->prepare("SELECT u.*, birth_date, l.username FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
         if(!$stmt) throw new Exception("user from id : Preparazione fallita. Errore: ". getErrorConnection());
-        $stmt->bind_param("s", $id);
+        $stmt->bind_param("i", $id);
         if(!$stmt->execute()) throw new Exception("user from id : Selezione fallita. Errore: ". getErrorConnection());
         $result = $stmt->get_result();
-        while($row = $result->fetch_assoc()){
-          array_push($user, $row);
-        }
-        if(count($user)==0) throw new Exception("USER (id=$id) NON ESISTENTE");
+        $user = $result->fetch_assoc();
+        if(count($user)==0) throw new Exception(USER_NOT_FOUND);
         $stmt->close();
-
      }
      closeConnection();
-     return $user[0];
+     return $user;
    }
 
    static function getUserForUsername($username){
@@ -169,57 +155,34 @@ class UserDao {
         if(!$stmt->execute()) throw new Exception("Check : Selezione fallita. Errore: ". getErrorConnection());
         $stmt->bind_result($id_user);
         $stmt->fetch();
-        if($id_user==NULL) throw new Exception("USER (username = $username) NON ESISTENTE");
+        if($id_user==NULL) throw new Exception(USER_NOT_FOUND);
         $stmt->close();
      }
      closeConnection();
      return array(ID_USER=>$id_user);
    }
 
-   static function dataAfterAccess($user){
-    try{
-        if(connect()){
-            
-            $stmt = getConnection()->prepare("SELECT id_phone FROM login WHERE id_user=? and id_phone IS NOT NULL");
-            if(!$stmt) throw new Exception("id phone : Preparazione fallita. Errore: ". getErrorConnection());
-            $stmt->bind_param("i", $user[ID_USER]);
-            if(!$stmt->execute()) throw new Exception("id phone : Selezione fallita. Errore: ". getErrorConnection());
-            $stmt->bind_result($id_phone);
-            $stmt->fetch();
-            $stmt->close();
-    
-            if(strcmp($id_phone, $user[IMEI])!=0){
-              startTransaction();
-              $stmt = getConnection()->prepare("UPDATE login SET id_phone = ? WHERE id_user=? ");
-              if(!$stmt) throw new Exception("id phone : Preparazione fallita. Errore: ". getErrorConnection());
-              $stmt->bind_param("si", $user[IMEI], $user[ID_USER]);
-              if(!$stmt->execute()) throw new Exception("id phone : Update fallito. Errore: ". getErrorConnection());
-              $stmt->close();
-              commitTransaction();
-              $img = self::getImageProfileForIdUser($user[ID_USER]);
-            }
+   static function allData($session_token){
+     $data= array();
+     if(connect()){
+         $stmt = getConnection()->prepare("SELECT id_user FROM session WHERE token=? ");
+         if(!$stmt) throw new Exception("Check Token : Preparazione fallita. Errore: ". getErrorConnection());
+         $stmt->bind_param("s", $session_token);
+         if(!$stmt->execute()) throw new Exception("Check Token: Selezione fallita. Errore: ". getErrorConnection());
+         $stmt->bind_result($id_user);
+         $stmt->fetch();
+         $stmt->close();
+
+         if($id_user==NULL) throw new Exception(USER_NOT_FOUND);
      }
-    }catch(Exception $e){
-      rollbackTransaction();
-      throw new Exception($e->getMessage());
-    }
-    closeConnection();
-    
-    if($img==null){
-        return array(USER => $user + self:: getUserForId($user[ID_USER]),
-                    WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
-                    WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
-                    APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))) ;
-    }else{
-        return array(USER => $user + self:: getUserForId($user[ID_USER]) + $img,
-                     WEIGHTS => StatisticsDao::getAllWeightFor($user[ID_USER]),
-                     WORKOUTS => WorkoutDao::getAllForUser($user[ID_USER]),
-                     APP => array( SETTINGS => SettingsDao::getSettingsFor($user[ID_USER]))) ;
+     closeConnection();
+     return  array( USER => self:: getUserForId($id_user) + self::getImageProfileForIdUser($id_user),
+                    WEIGHTS => StatisticsDao::getAllWeightFor($id_user),
+                    WORKOUTS => WorkoutDao::getAllForUser($id_user),
+                    SETTINGS => SettingsDao::getSettingsFor($id_user));
+   }
 
-    }
-  }
-
-  static function getImageProfileForIdUser($id){
+   static function getImageProfileForIdUser($id){
         if(connect()){
            $stmt = getConnection()->prepare("SELECT img_encode FROM profile_image WHERE id_user=?");
            if(!$stmt) throw new Exception("user image id : Preparazione fallita. Errore: ". getErrorConnection());
@@ -252,14 +215,16 @@ class UserDao {
          if(!$stmt) throw new Exception("Forgot Password : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("sss", $c_key, $end_validity, $email);
          if(!$stmt->execute()) throw new Exception("Forgot Password : Inserimento fallito. Errore: ". getErrorConnection());
+
+         if($stmt->affected_rows){
+           // Invio email con link
+           $doc = docHtml(_SERVER_."/emails/email_support_password.php");
+           $findMe = $doc->getElementById("link_change_password");
+           if (is_object($findMe)) $findMe->setAttribute('href',_SERVER_.'/emails/change_password.php?c_key='.$c_key);
+           sendEmail($email, "Reset Password", $doc->saveHTML());
+         }
+
          $stmt->close();
-
-
-         // Invio email con link
-         $doc = docHtml(_SERVER_."/emails/email_support_password.php");
-         $findMe = $doc->getElementById("link_change_password");
-         if (is_object($findMe)) $findMe->setAttribute('href',_SERVER_.'/emails/change_password.php?c_key='.$c_key);
-         sendEmail($email, "Reset Password", $doc->saveHTML());
 
          commitTransaction();
        }
@@ -272,7 +237,8 @@ class UserDao {
      return true;
    }
 
-   static function update($user){
+   static function update($user, $id_user){
+     $update = false;
      try {
        if(connect()) {
 
@@ -282,20 +248,19 @@ class UserDao {
          $values = array();
 
          foreach ($user as $key => $value) {
-           if($key!=ID_USER && $key!=IMG){
+           if($key!=IMG){
              array_push($keys, $key);
              array_push($values, $value);
            }
          }
-         array_push($values, $user[ID_USER]);
-
+         array_push($values, $id_user);
 
          if(count($values)>1){
            $stmt = getConnection()->prepare("UPDATE user SET " .join("=?,", $keys) ."=?"." WHERE id_user=?");
            if(!$stmt) throw new Exception("User update : Preparazione fallita. Errore: ". getErrorConnection());
            $stmt->bind_param(str_repeat('s', count($keys))."i", ...$values);
-
            if(!$stmt->execute()) throw new Exception("User : Update fallito. Errore: ". getErrorConnection());
+           $update = $stmt->affected_rows;
            $stmt->close();
          }
 
@@ -317,6 +282,7 @@ class UserDao {
            $stmt->bind_param("si", $user[IMG], $user[ID_USER]);
 
            if(!$stmt->execute()) throw new Exception("User Img : Update fallito. Errore: ". getErrorConnection());
+           $update = $stmt->affected_rows;
            $stmt->close();
 
          }
@@ -329,10 +295,10 @@ class UserDao {
        return;
      }
      closeConnection();
-     return true;
+     return $update;
    }
 
-   static function changePassword($id_user, $password){
+   static function changePassword($password, $id_user){
      try {
        if(connect()) {
 
@@ -341,8 +307,8 @@ class UserDao {
          $stmt = getConnection()->prepare("UPDATE login SET hash_password=? WHERE id_user=?");
          if(!$stmt) throw new Exception("Password update : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("si", $hash_crypt, $id_user);
-
          if(!$stmt->execute()) throw new Exception("Password : Update fallito. Errore: ". getErrorConnection());
+         if(!$stmt->affected_rows) return;
          $stmt->close();
 
          commitTransaction();
@@ -368,6 +334,7 @@ class UserDao {
          if(!$stmt) throw new Exception("User delete : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("i", $id_user);
          if(!$stmt->execute()) throw new Exception("User : Delete fallito. Errore: ". getErrorConnection());
+         if(!$stmt->affected_rows) return;
          $stmt->close();
 
          commitTransaction();

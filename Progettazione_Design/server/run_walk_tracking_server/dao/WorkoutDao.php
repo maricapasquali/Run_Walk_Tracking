@@ -9,7 +9,7 @@ class WorkoutDao {
         {
 
           startTransaction();
-      
+
           $keys = array();
           $values = array();
           $typeParam ="";
@@ -17,21 +17,17 @@ class WorkoutDao {
           foreach ($workout as $key => $value) {
             array_push($keys, $key);
             array_push($values, $value);
-            if($key==ID_USER || $key==DURATION) $typeParam.="i";
+            if($key==ID_USER || $key==DURATION || $key==ID_WORKOUT) $typeParam.="i";
             else if($key==DISTANCE || $key==CALORIES) $typeParam.="d";
             else $typeParam.="s";
-
           }
 
           $stmt = getConnection()->prepare("INSERT INTO workout"."(" . join(",", $keys) .")"." VALUES (". join(",", str_split(str_repeat('?', count($keys)))).")");
           if(!$stmt) throw new Exception("User : Preparazione fallita. Errore: ". getErrorConnection());
           $stmt->bind_param($typeParam, ...array_values($values));
-
           if(!$stmt->execute()) throw new Exception("User : Inserimento fallito. Errore: ". getErrorConnection());
+          if(!$stmt->affected_rows) return;
           $stmt->close();
-
-          $id = getConnection()->insert_id;
-
           commitTransaction();
         }
       }catch (Exception $e) {
@@ -39,7 +35,7 @@ class WorkoutDao {
         throw new Exception($e->getMessage());
       }
       closeConnection();
-      return array(ID_WORKOUT=>$id); // +array_combine($keys, $values);
+      return true;
    }
 
    static function getAllForUser($id_user){
@@ -61,13 +57,12 @@ class WorkoutDao {
      return $workouts;
    }
 
-   static function update($workout){
+   static function update($workout, $id_user){
      try {
        if(connect())
        {
 
          startTransaction();
-    
 
          $keys = array();
          $values = array();
@@ -82,11 +77,15 @@ class WorkoutDao {
            }
          }
          array_push($values, $workout[ID_WORKOUT]);
+         array_push($values, $id_user);
 
-         $stmt = getConnection()->prepare("UPDATE workout SET " . join("=?,", $keys) ."=? WHERE id_workout=?");
+         if(count($values) <= 2) return;
+
+         $stmt = getConnection()->prepare("UPDATE workout SET " . join("=?,", $keys) ."=? WHERE id_workout=? and id_user=?");
          if(!$stmt) throw new Exception("Workout update : Preparazione fallita. Errore: ". getErrorConnection());
-         $stmt->bind_param($typeParam."i", ...array_values($values));
+         $stmt->bind_param($typeParam."ii", ...array_values($values));
          if(!$stmt->execute()) throw new Exception("Workout : Update fallito. Errore: ". getErrorConnection());
+         if(!$stmt->affected_rows) return;
          $stmt->close();
 
          commitTransaction();
@@ -110,6 +109,7 @@ class WorkoutDao {
          if(!$stmt) throw new Exception("Workout delete : Preparazione fallita. Errore: ". getErrorConnection());
          $stmt->bind_param("i", $id_workout);
          if(!$stmt->execute()) throw new Exception("Workout : Delete fallito. Errore: ". getErrorConnection());
+         if(!$stmt->affected_rows) return;
          $stmt->close();
 
          commitTransaction();

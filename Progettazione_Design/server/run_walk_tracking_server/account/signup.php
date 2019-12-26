@@ -18,7 +18,7 @@ try{
      !isset($new_user[PASSWORD]))
       throw new Exception(URL_NOT_VALID);
 
-     print json_encode(UserDao::create($new_user));
+     print json_encode(array(SIGN_UP => UserDao::create($new_user)));
 
 }catch(Exception $e){
   print json_errors($e->getMessage());

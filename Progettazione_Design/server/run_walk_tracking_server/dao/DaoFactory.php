@@ -1,8 +1,8 @@
 <?php
 define("HOST", "localhost"); // E' il server a cui ti vuoi connettere.
-define("DATABASE", "id11865186_runwalktracking"); // Nome del database.
+define("DATABASE", "run_walk_tracking_db_server"); // Nome del database.
 
-define("USER_UB", "id11865186_sec_user_tracking"); // E' l'utente con cui ti collegherai al DB.
+define("USER_UB", "sec_user_tracking"); // E' l'utente con cui ti collegherai al DB.
 define("PASSWORD_DB", "owUpTYWuQEagbc9J"); // Password di accesso al DB.
 
 
@@ -39,6 +39,15 @@ function rollbackTransaction(){
 function getErrorConnection(){
   global $conn;
   return $conn->error;
+}
+
+function isDuplicate(){
+  return  getErrorCodeConnection()==1062;
+}
+
+function getErrorCodeConnection(){
+  global $conn;
+  return $conn->errno;
 }
 
 function closeConnection(){

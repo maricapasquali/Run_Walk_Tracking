@@ -17,12 +17,12 @@
     }
     closeConnection();
 
-    return current_date() >= $end_validity;
+    return current_datetime() >= $end_validity;
   }
 
   try{
       if(isExpired($_GET[C_KEY]))
-      die(json_errors("Link for the reset you clicked is EXPIRED !! Please request a new one."));
+      die(json_errors(LINK_EXPIRED));
   }catch(Exception $e){
       die(json_errors($e->getMessage()));
   }
@@ -109,6 +109,7 @@
     <script src="../js/md5.min.js"></script>
     <script src="../js/utility.js"></script>
     <script>
+      var _ERROR_PASSWORD_ = "Password inserita non è valida";
       function error(error){
         $("div.alert-container").empty();
         $("div.alert-container").append($($("#error_operation").html()).html(error));
@@ -123,7 +124,7 @@
         var password = $(this);
         var conf_passw = $('#conf-new-password');
         if (password.val() != $('#conf-new-password').val()) {
-          inValidInput(password, "Password inserita non è valida");
+          inValidInput(password, _ERROR_PASSWORD_);
           return;
         }
         validInput(conf_passw);
@@ -134,7 +135,7 @@
         var conf_passw = $(this);
         var password = $("#new-password");
         if ($("#new-password").val() != conf_passw.val()) {
-          inValidInput(conf_passw, "Password inserita non è valida");
+          inValidInput(conf_passw, _ERROR_PASSWORD_);
           return;
         }
         validInput(conf_passw);
