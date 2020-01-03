@@ -1,10 +1,8 @@
 package com.run_walk_tracking_gps.exception;
 
 import android.app.AlertDialog;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.LocationManager;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.R;

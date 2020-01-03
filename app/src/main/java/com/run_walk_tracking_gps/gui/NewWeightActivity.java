@@ -7,28 +7,25 @@ import android.widget.AdapterView;
 
 import android.widget.TextView;
 
-
-import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
+import com.run_walk_tracking_gps.db.tables.UserDescriptor;
+import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewWeightAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
-
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
-import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
-
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener, Response.Listener<JSONObject> {
+public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener{
 
     private final static String TAG = NewWeightActivity.class.getName();
 
@@ -80,38 +77,29 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
             if(!statisticsData.isSet())
                 throw new DataException(this, StatisticsData.class);
 
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this)))
-                    .put(HttpRequest.Constant.VALUE, statisticsData.getValue())
-                    .put(HttpRequest.Constant.DATE, statisticsData.getDate());
+            final JSONObject bodyJson = new JSONObject()
+                    .put(UserDescriptor.ID_USER, DefaultPreferencesUser.getIdUser(this))
+                    .put(WeightDescriptor.VALUE, statisticsData.getValue())
+                    .put(WeightDescriptor.DATE, statisticsData.getDateStrDB());
 
-            HttpRequest.requestNewWeight(this, bodyJson, this);
+            long id_weight = SqlLiteStatisticsDao.createWeightDao(this).insert(bodyJson);
+            if(id_weight!=-1){
+                DefaultPreferencesUser.update(this);
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
+                        NetworkHelper.Constant.WEIGHT, bodyJson.put(WeightDescriptor.ID_WEIGHT, id_weight).toString())
+                        .bindService();
 
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }catch (JSONException je){
-            je.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        } catch (DataException e) {
-            e.alert();
-        }
-    }
-
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-
-            int id_statistics = response.getInt(HttpRequest.Constant.ID_WEIGHT);
-            statisticsData.setId(id_statistics);
-            // save and send
-            final Intent newWeightIntent = new Intent();
-            newWeightIntent.putExtra(KeysIntent.NEW_WEIGHT, statisticsData);
-            setResult(RESULT_OK, newWeightIntent);
+                setResult(RESULT_OK, new Intent());
+            }else {
+                setResult(RESULT_CANCELED, new Intent());
+            }
             finish();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+        }
+        catch (JSONException je){
+            je.printStackTrace();
+        }
+        catch (DataException e) {
+            e.alert();
         }
     }
-
 }

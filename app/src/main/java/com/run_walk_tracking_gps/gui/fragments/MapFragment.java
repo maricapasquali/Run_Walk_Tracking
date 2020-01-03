@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.app.Activity;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,7 +25,6 @@ import com.run_walk_tracking_gps.exception.NoGPSException;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
-import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 

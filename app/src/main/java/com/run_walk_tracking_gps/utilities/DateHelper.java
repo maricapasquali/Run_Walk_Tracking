@@ -2,24 +2,19 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.support.v4.util.Pair;
-import android.util.Log;
 
-import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Language;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.SimpleTimeZone;
+
 import java.util.TimeZone;
-import java.util.zip.DataFormatException;
 
 
 public final class DateHelper {
@@ -39,6 +34,7 @@ public final class DateHelper {
         Log.d(TAG, "Time Zone = "+ TimeZone.getDefault().getID());*/
     }
 
+    // TODO: 12/30/2019 UTILIZZARE SYNGLETON (CONTEXT DELL'APPLICAZIONE)
     public static DateHelper create(Context context){
         return new DateHelper(context);
     }
@@ -49,6 +45,10 @@ public final class DateHelper {
 
     public Calendar getCalendar(){
         return calendar;
+    }
+
+    public long getCurrentDate(){
+        return calendar.getTime().getTime()/1000;
     }
 
 // FILTER
@@ -83,6 +83,15 @@ public final class DateHelper {
         return DateFormat.getDateInstance(style, locale).format(date);
     }
 
+    public String formatForDB(Date date){
+        if(date==null) return "";
+        return new SimpleDateFormat("yyyy-MM-dd", locale).format(date);
+    }
+
+    public long getUnixTime(Date date){
+        if(date==null) return 0L;
+        return date.getTime()/1000L;
+    }
 
     public String formatShortToString(Date date){
         if(date==null) return "";
@@ -109,7 +118,7 @@ public final class DateHelper {
 
     public Date parseShortDateTimeToDate(long dateWithTime)  {
         final Calendar c = Calendar.getInstance(TimeZone.getDefault(), locale);
-        c.setTime(new Date(dateWithTime));
+        c.setTime(new Date(dateWithTime*1000L));
         return c.getTime();
     }
 

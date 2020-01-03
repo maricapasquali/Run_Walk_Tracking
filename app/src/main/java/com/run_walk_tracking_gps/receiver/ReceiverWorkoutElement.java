@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.service.NotificationWorkout;
+import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.service.WorkoutService;
 
 

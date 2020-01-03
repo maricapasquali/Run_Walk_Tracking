@@ -1,11 +1,13 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.widget.Button;
 
 import com.run_walk_tracking_gps.R;
-
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 public class BootAppActivity extends CommonActivity {
 
@@ -30,5 +32,17 @@ public class BootAppActivity extends CommonActivity {
             final Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ImageFileHelper.create(this).deleteTmpDir();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
     }
 }

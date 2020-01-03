@@ -1,4 +1,4 @@
-package com.run_walk_tracking_gps.service;
+package com.run_walk_tracking_gps.gui;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -11,16 +11,19 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.gui.NotificationSplashScreenActivity;
+import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
 import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class NotificationWorkout {
 
-    static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
     // REQUEST
     private static final int REQUEST_CODE_RESUME = 5;
@@ -45,15 +48,25 @@ public class NotificationWorkout {
         this.remoteViewSmall  = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_small);
         this.remoteViewBig = new RemoteViews(context.getPackageName(), R.layout.custom_service_workout_running_big);
 
-        final Intent notificationIntent = new Intent(context, NotificationSplashScreenActivity.class).setAction(ActionReceiver.RUNNING_WORKOUT);
+        final Intent notificationIntent = new Intent(context, SplashScreenActivity.class).setAction(ActionReceiver.RUNNING_WORKOUT);
         final PendingIntent onClickNotificationIntent = PendingIntent.getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        final String defaultDistance = Measure.Utilities.formatMeasure(0d, DefaultPreferencesUser.getUnitDistanceDefault(c));
-        final String defaultEnergy = Measure.Utilities.formatMeasure(0d, DefaultPreferencesUser.getUnitEnergyDefault(c));
-        remoteViewBig.setTextViewText(R.id.distance_workout, defaultDistance);
-        remoteViewSmall.setTextViewText(R.id.distance_workout, defaultDistance);
-        remoteViewBig.setTextViewText(R.id.calories_workout, defaultEnergy);
-        remoteViewSmall.setTextViewText(R.id.calories_workout, defaultEnergy);
+        try {
+            final JSONObject unitMeasureDefault = SqlLiteSettingsDao.create(c).getUnitMeasureDefault();
+            final Measure.Unit distance = Measure.Unit.valueOf(unitMeasureDefault.getString(SettingsDescriptor.UnitMeasureDefault.DISTANCE));
+            final Measure.Unit energy = Measure.Unit.valueOf(unitMeasureDefault.getString(SettingsDescriptor.UnitMeasureDefault.ENERGY));
+
+            final String defaultDistance = Measure.Utilities.formatMeasure(0d, distance);
+            final String defaultEnergy = Measure.Utilities.formatMeasure(0d, energy);
+            remoteViewBig.setTextViewText(R.id.distance_workout, defaultDistance);
+            remoteViewSmall.setTextViewText(R.id.distance_workout, defaultDistance);
+
+            remoteViewBig.setTextViewText(R.id.calories_workout, defaultEnergy);
+            remoteViewSmall.setTextViewText(R.id.calories_workout, defaultEnergy);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
 
 
         this.notificationBuilder = this.notificationHelper.getNotificationBuilder(context, NotificationHelper.CHANNEL_1)
@@ -76,7 +89,7 @@ public class NotificationWorkout {
         Intent restartClick = new Intent(context, ReceiverNotificationButtonHandler.class).setAction(ActionReceiver.RESTART_ACTION);
         PendingIntent restartPendingClick = PendingIntent.getBroadcast(context, REQUEST_CODE_RESTART, restartClick, 0);
 
-        Intent stopClick = new Intent(context, NotificationSplashScreenActivity.class).setAction(ActionReceiver.STOP_ACTION);
+        Intent stopClick = new Intent(context, SplashScreenActivity.class).setAction(ActionReceiver.STOP_ACTION);
         PendingIntent stopPendingClick = PendingIntent.getActivity(context, REQUEST_CODE_STOP, stopClick, 0);
 
         remoteViewBig.setOnClickPendingIntent(R.id.pause_workout, pausePendingClick);
@@ -121,27 +134,27 @@ public class NotificationWorkout {
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    void pauseClicked() {
+    public void pauseClicked() {
         setVisibleButton(false);
     }
 
-    void restartClicked() {
+    public void restartClicked() {
         setVisibleButton(true);
     }
 
-    void stopClicked() {
+    public void stopClicked() {
         notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
         context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
-    void lockClicked() {
+    public void lockClicked() {
         remoteViewBig.setViewVisibility(R.id.restart_workout, View.GONE);
         remoteViewBig.setViewVisibility(R.id.stop_workout, View.GONE );
         remoteViewBig.setViewVisibility(R.id.pause_workout, View.GONE);
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    void unlockClicked() {
+    public void unlockClicked() {
         setVisibleButton(true);
     }
 

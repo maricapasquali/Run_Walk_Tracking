@@ -52,6 +52,10 @@
     <string name="password_not_empty">Password not empty</string>
     <string name="confirm_password_not_empty">Confirm Password not empty</string>
 
+    <!-- Activation Account -->
+    <string name="activation_account">Account Activation</string>
+    <string name="check_code">Activation code</string>
+
 
     <!-- Impostazioni -->
     <string name="sport">Sport</string>
@@ -109,6 +113,8 @@
     <string name="change_password">Change Password</string>
     <string name="save">Save</string>
     <string name="delete_account">Delete account</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
 
     <!-- Statistiche -->
     <string name="statistic_data">Data</string>
@@ -133,18 +139,22 @@
     <string name="delete_workout_mex">Are you sure you want to delete this workout?</string>
     <string name="correctly_sign_up">Registration successful! You will receive an email with a code.</string>
 
+    <string name="check_code_text">" Enter the account activation code that was emailed to you."</string>
+
     <!-- Messaggi di errore -->
     <string name="error">Error</string>
     <string name="not_correct_password">Incorrect password</string>
     <string name="workout_not_set_correctly">At least DAY, SPORT and DURATION must be set</string>
     <string name="weight_not_set_correctly">WEIGHT and DATE must be set</string>
-    <string name="not_empty">\u0020 can not be empty</string>
+    <string name="not_empty">\u0020 not be empty</string>
     <string name="user_not_set">User not set</string>
     <string name="account_not_checked">Account not verified!</string>
     <string name="start_compression_image">Started Image Compression</string>
     <string name="end_compression_image">Finished Image Compression</string>
     <string name="internet_not_available_title">Mobile Data is Turned Off</string>
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
+
+
 
     <!-- Da non TRADURRE -->
 
@@ -162,9 +172,6 @@
     <string name="username" translatable="false">Username</string>
     <string name="password" translatable="false">Password</string>
     <string name="email" translatable="false">Email</string>
-
-    <!-- Token -->
-    <string name="token" translatable="false">Token</string>
 
     <!-- Impostazione -->
     <string name="playlist" translatable="false">Playlist</string>

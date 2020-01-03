@@ -23,6 +23,9 @@ public class DateHelperTest {
         Date date = calendar.getTime();
         long mill = 1576007079550L;
         Log.e(TAG, new Date(mill).toString());
+        Log.e(TAG, "Date unix : "+ DateHelper.create(context).getCurrentDate());
+
+
 
         /*final String dateShortToDate = DateHelper.create(context).formatShortToString(date);
         final String dateShortDateTimeToDate = DateHelper.create(context).formatShortDateTimeToString(date);

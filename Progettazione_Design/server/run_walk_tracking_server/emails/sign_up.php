@@ -1,13 +1,14 @@
 <?php
   require_once('../utility.php');
-  if(!isset($_GET[ID])) die(json_errors(ID_NOT_SET));
+  require_once("../exception/Exceptions.php");
+  if(!isset($_GET[ID])) die(json_errors(new UrlExeception()));
   require_once('../dao/UserDao.php');
   try{
     $user = UserDao::getUserForId($_GET[ID]);
 
     $date = new DateTime($user[BIRTH_DATE]);
   }catch(Exception $e){
-    die(json_errors($e->getMessage()));
+    die(json_errors($e));
   }
 ?>
 <!DOCTYPE html>
@@ -70,7 +71,7 @@
         </table>
 
       <div class="mt-4 mb-4">
-        <p>To complete the registration you will have to use the Token below when requested:</p>
+        <p>To complete the registration you will have to use the Activation Code below when requested:</p>
         <strong id="token"></strong>
       </div>
 

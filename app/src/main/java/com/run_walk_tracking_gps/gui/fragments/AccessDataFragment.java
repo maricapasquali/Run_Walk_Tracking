@@ -13,12 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.stream.Stream;
 
 public class AccessDataFragment extends Fragment {
 
@@ -39,6 +41,7 @@ public class AccessDataFragment extends Fragment {
         }catch (ClassCastException e){
             throw new ClassCastException(context.toString() + " must implement AccessDataListener");
         }
+
     }
 
     private boolean isSetAll(){
@@ -68,23 +71,24 @@ public class AccessDataFragment extends Fragment {
         conf_password = view.findViewById(R.id.signup_profile_confirm_password);
         login = view.findViewById(R.id.signup_login);
 
+        setActionListener();
+        return view;
+    }
+
+    private void setActionListener(){
         login.setOnClickListener(v ->{
-
             try {
-
                 final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
                 final String hash_conf_password = CryptographicHashFunctions.md5(conf_password.getText().toString());
-
 
                 if(isSetAll()){
 
                     if(!hash_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(getContext());
 
-                    final JSONObject accessData = new JSONObject().put(HttpRequest.Constant.USERNAME, username.getText())
-                            .put(HttpRequest.Constant.PASSWORD, hash_password);
+                    final JSONObject accessData = new JSONObject().put(NetworkHelper.Constant.USERNAME, username.getText())
+                            .put(NetworkHelper.Constant.PASSWORD, hash_password);
 
                     accessDataListener.accessData(accessData);
-
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -93,12 +97,12 @@ public class AccessDataFragment extends Fragment {
                 conf_password.setText("");
             }
         });
-        return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Stream.of(username, password, conf_password).forEach(editText -> editText.setError(null));
 
         if(!TextUtils.isEmpty(conf_password.getText())) conf_password.setText("");
     }

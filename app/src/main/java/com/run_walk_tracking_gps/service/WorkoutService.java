@@ -15,14 +15,15 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
+import com.run_walk_tracking_gps.utilities.DateHelper;
 
-import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -141,7 +142,7 @@ public class WorkoutService extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         this.context = getApplicationContext();
-        this.workout = WorkoutBuilder.create(context).setDate(Calendar.getInstance().getTime()).build();
+        this.workout = WorkoutBuilder.create(context).setDate(DateHelper.create(context).getCalendar().getTime()).build();
 
         /* notifiation */
         this.notificationWorkout = NotificationWorkout.create(context);
@@ -179,7 +180,7 @@ public class WorkoutService extends Service {
         mTimer.scheduleAtFixedRate(timerTask, 0, TIMER_INTERVAL);
         /* map */
         mapRouteDraw.start();
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY; //super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -207,6 +208,7 @@ public class WorkoutService extends Service {
     }
 
     public Workout getWorkout() {
+        workout.setMiddleSpeed();
         workout.setMapRoute(mapRouteDraw.getListCoordinates());
         return workout;
     }

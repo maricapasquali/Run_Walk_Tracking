@@ -2,7 +2,7 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
+
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -15,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.WorkoutsFilterAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.FilterAdapterSpinner;
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 public class WorkoutsFragment extends Fragment {
 
     private static final String TAG = WorkoutsFragment.class.getName();
-    private static final String LIST_WORKOUT_KEY  = "Workouts History";
 
     private Spinner filter;
     private ExpandableListView workoutsViewExpandable;
@@ -43,7 +42,8 @@ public class WorkoutsFragment extends Fragment {
 
     private OnWorkOutSelectedListener onWorkOutSelectedListener;
     private OnManualAddClickedListener onManualAddClickedListener;
-    private OnDeleteWorkoutClickedListener onDeleteWorkoutClickedListener;
+
+
     private ArrayList<Workout> workouts = new ArrayList<>();
 
     public WorkoutsFragment() {
@@ -67,35 +67,13 @@ public class WorkoutsFragment extends Fragment {
         catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnManualAddClickedListener");
         }
-
-        try {
-            onDeleteWorkoutClickedListener =(OnDeleteWorkoutClickedListener)context;
-        }
-        catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnDeleteWorkoutClickedListener");
-        }
-    }
-
-    public static WorkoutsFragment createWithArgument(ArrayList<Workout> workouts){
-        final WorkoutsFragment workoutsFragment = new WorkoutsFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(LIST_WORKOUT_KEY, workouts);
-        workoutsFragment.setArguments(args);
-        return workoutsFragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
-
-        Bundle args = getArguments();
-        if(args!=null){
-            if(args.getParcelableArrayList(LIST_WORKOUT_KEY)!=null) {
-                workouts = getArguments().getParcelableArrayList(LIST_WORKOUT_KEY);
-            }
-            Log.d(TAG, "List Workouts = "+ workouts);
-        }
+        workouts = Workout.createList(getContext(), SqlLiteWorkoutDao.create(getContext()).getAll());
     }
 
     @Nullable
@@ -171,70 +149,27 @@ public class WorkoutsFragment extends Fragment {
         no_value_fragment.getView().setVisibility(isVisible? View.VISIBLE : View.GONE);
         filter.setVisibility(isVisible? View.GONE: View.VISIBLE );
         if(isVisible) Log.d(TAG, "No Workouts");
-        else Log.d(TAG, "Workouts = "+workouts);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "OnResume");
-        if(onManualAddClickedListener.newWorkout()==null &&
-           onWorkOutSelectedListener.workoutChanged()==null &&
-           onDeleteWorkoutClickedListener.idWorkoutDeleted()<=0)
-                checkSizeWorkouts();
+        // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
+        //SyncServiceHandler.create(getContext()).start();
 
         FilterTime filterTime = (FilterTime) filter.getSelectedItem();
+        workouts = Workout.createList(getContext(), SqlLiteWorkoutDao.create(getContext()).getAll());
         workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
-
-        if(onManualAddClickedListener.newWorkout()!=null){
-            final Workout newW = onManualAddClickedListener.newWorkout();
-            workouts.add(0, newW);
-            workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-            workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
-            onManualAddClickedListener.resetNewWorkout();
-            checkSizeWorkouts();
-            Log.d(TAG, "Gui Update : New Manual Workout = " +newW);
-        }
-
-        if(onWorkOutSelectedListener.workoutChanged()!=null){
-            final Workout newW = onWorkOutSelectedListener.workoutChanged();
-            workouts.stream().filter(w -> w.getIdWorkout() == newW.getIdWorkout())
-                                 .findFirst().ifPresent(w -> workouts.remove(w));
-            workouts.add(newW);
-            workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-            workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
-            onWorkOutSelectedListener.resetWorkoutChanged();
-
-            Log.d(TAG, "Gui Update : Workout Changed = " +newW);
-        }
-
-        if(onDeleteWorkoutClickedListener.idWorkoutDeleted()>0){
-            final int id_workout_deleted = onDeleteWorkoutClickedListener.idWorkoutDeleted();
-            workouts.stream().filter(w -> w.getIdWorkout() == id_workout_deleted)
-                    .findFirst().ifPresent(w -> workouts.remove(w));
-
-            workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
-            onDeleteWorkoutClickedListener.resetWorkoutDelete();
-            checkSizeWorkouts();
-            Log.d(TAG, "Gui Update : Workout Deleted = " +id_workout_deleted);
-        }
-
+        checkSizeWorkouts();
     }
 
     public interface OnWorkOutSelectedListener{
         void onWorkOutSelected(Workout workout);
-        Workout workoutChanged();
-        void resetWorkoutChanged();
     }
 
     public interface OnManualAddClickedListener{
         void onManualAddClickedListener();
-        Workout newWorkout();
-        void resetNewWorkout();
     }
 
-    public interface OnDeleteWorkoutClickedListener{
-        int idWorkoutDeleted();
-        void resetWorkoutDelete();
-    }
 }

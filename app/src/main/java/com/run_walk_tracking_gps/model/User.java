@@ -4,21 +4,28 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
+import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
 import com.run_walk_tracking_gps.utilities.DateHelper;
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 
 public class User implements Parcelable {
 
+
     private int id_user;
-    private String username;
+
+    private String nameImageProfile;
+
     private String name;
     private String last_name;
     private Gender gender;
@@ -41,16 +48,16 @@ public class User implements Parcelable {
         this.city = user.city;
         this.phone = user.phone;
         this.height = user.height.clone();
-        this.username = user.username;
+        this.nameImageProfile = user.nameImageProfile;
     }
 
     public JSONObject toJson() throws JSONException {
-        return new JSONObject().put(HttpRequest.Constant.NAME, this.name)
-                               .put(HttpRequest.Constant.LAST_NAME, this.last_name)
-                               .put(HttpRequest.Constant.BIRTH_DATE, this.birth_date)
-                               .put(HttpRequest.Constant.EMAIL, this.email)
-                               .put(HttpRequest.Constant.CITY, this.city)
-                               .put(HttpRequest.Constant.PHONE, this.phone);
+        return new JSONObject().put(NetworkHelper.Constant.NAME, this.name)
+                               .put(NetworkHelper.Constant.LAST_NAME, this.last_name)
+                               .put(NetworkHelper.Constant.BIRTH_DATE, this.birth_date)
+                               .put(NetworkHelper.Constant.EMAIL, this.email)
+                               .put(NetworkHelper.Constant.CITY, this.city)
+                               .put(NetworkHelper.Constant.PHONE, this.phone);
     }
 
     public User clone(){
@@ -59,16 +66,19 @@ public class User implements Parcelable {
 
     public User(Context context, JSONObject userJson) throws JSONException {
         try {
-            id_user = userJson.getInt(HttpRequest.Constant.ID_USER);
-            username = userJson.getString(HttpRequest.Constant.USERNAME);
-            name = userJson.getString(HttpRequest.Constant.NAME);
-            last_name = userJson.getString(HttpRequest.Constant.LAST_NAME);
-            gender = Gender.valueOf(userJson.getString(HttpRequest.Constant.GENDER));
-            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString(HttpRequest.Constant.BIRTH_DATE));
-            email = userJson.getString(HttpRequest.Constant.EMAIL);
-            city = userJson.getString(HttpRequest.Constant.CITY);
-            phone = userJson.getString(HttpRequest.Constant.PHONE);
-            height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble(HttpRequest.Constant.HEIGHT));
+            id_user = DefaultPreferencesUser.getIdUser(context);
+            name = userJson.getString(UserDescriptor.NAME);
+            last_name = userJson.getString(UserDescriptor.LAST_NAME);
+            gender = Gender.valueOf(userJson.getString(UserDescriptor.GENDER));
+            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString(UserDescriptor.BIRTH_DATE));
+            email = userJson.getString(UserDescriptor.EMAIL);
+            city = userJson.getString(UserDescriptor.CITY);
+            phone = userJson.getString(UserDescriptor.PHONE);
+            height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble(UserDescriptor.HEIGHT));
+            if(userJson.has(NetworkHelper.Constant.IMAGE)){
+                nameImageProfile = userJson.getJSONObject(NetworkHelper.Constant.IMAGE).getString(ImageProfileDescriptor.NAME);
+            }
+
         }
         catch (ParseException e) {
             e.printStackTrace();
@@ -83,7 +93,6 @@ public class User implements Parcelable {
 // START - Parcelable IMPLEMENTATION
     protected User(Parcel in) {
         id_user = in.readInt();
-        username =  in.readString();
         name = in.readString();
         last_name = in.readString();
         gender = Gender.valueOf(in.readString());
@@ -92,6 +101,7 @@ public class User implements Parcelable {
         city = in.readString();
         phone = in.readString();
         height = in.readParcelable(Measure.class.getClassLoader());
+        nameImageProfile = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -114,7 +124,6 @@ public class User implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id_user);
-        dest.writeString(username);
         dest.writeString(name);
         dest.writeString(last_name);
         dest.writeString(gender.toString());
@@ -123,18 +132,18 @@ public class User implements Parcelable {
         dest.writeString(city);
         dest.writeString(phone);
         dest.writeParcelable(height, 0);
+        dest.writeString(nameImageProfile);
     }
 
 // END - Parcelable IMPLEMENTATION
-
+    public Context getContext() {
+    return height.getContext();
+}
 
     public int getIdUser() {
         return id_user;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
     public String getName() {
         return name;
@@ -153,7 +162,11 @@ public class User implements Parcelable {
     }
 
     public String getBirthDateString() {
-        return DateHelper.create(height.getContext()).formatShortToString(birth_date);
+        return DateHelper.create(getContext()).formatShortToString(birth_date);
+    }
+
+    public String getBirthDateStrDB(){
+        return DateHelper.create(getContext()).formatForDB(birth_date);
     }
 
     public String getEmail() {
@@ -170,6 +183,10 @@ public class User implements Parcelable {
 
     public Measure getHeight() {
         return height;
+    }
+
+    public File getImage() {
+        return ImageFileHelper.create(getContext()).getImage(nameImageProfile);
     }
 
     public void setName(String name) {
@@ -200,9 +217,10 @@ public class User implements Parcelable {
         this.phone = phone;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setImageProfile(File image_profile) {
+        this.nameImageProfile = image_profile.getName();
     }
+
 
     @Override
     public String toString() {
@@ -216,6 +234,7 @@ public class User implements Parcelable {
                 ", city='" + city + '\'' +
                 ", phone= '" + phone + '\'' +
                 ", height='" + height + '\'' +
+                ", image='" + nameImageProfile + '\'' +
                 '}';
     }
 

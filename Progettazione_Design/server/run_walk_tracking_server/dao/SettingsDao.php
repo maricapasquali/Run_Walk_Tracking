@@ -5,7 +5,7 @@ class SettingsDao{
   /**
   * Settings
   */
-  static function getSettingsFor($id_user){
+  static function getAllForUser($id_user){
 
     if(connect()){
 
@@ -49,24 +49,47 @@ class SettingsDao{
   * Update Settings
   */
   static function updateSportFor($sport, $id_user){
-    return self::updateDeafult(SPORT, $sport[VALUE], $id_user);
+    return self::updateDeafult(SPORT, $sport, $id_user);
   }
 
   static function updateTargetFor($target, $id_user){
-    return self::updateDeafult(TARGET, $target[VALUE], $id_user);
+    return self::updateDeafult(TARGET, $target, $id_user);
   }
 
   static function updateUnitHeightFor($height, $id_user){
 
-    return self::updateUnitMeasure(HEIGHT, $height[VALUE], $id_user);
+    return self::updateUnitMeasure(HEIGHT, $height, $id_user);
   }
 
   static function updateUnitWeightFor($weight, $id_user){
-    return self::updateUnitMeasure(WEIGHT, $weight[VALUE], $id_user);
+    return self::updateUnitMeasure(WEIGHT, $weight, $id_user);
   }
 
   static function updateUnitDistanceFor($distance, $id_user){
-    return self::updateUnitMeasure(DISTANCE, $distance[VALUE], $id_user);
+    return self::updateUnitMeasure(DISTANCE, $distance, $id_user);
+  }
+
+  static function updateUnits($unit_measure, $id_user){
+    try {
+      if(connect())
+      {
+        startTransaction();
+
+        $stmt = getConnection()->prepare("UPDATE unit_measure_default SET distance=? , weight=? , height=? WHERE id_user=?");
+        if(!$stmt) throw new Exception("Units update : Preparazione fallita. Errore: ". getErrorConnection());
+        $stmt->bind_param("sssi" , $unit_measure[DISTANCE], $unit_measure[WEIGHT], $unit_measure[HEIGHT], $id_user);
+        if(!$stmt->execute()) throw new Exception("Units : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->affected_rows) return;
+        $stmt->close();
+
+        commitTransaction();
+      }
+    }catch (Exception $e) {
+      rollbackTransaction();
+      throw new Exception($e->getMessage());
+    }
+    closeConnection();
+    return true;
   }
 
   private function updateDeafult($type, $val, $id_user){

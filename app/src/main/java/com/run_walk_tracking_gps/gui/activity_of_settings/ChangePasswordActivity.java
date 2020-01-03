@@ -6,13 +6,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
@@ -20,10 +17,14 @@ import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ChangePasswordActivity extends CommonActivity implements Response.Listener<JSONObject>{
+public class ChangePasswordActivity extends CommonActivity
+        //implements Response.Listener<JSONObject>
+{
 
     private static final String TAG = ChangePasswordActivity.class.getName();
-    private EditText password;
+    private EditText username;
+    private EditText old_password;
+    private EditText new_password;
     private EditText conf_password;
 
     @Override
@@ -32,7 +33,9 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
         getSupportActionBar().setTitle(R.string.change_password);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        password = findViewById(R.id.password);
+        username = findViewById(R.id.username);
+        old_password = findViewById(R.id.old_password);
+        new_password = findViewById(R.id.password);
         conf_password = findViewById(R.id.conf_password);
     }
 
@@ -54,15 +57,16 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
 
                 if(check()){
                     try{
-                        final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
+                        final String hash_new_password = CryptographicHashFunctions.md5(new_password.getText().toString());
                         final String hash_conf_password = CryptographicHashFunctions.md5(conf_password.getText().toString());
 
-                        if(!hash_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(this);
+                        if(!hash_new_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(this);
 
-                        saveChangedPassword(CryptographicHashFunctions.md5(password.getText().toString()));
+                        saveChangedPassword(hash_new_password);
 
                     }catch (PasswordNotCorrectException e){
-                        e.alert();
+                        conf_password.setError(e.getMessage());
+                        conf_password.setText("");
                         //Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
@@ -77,9 +81,17 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
 
     private boolean check(){
         boolean isCheck = true;
-        if(TextUtils.isEmpty(password.getText())){
+        if(TextUtils.isEmpty(username.getText())){
             isCheck = false;
-            password.setError(getString(R.string.password_not_empty));
+            username.setError(getString(R.string.username_not_empty));
+        }
+        if(TextUtils.isEmpty(old_password.getText())){
+            isCheck = false;
+            old_password.setError(getString(R.string.password_not_empty));
+        }
+        if(TextUtils.isEmpty(new_password.getText())){
+            isCheck = false;
+            new_password.setError(getString(R.string.password_not_empty));
         }
         if(TextUtils.isEmpty(conf_password.getText())){
             isCheck = false;
@@ -88,25 +100,25 @@ public class ChangePasswordActivity extends CommonActivity implements Response.L
         return isCheck;
     }
 
-    private void saveChangedPassword(final String hash){
+    private void saveChangedPassword(final String new_hash){
         try {
-            int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
-                    .put(HttpRequest.Constant.PASSWORD, hash);
-
+            final JSONObject bodyJson = new JSONObject()
+                    .put(NetworkHelper.Constant.TOKEN,
+                            DefaultPreferencesUser.getSession(this).getString(NetworkHelper.Constant.TOKEN))
+                    .put(NetworkHelper.Constant.USERNAME, username.getText())
+                    .put(NetworkHelper.Constant.OLD_PASSWORD, CryptographicHashFunctions.md5(old_password.getText().toString()))
+                    .put(NetworkHelper.Constant.NEW_PASSWORD, new_hash);
             Log.e(TAG, bodyJson.toString());
 
-            HttpRequest.requestUpdatePassword(this, bodyJson,this);
+            NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.CHANGE_PASSWORD, bodyJson);
 
         }catch (JSONException json){
             json.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
         }
     }
 
-    @Override
+    /*@Override
     public void onResponse(JSONObject response) {
         super.onBackPressed();
-    }
+    }*/
 }

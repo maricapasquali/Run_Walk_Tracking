@@ -5,78 +5,76 @@ require_once("dao/UserDao.php");
 require_once("dao/SettingsDao.php");
 require_once("dao/WorkoutDao.php");
 require_once("dao/WeightDao.php");
+require_once("exception/Exceptions.php");
 try {
-  $data = bodyRequest();
+  $body = bodyRequest();
 
-  if(!isset($data[SESSION][TOKEN]) || !isset($data[SESSION][LAST_UPDATE]) )
-      throw new Exception(URL_NOT_VALID);
+  if(!isset($body[TOKEN]) || !isset($body[LAST_UPDATE]) )
+      throw new UrlException();
 
-       // TODO: ULTERIORI CONTROLLI
-  $session = SessionDao::checkForToken($data[SESSION][TOKEN]);
-  if($session == NULL)  throw new Exception(SESSION_TOKEN_NOT_VALID);
-  // UPDATE USER
-  UserDao::update($data[USER]);
+  $session = SessionDao::checkForToken($body[TOKEN]);
+
+  $data = $body[DATA];
+  if(!isset($data))  throw new DataExeception(DATA);
+// UPDATE USER
+  $user = $data[USER];
+  if(!isset($user[NAME]) ||
+     !isset($user[LAST_NAME]) ||
+     !isset($user[GENDER]) ||
+     !isset($user[BIRTH_DATE]) ||
+     !isset($user[EMAIL]) ||
+     !isset($user[PHONE]) ||
+     !isset($user[CITY]) ||
+     !isset($user[HEIGHT]))
+      throw new DataExeception(USER);
+  $updateUser = UserDao::update($user, $session[ID_USER]);
+
   // UPDATE SETTINGS
   $settings = $data[SETTINGS];
-  SettingsDao::updateSportFor($settings[SPORT], $session[ID_USER]);
-  SettingsDao::updateTargetFor($settings[TARGET], $session[ID_USER]);
-  $unit_measure = $settings[UNIT_MEASURE];
-  SettingsDao::updateUnitHeightFor($unit_measure[HEIGHT], $session[ID_USER]);
-  SettingsDao::updateUnitWeightFor($unit_measure[WEIGHT], $session[ID_USER]);
-  SettingsDao::updateUnitDistanceFor($unit_measure[DISTANCE], $session[ID_USER]);
+  if(!isset($settings[SPORT]) ||
+     !isset($settings[TARGET]) ||
+     !isset($settings[UNIT_MEASURE]) ||
+     !isset($settings[UNIT_MEASURE][HEIGHT]) ||
+     !isset($settings[UNIT_MEASURE][WEIGHT]) ||
+     !isset($settings[UNIT_MEASURE][DISTANCE]) )
+      throw new DataExeception(SETTINGS);
 
- // UPDATE WORKOUTS
+  $updateSport = SettingsDao::updateSportFor($settings[SPORT], $session[ID_USER]);
+  $updateTarget = SettingsDao::updateTargetFor($settings[TARGET], $session[ID_USER]);
+  $updateUnits = SettingsDao::updateUnits( $settings[UNIT_MEASURE], $session[ID_USER]);
+
   foreach ($data[WORKOUTS] as $workout) {
-    WorkoutDao::update($workout);
+    if(!isset($workout[ID_WORKOUT]) ||
+       !isset($workout[DATE]) ||
+       !isset($workout[DURATION]) ||
+       !isset($workout[SPORT])
+       )
+        throw new DataExeception(WORKOUT);
   }
-  // UPDATE WEIGHTS
+
+  // UPDATE WORKOUTS
+  $updateAllWorkout = WorkoutDao::updateAll($data[WORKOUTS], $session[ID_USER]);
+
   foreach ($data[WEIGHTS] as $weight) {
-    WeightDao::update($weight);
+    if(!isset($weight[ID_WEIGHT]) ||
+       !isset($weight[DATE]) ||
+       !isset($weight[VALUE]))
+        throw new DataExeception(WEIGHT);
   }
-  //print json_encode(array(UPDATE =>true));
-  print json_encode(array(UPDATE => SessionDao::updateLastUpdate($data[SESSION][LAST_UPDATE],$session[ID_USER])));
+
+  // UPDATE WEIGHTS
+  $updateAllWeight = WeightDao::updateAll($data[WEIGHTS], $session[ID_USER]);
+
+  $updateAll = $updateUser ||
+               $updateSport || $updateTarget || $updateUnits ||
+               $updateAllWorkout ||
+               $updateAllWeight;
+
+  print json_encode(array(UPDATE => $updateAll ? SessionDao::setLastUpdate($body[LAST_UPDATE], $session[ID_USER]): false));
+
 } catch (Exception $e) {
-  print json_errors($e->getMessage());
+  print json_errors($e);
 }
 
-/*
-{
-	"session": {
-		"token": "PVBXx1zTPmFIj9LHmtQy8eL0IceEg4XCc29lzF6rnuTI6pJfEhgo4aLE1UP7YoK51Gsnxgf6Ph6obviUGU6Gl9opYQ42ELLhebSO",
-		"last_update": 3
-	},
-	"user": {
-          "id_user": 5,
-          "name": "Maria",
-          "last_name": "Bianchi",
-          "gender": "FEMALE",
-          "birth_date": "1995-02-11",
-          "email": "mariabianchi@gmail.com",
-          "phone": "3333333333",
-          "city": "Milano",
-          "height": 1.55,
-          "img_encode": null
-      },
-	"weights": [
-          {
-            "id_weight": 5,
-            "date": "2019-12-24",
-            "value": 70.5
-          }
-        ],
-  "workouts": [],
-  "settings": {
-          "sport": "WALK",
-          "target": "LOSE_WEIGHT",
-          "unit_measure": {
-            "energy": "KILO_CALORIES",
-            "distance": "KILOMETER",
-            "weight": "KILOGRAM",
-            "height": "METER"
-        }
-}
-
-
-  */
 
 ?>

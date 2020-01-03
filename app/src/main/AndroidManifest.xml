@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.run_walk_tracking_gps">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <!-- Permission for IMEI code -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
@@ -62,11 +64,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".gui.NotificationSplashScreenActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"
-            />
 
         <activity
             android:name=".gui.BootAppActivity"
@@ -78,7 +75,7 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".gui.TokenActivity"
+            android:name=".gui.ActivationAccountActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
@@ -140,9 +137,12 @@
 
         <!-- SERVICE -->
         <service android:name=".service.WorkoutService"/>
+        <service android:name=".service.NetworkService"/>
+        <service android:name=".service.SyncService"/>
 
         <!-- RECEIVER -->
         <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
+
     </application>
 
 </manifest>

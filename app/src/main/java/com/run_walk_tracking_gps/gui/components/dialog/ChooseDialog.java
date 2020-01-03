@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
 public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterface.OnClickListener{

@@ -54,7 +54,7 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/layout_password"
+            android:id="@+id/layout_old_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"

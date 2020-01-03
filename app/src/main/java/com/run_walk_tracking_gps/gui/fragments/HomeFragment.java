@@ -1,21 +1,15 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,133 +18,31 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ncorti.slidetoact.SlideToActView;
-import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
-import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
 import com.run_walk_tracking_gps.service.MapRouteDraw;
 import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements WorkoutService.OnReceiverListener{
-
-    public class ServiceHandler implements ServiceConnection{
-
-        private Context context;
-
-        private double weight;
-        private String restore = null;
-        private WorkoutService wService;
-
-        private WorkoutService.OnReceiverListener  onReceiverListener;
-
-        private ServiceHandler(Context context, double weight, String restore){
-            this.context = context;
-            this.weight = weight;
-            this.restore = restore;
-        }
-
-        private void setOnReceiverListener(WorkoutService.OnReceiverListener onReceiverListener){
-            if(this.onReceiverListener==null) this.onReceiverListener = onReceiverListener;
-        }
-
-        private Workout getWorkout(){
-            return wService.getWorkout();
-        }
-
-        private void bindService(){
-            context.bindService(new Intent(context, WorkoutService.class), this,  Context.BIND_AUTO_CREATE);
-        }
-
-        private void unBindService(){
-            context.unbindService(this);
-        }
-
-        private void startService(){
-            context.startService(new Intent(context, wService.getClass())
-                    .putExtra(KeysIntent.WEIGHT_MORE_RECENT, weight)
-                    .putExtra(KeysIntent.SPORT_DEFAULT, DefaultPreferencesUser.getSportDefault(getContext()).toString()));
-        }
-
-        private void pauseService(){
-            wService.pause();
-        }
-
-        private void restartService(){
-            wService.restart();
-        }
-
-        private void lockService(){
-            wService.lock();
-        }
-
-        private void unLockService(){
-            wService.unlock();
-        }
-
-        private void stopService(){
-            context.unbindService(this);
-            context.stopService(new Intent(context, WorkoutService.class));
-        }
-
-        public boolean isWorkoutRunning(){
-            return wService!=null && wService.isRunning();
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected");
-            final WorkoutService.LocalBinder binder = (WorkoutService.LocalBinder) service;
-            wService = binder.getService();
-
-            wService.setOnReceiverListener(context, onReceiverListener);
-
-            if(restore!=null){
-                switch (restore){
-                    case ActionReceiver.STOP_ACTION:
-                        HomeFragment.this.stop();
-                        break;
-                    case ActionReceiver.RUNNING_WORKOUT: {
-                        HomeFragment.this.setIndoor(!LocationUtilities.isGpsEnable(context));
-                        HomeFragment.this.startState();
-                        if(wService.isPause())  HomeFragment.this.pauseState();
-                        else{
-                            if(wService.isLock()){
-                                HomeFragment.this.lockState();
-                                // TODO: 12/10/2019 NON FUNZIONA perchè menu viene creato dopo
-                                //setClickable(false);
-                            }else
-                                HomeFragment.this.unlockState();
-                        }
-                    }
-                    break;
-                }
-            }else {
-                startService();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "onServiceDisconnected");
-            context.stopService(new Intent(context, WorkoutService.class));
-        }
-    }
-
+public class HomeFragment extends Fragment
+                          implements WorkoutService.OnReceiverListener,
+                                     WorkoutServiceHandler.RestoreViewListener {
 
     private static final String TAG = HomeFragment.class.getName();
 
-    private static final String WEIGHT = Measure.Type.WEIGHT.toString();
     private static final String RESTORE = "restore";
 
     private View rootView;
@@ -173,19 +65,12 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
 
     private ArrayList<Measure> workoutMeasure = new ArrayList<>();
 
-    private ServiceHandler serviceHandler;
+    private String restore = null;
+    private WorkoutServiceHandler serviceHandler;
 
-    public static HomeFragment createWithArgument(double w) {
+    public static HomeFragment createWithArgument(String restore) {
         final HomeFragment homeFragment = new HomeFragment();
         Bundle args = new Bundle();
-        args.putDouble(WEIGHT, w);
-        homeFragment.setArguments(args);
-        return homeFragment;
-    }
-
-    public static HomeFragment createWithArgument(double w, String restore) {
-        final HomeFragment homeFragment = createWithArgument(w);
-        Bundle args = homeFragment.getArguments()==null? new Bundle(): homeFragment.getArguments();
         args.putString(RESTORE, restore);
         homeFragment.setArguments(args);
         return homeFragment;
@@ -212,8 +97,11 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
-        if (bundle != null) serviceHandler = new ServiceHandler(getContext(), bundle.getDouble(WEIGHT),  bundle.getString(RESTORE));
-     }
+        restore = (bundle == null ? null : bundle.getString(RESTORE));
+
+        serviceHandler = new WorkoutServiceHandler(getContext(), SqlLiteStatisticsDao.createWeightDao(getContext()).getLast(),
+                                                      restore == null ? null : this, this);
+    }
 
     @SuppressLint("RestrictedApi")
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -246,18 +134,22 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
     }
 
     private void setSport(){
-        final Sport sport_e = DefaultPreferencesUser.getSportDefault(getContext());
-        sport.setText(getString(sport_e.getStrId()));
-        sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
-        sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+
+        try {
+            final Sport sport_e = Sport.valueOf(SqlLiteSettingsDao.create(getContext()).getSportDefault());
+            sport.setText(getString(sport_e.getStrId()));
+            sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
+            sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        serviceHandler.setOnReceiverListener(this);
-        if(serviceHandler.restore!=null) serviceHandler.bindService();
-
+        if(restore!=null) serviceHandler.bindService();
     }
 
     public void stop(){
@@ -267,6 +159,7 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
     /* -- UPDATE GUI ACTION RUNNING WORKOUTSERVICE -- */
     @SuppressLint("RestrictedApi")
     private void startState(){
+        ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
         getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
         start.setVisibility(View.GONE);
         block_screen.setVisibility(View.VISIBLE);
@@ -357,6 +250,8 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+        // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
+       //SyncServiceHandler.create(getContext()).start();
 
         setSport();
 
@@ -424,7 +319,7 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
         super.onDestroy();
     }
 
-    public ServiceHandler getServiceHandler(){
+    public WorkoutServiceHandler getServiceHandler(){
         return serviceHandler;
     }
 
@@ -456,6 +351,29 @@ public class HomeFragment extends Fragment implements WorkoutService.OnReceiverL
                 if(fragment instanceof MapFragment) ((MapFragment)fragment).addPolyLine(polylineOptions);
             }
         };
+    }
+
+    @Override
+    public void restoreView(WorkoutService wService) {
+        switch (restore){
+            case ActionReceiver.STOP_ACTION:
+                HomeFragment.this.stop();
+                break;
+            case ActionReceiver.RUNNING_WORKOUT: {
+                HomeFragment.this.setIndoor(!LocationUtilities.isGpsEnable(getContext()));
+                HomeFragment.this.startState();
+                if(wService.isPause())  HomeFragment.this.pauseState();
+                else{
+                    if(wService.isLock()){
+                        HomeFragment.this.lockState();
+                        // TODO: 12/10/2019 NON FUNZIONA perchè menu viene creato dopo
+                        //setClickable(false);
+                    }else
+                        HomeFragment.this.unlockState();
+                }
+            }
+            break;
+        }
     }
 
     // COMMUNICATION WITH ACTIVITY

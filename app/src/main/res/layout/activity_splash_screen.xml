@@ -32,6 +32,5 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
         android:layout_centerInParent="true"
-        android:theme="@style/AppTheme.PrimaryDarkAccent"
-        android:visibility="gone"></ProgressBar>
+        android:theme="@style/AppTheme.PrimaryDarkAccent"></ProgressBar>
 </RelativeLayout>

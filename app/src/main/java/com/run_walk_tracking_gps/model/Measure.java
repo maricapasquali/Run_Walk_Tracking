@@ -6,13 +6,21 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Measure implements Parcelable {
@@ -46,6 +54,17 @@ public class Measure implements Parcelable {
 
         Unit(String str) {
             this.str = str;
+        }
+
+        public static HashMap<Type, Unit> getAllDefault(JSONObject unitDefaultJson) throws JSONException {
+            final HashMap<Type, Unit> unit = new HashMap<>();
+            unit.put(Type.ENERGY, Unit.valueOf(unitDefaultJson.getString(SettingsDescriptor.UnitMeasureDefault.ENERGY)));
+            unit.put(Type.DISTANCE, Unit.valueOf(unitDefaultJson.getString(SettingsDescriptor.UnitMeasureDefault.DISTANCE)));
+            unit.put(Type.WEIGHT, Unit.valueOf(unitDefaultJson.getString(SettingsDescriptor.UnitMeasureDefault.WEIGHT)));
+            unit.put(Type.HEIGHT, Unit.valueOf(unitDefaultJson.getString(SettingsDescriptor.UnitMeasureDefault.HEIGHT)));
+            unit.put(Type.MIDDLE_SPEED, unit.get(Type.DISTANCE)!=null && unit.get(Type.DISTANCE).equals(MILE)? MILE_PER_HOUR : KILOMETER_PER_HOUR);
+            unit.put(Type.DURATION, SECOND);
+            return unit;
         }
 
         public String getString() {
@@ -124,8 +143,16 @@ public class Measure implements Parcelable {
                 case ENERGY:
                     measureUnits = new Unit[]{Unit.KILO_CALORIES, null};
                     break;
+                case DURATION:
+                    measureUnits = new Unit[]{Unit.SECOND, null};
+                    break;
             }
             return measureUnits;
+        }
+
+        public static HashMap<Type, Unit> getMapMeasureUnitDefault(){
+            //HashMap<Type, Unit> map = new HashMap<>();Stream.of(values()).forEach(t -> map.put(t, t.getMeasureUnitDefault())); return map;
+            return Stream.of(values()).collect(Collectors.toMap(t -> t, Type::getMeasureUnitDefault, (prev, next) -> next, HashMap::new));
         }
 
     }
@@ -137,37 +164,47 @@ public class Measure implements Parcelable {
     private Double value;
     private Unit unit;
 
+    private HashMap<Type, Unit> unitsDefault;
+
     private Measure(Measure measure){
         this.context = measure.context;
         this.type = measure.type;
         this.value = measure.value;
         this.unit = measure.unit;
+        this.unitsDefault = measure.unitsDefault;
     }
 
     private Measure(Context context, Measure.Type type){
         this.context = context;
         this.type = type;
         this.value = 0d;
-        switch (type){
-            case HEIGHT:
-                setUnit(DefaultPreferencesUser.getUnitHeightDefault(context));
-                break;
-            case DISTANCE:
-                setUnit(DefaultPreferencesUser.getUnitDistanceDefault(context));
-                break;
-            case WEIGHT:
-                setUnit(DefaultPreferencesUser.getUnitWeightDefault(context));
-                break;
-            case MIDDLE_SPEED:
-                setUnit(DefaultPreferencesUser.getUnitMiddleSpeedDefault(context));
-                break;
-            case ENERGY:
-                setUnit(DefaultPreferencesUser.getUnitEnergyDefault(context));
-                break;
-            case DURATION:
-                setUnit(Measure.Unit.SECOND);
-                break;
+        try {
+            final JSONObject unitDefaultJson = SqlLiteSettingsDao.create(context).getUnitMeasureDefault();
+            unitsDefault = unitDefaultJson==null ? Type.getMapMeasureUnitDefault() : Measure.Unit.getAllDefault(unitDefaultJson);
+            switch (type){
+                case HEIGHT:
+                    setUnit(unitsDefault.get(Type.HEIGHT));//DefaultPreferencesUser.getUnitHeightDefault(context));
+                    break;
+                case DISTANCE:
+                    setUnit(unitsDefault.get(Type.DISTANCE)); //DefaultPreferencesUser.getUnitDistanceDefault(context));
+                    break;
+                case WEIGHT:
+                    setUnit(unitsDefault.get(Type.WEIGHT)); //DefaultPreferencesUser.getUnitWeightDefault(context));
+                    break;
+                case MIDDLE_SPEED:
+                    setUnit(unitsDefault.get(Type.MIDDLE_SPEED));//DefaultPreferencesUser.getUnitMiddleSpeedDefault(context));
+                    break;
+                case ENERGY:
+                    setUnit(unitsDefault.get(Type.ENERGY)); //DefaultPreferencesUser.getUnitEnergyDefault(context));
+                    break;
+                case DURATION:
+                    setUnit(unitsDefault.get(Type.DURATION));
+                    break;
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -190,6 +227,10 @@ public class Measure implements Parcelable {
         this.type = Type.valueOf(in.readString());
         this.value = in.readDouble();
         this.unit = Unit.valueOf(in.readString());
+
+        int sizeMap = 6;
+        this.unitsDefault = new HashMap<Type, Unit>(sizeMap);
+        IntStream.range(0, sizeMap).forEach(i -> this.unitsDefault.put(Type.valueOf(in.readString()), Unit.valueOf(in.readString())));
     }
 
     public static final Creator<Measure> CREATOR = new Creator<Measure>() {
@@ -214,6 +255,11 @@ public class Measure implements Parcelable {
         dest.writeString(this.type.toString());
         dest.writeDouble(getValueToDb());
         dest.writeString(this.unit.toString());
+
+        for (Map.Entry<Type, Unit> entry : this.unitsDefault.entrySet()) {
+            dest.writeString(entry.getKey().toString());
+            dest.writeString(entry.getValue().toString());
+        }
     }
 
 // END - Parcelable IMPLEMENTATION
@@ -230,8 +276,6 @@ public class Measure implements Parcelable {
     public Unit getUnit() {
         return unit;
     }
-
-
 
 
     public Double getValue(final boolean toDb){
@@ -253,55 +297,86 @@ public class Measure implements Parcelable {
         switch (this.type){
             case DURATION: return getValueToDb();
             case ENERGY:{
-                if(DefaultPreferencesUser.getUnitEnergyDefault(context).equals(Type.ENERGY.getMeasureUnitDefault()))
+                if(unitsDefault.get(Type.ENERGY).equals(Type.ENERGY.getMeasureUnitDefault()))
                     return getValueToDb();
                 else return conversionTo(this.type.getMeasureUnit()[1], value);
             }
            case MIDDLE_SPEED: {
-               if(DefaultPreferencesUser.getUnitDistanceDefault(context).equals(Type.DISTANCE.getMeasureUnitDefault()))
+               if(unitsDefault.get(Type.MIDDLE_SPEED).equals(Type.MIDDLE_SPEED.getMeasureUnitDefault()))
                    return getValueToDb();
                else
                    return conversionTo(this.type.getMeasureUnit()[1], value);
            }
-           default:{
+            case WEIGHT:
+            {
+                if(unitsDefault.get(Type.WEIGHT).equals(Type.WEIGHT.getMeasureUnitDefault()))
+                    return getValueToDb();
+                else
+                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            }
+
+            case HEIGHT:
+            {
+                if(unitsDefault.get(Type.HEIGHT).equals(Type.HEIGHT.getMeasureUnitDefault()))
+                    return getValueToDb();
+                else
+                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            }
+            case DISTANCE:
+            {
+                if(unitsDefault.get(Type.DISTANCE).equals(Type.DISTANCE.getMeasureUnitDefault()))
+                    return getValueToDb();
+                else
+                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            }
+
+           default:
+           {
+               /*
                String unitStr = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase());
                if(unitStr==null || Measure.Unit.valueOf(unitStr).equals(this.type.getMeasureUnitDefault()))
                    return getValueToDb();
                else
                    return conversionTo(this.type.getMeasureUnit()[1], value);
-
+                */
            }
         }
+        return this.value;
     }
 
 
     private void resetUnit(){
         if(!type.equals(Type.DURATION)){
-            Measure.Unit u = null;
-            switch (this.type){
-                case MIDDLE_SPEED:
-                    u = DefaultPreferencesUser.getUnitMiddleSpeedDefault(context);
-                    break;
-                case ENERGY:
-                    u = DefaultPreferencesUser.getUnitEnergyDefault(context);
-                    break;
-                case DISTANCE:
-                    u = DefaultPreferencesUser.getUnitDistanceDefault(context);
-                    break;
-                case HEIGHT:
-                    u = DefaultPreferencesUser.getUnitHeightDefault(context);
-                    break;
-                case WEIGHT:
-                    u = DefaultPreferencesUser.getUnitWeightDefault(context);
-                    break;
-                default:
-                    break;
+            try {
+                Measure.Unit u = null;
+                final JSONObject unitDefaultJson = SqlLiteSettingsDao.create(context).getUnitMeasureDefault();
+                unitsDefault = unitDefaultJson==null ? Type.getMapMeasureUnitDefault() : Unit.getAllDefault(unitDefaultJson);
+                switch (this.type){
+                    case MIDDLE_SPEED:
+                        u = unitsDefault.get(Type.MIDDLE_SPEED); //DefaultPreferencesUser.getUnitMiddleSpeedDefault(context);
+                        break;
+                    case ENERGY:
+                        u = unitsDefault.get(Type.ENERGY); //DefaultPreferencesUser.getUnitEnergyDefault(context);
+                        break;
+                    case DISTANCE:
+                        u = unitsDefault.get(Type.DISTANCE);//DefaultPreferencesUser.getUnitDistanceDefault(context);
+                        break;
+                    case HEIGHT:
+                        u = unitsDefault.get(Type.HEIGHT);//DefaultPreferencesUser.getUnitHeightDefault(context);
+                        break;
+                    case WEIGHT:
+                        u = unitsDefault.get(Type.WEIGHT);//DefaultPreferencesUser.getUnitWeightDefault(context);
+                        break;
+                    default:
+                        break;
+                }
+                if(!u.equals(unit)) setUnit(u);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            if(!u.equals(unit)) setUnit(u);
+
         }
     }
-
-
 
     public void setValue(final boolean fromDb, Double value){
         if(fromDb){
@@ -314,17 +389,17 @@ public class Measure implements Parcelable {
     private void setValueFromGui(Double value){
         switch (this.type){
             case DISTANCE:{
-                Unit unitS = DefaultPreferencesUser.getUnitDistanceDefault(context);
+                Unit unitS = unitsDefault.get(Type.DISTANCE); //DefaultPreferencesUser.getUnitDistanceDefault(context);
                 this.value = unitS.equals(Unit.MILE) ? conversionTo(Unit.KILOMETER, value): value;
                     break;
             }
             case WEIGHT:{
-                Unit unitS = DefaultPreferencesUser.getUnitWeightDefault(context);
+                Unit unitS = unitsDefault.get(Type.WEIGHT); //DefaultPreferencesUser.getUnitWeightDefault(context);
                 this.value = unitS.equals(Unit.POUND) ? conversionTo(Unit.KILOGRAM, value): value;
                 break;
             }
             case HEIGHT:{
-                Unit unitS = DefaultPreferencesUser.getUnitHeightDefault(context);
+                Unit unitS = unitsDefault.get(Type.HEIGHT);//DefaultPreferencesUser.getUnitHeightDefault(context);
                 this.value = unitS.equals(Unit.FEET) ? conversionTo(Unit.METER, value): value;
                 break;
             }
@@ -337,8 +412,6 @@ public class Measure implements Parcelable {
     private void setValueFromDb(Double value) {
         this.value = value;
     }
-
-
 
     public Measure getMeasure(int integer, int decimal){
         if(this.getType().equals(Measure.Type.DURATION))
@@ -357,6 +430,10 @@ public class Measure implements Parcelable {
 
     public void setUnit(Unit unit) {
         this.unit = unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = Measure.Unit.valueOf(unit);
     }
 
     public static boolean isNullOrEmpty(Measure distance) {

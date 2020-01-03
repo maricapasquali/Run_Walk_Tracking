@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Dic 26, 2019 alle 14:48
+-- Creato il: Gen 03, 2020 alle 23:17
 -- Versione del server: 10.4.6-MariaDB
 -- Versione PHP: 7.3.9
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `run_walk_tracking_db_server`
 --
+CREATE DATABASE IF NOT EXISTS `run_walk_tracking_db_server` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `run_walk_tracking_db_server`;
 
 -- --------------------------------------------------------
 
@@ -42,7 +44,8 @@ CREATE TABLE `login` (
 
 CREATE TABLE `profile_image` (
   `id_user` int(11) NOT NULL,
-  `img_encode` longblob NOT NULL
+  `content` longblob NOT NULL,
+  `name` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -65,7 +68,8 @@ CREATE TABLE `request_forgot_password` (
 
 CREATE TABLE `session` (
   `id_user` int(11) NOT NULL,
-  `token` varchar(100) NOT NULL,
+  `device` char(32) DEFAULT NULL,
+  `token` char(100) NOT NULL,
   `last_update` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -269,15 +273,15 @@ ALTER TABLE `unit_measure_default`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id_user`),
-  ADD UNIQUE KEY `SID_User_ID` (`name`,`last_name`),
   ADD UNIQUE KEY `ID_User_IND` (`id_user`),
-  ADD UNIQUE KEY `SID_User_IND` (`name`,`last_name`);
+  ADD UNIQUE KEY `SID_User_ID` (`name`,`last_name`) USING BTREE,
+  ADD KEY `SID_User_IND` (`name`,`last_name`) USING BTREE;
 
 --
 -- Indici per le tabelle `weight`
 --
 ALTER TABLE `weight`
-  ADD PRIMARY KEY (`id_weight`),
+  ADD PRIMARY KEY (`id_weight`,`id_user`),
   ADD UNIQUE KEY `SID_Weight_ID` (`id_user`,`date`),
   ADD UNIQUE KEY `ID_Weight_IND` (`id_weight`),
   ADD UNIQUE KEY `SID_Weight_IND` (`id_user`,`date`);
@@ -286,9 +290,9 @@ ALTER TABLE `weight`
 -- Indici per le tabelle `workout`
 --
 ALTER TABLE `workout`
-  ADD PRIMARY KEY (`id_workout`),
-  ADD UNIQUE KEY `ID_Workout_IND` (`id_workout`),
-  ADD KEY `FKcarry_out_IND` (`id_user`);
+  ADD PRIMARY KEY (`id_workout`,`id_user`),
+  ADD KEY `FKcarry_out_IND` (`id_user`),
+  ADD KEY `ID_Workout_IND` (`id_workout`) USING BTREE;
 
 --
 -- AUTO_INCREMENT per le tabelle scaricate

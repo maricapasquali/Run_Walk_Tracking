@@ -5,19 +5,14 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
@@ -119,7 +114,7 @@ public class MeasureAdapter extends BaseAdapter {
                     }
                     if(unitChecked!=null){
                         Log.d(TAG, "Filter = "+ type.toString().toLowerCase() +", Value = "+unitChecked);
-                        onCheckNewMeasureListener.onCheckNewMeasure(type.toString().toLowerCase(), unitChecked);
+                        onCheckNewMeasureListener.onCheckNewMeasure(type, unitChecked);
                     }
                 }
             });
@@ -144,7 +139,7 @@ public class MeasureAdapter extends BaseAdapter {
     }
 
     public interface OnCheckNewMeasureListener{
-        void onCheckNewMeasure(String filter, Measure.Unit unit);
+        void onCheckNewMeasure(Measure.Type filter, Measure.Unit unit);
     }
 
 }

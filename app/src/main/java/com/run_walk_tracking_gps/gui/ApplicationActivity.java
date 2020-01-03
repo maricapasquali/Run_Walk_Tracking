@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
@@ -13,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
@@ -22,20 +22,16 @@ import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
-import com.run_walk_tracking_gps.receiver.ReceiverNotificationButtonHandler;
-
-import java.util.ArrayList;
 
 public class ApplicationActivity extends CommonActivity
         implements  WorkoutsFragment.OnWorkOutSelectedListener,
-                    WorkoutsFragment.OnDeleteWorkoutClickedListener,
                     WorkoutsFragment.OnManualAddClickedListener,
                     HomeFragment.OnStopWorkoutClickListener ,
                     HomeFragment.OnBlockScreenClickListener ,
                     StatisticsFragment.OnWeightListener{
 
     private final static String TAG = ApplicationActivity.class.getName();
-    private final static int REQUEST_SETTINGS = 1;
+    //private final static int REQUEST_SETTINGS = 1;
     private final static int REQUEST_CHANGED_DETAILS = 2;
     private final static int REQUEST_SUMMARY = 3;
     private final static int REQUEST_NEW_WORKOUT = 4;
@@ -44,17 +40,6 @@ public class ApplicationActivity extends CommonActivity
 
     private BottomNavigationView navigationBarBottom;
     private Menu menuApp;
-
-    private StatisticsData newWeight;
-    private Workout newWorkout;
-    private Workout workoutChanged;
-    private int id_workout_delete;
-
-    private StatisticsData statisticsData;
-    private int id_weight_delete;
-
-    private ArrayList<Workout> workouts = new ArrayList<>();
-    private ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
 
     private String restore = null;
 
@@ -69,33 +54,20 @@ public class ApplicationActivity extends CommonActivity
 
         setNavigationBarBottom();
 
-        if(getIntent()!=null){
-            Log.d(TAG, "getIntent : " +getIntent());
-
-            workouts = getIntent().getParcelableArrayListExtra(KeysIntent.WORKOUTS);
-            statisticsWeight = getIntent().getParcelableArrayListExtra(KeysIntent.WEIGHTS);
-
-            if(workouts!=null && statisticsWeight!=null) {
-                workouts.forEach(w -> w.setContext(this));
-                statisticsWeight.forEach(s -> s.setContext(this));
-
-                if(getIntent().getAction()!=null &&
-                        (getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT)
-                        || getIntent().getAction().equals(ActionReceiver.STOP_ACTION))){
-                    restore = getIntent().getAction();
+        if(getIntent()!=null) {
+            Log.d(TAG, "getIntent : " + getIntent());
+            if(getIntent().getAction()!=null &&
+                    (getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT)
+                            || getIntent().getAction().equals(ActionReceiver.STOP_ACTION))){
+                restore = getIntent().getAction();
+                selectActiveFragment(HomeFragment.class);
+                restore = null;
+            }else{
+                if(savedInstanceState==null)
                     selectActiveFragment(HomeFragment.class);
-                    restore = null;
-                }else{
-                    if(savedInstanceState==null)
-                        selectActiveFragment(HomeFragment.class);
-                    else
-                        setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
-                }
+                else
+                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
             }
-
-            if(workouts==null) workouts = new ArrayList<>();
-            if(statisticsWeight==null) statisticsWeight = new ArrayList<>();
-
         }
     }
 
@@ -110,26 +82,40 @@ public class ApplicationActivity extends CommonActivity
             Log.d(TAG, "setOnNavigationItemSelectedListener");
             final int previousItem = navigationBarBottom.getSelectedItemId();
             final int nextItem = menuItem.getItemId();
-            if(previousItem!=nextItem){
+            //if(previousItem!=nextItem){
                 switch (menuItem.getItemId()) {
                     case R.id.workouts:
-                        addFragment(WorkoutsFragment.createWithArgument(workouts),false);
+                        addFragment(new WorkoutsFragment(),false);
                         break;
                     case R.id.home:
+                        Log.d(TAG, "Home: restore : " + restore);
                         addFragment(restore==null ?
-                                    HomeFragment.createWithArgument(statisticsWeight.get(0).getValue()) :
-                                    HomeFragment.createWithArgument(statisticsWeight.get(0).getValue(), restore),false);
+                                    new HomeFragment() :
+                                    HomeFragment.createWithArgument(restore),false);
                         break;
                     case R.id.statistics:
-                        addFragment(StatisticsFragment.createWithArgument(workouts, statisticsWeight), false);
+                        addFragment(new StatisticsFragment(), false);
                         break;
                     default:
                         return true;
                 }
-            }
+            //}
             return true;
         });
     }
+
+    /*@Override
+    protected void onResume() {
+        super.onResume();
+        // TODO: 12/29/2019 REQUEST SYNC onResume per ogni fragment (non activity)
+        try {
+            NetworkHelper.HttpRequest.sync(this, null);
+        } catch (InternetNoAvailableException e) {
+            e.alert();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -181,8 +167,7 @@ public class ApplicationActivity extends CommonActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.setting:
-                Intent intent = new Intent(this, SettingActivity.class);
-                startActivityForResult(intent, REQUEST_SETTINGS);
+                startActivity(new Intent(this, SettingActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -194,8 +179,7 @@ public class ApplicationActivity extends CommonActivity
         if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
             moveTaskToBack(true);
         } else{
-            finish();
-            System.exit(0);
+            finishAffinity();
         }
     }
 
@@ -208,21 +192,10 @@ public class ApplicationActivity extends CommonActivity
         startActivityForResult(intentDetail, REQUEST_CHANGED_DETAILS);
     }
 
-    @Override
-    public Workout workoutChanged() {
-        return workoutChanged;
-    }
-
-    @Override
-    public void resetWorkoutChanged() {
-        workoutChanged = null;
-    }
-
     // Summary (DetailsWorkoutActivity) Listener
-
     @Override
     public void OnStopWorkoutClick(Workout workout) {
-        startActivityForResult( new Intent(this, DetailsWorkoutActivity.class)
+        startActivityForResult(new Intent(this, DetailsWorkoutActivity.class)
                 .putExtra(KeysIntent.SUMMARY, workout), REQUEST_SUMMARY);
     }
 
@@ -239,27 +212,6 @@ public class ApplicationActivity extends CommonActivity
         startActivityForResult(newWorkoutIntent, REQUEST_NEW_WORKOUT);
     }
 
-    @Override
-    public Workout newWorkout() {
-        return newWorkout;
-    }
-
-    @Override
-    public void resetNewWorkout() {
-        newWorkout = null;
-    }
-
-    // Delete Workout Listener
-    @Override
-    public int idWorkoutDeleted() {
-        return id_workout_delete;
-    }
-
-    @Override
-    public void resetWorkoutDelete() {
-       id_workout_delete = 0;
-    }
-
     // StatisticsFragment Listener
     @Override
     public void onAddWeight() {
@@ -269,42 +221,11 @@ public class ApplicationActivity extends CommonActivity
     }
 
     @Override
-    public StatisticsData newWeight() {
-        return newWeight;
-    }
-
-    @Override
-    public void resetAddWeight() {
-        newWeight =null;
-    }
-
-    @Override
     public void modifyWeight(StatisticsData statisticsData) {
         final Intent intent = new Intent(this, ModifyWeightActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        intent.putExtra(KeysIntent.MODIFY_WEIGHT,statisticsData);
-        intent.putExtra(KeysIntent.IS_LAST_WEIGHT, statisticsWeight.size()==1);
+        intent.putExtra(KeysIntent.MODIFY_WEIGHT, statisticsData);
         startActivityForResult(intent, REQUEST_MODIFY_WEIGHT);
-    }
-
-    @Override
-    public StatisticsData changedWeight() {
-        return statisticsData;
-    }
-
-    @Override
-    public void resetChangedWeight() {
-        statisticsData =null;
-    }
-
-    @Override
-    public int deletedWeight() {
-        return id_weight_delete;
-    }
-
-    @Override
-    public void resetDeletedWeight() {
-        id_weight_delete=0;
     }
 
     //Results
@@ -312,75 +233,41 @@ public class ApplicationActivity extends CommonActivity
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult");
+        // TODO: 1/1/2020 UPDATE GUI
         switch (requestCode){
+            case REQUEST_SUMMARY:
+                if(resultCode==Activity.RESULT_OK)
+                    Toast.makeText(this, "Auto-Workout add", Toast.LENGTH_LONG).show();
+
+                if(!getSupportActionBar().isShowing()) getSupportActionBar().show();
+                selectActiveFragment(WorkoutsFragment.class);
+                break;
             case REQUEST_CHANGED_DETAILS:
                 if(resultCode==Activity.RESULT_OK){
-                    
-                    workoutChanged = (Workout)data.getParcelableExtra(KeysIntent.CHANGED_WORKOUT);
-                    if(workoutChanged!=null){
-                        workoutChanged.setContext(this);
-                        //Toast.makeText(this, ConstantIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Workout changed = " +workoutChanged);
-                    }
-
-                    id_workout_delete = data.getIntExtra(KeysIntent.DELETE_WORKOUT, 0);
-                    if(id_workout_delete>0){
-                        //Toast.makeText(this, R.string.delete_workout, Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Workout deleted = " +id_workout_delete);
-                    }
-                }
-                break;
-            case REQUEST_SUMMARY:
-                if(resultCode==Activity.RESULT_OK) {
-                    //Toast.makeText(this, getString(R.string.summary_workout), Toast.LENGTH_LONG).show();
-                    final Workout newAutoWorkout = (Workout) data.getParcelableExtra(KeysIntent.NEW_WORKOUT);
-                    newAutoWorkout.setContext(this);
-                    workouts.add(0,newAutoWorkout);
-                    workouts.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-                    selectActiveFragment(WorkoutsFragment.class);
-                    Log.d(TAG, "New Auto Workout = " + newAutoWorkout);
+                    Toast.makeText(this, "Modify or Delete " + getString(R.string.workout), Toast.LENGTH_LONG).show();
                 }
                 break;
             case REQUEST_NEW_WORKOUT:
                 if(resultCode==Activity.RESULT_OK) {
-                    //Toast.makeText(this, ConstantIntent.NEW_WORKOUT_MANUAL, Toast.LENGTH_LONG).show();
-                    newWorkout = (Workout) data.getParcelableExtra(KeysIntent.NEW_WORKOUT_MANUAL);
-                    newWorkout.setContext(this);
-                    Log.d(TAG, "New Manual Workout = " + newWorkout);
+                    Toast.makeText(this,"New " + getString(R.string.workout), Toast.LENGTH_LONG).show();
                 }
                 break;
-
             case REQUEST_NEW_WEIGHT:
                 if(resultCode==Activity.RESULT_OK) {
-                    //Toast.makeText(this, getString(R.string.new_weight), Toast.LENGTH_LONG).show();
-                    newWeight = (StatisticsData) data.getParcelableExtra(KeysIntent.NEW_WEIGHT);
-                    newWeight.setContext(this);
-                    Log.d(TAG, "New Weight = " + newWeight);
+                    Toast.makeText(this, "New " + getString(R.string.weight), Toast.LENGTH_LONG).show();
                 }
                 break;
-
             case REQUEST_MODIFY_WEIGHT:
                 if(resultCode==Activity.RESULT_OK) {
-                    statisticsData = (StatisticsData)data.getParcelableExtra(KeysIntent.CHANGED_WEIGHT);
-                    if(statisticsData!=null){
-                        statisticsData.setContext(this);
-                        //Toast.makeText(this, R.string.modify_weight, Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Weight changed = " +statisticsData);
-                    }
-
-                    id_weight_delete = data.getIntExtra(KeysIntent.DELETE_WEIGHT, 0);
-                    Log.d(TAG, "Weight deleted = " +id_weight_delete);
-                    if(id_weight_delete>0){
-                        //Toast.makeText(this, R.string.delete_weight, Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Weight deleted = " +id_weight_delete);
-                    }
+                    Toast.makeText(this, "Modify or Delete " + getString(R.string.weight), Toast.LENGTH_LONG).show();
                 }
-            case REQUEST_SETTINGS:
+                break;
+            /*case REQUEST_SETTINGS:
                 if(resultCode==Activity.RESULT_OK) {
                     //Toast.makeText(this, "Close Settings", Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Close Settings");
                 }
-                break;
+                break;*/
         }
     }
 }

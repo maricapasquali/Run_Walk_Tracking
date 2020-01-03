@@ -1,24 +1,21 @@
 package com.run_walk_tracking_gps.gui;
 
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ForgotPassword extends CommonActivity  implements  Response.Listener<JSONObject> {
+public class ForgotPassword extends CommonActivity
+       // implements  Response.Listener<JSONObject>
+{
 
     private TextView mexSuccess;
     private EditText email;
@@ -45,12 +42,10 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
             }
             else{
                 try {
-                    JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.EMAIL, email.getText().toString());
-                    HttpRequest.requestForgotPassword(this, bodyJson, this);
+                    JSONObject bodyJson = new JSONObject().put(NetworkHelper.Constant.EMAIL, email.getText().toString());
+                    NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.FORGOT_PASSWORD, bodyJson);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                } catch (InternetNoAvailableException e) {
-                    e.alert();
                 }
             }
         });
@@ -66,11 +61,11 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
+    /*@Override
     public void onResponse(JSONObject response) {
         try {
 
-            if(response.getBoolean(HttpRequest.Constant.REQUEST_PASSWORD_FORGOT_SEND)){
+            if(response.getBoolean(NetworkHelper.Constant.REQUEST_PASSWORD_FORGOT_SEND)){
                 mexSuccess.setVisibility(View.VISIBLE);
                 request.setVisibility(View.GONE);
             }
@@ -78,5 +73,5 @@ public class ForgotPassword extends CommonActivity  implements  Response.Listene
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }

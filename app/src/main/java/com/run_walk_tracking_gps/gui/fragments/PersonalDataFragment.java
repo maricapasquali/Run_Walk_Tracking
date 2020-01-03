@@ -7,7 +7,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.stream.Stream;
 
 
 public class PersonalDataFragment extends Fragment {
@@ -31,6 +36,9 @@ public class PersonalDataFragment extends Fragment {
     private static final String TAG = PersonalDataFragment.class.getName();
 
     private Factory.CustomImageView img;
+
+    private View view;
+
     private EditText name ;
     private EditText last_name ;
     private EditText birthDate;
@@ -62,10 +70,10 @@ public class PersonalDataFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_signup_1, container, false);
-
+        view = inflater.inflate(R.layout.fragment_signup_1, container, false);
 
         img = view.findViewById(R.id.signup_profile_img);
+
         name = view.findViewById(R.id.signup_profile_name);
         last_name = view.findViewById(R.id.signup_profile_lastname);
         birthDate = view.findViewById(R.id.signup_profile_birth_date);
@@ -73,19 +81,60 @@ public class PersonalDataFragment extends Fragment {
         city = view.findViewById(R.id.signup_profile_city);
         phone = view.findViewById(R.id.signup_profile_tel);
 
+        setActionListener();
+        return view;
+    }
+
+    private void setActionListener(){
+
+        Stream.of(name, last_name, birthDate, email, city, phone).forEach( editTexts -> {
+            editTexts.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(count<=0){
+                        if(editTexts.equals(name)){
+                            name.setError(getString(R.string.name_not_empty));
+                        }
+                        if(editTexts.equals(last_name)){
+                            last_name.setError(getString(R.string.lastname_not_empty));
+                        }
+                        if(editTexts.equals(email)){
+                            email.setError(getString(R.string.email_not_empty));
+                        }
+                        if(editTexts.equals(city)){
+                            city.setError(getString(R.string.city_not_empty));
+                        }
+                        if(editTexts.equals(phone)){
+                            phone.setError(getString(R.string.tel_not_empty));
+                        }
+                    }
+
+                    validation();
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+        });
+
         birthDate.setOnClickListener(v ->{
             final TextView  birthText = (TextView)v;
             DateTimePickerDialog.createDatePicker(getContext(),
                     (date, calendar) -> {
-                birthText.setText(date);
-                userBuilder.setBirthDate(calendar.getTime());
-                birthDate.setError(null);
-            } ).show();
+                        birthText.setText(date);
+                        userBuilder.setBirthDate(calendar.getTime());
+                        birthDate.setError(null);
+                        validation();
+                    } ).show();
         });
 
         img.setOnClickListener( v -> imagePickerHandlerListener.imagePickerHandler((ImageView)v));
-
-        return view;
     }
 
     @Override
@@ -94,8 +143,7 @@ public class PersonalDataFragment extends Fragment {
         Log.d(TAG,"onResume");
         if(imagePickerHandlerListener.getImageUri()!=null)
             img.setImageURI(imagePickerHandlerListener.getImageUri());
-
-        if(!isOk){
+        /*if(!isOk){
             if(TextUtils.isEmpty(name.getText()))
                 name.setError(getString(R.string.name_not_empty));
             if(TextUtils.isEmpty(birthDate.getText()))
@@ -110,7 +158,18 @@ public class PersonalDataFragment extends Fragment {
                 city.setError(getString(R.string.city_not_empty));
             if(TextUtils.isEmpty(phone.getText()))
                 phone.setError(getString(R.string.tel_not_empty));
-        }
+        }*/
+    }
+
+    private void validation(){
+        personalDataListener.next((name.getError()==null && last_name.getError()==null && email.getError()==null && city.getError()==null && phone.getError()==null) &&
+                (!TextUtils.isEmpty(name.getText()) &&
+                        !TextUtils.isEmpty(last_name.getText()) &&
+                        !TextUtils.isEmpty(birthDate.getText()) &&
+                        !TextUtils.isEmpty(email.getText()) &&
+                        !TextUtils.isEmpty(city.getText()) &&
+                        !TextUtils.isEmpty(phone.getText())));
+
     }
 
 
@@ -140,9 +199,9 @@ public class PersonalDataFragment extends Fragment {
         super.onDestroyView();
         Log.d(TAG,"onDestroyView");
         try {
-            JSONObject userJson = null;
-            if(isSetAll()){
-                userJson = userBuilder.setName(name.getText().toString())
+            //JSONObject userJson = null;
+            //if(isSetAll()){
+            JSONObject userJson = userBuilder.setName(name.getText().toString())
                         .setLastName(last_name.getText().toString())
                         .setEmail(email.getText().toString())
                         .setCity(city.getText().toString())
@@ -150,9 +209,9 @@ public class PersonalDataFragment extends Fragment {
                         .build()
                         .toJson();
 
-                userJson.remove(HttpRequest.Constant.ID_USER);
-                userJson.remove(HttpRequest.Constant.HEIGHT);
-            }
+                userJson.remove(NetworkHelper.Constant.ID_USER);
+                userJson.remove(NetworkHelper.Constant.HEIGHT);
+            //}
 
             personalDataListener.personalData(userJson);
 
@@ -179,6 +238,7 @@ public class PersonalDataFragment extends Fragment {
     }
 
     public interface PersonalDataListener{
+        void next(boolean valid);
         void personalData(JSONObject personalInfoUser);
     }
 }

@@ -3,71 +3,25 @@ require_once("../utility.php");
 require_once("../dao/SessionDao.php");
 require_once("../dao/UserDao.php");
 require_once("../dao/SettingsDao.php");
-require_once("../dao/StatisticsDao.php");
+require_once("../dao/WeightDao.php");
 require_once("../dao/WorkoutDao.php");
+require_once("../exception/Exceptions.php");
 try{
   $userCredentials = bodyRequest();
-  if(!isset($userCredentials[USERNAME]) || !isset($userCredentials[PASSWORD]) || !isset($userCredentials[TOKEN]))
-  throw new Exception(URL_NOT_VALID);
+  if(!isset($userCredentials[USERNAME]) ||
+     !isset($userCredentials[PASSWORD]) ||
+     !isset($userCredentials[TOKEN]) ||
+     !isset($userCredentials[DEVICE]))
+      throw new UrlExeception();
 
-   $session=UserDao::checkSignUp($userCredentials);
-   if($session==NULL)  throw new Exception(SESSION_TOKEN_NOT_VALID);
+   $id_user = UserDao::checkSignUp($userCredentials);
 
-   print json_encode(array(SESSION => $session, DATA =>UserDao::allData($session[TOKEN])));
+   $session = SessionDao::create($id_user, null);//, $userCredentials[DEVICE]);
+
+   print json_encode(array(SESSION => $session,
+                           DATA =>UserDao::allData($session[TOKEN], $userCredentials[DEVICE])));
 
  }catch(Exception $e){
-  print json_errors($e->getMessage());
+  print json_errors($e);
 }
-
-/*
-INPUT
-{
-  "id_user": 27
-  "token": "QZghiChpnA"
-}
-
-OUTPUT
-{
-  "Error": "TOKEN NON CORRETTO"
-}
-
-o
-
-{
-  "user": {
-    "id_user": "27",
-    "settings": {
-      "sport": {
-        "id_sport": 2,
-        "name": "WALK"
-      },
-      "target": {
-        "id_target": 2,
-        "name": "LOSE_WEIGHT"
-      },
-      "unit_measure": {
-        "energy": {
-          "id_unit": 1,
-          "unit": "Kcal"
-        },
-        "distance": {
-          "id_unit": 1,
-          "unit": "Km"
-        },
-        "weight": {
-          "id_unit": 1,
-          "unit": "Kg"
-        },
-        "height": {
-          "id_unit": 1,
-          "unit": "m"
-        }
-      }
-    }
-  }
-}
-
-*/
-
-
 ?>

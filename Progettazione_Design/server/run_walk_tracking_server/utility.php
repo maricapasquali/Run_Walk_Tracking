@@ -4,25 +4,19 @@ define("_SERVER_", "http://192.168.1.132/run_walk_tracking_server/");
 
 define("APP_NAME", "Run/Walk Tracking");
 
-/* --- Mex Error ---*/
-define("LINK_EXPIRED", "Link for the reset you clicked is EXPIRED !! Please request a new one.");
-define("CONSISTENT", "consistent");
-define("NO_CONSISTENT", "no consistent");
-
-define("SIGN_UP_TOKEN_NOT_VALID", "Codice di registrazione non valido");
-define("SESSION_TOKEN_NOT_VALID", "Token sessione non valido");
-define("DATA_NOT_SUFFICIENT", "Dati non sufficienti");
-define("URL_NOT_VALID", "Url non valido");
-define("FILTER_NOT_VALID", "Filtro non valido");
-define("ID_NOT_SET", "id non settato");
-define("USER_NOT_FOUND", "User non trovato");
-define("USER_JUST_SIGN_UP", "User già registato");
-define("PASSWORD_NOT_CORRECT", "Password  non corretta");
-
 /* --- Index --- */
+
+define("CONSISTENT", "consistent");
+define("NO_CONSISTENT_SEND_DATA", "no consistent : send data to server");
+define("NO_CONSISTENT_RECEIVE_DATA", "no consistent : receive data from server");
+
+define("DEVICE", "device");
+define("DB_EXIST", "db_exist");
+define("SUCCESS", "success");
 define("USER", "user");
 define("DATA", "data");
 define("LAST_UPDATE", "last_update");
+define("ERROR", "Error");
 define("STATE", "state");
 define("CODE", "code");
 define("DESCRIPTION", "description");
@@ -43,6 +37,9 @@ define("WEIGHTS", "weights");
 define("INSERT", "insert");
 define("UPDATE", "update");
 define("DELETE", "delete");
+
+define("OLD_PASSWORD", "old_password");
+define("NEW_PASSWORD", "new_password");
 //User
 define("ID_USER", "id_user");
 define("NAME", "name");
@@ -55,7 +52,11 @@ define("PHONE", "phone");
 define("HEIGHT", "height");
 define("TARGET", "target");
 define("WEIGHT", "weight");
-define("IMG", "img_encode");
+
+define("IMG", "image");
+define("IMG_ENCODE", "content");
+define("IMG_NAME", "name");
+
 define("USERNAME", "username");
 define("PASSWORD", "password");
 define("TOKEN", "token");
@@ -128,8 +129,8 @@ function sendEmail($to_email, $subject, $body){
 }
 
 
-function json_errors($err) {
-    return json_encode(array('Error'=> $err));
+function json_errors($ex) {
+    return json_encode(array(ERROR=> array(CODE => $ex->getCode(), DESCRIPTION=> $ex->getMessage())));
 }
 
 function getToken($length){
@@ -142,7 +143,6 @@ function getToken($length){
     for ($i=0; $i < $length; $i++) {
         $token .= $codeAlphabet[random_int(0, $max-1)];
     }
-
     return $token;
 }
 

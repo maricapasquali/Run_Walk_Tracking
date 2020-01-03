@@ -10,13 +10,12 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.Response;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
@@ -25,13 +24,14 @@ import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
 
-public class ModifyWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>  {
+public class ModifyWorkoutActivity extends  CommonActivity{
 
     private final static String TAG = ModifyWorkoutActivity.class.getName();
 
@@ -154,49 +154,42 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     private void saveWorkoutChanged(){
         try {
 
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
+            final JSONObject bodyJson = new JSONObject().put(WorkoutDescriptor.ID_WORKOUT, workout.getIdWorkout());
             if(!workout.getDate().equals(oldWorkout.getDate())){
-                bodyJson.put(HttpRequest.Constant.DATE, workout.getDate().getTime());
+                bodyJson.put(WorkoutDescriptor.DATE, workout.getUnixTime());
             }
             if(!workout.getSport().equals(oldWorkout.getSport())){
-                bodyJson.put(HttpRequest.Constant.SPORT, workout.getSport());
+                bodyJson.put(WorkoutDescriptor.SPORT, workout.getSport());
             }
             if(!workout.getDuration().getValue(true).equals(oldWorkout.getDuration().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.DURATION, workout.getDuration().getValue(true));
+                bodyJson.put(WorkoutDescriptor.DURATION, workout.getDuration().getValue(true));
             }
             if(!workout.getDistance().getValue(true).equals(oldWorkout.getDistance().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue(true));
+                bodyJson.put(WorkoutDescriptor.DISTANCE, workout.getDistance().getValue(true));
             }
             if(!workout.getCalories().getValue(true).equals(oldWorkout.getCalories().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
+                bodyJson.put(WorkoutDescriptor.CALORIES, workout.getCalories().getValue(true));
             }
 
             Log.d(TAG, bodyJson.toString());
-            HttpRequest.requestUpdateWorkout(this, bodyJson, this);
+            if(SqlLiteWorkoutDao.create(this).update(bodyJson)){
+                DefaultPreferencesUser.update(this);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        }
-    }
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
+                        NetworkHelper.Constant.WORKOUT, bodyJson.toString())
+                        .bindService();
 
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-
-            //Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
-            Intent returnIntent = new Intent();
-            if(response.getBoolean(HttpRequest.Constant.UPDATE)){
-                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-            }
-            setResult(Activity.RESULT_OK, returnIntent);
+                setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_WORKOUT, workout));
+            } else
+                setResult(RESULT_CANCELED, new Intent());
             finish();
 
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
 }
 
 

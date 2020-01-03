@@ -1,10 +1,11 @@
 <?php
 require_once("utility.php");
 require_once("dao/UserDao.php");
+require_once("exception/Exceptions.php");
 try{
 
     $request =  bodyRequest();
-    if(!isset($request[EMAIL])) throw new Exception(URL_NOT_VALID);
+    if(!isset($request[EMAIL])) throw new UrlExeception();
 
     $key = rand();
     $expiry_date = date_end_validity_link();
@@ -13,7 +14,7 @@ try{
     array(REQUEST_PASSWORD_FORGOT_SEND =>UserDao::requestForgotPassword($request[EMAIL], $key, $expiry_date)));
 
 }catch(Exception $e){
-  print json_errors($e->getMessage());
+  print json_errors($e);
 }
 
  ?>

@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -12,45 +11,33 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.controller.UserSingleton;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
-import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
-import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.task.CompressionBitMap;
-import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
+import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
+import com.run_walk_tracking_gps.db.tables.UserDescriptor;
+import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.HeightDialog;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.utilities.BitmapUtilities;
-import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import kotlin.jvm.internal.PropertyReference0Impl;
-
-public class ModifyUserActivity extends CommonActivity implements Response.Listener<JSONObject>{
+public class ModifyUserActivity extends CommonActivity {
 
     private static final String TAG = ModifyUserActivity.class.getName();
 
@@ -67,12 +54,9 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
     private ImagePicker imagePicker;
     private User oldUser;
     private User user;
-    private String image_encode = null;
-
-    private CompressionBitMap async =  null;
-
-    private RequestDialog dialog;
     private JSONObject bodyJson;
+
+    private ImageFileHelper imageFileHelper;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -80,6 +64,8 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         setContentView(R.layout.activity_modify_profile);
         getSupportActionBar().setTitle(R.string.modify);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        imageFileHelper = ImageFileHelper.create(this);
 
         img = findViewById(R.id.modify_profile_img);
         name = findViewById(R.id.modify_profile_name);
@@ -95,13 +81,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             oldUser = (User)getIntent().getParcelableExtra(KeysIntent.PROFILE);
             oldUser.setContext(this);
             Log.d(TAG, oldUser.toString());
-            try {
-                String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(oldUser.getIdUser()), null);
-                if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
 
-            }catch (IOException e){
-                img.setImageResource(R.drawable.ic_user_empty);
-            }
+            if(oldUser.getImage()!=null && oldUser.getImage().exists())
+                imageFileHelper.load(img, oldUser.getImage());
+
             name.setText(oldUser.getName());
             lastName.setText(oldUser.getLastName());
             gender.setText(oldUser.getGender().getStrId());
@@ -110,13 +93,11 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
             email.setText(oldUser.getEmail());
             city.setText(oldUser.getCity());
             tel.setText(oldUser.getPhone());
-
             height.setText(oldUser.getHeight().toString());
 
             user = oldUser.clone();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -124,59 +105,59 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void saveUserChanged(RequestDialog dialog){
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void saveUserChanged(){
         try {
-
-            bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, user.getIdUser());
+            bodyJson = new JSONObject();
             if(!user.getName().equals(oldUser.getName())){
-                bodyJson.put(HttpRequest.Constant.NAME, user.getName());
+                bodyJson.put(UserDescriptor.NAME, user.getName());
             }
             if(!user.getLastName().equals(oldUser.getLastName())){
-                bodyJson.put(HttpRequest.Constant.LAST_NAME, user.getLastName());
+                bodyJson.put(UserDescriptor.LAST_NAME, user.getLastName());
             }
             if(!user.getGender().equals(oldUser.getGender())){
-                bodyJson.put(HttpRequest.Constant.GENDER, user.getGender());
+                bodyJson.put(UserDescriptor.GENDER, user.getGender());
             }
             if(!user.getBirthDate().equals(oldUser.getBirthDate())){
-                bodyJson.put(HttpRequest.Constant.BIRTH_DATE, user.getBirthDate());
+                bodyJson.put(UserDescriptor.BIRTH_DATE, user.getBirthDateStrDB());
             }
             if(!user.getEmail().equals(oldUser.getEmail())){
-                bodyJson.put(HttpRequest.Constant.EMAIL, user.getEmail());
+                bodyJson.put(UserDescriptor.EMAIL, user.getEmail());
             }
             if(!user.getCity().equals(oldUser.getCity())){
-                bodyJson.put(HttpRequest.Constant.CITY, user.getCity());
+                bodyJson.put(UserDescriptor.CITY, user.getCity());
             }
             if(!user.getPhone().equals(oldUser.getPhone())){
-                bodyJson.put(HttpRequest.Constant.PHONE, user.getPhone());
+                bodyJson.put(UserDescriptor.PHONE, user.getPhone());
             }
             if(!user.getHeight().getValue(true).equals(oldUser.getHeight().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.HEIGHT, user.getHeight().getValue(true));
+                bodyJson.put(UserDescriptor.HEIGHT, user.getHeight().getValue(true));
+            }
+            if(!user.getImage().equals(oldUser.getImage())){
+                bodyJson.put(NetworkHelper.Constant.IMAGE, new JSONObject().put(ImageProfileDescriptor.NAME, user.getImage().getName()));
             }
 
-            if(async!=null){
-                this.image_encode = async.get();
-                if(image_encode!=null)
-                    bodyJson.put(HttpRequest.Constant.IMG_ENCODE, image_encode);
-            }
+            Log.d(TAG, user + ", count = "+ JSONUtilities.countKey(bodyJson));
 
-            Log.d(TAG, bodyJson.toString() + ", count = "+ JSONUtilities.countKey(bodyJson));
-            if(JSONUtilities.countKey(bodyJson) >1){
-                HttpRequest.requestDelayedUpdateUserInformation(this, bodyJson,this, dialog);
+            if(SqlLiteUserDao.create(this).update(bodyJson)){
+                DefaultPreferencesUser.update(this);
+                imageFileHelper.moveToImageDir(user.getImage().getName());
+                if(oldUser.getImage()!=null && oldUser.getImage().exists()) oldUser.getImage().delete();
+                imageFileHelper.deleteTmpDir();
+
+                NetworkServiceHandler.getInstance(this,
+                        NetworkHelper.Constant.UPDATE, NetworkHelper.Constant.USER,
+                        bodyJson.toString()).bindService();
+
+                setResult(RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_USER, user));
             }else{
-                dialog.dismiss();
                 setResult(RESULT_CANCELED, new Intent());
-                finish();
             }
-
+            finish();
         } catch (JSONException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
         }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
@@ -185,8 +166,6 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         switch (item.getItemId()){
             case R.id.save_profile:{
                 Log.e(TAG, "SALVA MODIFICHE");
-                dialog = RequestDialog.create(ModifyUserActivity.this);
-                dialog.show();
 
                 user.setName(TextUtils.isEmpty(name.getText())? oldUser.getName() : name.getText().toString());
                 user.setLastName(TextUtils.isEmpty(lastName.getText())? oldUser.getName() : lastName.getText().toString());
@@ -195,8 +174,7 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
                 user.setPhone(TextUtils.isEmpty(tel.getText())? oldUser.getName() : tel.getText().toString());
 
                 // REQUEST UPDATE USER
-                saveUserChanged(dialog);
-
+                saveUserChanged();
             }
             break;
             case android.R.id.home:
@@ -208,16 +186,19 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
 
     @Override
     protected void listenerAction() {
-
         img.setOnClickListener( v ->{
             imagePicker = new ImagePicker(this,
                     null ,
                     imageUri -> {
+                        String newName = ImageFileHelper.createNameRandom();
+                        Log.e(TAG, "Name : "+ newName);
+                        if(imageFileHelper.moveToTmpDir(imageUri, newName)){
+                            File imageTmp = imageFileHelper.getImageTmp(newName);
+                            imageFileHelper.load(img, imageTmp);
+                            user.setImageProfile(imageTmp);
 
-                        img.setImageURI(imageUri);
-                        async = CompressionBitMap.create(this);
-                        async.execute(((BitmapDrawable)img.getDrawable()).getBitmap());
-
+                            Log.e(TAG, "Name File user changed : "+ user.getImage());
+                        }
                     }).setWithImageCrop(1,1);
             imagePicker.choosePicture(true);
         });
@@ -270,31 +251,10 @@ public class ModifyUserActivity extends CommonActivity implements Response.Liste
         imagePicker.handlePermission(requestCode, grantResults);
     }
 
-    @Override
-    public void onResponse(JSONObject response) {
-
-        Log.d(TAG, response.toString());
-
-        try {
-            if(response.has(HttpRequest.Constant.UPDATE) && response.getBoolean(HttpRequest.Constant.UPDATE)){
-                DefaultPreferencesUser.setImage(this, user.getIdUser(), image_encode);
-
-                UserSingleton.getInstance().setUser(user);
-                Log.d(TAG, UserSingleton.getInstance().getUser().toString());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        final Intent returnIntent = new Intent();
-        returnIntent.putExtra(KeysIntent.CHANGED_USER, user);
-        setResult(RESULT_OK, returnIntent);
-        finish();
-    }
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBackPressed() {
-        HttpRequest.cancelAllRequestPending(bodyJson);
         super.onBackPressed();
+        imageFileHelper.deleteTmpDir();
     }
 }

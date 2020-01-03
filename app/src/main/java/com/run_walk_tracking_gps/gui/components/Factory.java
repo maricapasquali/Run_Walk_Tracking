@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
 
+
 public class Factory {
 
     public static class CustomImageView extends android.support.v7.widget.AppCompatImageView {
@@ -47,5 +48,7 @@ public class Factory {
             return new PolylineOptions().color(COLOR_DEFAULT).width(WIDTH_DEFAULT);
         }
     }
+
+
 
 }

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.util.Log;
 
+
 public abstract class CommonActivity extends AppCompatActivity {
 
     private final static String TAG = CommonActivity.class.getName();
@@ -26,8 +27,7 @@ public abstract class CommonActivity extends AppCompatActivity {
 
     protected abstract void listenerAction();
 
-
-    protected void addFragment(final Fragment fragment, final int container,final boolean toStack, final String tag) {
+    protected void addFragment(final Fragment fragment, final int container, final boolean toStack, final String tag) {
         final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction()
                 .replace(container, fragment, tag);
 

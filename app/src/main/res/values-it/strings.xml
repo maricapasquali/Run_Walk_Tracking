@@ -54,6 +54,10 @@
     <string name="password_not_empty">Password non vuota</string>
     <string name="confirm_password_not_empty">Conferma Password non vuota</string>
 
+    <!-- Activation Account -->
+    <string name="activation_account">Attivazione Account</string>
+    <string name="check_code">Codice di attivazione</string>
+
     <!-- Impostazioni -->
     <string name="sport">Sport</string>
     <string name="walk">Camminata</string>
@@ -113,6 +117,8 @@
     <string name="change_password">Cambia Password</string>
     <string name="save">Salva</string>
     <string name="delete_account">Elimina account</string>
+    <string name="old_password">Vecchia Password</string>
+    <string name="new_password">Nuova Password</string>
 
     <!-- Statistiche -->
     <string name="statistic_data">Dati</string>
@@ -136,12 +142,14 @@
     <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
 
+    <string name="check_code_text">" Inserisci il codice di attivazione dell'account che ti è stato inviato per email."</string>
+
     <!-- Messaggi di errore -->
     <string name="error">Errore</string>
     <string name="not_correct_password">Password non corretta</string>
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
     <string name="weight_not_set_correctly">Devono essere settati sia PESO sia GIORNO</string>
-    <string name="not_empty">\u0020 non può essere vuoto</string>
+    <string name="not_empty">\u0020 non vuoto</string>
     <string name="user_not_set">User non settato</string>
     <string name="account_not_checked">Account non verificato!</string>
     <string name="start_compression_image">Inizio Compressione Immagine</string>

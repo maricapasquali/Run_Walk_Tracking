@@ -16,22 +16,17 @@ import android.widget.TextView;
 
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.controller.UserSingleton;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
-import com.run_walk_tracking_gps.gui.BootAppActivity;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
 import com.run_walk_tracking_gps.model.User;
-import com.run_walk_tracking_gps.utilities.BitmapUtilities;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
+
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
 
 public class UserActivity extends CommonActivity {
 
@@ -51,15 +46,15 @@ public class UserActivity extends CommonActivity {
 
     private User user;
 
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
-
         setContentView(R.layout.activity_profile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.profile);
 
         img = findViewById(R.id.profile_img);
+
         name = findViewById(R.id.profile_name);
         lastName = findViewById(R.id.profile_lastname);
         gender = findViewById(R.id.profile_gender);
@@ -69,12 +64,10 @@ public class UserActivity extends CommonActivity {
         tel = findViewById(R.id.profile_tel);
         height = findViewById(R.id.profile_height);
 
-        if(getIntent()!=null){
-            user = UserSingleton.getInstance().getUser();
-            if(user!=null){
-                setGui(user);
-                getSupportActionBar().setTitle(user.getUsername());
-            }
+        try {
+            setGui(UserBuilder.create(this, SqlLiteUserDao.create(this).getUser()).build());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -103,36 +96,13 @@ public class UserActivity extends CommonActivity {
             case R.id.delete_account: {
                 Log.d(TAG, getString(R.string.delete_account));
                 //Toast.makeText(this, R.string.delete_account, Toast.LENGTH_LONG).show();
-                try {
-                    final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER,  user.getIdUser());
-
-                    new AlertDialog.Builder(this)
-                            .setMessage(R.string.delete_account_mex)
-                            .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                try {
-                                    HttpRequest.requestDeleteUser(this, bodyJson, response -> {
-                                        // CANCELLAZIONE PREFERENCES
-                                        DefaultPreferencesUser.deleteUser(this, String.valueOf(user.getIdUser()));
-                                        //EXIT
-                                        DefaultPreferencesUser.unSetUserLogged(this);
-
-                                        final Intent intent = new Intent(this, BootAppActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                        finish();
-
-                                    });
-                                } catch (InternetNoAvailableException e) {
-                                    e.alert();
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .create()
-                            .show();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                new AlertDialog.Builder(this)
+                               .setMessage(R.string.delete_account_mex)
+                               .setPositiveButton(R.string.delete, (dialog, id) ->
+                                       NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.DELETE_ACCOUNT, null))
+                               .setNegativeButton(R.string.cancel, null)
+                               .create()
+                               .show();
             }
             break;
 
@@ -147,9 +117,10 @@ public class UserActivity extends CommonActivity {
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
                 if(resultCode== Activity.RESULT_OK){
-                    setGui((User) data.getParcelableExtra(KeysIntent.CHANGED_USER));
-                }
-                else if(resultCode== Activity.RESULT_CANCELED){
+                    User user = (User) data.getParcelableExtra(KeysIntent.CHANGED_USER);
+                    user.setContext(this);
+                    setGui(user);
+                } else if(resultCode== Activity.RESULT_CANCELED){
                     Log.e(TAG, "USER NON MODIFICATO");
                 }
                 break;
@@ -171,28 +142,27 @@ public class UserActivity extends CommonActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
-        user.setContext(this);
-        name.setText(user.getName());
-        lastName.setText(user.getLastName());
-        gender.setText(user.getGender().getStrId());
-        gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(user.getGender().getIconId()),null, null, null);
-        birthDate.setText(user.getBirthDateString());
-        email.setText(user.getEmail());
-        city.setText(user.getCity());
-        tel.setText(user.getPhone());
+        if(user!=null){
 
-        height.setText(user.getHeight().toString());
+            name.setText(user.getName());
+            lastName.setText(user.getLastName());
+            gender.setText(user.getGender().getStrId());
+            gender.setCompoundDrawablesWithIntrinsicBounds(
+                    getDrawable(user.getGender().getIconId()),
+                    null, null, null);
+            birthDate.setText(user.getBirthDateString());
+            email.setText(user.getEmail());
+            city.setText(user.getCity());
+            tel.setText(user.getPhone());
+            height.setText(user.getHeight().toString());
 
-        try{
-            String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
-            Log.e(TAG, "IMAGE ENCODE = " + img_encode);
-            if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
-        }catch (IOException e){
-            img.setImageResource(R.drawable.ic_user_empty);
+            if(user.getImage()!=null && user.getImage().exists())
+                ImageFileHelper.create(this).load(img, user.getImage());
+
+            this.user = user;
+            Log.d(TAG, "User = " + user);
         }
-
-        this.user = user;
-        Log.d(TAG, "User = " + user);
     }
+
 
 }

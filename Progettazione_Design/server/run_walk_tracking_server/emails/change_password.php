@@ -2,8 +2,9 @@
   require_once("../utility.php");
   require_once("../dao/DaoFactory.php");
   require_once("../dao/UserDao.php");
+  require_once("../exception/Exceptions.php");
   if(!isset($_GET[C_KEY]) || (isset($_GET[C_KEY]) && empty($_GET[C_KEY])))
-    die(json_errors(URL_NOT_VALID));
+    die(json_errors(new UrlExeception()));
 
   function isExpired($key) {
     if(connect()){
@@ -21,10 +22,9 @@
   }
 
   try{
-      if(isExpired($_GET[C_KEY]))
-      die(json_errors(LINK_EXPIRED));
+      if(isExpired($_GET[C_KEY])) throw new LinkExpiredException();
   }catch(Exception $e){
-      die(json_errors($e->getMessage()));
+      die(json_errors($e));
   }
 ?>
 <!DOCTYPE html>

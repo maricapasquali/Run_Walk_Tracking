@@ -1,7 +1,7 @@
 <?php
 require_once("../utility.php");
 require_once("../dao/UserDao.php");
-
+require_once("../exception/Exceptions.php");
 try{
   $new_user = bodyRequest();
   if(!isset($new_user[NAME]) ||
@@ -16,36 +16,12 @@ try{
      !isset($new_user[WEIGHT]) ||
      !isset($new_user[USERNAME]) ||
      !isset($new_user[PASSWORD]))
-      throw new Exception(URL_NOT_VALID);
+      throw new UrlExeception();
 
      print json_encode(array(SIGN_UP => UserDao::create($new_user)));
+    //print json_encode(array(SIGN_UP => false));
 
 }catch(Exception $e){
-  print json_errors($e->getMessage());
+  print json_errors($e);
 }
-/*
-INPUT
-{
-    "name" : "Maria",
-    "last_name":"Bianchi",
-    "gender": "Female",
-    "birth_date" : "1990-02-11",
-    "email": "mariabianchi@gmail.com",
-    "city": "Milano",
-    "phone": "3333333333",
-    "height": 1.55,
-    "target": 2,
-    "weight": 70.5,
-    "username": "mariabianchi$1",
-    "password": "pass"
-}
-
-OUTPUT
-{
-  "id_user" : .....
-	"token" : ".........."
-}
-*/
-
-
 ?>

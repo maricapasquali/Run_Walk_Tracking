@@ -12,32 +12,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DetailsWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>{
+public class DetailsWorkoutActivity extends  CommonActivity{
 
     private final static String TAG = DetailsWorkoutActivity.class.getName();
 
     private final static int REQUEST_MODIFY = 0;
 
+    private MenuItem cancel;
     private ListView summary_workout;
     private FloatingActionButton summary_ok;
 
     private DetailsWorkoutAdapter adapter;
 
-    private boolean isChangedWorkout = false;
     private boolean isSummary = false;
     private Workout workout;
 
@@ -57,7 +58,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
             workout.setContext(this);
             Log.d(TAG, workout.toString());
 
-            setMapView();
+            setMapView(workout.getMapRoute());
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -68,7 +69,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                 workout.setContext(this);
 
                 Log.d(TAG, workout.toString());
-                setMapView();
+                setMapView(workout.getMapRoute());
 
                 summary_ok.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(R.string.detail_workout);
@@ -80,10 +81,11 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
        }
     }
 
-    private void setMapView(){
-        if(workout.getMapRoute()!=null){
+    private void setMapView(String mapRoute){
+        if(mapRoute!=null && !mapRoute.equals("null")){
+            Log.e(TAG, "MAP ROUTE "+(mapRoute.equals("null")));
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.summary_map, MapFragment.createWithArguments(workout.getMapRoute()))
+                    .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute))
                     .commit();
         }else {
             findViewById(R.id.summary_map).setVisibility(View.GONE);
@@ -97,7 +99,12 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(!isSummary) getMenuInflater().inflate(R.menu.menu_detail_workout, menu);
+        getMenuInflater().inflate(R.menu.menu_detail_workout, menu);
+
+        if(isSummary){
+            cancel = menu.findItem(R.id.summary_cancel_workout);
+            menu.findItem(R.id.summary_modify_workout).setVisible(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -105,8 +112,6 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.summary_modify_workout:
-                //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
-
                 final Intent intentModify = new Intent(this, ModifyWorkoutActivity.class);
                 intentModify.putExtra(KeysIntent.MODIFY_WORKOUT, workout);
                 startActivityForResult(intentModify, REQUEST_MODIFY);
@@ -117,28 +122,28 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                         .setMessage(R.string.delete_workout_mex)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
 
-                            try{
-                                JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
-
-                                HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
+                            if(isSummary)
+                                setResult(RESULT_CANCELED, new Intent());
+                            else {
+                                if(SqlLiteWorkoutDao.create(this).delete(workout.getIdWorkout())){
+                                    DefaultPreferencesUser.update(this);
 
                                     try {
-                                        if(response.getBoolean(HttpRequest.Constant.DELETE)){
-                                            final Intent resultIntent = new Intent();
-                                            resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
-                                            setResult(Activity.RESULT_OK, resultIntent);
-                                            finish();
-                                        }
+
+                                        NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.DELETE,
+                                                NetworkHelper.Constant.WORKOUT,
+                                                new JSONObject().put(WorkoutDescriptor.ID_WORKOUT,
+                                                        workout.getIdWorkout()).toString())
+                                                .bindService();
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
-                                });
 
-                            }catch (JSONException e){
-                                e.printStackTrace();
-                            } catch (InternetNoAvailableException e) {
-                                e.alert();
+                                    setResult(RESULT_OK, new Intent());
+                                }else
+                                    setResult(RESULT_CANCELED, new Intent());
                             }
+                            finish();
                         })
                         .setNegativeButton(R.string.cancel, null).create().show();
                 break;
@@ -158,10 +163,9 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         switch (requestCode){
             case REQUEST_MODIFY:
                 if(resultCode==Activity.RESULT_OK) {
-                    Toast.makeText(this, KeysIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, KeysIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
                     Workout work = (Workout) data.getParcelableExtra(KeysIntent.CHANGED_WORKOUT);
-                    isChangedWorkout = (work!=null);
-                    if(isChangedWorkout){
+                    if(work!=null){
                         work.setContext(this);
                         adapter.updateDetails(work);
                         workout = work;
@@ -175,46 +179,37 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     @Override
     public void onBackPressed() {
         Log.d(TAG, "OnBackPressed");
-        if(isSummary){
+        if(isSummary)
             saveWorkout();
-        }else {
-            if(isChangedWorkout){
-                Log.d(TAG, "Return Workout changed");
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-                setResult(Activity.RESULT_OK, returnIntent);
-
-            }
+        else
             super.onBackPressed();
-        }
+
     }
 
     private void saveWorkout(){
-        Log.d(KeysIntent.NEW_WORKOUT, "Summary : Workout = "+ workout);
-        try {
-            final JSONObject bodyJson = workout.toJson(this);
-            Log.d(TAG, bodyJson.toString());
-            HttpRequest.requestNewWorkout(this, bodyJson, this);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        }
-    }
+        Log.d(KeysIntent.NEW_WORKOUT, "Save Workout (Summary)");
 
-    @Override
-    public void onResponse(JSONObject response) {
         try {
-            int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
-            // save and send to workouts list
-            final Intent resultIntent = new Intent();
-            workout.setIdWorkout(id_workout);
-            resultIntent.putExtra(KeysIntent.NEW_WORKOUT, workout);
-            setResult(Activity.RESULT_OK, resultIntent);
+            JSONObject bodyJson = workout.toJson(this);
+            Log.d(TAG, bodyJson.toString());
+            long id_workout = SqlLiteWorkoutDao.create(this).insert(bodyJson);
+            if(id_workout!=-1){
+                DefaultPreferencesUser.update(this);
+
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
+                        NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
+                        .bindService();
+
+
+                setResult(RESULT_OK, new Intent());
+            }else {
+                setResult(RESULT_CANCELED, new Intent());
+            }
             finish();
-        } catch (JSONException e) {
-           e.printStackTrace();
+        }catch (JSONException e){
+            e.printStackTrace();
         }
+
     }
 
 }
