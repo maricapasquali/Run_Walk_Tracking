@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.run_walk_tracking_gps">
 
+
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Permission for IMEI code -->
@@ -90,7 +91,6 @@
             android:name=".gui.ApplicationActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask">
-         <!--   android:launchMode="singleInstance"-->
         </activity>
 
         <activity
@@ -138,10 +138,13 @@
         <!-- SERVICE -->
         <service android:name=".service.WorkoutService"/>
         <service android:name=".service.NetworkService"/>
-        <service android:name=".service.SyncService"/>
 
         <!-- RECEIVER -->
         <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
+
+        <receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
+            android:exported="false">
+        </receiver>
 
     </application>
 

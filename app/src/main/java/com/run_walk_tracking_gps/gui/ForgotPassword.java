@@ -65,7 +65,7 @@ public class ForgotPassword extends CommonActivity
     public void onResponse(JSONObject response) {
         try {
 
-            if(response.getBoolean(NetworkHelper.Constant.REQUEST_PASSWORD_FORGOT_SEND)){
+            if(response.getBoolean(Constant.REQUEST_PASSWORD_FORGOT_SEND)){
                 mexSuccess.setVisibility(View.VISIBLE);
                 request.setVisibility(View.GONE);
             }

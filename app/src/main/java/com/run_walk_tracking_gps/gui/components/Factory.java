@@ -48,7 +48,4 @@ public class Factory {
             return new PolylineOptions().color(COLOR_DEFAULT).width(WIDTH_DEFAULT);
         }
     }
-
-
-
 }

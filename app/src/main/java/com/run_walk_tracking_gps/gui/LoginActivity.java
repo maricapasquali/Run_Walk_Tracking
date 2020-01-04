@@ -79,20 +79,20 @@ public class LoginActivity extends CommonActivity
     @Override
     public void onResponse(JSONObject response) {
         try {
-            if(response.has(NetworkHelper.Constant.FIRST_LOGIN) && response.getBoolean(NetworkHelper.Constant.FIRST_LOGIN)){
+            if(response.has(Constant.FIRST_LOGIN) && response.getBoolean(Constant.FIRST_LOGIN)){
                 final Intent intent = new Intent(this, TokenActivity.class);
                 intent.putExtra(KeysIntent.USERNAME, username.getText().toString());
                 intent.putExtra(KeysIntent.PASSWORD, hash_password);
                 startActivity(intent);
                 finish();
-            }else if(response.has(NetworkHelper.Constant.SESSION)){
+            }else if(response.has(Constant.SESSION)){
                 // SESSION TO SHAREDPREFERENCE
 
                 DefaultPreferencesUser.setSession(this,
-                        response.getJSONObject(NetworkHelper.Constant.SESSION).put(NetworkHelper.Constant.LAST_UPDATE, 0));
+                        response.getJSONObject(Constant.SESSION).put(Constant.LAST_UPDATE, 0));
 
                 // REQUEST SYNC
-                NetworkHelper.HttpRequest.getInstance(this).sync(new OnUpdateGuiListener() {
+                HttpRequest.getInstance(this).sync(new OnUpdateGuiListener() {
                     @Override
                     public void onChangeStateDB() {
                         final Intent intent = new Intent(LoginActivity.this, ApplicationActivity.class);

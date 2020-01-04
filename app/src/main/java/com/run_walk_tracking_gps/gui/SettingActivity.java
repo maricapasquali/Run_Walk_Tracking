@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
@@ -98,6 +99,7 @@ public class SettingActivity extends CommonActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        ErrorQueue.getErrors(this);
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
         //SyncServiceHandler.create(this).start();
 

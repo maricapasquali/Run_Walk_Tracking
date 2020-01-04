@@ -141,7 +141,7 @@
     <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
     <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
-
+    <string name="account_use_other_device">Account in uso in un altro dispositivo.</string>
     <string name="check_code_text">" Inserisci il codice di attivazione dell'account che ti è stato inviato per email."</string>
 
     <!-- Messaggi di errore -->
@@ -156,6 +156,7 @@
     <string name="end_compression_image">Compressione Immagine Finita</string>
     <string name="internet_not_available_title">Dati cellulare disattivati</string>
     <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
+    <string name="token_not_valid">Token non valido</string>
 
 
 </resources>

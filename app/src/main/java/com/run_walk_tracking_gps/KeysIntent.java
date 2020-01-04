@@ -13,8 +13,6 @@ public class KeysIntent {
 
     public final static String MODIFY_WEIGHT = "Modify Weight";
 
-
-    public final static String ID_USER = "id_user";
     public final static String PROFILE = "Profile";
     public final static String CHANGED_USER = "Changed User";
 
@@ -27,6 +25,6 @@ public class KeysIntent {
 
 
     public static final String FILTER = "filter";
-    public static final String DATA_REQUEST = "data_json_request";
+    public static final String DATA_REQUEST = "data json request";
 
 }

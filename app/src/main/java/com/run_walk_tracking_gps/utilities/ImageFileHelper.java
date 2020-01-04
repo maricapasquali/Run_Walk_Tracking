@@ -140,7 +140,7 @@ public class ImageFileHelper {
 
     private String getNameImage() {
         return DefaultPreferencesUser.getIdUser(context) + ".jpg";
-        //.getSession(this).getString(NetworkHelper.Constant.TOKEN)+".jpg";
+        //.getSession(this).getString(Constant.TOKEN)+".jpg";
     }
 
     public File getImage() {

@@ -1,9 +1,5 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -14,8 +10,7 @@ import android.widget.EditText;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
-
+import com.run_walk_tracking_gps.utilities.AppUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,14 +46,10 @@ public class ActivationAccountActivity extends CommonActivity
             }
             else{
                 try {
-                    @SuppressLint("HardwareIds")
-                    String mac = CryptographicHashFunctions.md5(
-                            ((WifiManager)getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getMacAddress());
-
                     JSONObject bodyJson = new JSONObject().put(NetworkHelper.Constant.USERNAME, username)
                                                           .put(NetworkHelper.Constant.PASSWORD, password)
                                                           .put(NetworkHelper.Constant.TOKEN, token.getText().toString())
-                                                          .put(NetworkHelper.Constant.DEVICE, mac);
+                                                          .put(NetworkHelper.Constant.DEVICE, AppUtilities.id(this));
 
                     NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.FIRST_LOGIN, bodyJson);
 
@@ -73,24 +64,24 @@ public class ActivationAccountActivity extends CommonActivity
     @Override
     public void onResponse(JSONObject response) {
 
-        if(response.has(NetworkHelper.Constant.SESSION) && response.has(NetworkHelper.Constant.DATA)){
+        if(response.has(Constant.SESSION) && response.has(Constant.DATA)){
             try {
                 // SESSION TO SHAREDPREFERENCE
-                DefaultPreferencesUser.setSession(this, response.getJSONObject(NetworkHelper.Constant.SESSION));
+                DefaultPreferencesUser.setSession(this, response.getJSONObject(Constant.SESSION));
 
                 // DATA TO DATABASE
-                JSONObject data = response.getJSONObject(NetworkHelper.Constant.DATA);
-                final  JSONObject user = data.getJSONObject(NetworkHelper.Constant.USER);
+                JSONObject data = response.getJSONObject(Constant.DATA);
+                final  JSONObject user = data.getJSONObject(Constant.USER);
                 if(SqlLiteUserDao.create(this).insert(user)){
                     // TODO: 1/2/2020 DECOMPRESSIONE IMMAGINE E SALVATAGGIO IN image/
-                    final JSONObject image = user.getJSONObject(NetworkHelper.Constant.IMAGE);
+                    final JSONObject image = user.getJSONObject(Constant.IMAGE);
                     final String name = image.getString(ImageProfileDescriptor.NAME);
-                    final String encode = image.getString(NetworkHelper.Constant.IMG_ENCODE);
+                    final String encode = image.getString(Constant.IMG_ENCODE);
 
                     DecompressionEncodeImageTask.create(this, name).execute(encode);
                 }
-                SqlLiteSettingsDao.create(this).insert(data.getJSONObject(NetworkHelper.Constant.SETTINGS));
-                SqlLiteStatisticsDao.createWeightDao(this).insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS).getJSONObject(0));
+                SqlLiteSettingsDao.create(this).insert(data.getJSONObject(Constant.SETTINGS));
+                SqlLiteStatisticsDao.createWeightDao(this).insert(data.getJSONArray(Constant.WEIGHTS).getJSONObject(0));
 
                 startActivity(new Intent(this, ApplicationActivity.class));
                 finishAffinity();

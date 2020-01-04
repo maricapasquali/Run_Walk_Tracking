@@ -138,23 +138,23 @@ public class SignUpActivity extends CommonActivity
             NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.SIGN_UP, user);
 /*
             Bitmap bitmap = null;
-            if(!user.isNull(NetworkHelper.Constant.IMAGE)) {
-                bitmap = BitmapFactory.decodeFile(ImageFileHelper.create(this).getPathTmpImage(user.getJSONObject(NetworkHelper.Constant.IMAGE).getString(NetworkHelper.Constant.NAME)));
+            if(!user.isNull(Constant.IMAGE)) {
+                bitmap = BitmapFactory.decodeFile(ImageFileHelper.create(this).getPathTmpImage(user.getJSONObject(Constant.IMAGE).getString(Constant.NAME)));
             }
             if(bitmap!=null){
                 RequestDialog progressDialog = RequestDialog.create(this);
                 progressDialog.show();
                 CompressionBitMapTask.create(this, image_encode -> {
-                    user.getJSONObject(NetworkHelper.Constant.IMAGE).put(NetworkHelper.Constant.IMG_ENCODE, image_encode);
+                    user.getJSONObject(Constant.IMAGE).put(Constant.IMG_ENCODE, image_encode);
                     Log.d(TAG, "After compress : " + user.toString());
-                    NetworkHelper.HttpRequest.requestSignUp(this, user, progressDialog);
+                    HttpRequest.requestSignUp(this, user, progressDialog);
                 }).execute(bitmap);
 
                // SignUpTask.create(this, user).execute(bitmap);
             }
             else {
-                user.remove(NetworkHelper.Constant.IMAGE);
-                NetworkHelper.HttpRequest.requestSignUp(this, user, null);
+                user.remove(Constant.IMAGE);
+                HttpRequest.requestSignUp(this, user, null);
             }
 */
         } catch (JSONException je){
@@ -198,7 +198,8 @@ public class SignUpActivity extends CommonActivity
 
                             Bitmap bitmap = null;
                             if(!user.isNull(NetworkHelper.Constant.IMAGE)) {
-                                bitmap = BitmapFactory.decodeFile(ImageFileHelper.create(this).getPathTmpImage(user.getJSONObject(NetworkHelper.Constant.IMAGE).getString(NetworkHelper.Constant.NAME)));
+                                bitmap = BitmapFactory.decodeFile(ImageFileHelper.create(this)
+                                        .getPathTmpImage(user.getJSONObject(NetworkHelper.Constant.IMAGE).getString(NetworkHelper.Constant.NAME)));
                             }
                             if(bitmap!=null){
                                 CompressionBitMapTask.create(this, image_encode -> {

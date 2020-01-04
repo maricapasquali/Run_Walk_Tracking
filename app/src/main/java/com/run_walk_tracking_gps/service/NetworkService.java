@@ -72,7 +72,7 @@ public class NetworkService extends Service {
                     }
                     Log.e(TAG, data.toString());
                     if(intent.getAction()!=null){
-                        //NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data ,responseListener);
+                        //HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data ,responseListener);
                         NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data , serviceConnection);
                     }
                 } catch (JSONException e) {

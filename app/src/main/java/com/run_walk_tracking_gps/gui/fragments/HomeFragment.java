@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.ncorti.slidetoact.SlideToActView;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
@@ -250,6 +251,7 @@ public class HomeFragment extends Fragment
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+        ErrorQueue.getErrors(getContext());
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
        //SyncServiceHandler.create(getContext()).start();
 

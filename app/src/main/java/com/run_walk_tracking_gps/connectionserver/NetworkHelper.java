@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.connectionserver;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,7 +41,7 @@ import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.service.SyncServiceHandler;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.task.DecompressionEncodeImageTask;
-import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
+import com.run_walk_tracking_gps.utilities.AppUtilities;
 import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONArray;
@@ -59,7 +57,7 @@ import java.util.stream.StreamSupport;
 
 public class NetworkHelper {
 
-    private static final String TAG = NetworkHelper.class.getName();
+    static final String TAG = NetworkHelper.class.getName();
 
     public static class Constant{
         public static final String ERROR = "Error";
@@ -336,40 +334,26 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DELETE, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
-        private static boolean sync(Context activity, OnUpdateGuiListener onUpdateGuiListener) throws InternetNoAvailableException {
+        private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
             try{
-
-                @SuppressLint("HardwareIds")
-                String mac = CryptographicHashFunctions.md5(
-                        ((WifiManager)activity.getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getMacAddress());
-                JSONObject bodyJson = DefaultPreferencesUser.getSession(activity).put(Constant.DEVICE, mac);
+                JSONObject bodyJson = DefaultPreferencesUser.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
                 check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSync());
-                return requestJsonPostToServerVolleyWithoutProgressBar(activity, SYNC, bodyJson, HttpResponse.onResponseSync(activity, onUpdateGuiListener));
+                return requestJsonPostToServerVolleyWithoutProgressBar(context, SYNC, bodyJson, HttpResponse.onResponseSync(context, onUpdateGuiListener));
             }catch (JSONException e) {
                 e.printStackTrace();
-            }
-            return false;
-        }
-
-        public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
-            try {
-                return sync(context, onUpdateGuiListener);
-            } catch (InternetNoAvailableException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        public static boolean syncInForeground(Activity activity, OnUpdateGuiListener onUpdateGuiListener) {
-            try {
-                return sync(activity, onUpdateGuiListener);
-            } catch (InternetNoAvailableException e) {
+            }catch (InternetNoAvailableException e){
                 e.alert();
             }
             return false;
         }
 
+        public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
+            return sync(context, onUpdateGuiListener);
+        }
 
+        public static boolean syncInForeground(Activity activity, OnUpdateGuiListener onUpdateGuiListener) {
+            return sync(activity, onUpdateGuiListener);
+        }
 
         private static boolean requestUpdateAll(Context context, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
                 throws NullPointerException, InternetNoAvailableException, JSONException, IllegalArgumentException {
@@ -641,6 +625,7 @@ public class NetworkHelper {
         }
     }
 
+
     static class HttpResponse{
 
         public static class Code {
@@ -827,7 +812,7 @@ public class NetworkHelper {
                         }
                         SqlLiteSettingsDao.create(activity).insert(data.getJSONObject(NetworkHelper.Constant.SETTINGS));
                         SqlLiteStatisticsDao.createWeightDao(activity).insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS).getJSONObject(0));
-                        SyncServiceHandler.createDelayed(activity);
+                        SyncServiceHandler.create(activity).start();
                         activity.startActivity(new Intent(activity, ApplicationActivity.class));
                         activity.finish();
                     } catch (JSONException e) {
@@ -855,7 +840,7 @@ public class NetworkHelper {
 
                         // REQUEST SYNC
                         NetworkHelper.HttpRequest.syncInForeground(activity, () -> {
-                            SyncServiceHandler.createDelayed(activity);
+                            SyncServiceHandler.create(activity).start();
                             activity.startActivity(new Intent(activity, ApplicationActivity.class));
                             activity.finish();
                         });

@@ -40,7 +40,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 // TODO: 12/26/2019 REQUEST SYNC
 
                 NetworkHelper.HttpRequest.syncInForeground(this, () -> {
-                    SyncServiceHandler.createDelayed(this);
+                    SyncServiceHandler.create(this).start();
                     startActivity(new Intent(SplashScreenActivity.this, ApplicationActivity.class));
                     finish();
                 });

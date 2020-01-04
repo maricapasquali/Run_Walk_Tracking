@@ -47,7 +47,7 @@ public class DefaultPreferencesUser {
     public static void setSession(Context context, JSONObject s) {
         final SharedPreferences session = getSharedPreferencesSession(context);
         session.edit()
-                //.putString(NetworkHelper.Constant.DEVICE, s.optString(NetworkHelper.Constant.DEVICE))
+                //.putString(Constant.DEVICE, s.optString(Constant.DEVICE))
                 .putString(NetworkHelper.Constant.TOKEN, s.optString(NetworkHelper.Constant.TOKEN))
                 .putLong(NetworkHelper.Constant.LAST_UPDATE, s.optLong(NetworkHelper.Constant.LAST_UPDATE))
                 .putInt(NetworkHelper.Constant.ID_USER, s.optInt(NetworkHelper.Constant.ID_USER))

@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.WorkoutsFilterAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.FilterAdapterSpinner;
@@ -155,6 +156,7 @@ public class WorkoutsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "OnResume");
+        ErrorQueue.getErrors(getContext());
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
         //SyncServiceHandler.create(getContext()).start();
 

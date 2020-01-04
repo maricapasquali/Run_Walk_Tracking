@@ -138,8 +138,8 @@
     <string name="delete_weight_mex">Are you sure you want to remove this weight?</string>
     <string name="delete_workout_mex">Are you sure you want to delete this workout?</string>
     <string name="correctly_sign_up">Registration successful! You will receive an email with a code.</string>
-
-    <string name="check_code_text">" Enter the account activation code that was emailed to you."</string>
+    <string name="account_use_other_device">Account in use on another device.</string>
+    <string name="check_code_text">Enter the account activation code that was emailed to you.</string>
 
     <!-- Messaggi di errore -->
     <string name="error">Error</string>
@@ -153,6 +153,7 @@
     <string name="end_compression_image">Finished Image Compression</string>
     <string name="internet_not_available_title">Mobile Data is Turned Off</string>
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
+    <string name="token_not_valid">Invalid Token</string>
 
 
 
@@ -187,8 +188,10 @@
     <string name="unit_min" translatable="false">min</string>
 
 
+    <string name="logout" translatable="false">Logout</string>
     <!-- Language Code -->
     <string name="it_code" translatable="false">it</string>
     <string name="en_code" translatable="false">en</string>
     <string name="es_code" translatable="false">es</string>
+
 </resources>

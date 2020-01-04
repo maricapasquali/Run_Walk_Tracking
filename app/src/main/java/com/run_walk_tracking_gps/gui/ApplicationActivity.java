@@ -104,18 +104,6 @@ public class ApplicationActivity extends CommonActivity
         });
     }
 
-    /*@Override
-    protected void onResume() {
-        super.onResume();
-        // TODO: 12/29/2019 REQUEST SYNC onResume per ogni fragment (non activity)
-        try {
-            NetworkHelper.HttpRequest.sync(this, null);
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     @Override
     protected void onNewIntent(Intent intent) {

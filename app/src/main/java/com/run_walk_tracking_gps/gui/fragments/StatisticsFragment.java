@@ -18,6 +18,7 @@ import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
 
+import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
@@ -160,6 +161,7 @@ public class StatisticsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "OnResume");
+        ErrorQueue.getErrors(getContext());
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME 
         //SyncServiceHandler.create(getContext()).start();
 
