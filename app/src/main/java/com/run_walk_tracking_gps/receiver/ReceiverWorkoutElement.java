@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.NotificationWorkout;
+import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.service.WorkoutService;
 
 
@@ -60,6 +61,7 @@ public class ReceiverWorkoutElement extends BroadcastReceiver {
                         final String distanceInKm = intent.getStringExtra(KeysIntent.DISTANCE);
                         final String energyInKcal  = intent.getStringExtra(KeysIntent.ENERGY) ;
                         Log.d(TAG, "Distance (km) = " + distanceInKm + ", Energy (kcal) = "+energyInKcal );
+
                         broadcastReceiver.onReceiverEnergy(energyInKcal);
                         broadcastReceiver.onReceiverDistance(distanceInKm);
 

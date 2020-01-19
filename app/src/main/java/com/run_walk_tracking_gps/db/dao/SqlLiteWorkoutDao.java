@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.DataBaseUtilities;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
@@ -43,7 +43,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
     public JSONArray getAll() {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         Cursor c = db.query(WorkoutDescriptor.TABLE_WORKOUT, null,
-                UserDescriptor.ID_USER+"=?", new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))},
+                UserDescriptor.ID_USER+"=?", new String[]{String.valueOf(Preferences.Session.getIdUser(context))},
                 null , null , null);
         JSONArray workouts = DataBaseUtilities.getJSONArrayByCursor(c, WorkoutDescriptor::from);
         db.close();
@@ -57,7 +57,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         try {
 
             db.beginTransaction();
-            int id_user = DefaultPreferencesUser.getIdUser(context);
+            int id_user = Preferences.Session.getIdUser(context);
 
             id_workout = insertOne(db, workout, id_user);
             if(id_workout==-1)
@@ -110,7 +110,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         try {
 
             db.beginTransaction();
-            int id_user = DefaultPreferencesUser.getIdUser(context);
+            int id_user = Preferences.Session.getIdUser(context);
 
             for (int i = 0; i <workouts.length(); i++){
                 success = (insertOne(db, workouts.getJSONObject(i), id_user)!=-1);
@@ -136,7 +136,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         boolean success = false;
         try {
             db.beginTransaction();
-            int id_user = DefaultPreferencesUser.getIdUser(context);
+            int id_user = Preferences.Session.getIdUser(context);
 
             db.delete(WorkoutDescriptor.TABLE_WORKOUT, UserDescriptor.ID_USER + "=?",
                     new String[]{String.valueOf(id_user)});
@@ -177,7 +177,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
 
         Map<String, String> whereCondition = new HashMap<>();
         whereCondition.put(WorkoutDescriptor.ID_WORKOUT, String.valueOf(workout.getString(WorkoutDescriptor.ID_WORKOUT)));
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
 
         return DataBaseUtilities.update(daoFactory.getWritableDatabase(), WorkoutDescriptor.TABLE_WORKOUT, workoutContentValues, whereCondition);
     }
@@ -186,7 +186,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
     public boolean delete(int id) {
         Map<String, String> whereCondition = new HashMap<>();
         whereCondition.put(WorkoutDescriptor.ID_WORKOUT, String.valueOf(id));
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
         return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), WorkoutDescriptor.TABLE_WORKOUT, whereCondition);
     }
 }

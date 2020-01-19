@@ -5,13 +5,11 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -128,72 +126,11 @@ public class ImageFileHelper {
         int max = codeAlphabet.length(); // edited
         Random random = new Random();
 
-        for (int i=0; i< max; i++){
+        for (int i=0; i< length; i++){
             int r = random.nextInt(max);
             token.append(codeAlphabet.charAt(r));
         }
         return token.toString();
-    }
-
-
-    // non servono
-
-    private String getNameImage() {
-        return DefaultPreferencesUser.getIdUser(context) + ".jpg";
-        //.getSession(this).getString(Constant.TOKEN)+".jpg";
-    }
-
-    public File getImage() {
-        return getImage(getNameImage());
-    }
-
-    public File getImageTmp() {
-        return getImageTmp(getNameImage());
-    }
-
-    public String getPathImage() {
-        return getPathImage(getNameImage());
-    }
-
-    public String getPathTmpImage() {
-        return getPathTmpImage(getNameImage());
-    }
-
-    public void loadImage(ImageView container){
-        File image = getImage();
-        Log.e(TAG, "Image : " +image);
-        if(image.exists()) load(container, image);
-    }
-
-    public void loadTmp(ImageView container){
-        File image = getImageTmp();
-        Log.e(TAG, "ImageTmp : " +image);
-        if(image.exists()) load(container, image);
-    }
-
-    public void moveToTmpDir(Uri imageUri, ImageView container){
-        final File pathTmpImage = getImageTmp();
-        File oldImage = new File(imageUri.getPath());
-
-        if(FileUtilities.move(oldImage, pathTmpImage.getPath()))
-            Glide.with(context).load(pathTmpImage.getPath())
-                               .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                          .skipMemoryCache(true))
-                               .into(container);
-
-
-    }
-
-    public boolean moveToImageDir(){
-        final File pathImage = getImage();
-        File oldImage = getImageTmp();
-        return FileUtilities.move(oldImage, pathImage.getPath());
-    }
-
-    public boolean moveToTmpDir(Uri imageUri){
-        final File pathTmpImage = getImageTmp();
-        File oldImage = new File(imageUri.getPath());
-        return FileUtilities.move(oldImage, pathTmpImage.getPath());
     }
 
 }

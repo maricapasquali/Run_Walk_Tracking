@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -9,7 +11,7 @@ import android.widget.EditText;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
@@ -100,11 +102,12 @@ public class ChangePasswordActivity extends CommonActivity
         return isCheck;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void saveChangedPassword(final String new_hash){
         try {
             final JSONObject bodyJson = new JSONObject()
                     .put(NetworkHelper.Constant.TOKEN,
-                            DefaultPreferencesUser.getSession(this).getString(NetworkHelper.Constant.TOKEN))
+                            Preferences.Session.getSession(this).getString(NetworkHelper.Constant.TOKEN))
                     .put(NetworkHelper.Constant.USERNAME, username.getText())
                     .put(NetworkHelper.Constant.OLD_PASSWORD, CryptographicHashFunctions.md5(old_password.getText().toString()))
                     .put(NetworkHelper.Constant.NEW_PASSWORD, new_hash);

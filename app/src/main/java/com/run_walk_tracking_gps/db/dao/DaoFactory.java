@@ -12,8 +12,8 @@ import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 
 public class DaoFactory extends SQLiteOpenHelper {
     private static DaoFactory DaoFactoryInstance = null;
-    public static final String DB_NAME = "RUN_WALK_TRACKING_DB.db";
-    public static final int DB_VERSION = 1;
+    private static final String DB_NAME = "RUN_WALK_TRACKING_DB.db";
+    private static final int DB_VERSION = 1;
 
     /*
         perchè syncronized? cosa succede se accedo all'istanza da diversi flussi di controllo?

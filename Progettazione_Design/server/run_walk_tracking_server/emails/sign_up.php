@@ -1,10 +1,9 @@
 <?php
   require_once('../utility.php');
-  require_once("../exception/Exceptions.php");
   if(!isset($_GET[ID])) die(json_errors(new UrlExeception()));
   require_once('../dao/UserDao.php');
   try{
-    $user = UserDao::getUserForId($_GET[ID]);
+    $user = UserDao::instance()->getUserForId($_GET[ID]);
 
     $date = new DateTime($user[BIRTH_DATE]);
   }catch(Exception $e){

@@ -1,20 +1,31 @@
 <?php
 require_once("DaoFactory.php");
 
-class SettingsDao{
+class SettingsDao implements ISettingsDao{
+
+  private $daoFactory;
+  public function __construct(){
+      $this->daoFactory = DaoFactory::instance();
+  }
+
+  private static $instance;
+  public static function instance(){
+    if(self::$instance==null) self::$instance = new self();
+    return self::$instance;
+  }
   /**
   * Settings
   */
-  static function getAllForUser($id_user){
+  public function getAllForUser($id_user){
 
-    if(connect()){
+    if($this->daoFactory->connect()){
 
       $sport = self::getDefault(SPORT, $id_user);
       $target = self::getDefault(TARGET, $id_user);
 
       $unit_measure = self::getUnitMeaureDefaultForUser($id_user);
     }
-    closeConnection();
+    $this->daoFactory->closeConnection();
     return array(SPORT=>$sport[SPORT],
                  TARGET=>$target[TARGET],
                  UNIT_MEASURE => $unit_measure);
@@ -22,121 +33,182 @@ class SettingsDao{
 
   private function getUnitMeaureDefaultForUser($id_user){
 
-    $stmt = getConnection()->prepare("SELECT energy, distance, weight, height FROM unit_measure_default WHERE id_user=?;");
-    if(!$stmt) throw new Exception("unit measure : Preparazione fallita. Errore: ". getErrorConnection());
+    if($this->daoFactory->selection(function() use ($id_user, &$unit){
+      $stmt = $this->daoFactory->getConnection()->prepare("SELECT energy, distance, weight, height FROM unit_measure_default WHERE id_user=?;");
+      if(!$stmt) throw new Exception("unit measure : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+      $stmt->bind_param("i", $id_user);
+      if(!$stmt->execute()) throw new Exception("unit measure : Inserimento fallito. Errore: ". $this->daoFactory->getErrorConnection());
+      $result = $stmt->get_result();
+      $unit = $result->fetch_assoc();
+      $stmt->close();
+    }))
+    {
+      return $unit;
+    }
+    /*
+    $stmt = $this->daoFactory->getConnection()->prepare("SELECT energy, distance, weight, height FROM unit_measure_default WHERE id_user=?;");
+    if(!$stmt) throw new Exception("unit measure : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
     $stmt->bind_param("i", $id_user);
-    if(!$stmt->execute()) throw new Exception("unit measure : Inserimento fallito. Errore: ". getErrorConnection());
+    if(!$stmt->execute()) throw new Exception("unit measure : Inserimento fallito. Errore: ". $this->daoFactory->getErrorConnection());
     $result = $stmt->get_result();
     $unit = $result->fetch_assoc();
     $stmt->close();
     return $unit;
+    */
   }
 
   private function getDefault($type, $id_user){
 
+    if($this->daoFactory->selection(function() use ($type, $id_user, &$def){
+      $stmt = $this->daoFactory->getConnection()->prepare("SELECT $type FROM ".$type."_default WHERE id_user=?");
+      if(!$stmt) throw new Exception("default $type : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+      $stmt->bind_param("i", $id_user);
+      if(!$stmt->execute()) throw new Exception("default $type: Inserimento fallito. Errore: ". $this->daoFactory->getErrorConnection());
+      $result = $stmt->get_result();
+      $def = $result->fetch_assoc();
+      $stmt->close();
+    }))
+    {
+      return $def;
+    }
+    /*
     $sql =  "SELECT $type FROM ".$type."_default WHERE id_user=?;";
-    $stmt = getConnection()->prepare($sql);
-    if(!$stmt) throw new Exception("default $type : Preparazione fallita. Errore: ". getErrorConnection());
+    $stmt = $this->daoFactory->getConnection()->prepare($sql);
+    if(!$stmt) throw new Exception("default $type : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
     $stmt->bind_param("i", $id_user);
-    if(!$stmt->execute()) throw new Exception("default $type: Inserimento fallito. Errore: ". getErrorConnection());
+    if(!$stmt->execute()) throw new Exception("default $type: Inserimento fallito. Errore: ". $this->daoFactory->getErrorConnection());
     $result = $stmt->get_result();
     $def = $result->fetch_assoc();
     $stmt->close();
     return $def;
+    */
   }
 
   /**
   * Update Settings
   */
-  static function updateSportFor($sport, $id_user){
+  public function updateSportFor($sport, $id_user){
     return self::updateDeafult(SPORT, $sport, $id_user);
   }
 
-  static function updateTargetFor($target, $id_user){
+  public function updateTargetFor($target, $id_user){
     return self::updateDeafult(TARGET, $target, $id_user);
   }
 
-  static function updateUnitHeightFor($height, $id_user){
+  public function updateUnitHeightFor($height, $id_user){
 
     return self::updateUnitMeasure(HEIGHT, $height, $id_user);
   }
 
-  static function updateUnitWeightFor($weight, $id_user){
+  public function updateUnitWeightFor($weight, $id_user){
     return self::updateUnitMeasure(WEIGHT, $weight, $id_user);
   }
 
-  static function updateUnitDistanceFor($distance, $id_user){
+  public function updateUnitDistanceFor($distance, $id_user){
     return self::updateUnitMeasure(DISTANCE, $distance, $id_user);
   }
 
-  static function updateUnits($unit_measure, $id_user){
-    try {
-      if(connect())
-      {
-        startTransaction();
+  public function updateUnits($unit_measure, $id_user){
 
-        $stmt = getConnection()->prepare("UPDATE unit_measure_default SET distance=? , weight=? , height=? WHERE id_user=?");
-        if(!$stmt) throw new Exception("Units update : Preparazione fallita. Errore: ". getErrorConnection());
+    return $this->daoFactory->transaction(function() use ($unit_measure, $id_user){
+          $stmt = $this->daoFactory->getConnection()->prepare("UPDATE unit_measure_default SET distance=? , weight=? , height=? WHERE id_user=?");
+          if(!$stmt) throw new Exception("Units update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->bind_param("sssi" , $unit_measure[DISTANCE], $unit_measure[WEIGHT], $unit_measure[HEIGHT], $id_user);
+          if(!$stmt->execute()) throw new Exception("Units : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->close();
+    });
+
+    /*
+    try {
+      if($this->daoFactory->connect())
+      {
+        $this->daoFactory->startTransaction();
+
+        $stmt = $this->daoFactory->getConnection()->prepare("UPDATE unit_measure_default SET distance=? , weight=? , height=? WHERE id_user=?");
+        if(!$stmt) throw new Exception("Units update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
         $stmt->bind_param("sssi" , $unit_measure[DISTANCE], $unit_measure[WEIGHT], $unit_measure[HEIGHT], $id_user);
-        if(!$stmt->execute()) throw new Exception("Units : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->execute()) throw new Exception("Units : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
         if(!$stmt->affected_rows) return;
         $stmt->close();
 
-        commitTransaction();
+        $this->daoFactory->commitTransaction();
       }
     }catch (Exception $e) {
-      rollbackTransaction();
-      throw new Exception($e->getMessage());
+      $this->daoFactory->rollbackTransaction();
+      throw $e;
     }
-    closeConnection();
+    $this->daoFactory->closeConnection();
     return true;
+    */
   }
 
   private function updateDeafult($type, $val, $id_user){
+
+    return $this->daoFactory->transaction(function() use ($type, $val, $id_user){
+          $stmt = $this->daoFactory->getConnection()->prepare("UPDATE ".$type."_default SET $type=? WHERE id_user=?");
+          if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->bind_param("si" , $val, $id_user);
+          if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->close();
+    });
+
+    /*
     try {
-      if(connect())
+      if($this->daoFactory->connect())
       {
-        startTransaction();
+        $this->daoFactory->startTransaction();
         $sql = "UPDATE ".$type."_default SET $type=? WHERE id_user=?";
-        $stmt = getConnection()->prepare($sql);
-        if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
+        $stmt = $this->daoFactory->getConnection()->prepare($sql);
+        if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
         $stmt->bind_param("si" , $val, $id_user);
-        if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
         if(!$stmt->affected_rows) return;
         $stmt->close();
 
-        commitTransaction();
+        $this->daoFactory->commitTransaction();
 
       }
     }catch (Exception $e) {
-      rollbackTransaction();
-      throw new Exception($e->getMessage());
+      $this->daoFactory->rollbackTransaction();
+      throw $e;
     }
-    closeConnection();
+    $this->daoFactory->closeConnection();
     return true;
+    */
   }
 
   private function updateUnitMeasure($type, $id_unit, $id_user){
-    try {
-      if(connect())
-      {
-        startTransaction();
+    
+    return $this->daoFactory->transaction(function() use ($type, $id_unit, $id_user){
+          $stmt = $this->daoFactory->getConnection()->prepare("UPDATE unit_measure_default SET $type=? WHERE id_user=?");
+          if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->bind_param("si" , $id_unit, $id_user);
+          if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->close();
+    });
 
-        $stmt = getConnection()->prepare("UPDATE unit_measure_default SET $type=? WHERE id_user=?");
-        if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". getErrorConnection());
+    /*
+    try {
+      if($this->daoFactory->connect())
+      {
+        $this->daoFactory->startTransaction();
+
+        $stmt = $this->daoFactory->getConnection()->prepare("UPDATE unit_measure_default SET $type=? WHERE id_user=?");
+        if(!$stmt) throw new Exception("$type update : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
         $stmt->bind_param("si" , $id_unit, $id_user);
-        if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". getErrorConnection());
+        if(!$stmt->execute()) throw new Exception("$type : Update fallito. Errore: ". $this->daoFactory->getErrorConnection());
         if(!$stmt->affected_rows) return;
         $stmt->close();
 
-        commitTransaction();
+        $this->daoFactory->commitTransaction();
       }
     }catch (Exception $e) {
-      rollbackTransaction();
-      throw new Exception($e->getMessage());
+      $this->daoFactory->rollbackTransaction();
+      throw $e;
     }
-    closeConnection();
+    $this->daoFactory->closeConnection();
     return true;
+    */
   }
 
 }

@@ -3,12 +3,15 @@ package com.run_walk_tracking_gps.connectionserver;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,8 +27,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.controller.OnUpdateGuiListener;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteImageDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
@@ -36,13 +38,19 @@ import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.ApplicationActivity;
 import com.run_walk_tracking_gps.gui.ActivationAccountActivity;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
+import com.run_walk_tracking_gps.gui.LoginActivity;
+import com.run_walk_tracking_gps.gui.SplashScreenActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.RequestDialog;
+import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
+import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
+import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.service.SyncServiceHandler;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.task.DecompressionEncodeImageTask;
 import com.run_walk_tracking_gps.utilities.AppUtilities;
 import com.run_walk_tracking_gps.utilities.ImageFileHelper;
+import com.run_walk_tracking_gps.utilities.SessionUtilities;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +66,10 @@ import java.util.stream.StreamSupport;
 public class NetworkHelper {
 
     static final String TAG = NetworkHelper.class.getName();
+
+    public interface OnUpdateGuiListener {
+        void onChangeStateDB();
+    }
 
     public static class Constant{
         public static final String ERROR = "Error";
@@ -149,7 +161,7 @@ public class NetworkHelper {
         }
 
         private static List<String> fieldRequiredForSignIn(){
-            return Arrays.asList(USERNAME, PASSWORD);
+            return Arrays.asList(USERNAME, PASSWORD, DEVICE);
         }
 
         private static List<String> fieldRequiredForFirstSignIn(){
@@ -226,7 +238,7 @@ public class NetworkHelper {
         private static final String TAG = NetworkHelper.class.getName();
         private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
 
-        //private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
+        // private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
         // SERVER LOCALE
         private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
         //private static final String SERVER = "http://172.20.10.5/run_walk_tracking_server/";
@@ -237,8 +249,10 @@ public class NetworkHelper {
         private static final String UPDATE = SERVER + "update.php";
         private static final String DELETE = SERVER + "delete.php";
 
-        private static final String UPDATE_ALL= SERVER + "updateAll.php";
+        private static final String UPDATE_ALL = SERVER + "updateAll.php";
         private static final String SYNC = SERVER + "sync.php";
+
+        private static final String CONTINUE_HERE = SERVER + "continueHere.php";
 
         // ACCOUNT
         private static final String ACCOUNT = SERVER + "account/";
@@ -249,15 +263,12 @@ public class NetworkHelper {
         private static final String SIGN_IN = ACCOUNT + "signin.php";
         private static final String CHANGE_PASSWORD = ACCOUNT + "change_password.php";
 
-
         private static RequestQueue queue;
 
-        //public boolean requestCUD(String action, String filter, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
-        public boolean requestCUD(String action, String filter, JSONObject data, ServiceConnection serviceConnection)
+        public boolean requestCUD(String action, String filter, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
                 throws NullPointerException, JSONException {
             try {
                 if(action!=null){
-                    Response.Listener<JSONObject> responseJsonListener = HttpResponse.onResponseRequestCUD(context, action, serviceConnection);
                     switch (action){
                         case Constant.INSERT:
                             return insert(filter, data, responseJsonListener);
@@ -287,7 +298,6 @@ public class NetworkHelper {
                     check(data,  NetworkHelper.Constant.fieldRequiredForNewWeight());
                     break;
             }
-
             return requestJsonPostToServerVolleyWithoutProgressBar(context, INSERT, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
@@ -334,9 +344,31 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DELETE, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public static boolean requestContinueHere(AppCompatActivity activity) {
+            try {
+                JSONObject s = Preferences.Session.getSession(activity);
+
+                String sessionEncoded = SessionUtilities.getEncodedSession(Preferences.Session.getIdUser(activity),
+                                                                           s.getString(Constant.LAST_UPDATE),
+                                                                           s.getLong(Constant.LAST_UPDATE),
+                                                                           AppUtilities.id(activity));
+
+                final JSONObject session = new JSONObject().put(Constant.SESSION, sessionEncoded);
+
+                return requestJsonPostToServerVolleyWithoutProgressBar(activity, CONTINUE_HERE, session, HttpResponse.onResponseContinueHere(activity));
+            }catch (InternetNoAvailableException e){
+                e.alert();
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
             try{
-                JSONObject bodyJson = DefaultPreferencesUser.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
+                JSONObject bodyJson = Preferences.Session.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
                 check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSync());
                 return requestJsonPostToServerVolleyWithoutProgressBar(context, SYNC, bodyJson, HttpResponse.onResponseSync(context, onUpdateGuiListener));
             }catch (JSONException e) {
@@ -347,12 +379,14 @@ public class NetworkHelper {
             return false;
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
             return sync(context, onUpdateGuiListener);
         }
 
-        public static boolean syncInForeground(Activity activity, OnUpdateGuiListener onUpdateGuiListener) {
-            return sync(activity, onUpdateGuiListener);
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public static boolean syncInForeground(AppCompatActivity activity) {
+            return sync(activity, HttpResponse.onResponseSyncInForeground(activity));
         }
 
         private static boolean requestUpdateAll(Context context, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
@@ -403,9 +437,9 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, UPDATE_ALL, getBodyRequest(context, data),responseJsonListener);
         }
 
-
         // ACCOUNT
-        public static boolean request(Activity activity, String action , JSONObject bodyJson) {
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
             try {
                 switch (action){
                     case Constant.SIGN_UP:
@@ -436,7 +470,6 @@ public class NetworkHelper {
             }
             return false;
         }
-
 
         public static boolean requestSignUp(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException, JSONException {
@@ -473,30 +506,30 @@ public class NetworkHelper {
 
         private static boolean downloadImageProfile(Context context, JSONObject bodyJson) throws InternetNoAvailableException, JSONException {
             if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-            bodyJson.put(Constant.TOKEN, DefaultPreferencesUser.getSession(context).getString(Constant.TOKEN));
+            bodyJson.put(Constant.TOKEN, Preferences.Session.getSession(context).getString(Constant.TOKEN));
             check(bodyJson, NetworkHelper.Constant.fieldRequiredForDownloadImage());
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DOWNLOAD_IMAGE, bodyJson, HttpResponse.onResponseDownloadImageProfile(context));
         }
 
-        //private static boolean requestSignIn(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
-        private static boolean requestSignIn(Activity activity, JSONObject bodyJson)
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        private static boolean requestSignIn(AppCompatActivity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSignIn());
             //return requestJsonPostToServerVolleyWithProgressBar(context, SIGN_IN, bodyJson,responseJsonListener);
             return requestJsonPostToServerVolleyWithProgressBar(activity, SIGN_IN, bodyJson, HttpResponse.onResponseLogin(activity, bodyJson));
         }
 
-        //private static boolean requestFirstSignIn(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestFirstSignIn(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForFirstSignIn());
             //return requestJsonPostToServerVolleyWithProgressBar(context, FIRST_SIGN_IN, bodyJson,responseJsonListener);
-            return requestJsonPostToServerVolleyWithProgressBar(activity, FIRST_SIGN_IN, bodyJson, HttpResponse.onResponseFirstLogin(activity));
+            return requestJsonPostToServerVolleyWithProgressBar(activity, FIRST_SIGN_IN, bodyJson,
+                    HttpResponse.onResponseFirstLogin(activity));
         }
 
 
         private static boolean requestForgotPassword(Activity activity, JSONObject bodyJson)
-        //private static boolean requestForgotPassword(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson, NetworkHelper.Constant.fieldRequiredForForgotPassword());
             //return requestJsonPostToServerVolleyWithProgressBar(context, FORGOT_PASSWORD, bodyJson,responseJsonListener);
@@ -505,7 +538,6 @@ public class NetworkHelper {
         }
 
 
-        //private static boolean requestChangePassword(Activity context, JSONObject bodyJson, Response.Listener<JSONObject> responseJsonListener)
         private static boolean requestChangePassword(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForUpdatePassword());
@@ -521,12 +553,11 @@ public class NetworkHelper {
         }
 
 
-
 // UTILITIES ---------------------------
 
         private static JSONObject getBodyRequest(Context context, JSONObject data)
                 throws JSONException{
-            return DefaultPreferencesUser.getSession(context).put(Constant.DATA, data);
+            return Preferences.Session.getSession(context).put(Constant.DATA, data);
         }
 
         private static JSONObject getBodyRequest(Context context, String filter, JSONObject data)
@@ -578,7 +609,6 @@ public class NetworkHelper {
 
 
         // GENERAL
-
         private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method,
                                                                            final JSONObject bodyJson,
                                                                            final Response.Listener<JSONObject> listenerResponse)
@@ -613,7 +643,8 @@ public class NetworkHelper {
             final StringRequest jsonRequest = new CustomRequest(context, method, url, bodyJson, responseJsonListener);
             jsonRequest.setTag(bodyJson);
             // TODO: 12/5/2019 DA RIGUARDARE
-            jsonRequest.setRetryPolicy(new DefaultRetryPolicy(50000,3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            jsonRequest.setRetryPolicy(new DefaultRetryPolicy(50000,3,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             queue.add(jsonRequest);
         }
 
@@ -625,8 +656,7 @@ public class NetworkHelper {
         }
     }
 
-
-    static class HttpResponse{
+    static class HttpResponse {
 
         public static class Code {
 
@@ -641,6 +671,7 @@ public class NetworkHelper {
             }
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseSync(Context context, OnUpdateGuiListener onUpdateGuiListener){
             return response -> {
                 try {
@@ -649,17 +680,18 @@ public class NetworkHelper {
                     switch (state.getInt(NetworkHelper.Constant.CODE))
                     {
                         case Code.StateDBServer.CONSISTENT:
-                        {
-                            // TODO: UPDATE GUI
                            if(onUpdateGuiListener!=null) onUpdateGuiListener.onChangeStateDB();
-                        }
                         break;
                         case Code.StateDBServer.INCONSISTENT_RECEIVE_DATA: // not consistent ( receive data to server )
                         {
                             final JSONObject receivedData = state.getJSONObject(NetworkHelper.Constant.DATA);
-                            DefaultPreferencesUser.setSession(context, receivedData.getJSONObject(NetworkHelper.Constant.SESSION));
-                            Log.e(NetworkHelper.TAG, "User receive " + receivedData.getJSONObject(NetworkHelper.Constant.USER));
-                            final JSONObject user = receivedData.getJSONObject(NetworkHelper.Constant.USER);
+                            final JSONObject session = SessionUtilities.getDecodedSession(receivedData.getString(NetworkHelper.Constant.SESSION));
+
+                            Preferences.Session.setSession(context, session);
+
+                            final JSONObject user = receivedData.getJSONObject(NetworkHelper.Constant.USER)
+                                                                .put(Constant.ID_USER, session.getInt(Constant.ID_USER));
+                            Log.e(NetworkHelper.TAG, "User receive " + user);
                             if(!user.isNull(Constant.IMAGE)){
                                 final JSONObject image = user.getJSONObject(Constant.IMAGE);
 
@@ -674,10 +706,9 @@ public class NetworkHelper {
                             SqlLiteUserDao.create(context).insert(user);
                             SqlLiteSettingsDao.create(context).insert(receivedData.getJSONObject(NetworkHelper.Constant.SETTINGS));
                             SqlLiteWorkoutDao.create(context).replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WORKOUTS));
-                            SqlLiteStatisticsDao.createWeightDao(context).replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WEIGHTS));
-                            // TODO: UPDATE GUI
-                            // TODO: 1/1/2020 se immagine presente (<> device -> storage image into internal memory )
-                            if(onUpdateGuiListener!=null) onUpdateGuiListener.onChangeStateDB(); //.onNoConsistentInternalDB();
+                            SqlLiteStatisticsDao.SqlLiteWeightDao.create(context).replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WEIGHTS));
+                            // TODO: UPDATE GUI : se immagine presente (<> device -> storage image into internal memory )
+                            if(onUpdateGuiListener!=null) onUpdateGuiListener.onChangeStateDB();
                         }
                         break;
                         case Code.StateDBServer.INCONSISTENT_SEND_DATA: // not consistent ( send data to server )
@@ -693,10 +724,10 @@ public class NetworkHelper {
                             data.put(NetworkHelper.Constant.WEIGHTS, weights);
                             data.put(NetworkHelper.Constant.WORKOUTS, workouts);
 
-
                             final Bitmap img = userJson.isNull(Constant.IMAGE) ? null :
                                     BitmapFactory.decodeFile(
-                                            ImageFileHelper.create(context).getPathImage(userJson.getJSONObject(Constant.IMAGE).getString(ImageProfileDescriptor.NAME)));
+                                            ImageFileHelper.create(context).getPathImage(userJson.getJSONObject(Constant.IMAGE)
+                                                                           .getString(ImageProfileDescriptor.NAME)));
                             if(img==null)
                                 // TODO: UPDATE GUI
                                 HttpRequest.requestUpdateAll(context, data, responseUpdate-> {
@@ -741,13 +772,20 @@ public class NetworkHelper {
             };
         }
 
-        private static Response.Listener<JSONObject> onResponseRequestCUD(Context context, String action, ServiceConnection serviceConnection){
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        private static Response.Listener<JSONObject> onResponseContinueHere(AppCompatActivity activity) {
             return response -> {
-                Log.e(TAG, "Response after "+ action +" : "+ response.toString());
-                context.unbindService(serviceConnection);
+                try {
+                    JSONObject session = SessionUtilities.getDecodedSession(response.getString(Constant.SESSION));
+                    Preferences.Session.setSession(activity, session);
+                    Log.d(TAG, "Continue here");
+                    HttpRequest.syncInForeground(activity);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             };
         }
-
 
         private static Response.Listener<JSONObject> onResponseSignUp(Activity activity, JSONObject credential){
             return response ->{
@@ -784,34 +822,33 @@ public class NetworkHelper {
             };
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseFirstLogin(Activity activity) {
             return response -> {
                 if(response.has(NetworkHelper.Constant.SESSION) && response.has(NetworkHelper.Constant.DATA)){
                     try {
-
                         // SESSION TO SHAREDPREFERENCE
-                        DefaultPreferencesUser.setSession(activity, response.getJSONObject(NetworkHelper.Constant.SESSION));
+                        final JSONObject ss = SessionUtilities.getDecodedSession(response.getString(NetworkHelper.Constant.SESSION));
+                        Preferences.Session.setSession(activity, ss);
 
                         // DATA TO DATABASE
                         JSONObject data = response.getJSONObject(NetworkHelper.Constant.DATA);
-                        final  JSONObject user = data.getJSONObject(NetworkHelper.Constant.USER);
+                        final JSONObject user = data.getJSONObject(NetworkHelper.Constant.USER)
+                                                    .put(Constant.ID_USER, Preferences.Session.getIdUser(activity));
+
                         if(SqlLiteUserDao.create(activity).insert(user)){
-                            // TODO: 1/2/2020 DECOMPRESSIONE IMMAGINE E SALVATAGGIO IN image/
+                           // TODO: 1/2/2020 DECOMPRESSIONE IMMAGINE E SALVATAGGIO IN image/
                            if(!user.isNull(NetworkHelper.Constant.IMAGE)){
                                final JSONObject image = user.getJSONObject(NetworkHelper.Constant.IMAGE);
                                final String name = image.getString(ImageProfileDescriptor.NAME);
                                final String encode = image.getString(NetworkHelper.Constant.IMG_ENCODE);
                                DecompressionEncodeImageTask.create(activity, name).execute(encode);
                            }
-                    /*try {
-                         Bitmap bitmap = BitmapUtilities.StringToBitMap(encode);ImageFileHelper.create(this).storageImage(bitmap, name);7
-                     } catch (IOException e) {
-                          e.printStackTrace();
-                      }*/
-
                         }
                         SqlLiteSettingsDao.create(activity).insert(data.getJSONObject(NetworkHelper.Constant.SETTINGS));
-                        SqlLiteStatisticsDao.createWeightDao(activity).insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS).getJSONObject(0));
+                        SqlLiteStatisticsDao.SqlLiteWeightDao.create(activity)
+                                                             .insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS)
+                                                                         .getJSONObject(0));
                         SyncServiceHandler.create(activity).start();
                         activity.startActivity(new Intent(activity, ApplicationActivity.class));
                         activity.finish();
@@ -822,7 +859,8 @@ public class NetworkHelper {
             };
         }
 
-        private static Response.Listener<JSONObject> onResponseLogin(Activity activity, JSONObject credential){
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        private static Response.Listener<JSONObject> onResponseLogin(AppCompatActivity activity, JSONObject credential){
             return response ->{
                 try {
                     if(response.has(NetworkHelper.Constant.FIRST_LOGIN) && response.getBoolean(NetworkHelper.Constant.FIRST_LOGIN)){
@@ -835,21 +873,16 @@ public class NetworkHelper {
                     }else if(response.has(NetworkHelper.Constant.SESSION)){
                         // SESSION TO SHAREDPREFERENCE
 
-                        DefaultPreferencesUser.setSession(activity,
-                                response.getJSONObject(NetworkHelper.Constant.SESSION).put(NetworkHelper.Constant.LAST_UPDATE, 0));
+                        final JSONObject session = SessionUtilities.getDecodedSession(response.getString(NetworkHelper.Constant.SESSION));
+                        Preferences.Session.setSession(activity, session);
 
                         // REQUEST SYNC
-                        NetworkHelper.HttpRequest.syncInForeground(activity, () -> {
-                            SyncServiceHandler.create(activity).start();
-                            activity.startActivity(new Intent(activity, ApplicationActivity.class));
-                            activity.finish();
-                        });
+                        NetworkHelper.HttpRequest.syncInForeground(activity);
 
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             };
         }
 
@@ -889,11 +922,35 @@ public class NetworkHelper {
                     e.printStackTrace();
                 }
 
-                DefaultPreferencesUser.logout(activity);
+                Preferences.Session.logout(activity);
                 activity.startActivity(new Intent(activity, BootAppActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 activity.finish();
             };
         }
+
+        private static OnUpdateGuiListener onResponseSyncInForeground(AppCompatActivity activity){
+            return () -> {
+                // UPDATE GUI IF RECEIVED DATA ( INTO FRAGMENT WORKOUT OR STATISTICS )
+                if(activity instanceof SplashScreenActivity || activity instanceof LoginActivity){
+                    SyncServiceHandler.create(activity).start();
+                    activity.startActivity(new Intent(activity, ApplicationActivity.class));
+                    activity.finish();
+                }
+                final Fragment fragment = activity.getSupportFragmentManager().findFragmentByTag(ApplicationActivity.TAG);
+                if(fragment!=null){
+                   if(fragment instanceof WorkoutsFragment){
+                       ((WorkoutsFragment)fragment).onResume();
+                   }
+                   if(fragment instanceof StatisticsFragment){
+                       ((StatisticsFragment)fragment).onResume();
+                   }
+                   if(fragment instanceof HomeFragment){
+                       ((HomeFragment)fragment).onResume();
+                   }
+                }
+            };
+        }
+
     }
 
 }

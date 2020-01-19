@@ -59,8 +59,6 @@ public class ImageTest {
             Log.e(TAG, "Cartella non creata.");
         }
 
-        file = new File(directory.getParentFile(), imageFileHelper.getImage().getName());
-        Log.e(TAG, "File : "+file);
        /*Assert.assertTrue(imageFileHelper.moveToTmpDir(Uri.parse(file.getPath())));
         Assert.assertTrue(imageFileHelper.moveToImageDir());*/
 

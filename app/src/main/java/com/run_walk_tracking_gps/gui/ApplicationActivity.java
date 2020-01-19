@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
@@ -30,7 +31,7 @@ public class ApplicationActivity extends CommonActivity
                     HomeFragment.OnBlockScreenClickListener ,
                     StatisticsFragment.OnWeightListener{
 
-    private final static String TAG = ApplicationActivity.class.getName();
+    public final static String TAG = ApplicationActivity.class.getName();
     //private final static int REQUEST_SETTINGS = 1;
     private final static int REQUEST_CHANGED_DETAILS = 2;
     private final static int REQUEST_SUMMARY = 3;
@@ -43,11 +44,11 @@ public class ApplicationActivity extends CommonActivity
 
     private String restore = null;
 
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         Log.d(TAG,"init");
-
         setContentView(R.layout.activity_application);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.ic_runtracking_light);
@@ -66,8 +67,9 @@ public class ApplicationActivity extends CommonActivity
                 if(savedInstanceState==null)
                     selectActiveFragment(HomeFragment.class);
                 else
-                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG).getClass());
+                    setTitleAndLogoActionBar(getSupportFragmentManager().findFragmentByTag(TAG));
             }
+
         }
     }
 
@@ -75,6 +77,8 @@ public class ApplicationActivity extends CommonActivity
     protected void listenerAction() {
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setNavigationBarBottom(){
         navigationBarBottom = findViewById(R.id.nav_bar);
 
@@ -82,28 +86,36 @@ public class ApplicationActivity extends CommonActivity
             Log.d(TAG, "setOnNavigationItemSelectedListener");
             final int previousItem = navigationBarBottom.getSelectedItemId();
             final int nextItem = menuItem.getItemId();
-            //if(previousItem!=nextItem){
+
+            if(previousItem!=nextItem)
+            {
                 switch (menuItem.getItemId()) {
                     case R.id.workouts:
+
                         addFragment(new WorkoutsFragment(),false);
                         break;
                     case R.id.home:
                         Log.d(TAG, "Home: restore : " + restore);
+
                         addFragment(restore==null ?
                                     new HomeFragment() :
                                     HomeFragment.createWithArgument(restore),false);
                         break;
                     case R.id.statistics:
+
                         addFragment(new StatisticsFragment(), false);
                         break;
                     default:
                         return true;
                 }
-            //}
+            }
+            else
+            {
+                NetworkHelper.HttpRequest.syncInForeground(this);
+            }
             return true;
         });
     }
-
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -131,16 +143,16 @@ public class ApplicationActivity extends CommonActivity
     private void addFragment(final Fragment fragment, final boolean toStack) {
         super.addFragment(fragment, R.id.container_fragments_application, toStack, TAG);
 
-        setTitleAndLogoActionBar(fragment.getClass());
+        setTitleAndLogoActionBar(fragment);
         Log.d(TAG, "Add " + fragment.getClass().getSimpleName());
     }
 
-    private void setTitleAndLogoActionBar(final Class fragment_class) {
+    private void setTitleAndLogoActionBar(final Fragment fragment) {
         if(getSupportActionBar()!= null){
-            getSupportActionBar().setLogo(fragment_class==HomeFragment.class ? R.drawable.ic_runtracking_light : 0);
-            getSupportActionBar().setTitle("  " + getString(fragment_class==HomeFragment.class ? R.string.app_name :
-                    fragment_class==WorkoutsFragment.class? R.string.workouts :
-                            R.string.statistics));
+            getSupportActionBar().setLogo(fragment instanceof HomeFragment ? R.drawable.ic_runtracking_light : 0);
+            getSupportActionBar().setTitle("  " + getString(fragment instanceof HomeFragment ? R.string.app_name :
+                    fragment instanceof WorkoutsFragment? R.string.workouts : R.string.statistics));
+
         }
     }
 

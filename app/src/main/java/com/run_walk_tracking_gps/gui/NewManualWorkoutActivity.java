@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
@@ -112,7 +112,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
             if(!workout.isMinimalSet())
                 throw new DataException(this, Workout.class);
 
-            final JSONObject bodyJson = new JSONObject().put(UserDescriptor.ID_USER, DefaultPreferencesUser.getIdUser(this))
+            final JSONObject bodyJson = new JSONObject().put(UserDescriptor.ID_USER, Preferences.Session.getIdUser(this))
                                                         .put(WorkoutDescriptor.SPORT, workout.getSport())
                                                         .put(WorkoutDescriptor.DURATION, workout.getDuration().getValue(true))
                                                         .put(WorkoutDescriptor.DATE, workout.getUnixTime());
@@ -124,7 +124,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity implements 
 
             long id_workout = SqlLiteWorkoutDao.create(this).insert(bodyJson);
             if(id_workout!=-1){
-                DefaultPreferencesUser.update(this);
+                Preferences.Session.update(this);
 
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())

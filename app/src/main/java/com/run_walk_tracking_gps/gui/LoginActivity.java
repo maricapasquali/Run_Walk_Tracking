@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.utilities.AppUtilities;
 import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
@@ -46,20 +47,20 @@ public class LoginActivity extends CommonActivity
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void listenerAction() {
-        forgotPassword.setOnClickListener(v ->{
-            //Toast.makeText(this,getString(R.string.forgot_password) , Toast.LENGTH_LONG).show();
+        forgotPassword.setOnClickListener(v -> {
             final Intent intent = new Intent(this, ForgotPassword.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
         });
 
-        login.setOnClickListener(v ->{
+        login.setOnClickListener(v -> {
             if(check(username.getText(), password.getText())){
                 try {
                     hash_password = CryptographicHashFunctions.md5(password.getText().toString());
 
                     bodyJson = new JSONObject().put(NetworkHelper.Constant.USERNAME, username.getText().toString())
-                                               .put(NetworkHelper.Constant.PASSWORD, hash_password);
+                                               .put(NetworkHelper.Constant.PASSWORD, hash_password)
+                                               .put(NetworkHelper.Constant.DEVICE, AppUtilities.id(this));
 
                     NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.SIGN_IN, bodyJson);
 
@@ -75,58 +76,7 @@ public class LoginActivity extends CommonActivity
         super.onBackPressed();
         NetworkHelper.HttpRequest.cancelAllRequestPending(bodyJson);
     }
-    /*
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-            if(response.has(Constant.FIRST_LOGIN) && response.getBoolean(Constant.FIRST_LOGIN)){
-                final Intent intent = new Intent(this, TokenActivity.class);
-                intent.putExtra(KeysIntent.USERNAME, username.getText().toString());
-                intent.putExtra(KeysIntent.PASSWORD, hash_password);
-                startActivity(intent);
-                finish();
-            }else if(response.has(Constant.SESSION)){
-                // SESSION TO SHAREDPREFERENCE
 
-                DefaultPreferencesUser.setSession(this,
-                        response.getJSONObject(Constant.SESSION).put(Constant.LAST_UPDATE, 0));
-
-                // REQUEST SYNC
-                HttpRequest.getInstance(this).sync(new OnUpdateGuiListener() {
-                    @Override
-                    public void onChangeStateDB() {
-                        final Intent intent = new Intent(LoginActivity.this, ApplicationActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-
-
-                    @Override
-                    public void onConsistentInternalDB() {
-                    }
-
-                    @Override
-                    public void onNoConsistentInternalDB() {
-                        final Intent intent = new Intent(LoginActivity.this, ApplicationActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-
-                    @Override
-                    public void onNoConsistentServerDB() {
-                    }
-
-                });
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        catch (InternetNoAvailableException e) {
-            e.alert();
-        }
-    }
-*/
     private boolean check(Editable user, Editable pass){
         boolean isOk = true;
         if(TextUtils.isEmpty(user)){

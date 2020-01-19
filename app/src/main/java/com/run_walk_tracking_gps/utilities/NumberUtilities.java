@@ -17,4 +17,13 @@ public class NumberUtilities {
         return new BigDecimal(val).setScale(scale, RoundingMode.HALF_UP).doubleValue();
     }
 
+    public static Object cast(String strNum) {
+        double d = 0;
+        try {
+            d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return strNum;
+        }
+        return (int)d;
+    }
 }

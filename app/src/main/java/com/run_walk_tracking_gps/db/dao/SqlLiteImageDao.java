@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.DataBaseUtilities;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
@@ -40,7 +40,7 @@ public class SqlLiteImageDao implements ImageDao {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try(Cursor c = db.rawQuery("SELECT "+ImageProfileDescriptor.NAME+" FROM "+
                         ImageProfileDescriptor.TABLE_IMG +" WHERE "+ UserDescriptor.ID_USER+"=?",
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})){
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})){
             return (!c.moveToFirst()) ? null :ImageProfileDescriptor.from(c);
         }
     }
@@ -49,7 +49,7 @@ public class SqlLiteImageDao implements ImageDao {
     private boolean hasImage() {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try(Cursor c = db.rawQuery("SELECT * FROM "+ ImageProfileDescriptor.TABLE_IMG +" WHERE "+ UserDescriptor.ID_USER+"=?",
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})){
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})){
             return (c.moveToFirst()) && c.getCount() > 0;
         }
     }
@@ -61,8 +61,8 @@ public class SqlLiteImageDao implements ImageDao {
         imgContentValues.put(UserDescriptor.NAME, image.getString(UserDescriptor.NAME));
 
         Map<String, String> whereCondition = new HashMap<>();
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
-        imgContentValues.put(UserDescriptor.ID_USER, DefaultPreferencesUser.getIdUser(context));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
+        imgContentValues.put(UserDescriptor.ID_USER, Preferences.Session.getIdUser(context));
 
         success = DataBaseUtilities.replace(daoFactory.getWritableDatabase(), ImageProfileDescriptor.TABLE_IMG, imgContentValues);
         return success;
@@ -71,7 +71,7 @@ public class SqlLiteImageDao implements ImageDao {
     @Override
     public boolean delete() {
         Map<String, String> whereCondition = new HashMap<>();
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
         // TODO: 1/1/2020 ELIMINARE DA STOREAGE
         return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), ImageProfileDescriptor.TABLE_IMG, whereCondition);
     }

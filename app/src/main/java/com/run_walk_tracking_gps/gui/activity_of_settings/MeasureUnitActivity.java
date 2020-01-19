@@ -6,7 +6,7 @@ import android.widget.ListView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
@@ -60,7 +60,7 @@ public class MeasureUnitActivity extends CommonActivity implements MeasureAdapte
     public void onCheckNewMeasure(Measure.Type filter, Measure.Unit unit) {
         Log.d(TAG, "Filter = " + filter + ", value = " + unit);
         if(SqlLiteSettingsDao.create(this).update(filter, unit.toString())){
-            DefaultPreferencesUser.update(this);
+            Preferences.Session.update(this);
             try {
                 JSONObject data = new JSONObject().put(NetworkHelper.Constant.VALUE, unit.toString());
                 String filterNetwork = null;

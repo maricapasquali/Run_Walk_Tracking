@@ -120,6 +120,11 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".gui.activity_of_settings.VoiceCoachActivity"
+            android:parentActivityName=".gui.SettingActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name=".gui.activity_of_settings.ModifyUserActivity"
             android:screenOrientation="portrait" />
         <activity

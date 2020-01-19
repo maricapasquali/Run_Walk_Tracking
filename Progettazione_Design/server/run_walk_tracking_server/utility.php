@@ -83,10 +83,6 @@ define("UNIT_WEIGHT", "unit_weight");
 define("UNIT_HEIGHT", "unit_height");
 
 
-function bodyRequest(){
-  return json_decode(file_get_contents('php://input'), true);
-}
-
 function hashed_password($password){
   return password_hash($password, PASSWORD_BCRYPT);
 }
@@ -128,7 +124,6 @@ function sendEmail($to_email, $subject, $body){
      if (!$success)  throw new Exception(error_get_last()['message']);
 }
 
-
 function json_errors($ex) {
     return json_encode(array(ERROR=> array(CODE => $ex->getCode(), DESCRIPTION=> $ex->getMessage())));
 }
@@ -146,4 +141,6 @@ function getToken($length){
     return $token;
 }
 
+require_once("Exceptions.php");
+require_once("Request.php");
 ?>

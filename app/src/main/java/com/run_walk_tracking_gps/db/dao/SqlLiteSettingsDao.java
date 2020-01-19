@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.DataBaseUtilities;
 import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
@@ -50,7 +50,7 @@ public class SqlLiteSettingsDao implements SettingsDao {
     public JSONObject getUnitMeasureDefault() throws JSONException {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try (Cursor c = db.rawQuery(get(SettingsDescriptor.UnitMeasureDefault.TABLE_UNIT_MEASURE_DEFAULT),
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})) {
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             return (!c.moveToFirst()) ? null : SettingsDescriptor.UnitMeasureDefault.from(c);
         }
     }
@@ -59,7 +59,7 @@ public class SqlLiteSettingsDao implements SettingsDao {
     public String getSportDefault() {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try (Cursor c = db.rawQuery(get(SettingsDescriptor.SportDefault.TABLE_SPORT_DEFAULT),
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})) {
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             return (!c.moveToFirst()) ? null : c.getString(c.getColumnIndex(SettingsDescriptor.SportDefault.SPORT));
         }
     }
@@ -68,7 +68,7 @@ public class SqlLiteSettingsDao implements SettingsDao {
     public String getTargetDefault() {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try (Cursor c = db.rawQuery(get(SettingsDescriptor.TargetDefault.TABLE_TARGET_DEFAULT),
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})) {
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             return (!c.moveToFirst()) ? null : c.getString(c.getColumnIndex(SettingsDescriptor.TargetDefault.TARGET));
         }
     }
@@ -85,7 +85,7 @@ public class SqlLiteSettingsDao implements SettingsDao {
         try {
             db.beginTransaction();
 
-            int id_user = DefaultPreferencesUser.getIdUser(context);
+            int id_user = Preferences.Session.getIdUser(context);
 
             final ContentValues sportContentValues = new ContentValues();
             sportContentValues.put(UserDescriptor.ID_USER, id_user);
@@ -133,7 +133,7 @@ public class SqlLiteSettingsDao implements SettingsDao {
         final ContentValues contentValues = new ContentValues();
         final Map<String, String> whereCondition = new HashMap<>();
         String table = null;
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
         if(type instanceof Sport)
         {
             table = SettingsDescriptor.SportDefault.TABLE_SPORT_DEFAULT;

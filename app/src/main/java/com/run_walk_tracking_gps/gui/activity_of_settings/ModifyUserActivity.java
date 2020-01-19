@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 
 import com.myhexaville.smartimagepicker.ImagePicker;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
@@ -140,7 +140,7 @@ public class ModifyUserActivity extends CommonActivity {
             Log.d(TAG, user + ", count = "+ JSONUtilities.countKey(bodyJson));
 
             if(SqlLiteUserDao.create(this).update(bodyJson)){
-                DefaultPreferencesUser.update(this);
+                Preferences.Session.update(this);
                 imageFileHelper.moveToImageDir(user.getImage().getName());
                 if(oldUser.getImage()!=null && oldUser.getImage().exists()) oldUser.getImage().delete();
                 imageFileHelper.deleteTmpDir();

@@ -5,24 +5,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.VoiceCoachActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
@@ -49,7 +54,8 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout unit;
 
     private LinearLayout playlist;
-    private LinearLayout coach;
+    private TextView coach;
+    private Switch coachOnOff;
 
     private LinearLayout info;
     private LinearLayout exit;
@@ -79,7 +85,9 @@ public class SettingActivity extends CommonActivity {
         unit = findViewById(R.id.unit);
 
         playlist = findViewById(R.id.playlist);
-        coach = findViewById(R.id.voacal_coach);
+        coach = findViewById(R.id.setting_vocal);
+        coachOnOff = findViewById(R.id.setting_vocal_on_off);
+
 
         info = findViewById(R.id.info);
         exit = findViewById(R.id.exit);
@@ -91,6 +99,8 @@ public class SettingActivity extends CommonActivity {
             idStrTarget = Target.valueOf(SqlLiteSettingsDao.create(this).getTargetDefault()).getStrId();
             target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
 
+
+            coachOnOff.setChecked(VoiceCoach.create(this).isActive());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -102,6 +112,8 @@ public class SettingActivity extends CommonActivity {
         ErrorQueue.getErrors(this);
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
         //SyncServiceHandler.create(this).start();
+
+        coachOnOff.setChecked(VoiceCoach.create(this).isActive());
 
         if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
                 (!LocationUtilities.isGpsEnable(this) && locationOnOff.isChecked())){
@@ -127,10 +139,10 @@ public class SettingActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     private void onChangeSpinnerSelection(Enum type){
-        if( SqlLiteSettingsDao.create(this).update(type, type.toString())){
-            DefaultPreferencesUser.update(this);
+
+        if(SqlLiteSettingsDao.create(this).update(type, type.toString())){
+            Preferences.Session.update(this);
 
             try {
                 JSONObject data = new JSONObject().put(NetworkHelper.Constant.VALUE, type.toString());
@@ -187,7 +199,18 @@ public class SettingActivity extends CommonActivity {
 
         playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
 
-        coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
+
+        coach.setOnTouchListener((v, event) -> {
+            final LinearLayout parent = ((LinearLayout)((TextView)v).getParent());
+            if(event.getAction()==MotionEvent.ACTION_DOWN ||
+               event.getAction()==MotionEvent.ACTION_UP ||
+               event.getAction()==MotionEvent.ACTION_CANCEL  )
+                    parent.setPressed(!parent.isPressed());
+
+            return false;
+        });
+        coach.setOnClickListener(v -> startActivity(new Intent(this, VoiceCoachActivity.class)));
+        coachOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> VoiceCoach.create(this).setActive(isChecked));
 
         info.setOnClickListener(v -> startActivity(new Intent(this, InfoActivity.class)));
 
@@ -197,7 +220,7 @@ public class SettingActivity extends CommonActivity {
 
         exit.setOnClickListener(v -> {
             SyncServiceHandler.create(this).stop();
-            DefaultPreferencesUser.logout(this);
+            Preferences.Session.logout(this);
             startActivity(new Intent(this, BootAppActivity.class)
                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();

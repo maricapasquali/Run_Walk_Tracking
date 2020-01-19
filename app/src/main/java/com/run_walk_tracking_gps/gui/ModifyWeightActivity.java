@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
@@ -55,7 +55,7 @@ public class ModifyWeightActivity extends CommonActivity {
                 listView.setAdapter(adapter);
                 statisticsData = oldStatisticsData.clone();
             }
-            isLastWeight = SqlLiteStatisticsDao.createWeightDao(this).isOne();
+            isLastWeight = SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).isOne();
         }
     }
 
@@ -112,8 +112,8 @@ public class ModifyWeightActivity extends CommonActivity {
                             bodyJson.put(WeightDescriptor.DATE, statisticsData.getDateStrDB());
                         }
                         Log.e(TAG, bodyJson.toString());
-                        if(SqlLiteStatisticsDao.createWeightDao(this).update(bodyJson)) {
-                            DefaultPreferencesUser.update(this);
+                        if(SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).update(bodyJson)) {
+                            Preferences.Session.update(this);
 
                             NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
                                     NetworkHelper.Constant.WEIGHT, bodyJson.toString())
@@ -137,8 +137,8 @@ public class ModifyWeightActivity extends CommonActivity {
                     new AlertDialog.Builder(this)
                             .setMessage(R.string.delete_weight_mex)
                             .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                if(SqlLiteStatisticsDao.createWeightDao(this).delete(statisticsData.getId())){
-                                    DefaultPreferencesUser.update(this);
+                                if(SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).delete(statisticsData.getId())){
+                                    Preferences.Session.update(this);
 
 
                                     try {

@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
@@ -66,7 +66,7 @@ public class User implements Parcelable {
 
     public User(Context context, JSONObject userJson) throws JSONException {
         try {
-            id_user = DefaultPreferencesUser.getIdUser(context);
+            id_user = Preferences.Session.getIdUser(context);
             name = userJson.getString(UserDescriptor.NAME);
             last_name = userJson.getString(UserDescriptor.LAST_NAME);
             gender = Gender.valueOf(userJson.getString(UserDescriptor.GENDER));

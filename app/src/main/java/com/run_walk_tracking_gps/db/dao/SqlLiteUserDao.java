@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.DataBaseUtilities;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
@@ -44,7 +44,7 @@ public class SqlLiteUserDao implements UserDao {
         JSONObject user = null;
         SQLiteDatabase db = daoFactory.getReadableDatabase();
         try (Cursor c = db.rawQuery("SELECT * FROM "+UserDescriptor.TABLE_USER+" WHERE "+UserDescriptor.ID_USER+"=?",
-                new String[]{String.valueOf(DefaultPreferencesUser.getIdUser(context))})) {
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             user =  (!c.moveToFirst()) ? null : UserDescriptor.from(c);
         }
         final JSONObject image = SqlLiteImageDao.create(context).getImage();
@@ -94,7 +94,7 @@ public class SqlLiteUserDao implements UserDao {
             userContentValues.put(UserDescriptor.HEIGHT, user.getDouble(UserDescriptor.HEIGHT));
 
         Map<String, String> whereCondition = new HashMap<>();
-        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(DefaultPreferencesUser.getIdUser(context)));
+        whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
         boolean success = false;
         if(userContentValues.size()>0){
             success = DataBaseUtilities.update(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER,
@@ -111,7 +111,7 @@ public class SqlLiteUserDao implements UserDao {
 
     @Override
     public boolean delete() {
-        int id_user = DefaultPreferencesUser.getIdUser(context);
+        int id_user = Preferences.Session.getIdUser(context);
         Map<String, String> whereCondition = new HashMap<>();
         whereCondition.put(UserDescriptor.ID_USER, String.valueOf(id_user));
         return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER, whereCondition);

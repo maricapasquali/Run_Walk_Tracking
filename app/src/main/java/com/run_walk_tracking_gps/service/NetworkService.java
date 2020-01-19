@@ -72,8 +72,11 @@ public class NetworkService extends Service {
                     }
                     Log.e(TAG, data.toString());
                     if(intent.getAction()!=null){
-                        //HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data ,responseListener);
-                        NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data , serviceConnection);
+
+                        NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data , response -> {
+                            Log.e(TAG, "Response after "+ intent.getAction() +" : "+ response.toString());
+                            context.unbindService(serviceConnection);
+                        });
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

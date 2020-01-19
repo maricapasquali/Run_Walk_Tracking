@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -33,6 +35,7 @@ public class ForgotPassword extends CommonActivity
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void listenerAction() {
         request.setOnClickListener(v ->{

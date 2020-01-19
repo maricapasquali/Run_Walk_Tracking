@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
@@ -78,13 +78,13 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
                 throw new DataException(this, StatisticsData.class);
 
             final JSONObject bodyJson = new JSONObject()
-                    .put(UserDescriptor.ID_USER, DefaultPreferencesUser.getIdUser(this))
+                    .put(UserDescriptor.ID_USER, Preferences.Session.getIdUser(this))
                     .put(WeightDescriptor.VALUE, statisticsData.getValue())
                     .put(WeightDescriptor.DATE, statisticsData.getDateStrDB());
 
-            long id_weight = SqlLiteStatisticsDao.createWeightDao(this).insert(bodyJson);
+            long id_weight = SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).insert(bodyJson);
             if(id_weight!=-1){
-                DefaultPreferencesUser.update(this);
+                Preferences.Session.update(this);
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WEIGHT, bodyJson.put(WeightDescriptor.ID_WEIGHT, id_weight).toString())
                         .bindService();

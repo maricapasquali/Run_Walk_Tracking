@@ -8,12 +8,11 @@ import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.toolbox.StringRequest;
 
-
+import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.exception.BackgroundException;
 import com.run_walk_tracking_gps.exception.SomeErrorHttpException;
 import com.run_walk_tracking_gps.exception.TokenException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.run_walk_tracking_gps.connectionserver.NetworkHelper.Constant.ERROR;
@@ -25,15 +24,14 @@ public class CustomRequest extends StringRequest {
 
     private JSONObject bodyJson;
 
-    public CustomRequest(Context context, int method, String url, JSONObject bodyJson, Response.Listener<JSONObject>  responseJsonListener) {
+    CustomRequest(Context context, int method, String url, JSONObject bodyJson, Response.Listener<JSONObject>  responseJsonListener) {
         super(method, url, response -> {
             Log.d(TAG, "onResponse");
             try {
-                JSONObject JSONResponse = new JSONObject(response);
+                final JSONObject JSONResponse = new JSONObject(response);
                 Log.d(TAG, JSONResponse.toString());
-
-                if(JSONResponse.has(ERROR)){
-                    JSONObject error = JSONResponse.getJSONObject(ERROR);
+                if(JSONResponse.has(ERROR)) {
+                    final JSONObject error = JSONResponse.getJSONObject(ERROR);
                     switch (error.getInt(NetworkHelper.Constant.CODE)){
                         case NetworkHelper.HttpResponse.Code.Error.TOKEN_NOT_VALID:
                             throw new TokenException(context);
@@ -41,28 +39,22 @@ public class CustomRequest extends StringRequest {
                     throw new SomeErrorHttpException(context, error.getString(NetworkHelper.Constant.DESCRIPTION));
                 }
                 responseJsonListener.onResponse(JSONResponse);
-
-            } catch (JSONException | SomeErrorHttpException | TokenException e) {
-                Log.e(TAG, response);
-                BackgroundException ex;
-                if(e instanceof TokenException)
-                    ex = (TokenException) e;
-                else {
-                     ex = e instanceof SomeErrorHttpException ? (SomeErrorHttpException)e :
-                                            SomeErrorHttpException.create(context, response);
-                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error = " + e);
+                BackgroundException ex = e instanceof TokenException ? (TokenException) e :
+                                         e instanceof SomeErrorHttpException ? (SomeErrorHttpException)e : // error server
+                                                                                SomeErrorHttpException.create(context,
+                                                                                                              e.getMessage()); // error client
                 ex.alert();
-                //if(AppUtilities.isInForeground(context)) ex.alert();else ErrorQueue.getInstance(context).add(ex);
             }
-
         }, error -> {
             String errorHandler = null;
-            if(error instanceof TimeoutError){
-                errorHandler = "Ops ! Connessione lenta, riprova più tardi."; // TODO: 1/3/2020 MAKE A STRING FOR AL LANGUAGE
-            }
-            SomeErrorHttpException ex = SomeErrorHttpException.create(context, errorHandler==null ? error.toString(): errorHandler);
+            if(error instanceof TimeoutError)
+                errorHandler = context.getString(R.string.connection_slow);
+
+            SomeErrorHttpException ex =
+                    SomeErrorHttpException.create(context, errorHandler==null ? error.toString(): errorHandler);
             ex.alert();
-            //if(AppUtilities.isInForeground(context))ex.alert();else ErrorQueue.getInstance(context).add(ex);
         });
         this.bodyJson = bodyJson;
     }

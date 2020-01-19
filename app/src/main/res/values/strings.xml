@@ -65,7 +65,7 @@
     <string name="location">Location</string>
     <string name="measure_unit">Measure Unit</string>
     <string name="language">Language</string>
-    <string name="vocal_coach">Vocal Coach</string>
+    <string name="vocal_coach">Voice Coach</string>
     <string name="info">Information</string>
     <string name="exit">Exit</string>
 
@@ -121,6 +121,10 @@
     <string name="graphic_statistics">Graphic</string>
     <string name="nothing_value">No Value</string>
 
+    <!-- Vocal Coach -->
+    <string name="use_coach">Use voice coach</string>
+    <string name="interval">Interval (min)</string>
+
     <!-- Informazioni account -->
     <string name="info_description">
         <b>Supported languages</b>:\n
@@ -138,8 +142,9 @@
     <string name="delete_weight_mex">Are you sure you want to remove this weight?</string>
     <string name="delete_workout_mex">Are you sure you want to delete this workout?</string>
     <string name="correctly_sign_up">Registration successful! You will receive an email with a code.</string>
-    <string name="account_use_other_device">Account in use on another device.</string>
+    <string name="account_use_other_device">Account in use on another device. Continue here ?</string>
     <string name="check_code_text">Enter the account activation code that was emailed to you.</string>
+    <string name="continue_here">Continue here</string>
 
     <!-- Messaggi di errore -->
     <string name="error">Error</string>
@@ -153,8 +158,8 @@
     <string name="end_compression_image">Finished Image Compression</string>
     <string name="internet_not_available_title">Mobile Data is Turned Off</string>
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
-    <string name="token_not_valid">Invalid Token</string>
-
+    <string name="token_not_valid">Invalid Session</string>
+    <string name="connection_slow">Oops! Slow connection, try again later.</string>
 
 
     <!-- Da non TRADURRE -->
@@ -193,5 +198,6 @@
     <string name="it_code" translatable="false">it</string>
     <string name="en_code" translatable="false">en</string>
     <string name="es_code" translatable="false">es</string>
+
 
 </resources>

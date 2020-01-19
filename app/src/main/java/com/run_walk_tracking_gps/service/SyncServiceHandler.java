@@ -5,17 +5,22 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
 
 public class SyncServiceHandler {
+
     public static final String TAG = SyncServiceHandler.class.getName();
 
     private static final int START_SERVICE_REQUEST_CODE = 1000;
 
     private static SyncServiceHandler handler;
+
+    private static boolean isStarted = false;
 
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
@@ -27,7 +32,7 @@ public class SyncServiceHandler {
     }
 
     public static synchronized SyncServiceHandler create(Context context){
-        if(handler == null){
+        if(handler == null) {
             Log.e(TAG,"SYNC created!");
             handler = new SyncServiceHandler(context.getApplicationContext());
         }
@@ -35,21 +40,24 @@ public class SyncServiceHandler {
     }
 
     public void start(){
-        if(handler!=null){
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 60000, pendingIntent);
+        if(handler!=null && !isStarted) {
+            isStarted = true;
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                            60000, pendingIntent);
             Log.d(TAG, "Start SYNC!");
         }
     }
 
     public void stop(){
-        if(handler!=null){
+        if(handler!=null) {
+            isStarted = false;
             alarmManager.cancel(pendingIntent);
             Log.d(TAG, "Stop SYNC!");
         }
     }
 
     public static class RequestSyncBroadcastReceiver extends BroadcastReceiver {
-
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(SyncServiceHandler.TAG, "Richiesta Sync");
@@ -59,4 +67,5 @@ public class SyncServiceHandler {
             });
         }
     }
+
 }

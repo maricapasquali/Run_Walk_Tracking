@@ -4,20 +4,19 @@ require_once("../dao/SessionDao.php");
 require_once("../dao/UserDao.php");
 require_once("../dao/SettingsDao.php");
 require_once("../dao/WorkoutDao.php");
-require_once("../exception/Exceptions.php");
+
 try{
-  $userCredentials = bodyRequest();
+  //print json_encode(Request::getBody(SIGN_IN));
 
-  if(!isset($userCredentials[USERNAME]) ||
-     !isset($userCredentials[PASSWORD]) )
-      throw new UrlExeception();
+  $userCredentials = Request::getBody(SIGN_IN); 
 
-   $id_user = UserDao::checkSignIn($userCredentials[USERNAME], $userCredentials[PASSWORD]);
+   $id_user = UserDao::instance()->checkSignIn($userCredentials[USERNAME], $userCredentials[PASSWORD]);
 
-   $session = SessionDao::checkForIdUser($id_user);
+   $session = SessionDao::instance()->checkForIdUser($id_user);
 
-   $session = SessionDao::update($id_user);
+   $session = SessionDao::instance()->update($id_user);
    print json_encode(array(SESSION => $session));
+
 }
 catch(SessionTokenExeception $se){
   //FIRST_LOGIN

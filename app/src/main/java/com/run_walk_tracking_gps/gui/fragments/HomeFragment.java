@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,15 +20,18 @@ import android.widget.TextView;
 
 import com.ncorti.slidetoact.SlideToActView;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
+import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.MapRouteDraw;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
@@ -100,8 +104,10 @@ public class HomeFragment extends Fragment
         final Bundle bundle = getArguments();
         restore = (bundle == null ? null : bundle.getString(RESTORE));
 
-        serviceHandler = new WorkoutServiceHandler(getContext(), SqlLiteStatisticsDao.createWeightDao(getContext()).getLast(),
-                                                      restore == null ? null : this, this);
+        serviceHandler = new WorkoutServiceHandler(getContext(),
+                SqlLiteStatisticsDao.SqlLiteWeightDao.create(getContext()).getLast(),
+                restore == null ? null : this, this);
+
     }
 
     @SuppressLint("RestrictedApi")
@@ -143,6 +149,9 @@ public class HomeFragment extends Fragment
             sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
         } catch (JSONException e) {
             e.printStackTrace();
+        }catch (NullPointerException e){
+            Preferences.Session.logout(getContext());
+            getContext().startActivity(new Intent(getContext(), BootAppActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
     }
@@ -208,6 +217,7 @@ public class HomeFragment extends Fragment
         });
 
         restart.setOnClickListener(v -> {
+
             v.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
             block_screen.setVisibility(View.VISIBLE);
@@ -218,6 +228,7 @@ public class HomeFragment extends Fragment
 
         stop.setOnClickListener(v -> {
             // STOP SERVICE
+
             final Workout workout = serviceHandler.getWorkout();
             serviceHandler.stopService();
             onStopWorkoutClickListener.OnStopWorkoutClick(workout);
@@ -252,13 +263,11 @@ public class HomeFragment extends Fragment
         Log.d(TAG, "onResume");
         super.onResume();
         ErrorQueue.getErrors(getContext());
-        // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
-       //SyncServiceHandler.create(getContext()).start();
-
+        //TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
+        //SyncServiceHandler.create(getContext()).start();
+        setWorkoutRunning();
         setSport();
-
         setIndoor(!LocationUtilities.isGpsEnable(getContext()));
-
         if(getFragmentManager()!=null){
             if(getFragmentManager().findFragmentByTag(TAG) instanceof MapFragment &&
                     !LocationUtilities.isGpsEnable(getContext())){
@@ -299,6 +308,10 @@ public class HomeFragment extends Fragment
         info_workout.setVisibility(isIndoor ? View.GONE : View.VISIBLE);
         info_workout_numbers.setVisibility(isIndoor ? View.GONE : View.VISIBLE);
 
+        setWorkoutRunning();
+    }
+
+    private void setWorkoutRunning(){
         if(serviceHandler.isWorkoutRunning()){
             workout_duration.setText(serviceHandler.getWorkout().getDuration().toString(true));
             workout_distance.setText(serviceHandler.getWorkout().getDistance().toString(true) );

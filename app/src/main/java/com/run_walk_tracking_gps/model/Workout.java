@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
@@ -217,7 +217,7 @@ public class Workout implements Parcelable, Cloneable{
         map.put(Info.DATE, this.getDateStr());
         map.put(Info.SPORT, this.getSport());
         map.put(Info.TIME, this.getDuration().toString());
-        map.put(Info.DISTANCE,this.getDistance().toString() );
+        map.put(Info.DISTANCE, this.getDistance().toString() );
         map.put(Info.CALORIES, this.getCalories().toString());
         if(withMiddleSpeed) map.put(Info.MIDDLE_SPEED, this.getMiddleSpeed().toString());
         return map;
@@ -229,7 +229,7 @@ public class Workout implements Parcelable, Cloneable{
 
     public JSONObject toJson(Context context) throws JSONException {
         return new JSONObject()
-                .put(NetworkHelper.Constant.ID_USER, DefaultPreferencesUser.getIdUser(context))
+                .put(NetworkHelper.Constant.ID_USER, Preferences.Session.getIdUser(context))
                 .put(NetworkHelper.Constant.MAP_ROUTE, this.getMapRoute())
                 .put(NetworkHelper.Constant.DATE, this.getUnixTime())
                 .put(NetworkHelper.Constant.DURATION, this.getDuration().getValue(true))

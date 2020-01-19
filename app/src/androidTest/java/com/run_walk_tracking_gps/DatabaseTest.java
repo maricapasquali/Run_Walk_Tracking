@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
@@ -28,7 +28,7 @@ public class DatabaseTest {
     @Before
     public void insertUser1() throws JSONException {
         Assert.assertTrue(SqlLiteUserDao.create(context).delete());
-       DefaultPreferencesUser.setSession(context, new JSONObject(" {\n" +
+       Preferences.Session.setSession(context, new JSONObject(" {\n" +
                "    \"id_user\": 27,\n" +
                "    \"token\": \"kKC72gfy8h0HOUHJ1sdCrDzWvKfTsf7xfqGLCX6BnL0IdqdETudYZhfWSEytxu3iXYoj22hMO7ugKoirRoFC4NqIfcULnWq6qHY0\",\n" +
                "    \"last_update\": 1577387391\n" +
@@ -60,7 +60,7 @@ public class DatabaseTest {
                "    }"));
        Assert.assertTrue(result);
 
-       result = SqlLiteStatisticsDao.createWeightDao(context).replaceAll(new JSONArray(
+       result = SqlLiteStatisticsDao.SqlLiteWeightDao.create(context).replaceAll(new JSONArray(
                "[\n" +
                        "      {\n" +
                        "      \"id_weight\": 1,\n" +

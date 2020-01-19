@@ -1,13 +1,15 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.SyncServiceHandler;
 
@@ -21,6 +23,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onResume() {
         super.onResume();
@@ -36,14 +39,9 @@ public class SplashScreenActivity extends AppCompatActivity {
                     .setAction(getIntent().getAction()));
 
         }else{
-            if(DefaultPreferencesUser.isLogged(this)) {
+            if(Preferences.Session.isLogged(this)) {
                 // TODO: 12/26/2019 REQUEST SYNC
-
-                NetworkHelper.HttpRequest.syncInForeground(this, () -> {
-                    SyncServiceHandler.create(this).start();
-                    startActivity(new Intent(SplashScreenActivity.this, ApplicationActivity.class));
-                    finish();
-                });
+                NetworkHelper.HttpRequest.syncInForeground(this);
             } else {
                 startActivity(new Intent(SplashScreenActivity.this, BootAppActivity.class));
                 finish();

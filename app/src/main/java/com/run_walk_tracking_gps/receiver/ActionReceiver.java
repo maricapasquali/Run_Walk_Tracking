@@ -11,7 +11,4 @@ public class ActionReceiver{
     public static final String STOP_ACTION ="stop";
     public static final String RUNNING_WORKOUT = "running_workout";
 
-
-    public static final String SIGN_IN_ACTION = "sign_in";
-    public static final String RESUME_ACTION = "resume";
 }

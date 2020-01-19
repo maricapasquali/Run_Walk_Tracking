@@ -17,6 +17,7 @@ import android.util.Log;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
@@ -52,6 +53,8 @@ public class WorkoutService extends Service {
     private ReceiverWorkoutElement receiver;
     private NotificationWorkout notificationWorkout;
     private Workout workout;
+    /* VOCAL COACH*/
+    private VoiceCoach voiceCoach;
 
     /* MAP */
     private MapRouteDraw mapRouteDraw;
@@ -113,7 +116,14 @@ public class WorkoutService extends Service {
                 ++time;
                // Log.e(TAG, "Timer = " +time);
                 workout.getDuration().setValue(true, (double) time);
-                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(KeysIntent.SECONDS, Measure.Utilities.format(time)));
+
+                String timeFormat = workout.getDuration().toString(true);
+                /*voice coach*/
+                voiceCoach.speakIfIsActive(timeFormat,
+                                           workout.getDistance().toString(true),
+                                           workout.getCalories().toString(true));
+
+                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(KeysIntent.SECONDS, timeFormat));
             }
         }
     };
@@ -163,6 +173,10 @@ public class WorkoutService extends Service {
         /* timer */
         this.mTimer = new Timer();
         this.time = 0;
+
+        /*voice coach*/
+        voiceCoach = VoiceCoach.create(context);
+        voiceCoach.start();
     }
 
     @Override
@@ -180,7 +194,7 @@ public class WorkoutService extends Service {
         mTimer.scheduleAtFixedRate(timerTask, 0, TIMER_INTERVAL);
         /* map */
         mapRouteDraw.start();
-        return START_STICKY; //super.onStartCommand(intent, flags, startId);
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -205,6 +219,9 @@ public class WorkoutService extends Service {
 
         /* notification */
         notificationWorkout.stopClicked();
+
+        /*voice coach*/
+        voiceCoach.stop();
     }
 
     public Workout getWorkout() {
@@ -218,6 +235,7 @@ public class WorkoutService extends Service {
         isWorkoutServicePause = true;
         /* map */
         mapRouteDraw.pause();
+
         /* notification */
         notificationWorkout.pauseClicked();
     }
@@ -229,6 +247,7 @@ public class WorkoutService extends Service {
         firstTime = true;
         /* map */
         mapRouteDraw.start();
+
         /* notification */
         notificationWorkout.restartClicked();
     }

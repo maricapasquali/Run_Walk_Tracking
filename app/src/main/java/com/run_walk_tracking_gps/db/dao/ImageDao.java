@@ -6,8 +6,9 @@ import org.json.JSONObject;
 public interface ImageDao {
 
     JSONObject getImage() throws JSONException;
-    boolean save(JSONObject image) throws JSONException;
-    boolean delete();
 
+    boolean save(JSONObject image) throws JSONException;
+
+    boolean delete();
 
 }

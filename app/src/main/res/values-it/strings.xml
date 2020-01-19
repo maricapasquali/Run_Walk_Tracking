@@ -125,6 +125,10 @@
     <string name="graphic_statistics">Grafico</string>
     <string name="nothing_value">Nessun Valore</string>
 
+    <!-- Vocal Coach -->
+    <string name="use_coach">Utilizza allenatore vocale</string>
+    <string name="interval">Intervallo (min)</string>
+
     <!-- Informazioni account -->
     <string name="info_description">
         <b>Lingue supportate</b>:\n
@@ -141,8 +145,9 @@
     <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
     <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
-    <string name="account_use_other_device">Account in uso in un altro dispositivo.</string>
+    <string name="account_use_other_device">Account in uso in un altro dispositivo. Continua qui ?</string>
     <string name="check_code_text">" Inserisci il codice di attivazione dell'account che ti è stato inviato per email."</string>
+    <string name="continue_here">Continua qui</string>
 
     <!-- Messaggi di errore -->
     <string name="error">Errore</string>
@@ -156,7 +161,8 @@
     <string name="end_compression_image">Compressione Immagine Finita</string>
     <string name="internet_not_available_title">Dati cellulare disattivati</string>
     <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
-    <string name="token_not_valid">Token non valido</string>
+    <string name="token_not_valid">Sessione non valida</string>
+    <string name="connection_slow">¡Uy! Conexión lenta, intente nuevamente más tarde.</string>
 
 
 </resources>

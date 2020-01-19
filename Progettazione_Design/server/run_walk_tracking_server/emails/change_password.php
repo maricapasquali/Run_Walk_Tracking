@@ -2,21 +2,21 @@
   require_once("../utility.php");
   require_once("../dao/DaoFactory.php");
   require_once("../dao/UserDao.php");
-  require_once("../exception/Exceptions.php");
   if(!isset($_GET[C_KEY]) || (isset($_GET[C_KEY]) && empty($_GET[C_KEY])))
     die(json_errors(new UrlExeception()));
 
   function isExpired($key) {
-    if(connect()){
-      $stmt = getConnection()->prepare("SELECT end_validity from request_forgot_password where c_key=?");
-      if(!$stmt) throw new Exception("Preparazione fallita. Error: " . $conn->error);
+    $dao = DaoFactory::instance();
+    if($dao->connect()){
+      $stmt = $dao->getConnection()->prepare("SELECT end_validity from request_forgot_password where c_key=?");
+      if(!$stmt) throw new Exception("Preparazione fallita. Error: " .$dao->getErrorConnection());
       $stmt->bind_param("s", $key);
-      if(!$stmt->execute()) throw new Exception("Cancellazione fallita. Error: " . $conn->error);
+      if(!$stmt->execute()) throw new Exception("Cancellazione fallita. Error: " . $dao->getErrorConnection());
       $stmt->bind_result($end_validity);
       $stmt->fetch();
       $stmt->close();
     }
-    closeConnection();
+    $dao->closeConnection();
 
     return current_datetime() >= $end_validity;
   }
