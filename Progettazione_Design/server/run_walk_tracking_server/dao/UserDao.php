@@ -175,7 +175,7 @@ class UserDao implements IUserDao{
    public function checkSignUp($userCredentials){
      $id_user = self::checkSignIn($userCredentials[USERNAME], $userCredentials[PASSWORD]);
 
-     if($this->daoFactory->selection(function() use ($id_user){
+     if($this->daoFactory->selection(function() use ($userCredentials, $id_user){
          $stmt = $this->daoFactory->getConnection()->prepare("SELECT count(*) FROM session WHERE id_user=?");
          if(!$stmt) throw new Exception("Check Token : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
          $stmt->bind_param("i", $id_user);
@@ -192,6 +192,7 @@ class UserDao implements IUserDao{
          $stmt->bind_result($isCorrect);
          $stmt->fetch();
          $stmt->close();
+
          if($isCorrect==0) throw new SignUpTokenExeception();
      }))
      {
@@ -264,7 +265,8 @@ class UserDao implements IUserDao{
    public function getUserForId($id){
      $user = array();
      if($this->daoFactory->selection(function() use ($id, &$user){
-             $stmt = $this->daoFactory->getConnection()->prepare("SELECT u.*, birth_date, l.username FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
+             $stmt = $this->daoFactory->getConnection()->prepare("SELECT u.name, u.last_name, u.gender, u.birth_date, u.email, u.phone, u.city, u.height, l.username
+                                                                  FROM login l JOIN user u on(l.id_user=u.id_user) WHERE u.id_user=?");
              if(!$stmt) throw new Exception("user from id : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
              $stmt->bind_param("i", $id);
              if(!$stmt->execute()) throw new Exception("user from id : Selezione fallita. Errore: ". $this->daoFactory->getErrorConnection());

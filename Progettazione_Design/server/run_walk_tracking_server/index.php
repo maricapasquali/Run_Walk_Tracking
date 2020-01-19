@@ -2,38 +2,16 @@
 try{
 require_once("utility.php");
 require_once("dao/SessionDao.php");
-/* UTILITY --- */
-define("SEPARATOR", ".");
-
-function encode($val){
-  return base64_encode(base64_encode($val));
-}
-
-function decode($val){
-  return base64_decode(base64_decode($val));
-}
-
-function cast($strNum) {
-  return is_numeric($strNum) ? intval($strNum): $strNum;
-}
-/* FINE --- */
 
 //print "BENVENUTO<br>";
-function getTokenSession($id_user, $last_update, $device){
-   // $device ==  md5(md5(device)) : il primo md5 applicato dal client e il secondo dal server
-  return encode(implode(SEPARATOR, array(encode($id_user), encode($last_update), encode($device))));
-}
 
-function getSession($token_session){
-  return array_combine(array(ID_USER, LAST_UPDATE, DEVICE),
-                       array_map(function($value){
-                                   return cast(decode($value));
-                       }, explode(SEPARATOR, decode($token_session))));
-}
-
-$token_session =  getTokenSession(22, 1578167181, "ef62c1f173d2f81dc16779189c2dfdb6");
-$session = getSession($token_session);
-print json_encode(array(TOKEN => $token_session, SESSION => $session ));
+define("SESSION_ENCODED", "session_encoded");
+define("SESSION_DECODED", "session_decoded");
+$se = array(ID_USER => 22, TOKEN => "kq2sOan0e1umJO8azHDJb3LMwKXNLhxaxCYzhcqP7jRXHdYVm6J9fZ3x77HaP2fjV6mD4yXTSKk6kYS1lcrEwUqZLOv0VcYTxwY3",
+LAST_UPDATE => 1578167181, DEVICE=>"ef62c1f173d2f81dc16779189c2dfdb6");
+$token_session =  getEncodedSession($se);
+$session = getDecodedSession($token_session);
+print json_encode(array(SESSION_ENCODED => $token_session, SESSION_DECODED => $session ));
 
 /*
 $session[TOKEN]=Session::createToken();

@@ -9,9 +9,9 @@ require_once("dao/WorkoutDao.php");
 function sendData($session, $device){
   print json_encode(array(STATE => array( CODE => 1 ,
                                           DESCRIPTION => NO_CONSISTENT_RECEIVE_DATA,
-                                          DATA => array(SESSION => $session)+UserDao::instance()->allData($session[TOKEN], $device))));
+                                          DATA => array(SESSION => getEncodedSession($session)) +
+                                                  UserDao::instance()->allData($session[TOKEN], $device))));
 }
-
 
 try{
     $code = Request::getBody(SYNC);
@@ -37,6 +37,5 @@ try{
  catch(Exception $e){
   print json_errors($e);
  }
-
 
 ?>

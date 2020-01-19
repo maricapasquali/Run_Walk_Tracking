@@ -83,6 +83,35 @@ define("UNIT_WEIGHT", "unit_weight");
 define("UNIT_HEIGHT", "unit_height");
 
 
+/* UTILITY SESSION--- */
+define("SEPARATOR", ".");
+
+function encode($val){
+  return base64_encode(base64_encode($val));
+}
+
+function decode($val){
+  return base64_decode(base64_decode($val));
+}
+
+function cast($strNum) {
+  return is_numeric($strNum) ? intval($strNum): $strNum;
+}
+
+function getEncodedSession($session){
+  return encode(implode(SEPARATOR, array(encode($session[ID_USER]), encode($session[TOKEN]),
+                                         encode($session[LAST_UPDATE]), encode($session[DEVICE]))));
+}
+
+function getDecodedSession($token_session){
+  return array_combine(array(ID_USER, TOKEN, LAST_UPDATE, DEVICE),
+                       array_map(function($value){
+                                   return cast(decode($value));
+                       }, explode(SEPARATOR, decode($token_session))));
+}
+
+/* FINE --- */
+
 function hashed_password($password){
   return password_hash($password, PASSWORD_BCRYPT);
 }

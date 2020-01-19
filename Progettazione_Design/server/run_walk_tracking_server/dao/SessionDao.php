@@ -21,11 +21,12 @@ class SessionDao implements ISessionDao{
       $stmt->bind_param("issi", $id_user, $device, getToken(100), current_unixdatetime());
       if(!$stmt->execute()) throw new Exception("create session : Selezione fallita. Errore: ". $this->daoFactory->getErrorConnection());
       $stmt->close();
-    })){
+    }))
+    {
       return self::checkForIdUser($id_user);
     }
     /*
-    try {
+    try {s
       if($this->daoFactory->connect())
       {
         $this->daoFactory->startTransaction();
@@ -108,6 +109,32 @@ class SessionDao implements ISessionDao{
     $this->daoFactory->closeConnection();
     return $session;
     */
+  }
+
+  public function updateAll($old_session){
+/*
+    $this->daoFactory->selection(function() use (&$old_session){
+      $stmt = $this->daoFactory->getConnection()->prepare("SELECT last_update FROM session WHERE id_user = ?");
+      if(!$stmt) throw new Exception("last_update session : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+      $stmt->bind_param("i", $old_session[ID_USER]);
+      if(!$stmt->execute()) throw new Exception("last_update session : Selezione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+      $stmt->bind_result($last_update);
+      $stmt->fetch();
+      $stmt->close();
+      if($last_update > $old_session[LAST_UPDATE])  $old_session[LAST_UPDATE] = $last_update;
+    });
+*/
+    if($this->daoFactory->transaction(function() use (&$old_session){
+          $stmt = $this->daoFactory->getConnection()->prepare("UPDATE session SET token=?, device = ? WHERE id_user = ?");
+          if(!$stmt) throw new Exception("update all session : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->bind_param("ssi", getToken(100), $old_session[DEVICE],  $old_session[ID_USER]);
+          if(!$stmt->execute()) throw new Exception("update all session : Selezione fallita. Errore: ". $this->daoFactory->getErrorConnection());
+          $stmt->close();
+    }))
+    {
+      return self::checkForIdUser($old_session[ID_USER]);
+    }
+
   }
 
   public function update($id_user){

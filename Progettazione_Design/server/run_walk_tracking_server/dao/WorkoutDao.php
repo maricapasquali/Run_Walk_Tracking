@@ -15,7 +15,7 @@ class WorkoutDao implements IWorkoutDao{
   }
 
    public function create($workout){
-       return $this->daoFactory->transaction(function() use ($weights, $id_user){
+       return $this->daoFactory->transaction(function() use ($workout){
              $keys = array();
              $values = array();
              $typeParam ="";

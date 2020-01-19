@@ -6,6 +6,7 @@ define("DOWNLOAD_IMAGE", "download_image");
 define("CHANGE_PASSWORD", "change_password");
 define("REQUEST_CHANGE_PASSWORD", "request_change_password");
 define("SYNC", "sync");
+define("_CONTINUE_", "continue");
 
 class Request {
 
@@ -16,6 +17,7 @@ class Request {
   public static function getBody($of){
 
     switch ($of) {
+
       case SIGN_UP:
         $required = array(NAME, LAST_NAME, GENDER, BIRTH_DATE, EMAIL, CITY,
                           PHONE, HEIGHT, TARGET, WEIGHT, USERNAME, PASSWORD);
@@ -45,8 +47,12 @@ class Request {
         $required = array(LAST_UPDATE, DB_EXIST, TOKEN, DEVICE);
         break;
 
+      case _CONTINUE_:
+        $required = array(SESSION);
+        break;
+
       default:
-          return false;
+          break;
     }
     if($of==INSERT || $of==UPDATE || $of==DELETE)
     {
