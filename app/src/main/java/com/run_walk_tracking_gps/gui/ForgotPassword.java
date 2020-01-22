@@ -2,18 +2,20 @@ package com.run_walk_tracking_gps.gui;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.material.button.MaterialButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.RequiresApi;
 
 public class ForgotPassword extends CommonActivity
        // implements  Response.Listener<JSONObject>
@@ -21,7 +23,7 @@ public class ForgotPassword extends CommonActivity
 
     private TextView mexSuccess;
     private EditText email;
-    private Button request;
+    private MaterialButton request;
 
     @Override
     protected void init(Bundle savedInstanceState) {

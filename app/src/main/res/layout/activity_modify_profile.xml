@@ -17,8 +17,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <view class="com.run_walk_tracking_gps.gui.components.Factory$CustomImageView"
+            <view
                 android:id="@+id/modify_profile_img"
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomImageView"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_centerInParent="true"

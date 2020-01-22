@@ -1,8 +1,6 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -28,7 +26,6 @@ public class VoiceCoachActivity extends CommonActivity {
     private Switch calories;
     private IndicatorSeekBar intervalSet;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_vocal_coach);

@@ -10,7 +10,6 @@
     android:orientation="vertical"
     tools:context=".gui.BootAppActivity">
 
-
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,35 +60,29 @@
                     android:layout_centerInParent="true"
                     android:orientation="vertical">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/recbtn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="10dp"
-                        android:background="@drawable/button_boot_app"
-                        android:drawableStart="@drawable/ic_sign_up"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
+                        android:paddingTop="15dp"
+                        android:paddingBottom="15dp"
                         android:text="@string/rec"
-                        android:textColor="@android:color/background_light"
-                        android:textSize="24sp" />
+                        android:textSize="18sp"
+                        app:backgroundTint="@color/colorPrimaryDark"
+                        app:cornerRadius="10dp"
+                        app:icon="@drawable/ic_sign_up" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/loginbtn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/button_boot_app"
-                        android:drawableStart="@drawable/ic_login"
-                        android:drawablePadding="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="30dp"
+                        android:paddingTop="15dp"
+                        android:paddingBottom="15dp"
                         android:text="@string/login"
-                        android:textColor="@android:color/background_light"
-                        android:textSize="24sp" />
+                        android:textSize="18sp"
+                        app:backgroundTint="@color/colorPrimaryDark"
+                        app:cornerRadius="10dp"
+                        app:icon="@drawable/ic_login" />
                 </LinearLayout>
 
             </RelativeLayout>

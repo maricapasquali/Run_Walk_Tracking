@@ -5,8 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
+
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -20,6 +19,9 @@ import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 
 public class NotificationWorkout {
 
@@ -70,6 +72,7 @@ public class NotificationWorkout {
 
 
         this.notificationBuilder = this.notificationHelper.getNotificationBuilder(context, NotificationHelper.CHANNEL_1)
+
                                                           .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                                                           .setCustomContentView(remoteViewSmall)
                                                           .setCustomBigContentView(remoteViewBig)

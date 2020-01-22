@@ -104,22 +104,21 @@
             android:textColor="@android:color/background_light"
             android:textSize="18sp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginTop="20dp"
-            android:background="@drawable/button_boot_app"
-            android:drawableStart="@drawable/ic_login"
-            android:drawablePadding="20dp"
             android:gravity="center_horizontal|center_vertical"
             android:paddingStart="20dp"
             android:paddingTop="15dp"
             android:paddingEnd="20dp"
             android:paddingBottom="15dp"
+            app:cornerRadius="10dp"
             android:text="@string/login"
-            android:textColor="@android:color/background_light" />
+            app:backgroundTint="@color/colorPrimaryDark"
+            app:icon="@drawable/ic_login" />
 
     </LinearLayout>
 </ScrollView>

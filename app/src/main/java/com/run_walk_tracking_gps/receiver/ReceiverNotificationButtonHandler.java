@@ -5,10 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import android.support.design.widget.FloatingActionButton;
 
 import android.util.Log;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 
 import java.util.List;

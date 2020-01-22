@@ -8,10 +8,6 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -62,6 +58,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 public class NetworkHelper {
 
@@ -344,7 +343,7 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DELETE, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         public static boolean requestContinueHere(AppCompatActivity activity) {
             try {
                 JSONObject s = Preferences.Session.getSession(activity);
@@ -365,7 +364,7 @@ public class NetworkHelper {
             return false;
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
             try{
                 JSONObject bodyJson = Preferences.Session.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
@@ -379,12 +378,12 @@ public class NetworkHelper {
             return false;
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
             return sync(context, onUpdateGuiListener);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         public static boolean syncInForeground(AppCompatActivity activity) {
             return sync(activity, HttpResponse.onResponseSyncInForeground(activity));
         }
@@ -438,7 +437,7 @@ public class NetworkHelper {
         }
 
         // ACCOUNT
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
             try {
                 switch (action){
@@ -511,7 +510,7 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DOWNLOAD_IMAGE, bodyJson, HttpResponse.onResponseDownloadImageProfile(context));
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         private static boolean requestSignIn(AppCompatActivity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSignIn());
@@ -519,7 +518,6 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithProgressBar(activity, SIGN_IN, bodyJson, HttpResponse.onResponseLogin(activity, bodyJson));
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestFirstSignIn(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForFirstSignIn());
@@ -671,7 +669,6 @@ public class NetworkHelper {
             }
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseSync(Context context, OnUpdateGuiListener onUpdateGuiListener){
             return response -> {
                 try {
@@ -773,7 +770,6 @@ public class NetworkHelper {
         }
 
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseContinueHere(AppCompatActivity activity) {
             return response -> {
                 try {
@@ -822,7 +818,6 @@ public class NetworkHelper {
             };
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseFirstLogin(Activity activity) {
             return response -> {
                 if(response.has(NetworkHelper.Constant.SESSION) && response.has(NetworkHelper.Constant.DATA)){
@@ -859,7 +854,7 @@ public class NetworkHelper {
             };
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         private static Response.Listener<JSONObject> onResponseLogin(AppCompatActivity activity, JSONObject credential){
             return response ->{
                 try {

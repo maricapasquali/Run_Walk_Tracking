@@ -18,7 +18,7 @@ public class UserBuilder {
         user = new User();
     }
 
-    private UserBuilder(Context context,JSONObject userJson) throws JSONException {
+    private UserBuilder(Context context,JSONObject userJson){
         user = new User(context, userJson);
     }
 
@@ -26,7 +26,7 @@ public class UserBuilder {
         return new UserBuilder();
     }
 
-    public static UserBuilder create(Context context,JSONObject userJson) throws JSONException {
+    public static UserBuilder create(Context context,JSONObject userJson) {
         return new UserBuilder(context, userJson);
     }
 

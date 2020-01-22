@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -37,6 +36,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.Arrays;
 
+import androidx.annotation.RequiresApi;
+
 public class ModifyUserActivity extends CommonActivity {
 
     private static final String TAG = ModifyUserActivity.class.getName();
@@ -58,7 +59,7 @@ public class ModifyUserActivity extends CommonActivity {
 
     private ImageFileHelper imageFileHelper;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_modify_profile);
@@ -160,7 +161,7 @@ public class ModifyUserActivity extends CommonActivity {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){

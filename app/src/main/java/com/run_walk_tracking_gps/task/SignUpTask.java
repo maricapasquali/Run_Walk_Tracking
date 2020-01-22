@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
@@ -16,6 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+
+import androidx.annotation.RequiresApi;
 
 
 public class SignUpTask extends AsyncTask<Bitmap, Void, String> {

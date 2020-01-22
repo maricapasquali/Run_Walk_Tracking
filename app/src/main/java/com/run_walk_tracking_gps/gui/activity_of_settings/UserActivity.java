@@ -3,11 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +24,8 @@ import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
 
+import androidx.appcompat.app.AlertDialog;
+
 public class UserActivity extends CommonActivity {
 
     private static final String TAG = UserActivity.class.getName();
@@ -46,7 +44,7 @@ public class UserActivity extends CommonActivity {
 
     private User user;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_profile);
@@ -77,7 +75,6 @@ public class UserActivity extends CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -111,9 +108,8 @@ public class UserActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
@@ -130,18 +126,8 @@ public class UserActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
-
-        findViewById(R.id.profile_img).setOnClickListener(v ->{
-            ImageView i = (ImageView)v;
-            try {
-                ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
-            }catch (ClassCastException e){
-                Log.e(TAG, "Immagine vuota");
-            }
-        });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
         if(user!=null){
 

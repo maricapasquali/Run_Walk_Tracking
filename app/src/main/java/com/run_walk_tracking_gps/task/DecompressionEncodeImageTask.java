@@ -4,13 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import java.io.IOException;
+
+import androidx.annotation.RequiresApi;
 
 
 public class DecompressionEncodeImageTask extends AsyncTask<String, Void, Bitmap>{

@@ -13,12 +13,11 @@
         android:layout_marginTop="20dp"
         android:orientation="vertical">
 
-
         <TextView
             android:id="@+id/signup_personal_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="30dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:text="@string/personal_data"
@@ -38,9 +37,20 @@
                 android:layout_height="120dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerInParent="true"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="10dp"
                 android:contentDescription="@string/img_profile"
                 app:srcCompat="@drawable/ic_user_empty" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/take_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/signup_profile_img"
+                android:layout_marginStart="70dp"
+                android:layout_marginBottom="-12dp"
+                app:backgroundTint="@color/colorPrimaryDark"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_camera" />
 
             <RelativeLayout
                 android:id="@+id/profile_layout_name"
@@ -49,31 +59,30 @@
                 android:layout_marginBottom="5dp"
                 android:layout_toEndOf="@+id/signup_profile_img">
 
-                <TextView
-                    android:id="@+id/signup_profile_name_title"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:text="@string/name" />
-
-                <EditText
-                    android:id="@+id/signup_profile_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signup_profile_name_title"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/textview_rounded_corners"
-                    android:drawablePadding="20dp"
                     android:hint="@string/name"
-                    android:inputType="text"
-                    android:paddingStart="15dp"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="10dp"
-                    android:paddingBottom="20dp"
-                    android:textColor="@android:color/background_light"
-                    android:textColorHint="@android:color/background_light" />
+                    android:textColorHint="@color/colorPrimaryDark"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:errorEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_profile_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textColorHighlight="@color/colorPrimaryDark" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
             </RelativeLayout>
 
             <RelativeLayout
@@ -84,32 +93,30 @@
                 android:layout_marginTop="5dp"
                 android:layout_toEndOf="@+id/signup_profile_img">
 
-                <TextView
-                    android:id="@+id/signup_profile_lastname_title"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:text="@string/lastname" />
-
-                <EditText
-                    android:id="@+id/signup_profile_lastname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/signup_profile_lastname_title"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/textview_rounded_corners"
-                    android:drawablePadding="20dp"
                     android:hint="@string/lastname"
-                    android:inputType="text"
-                    android:paddingStart="15dp"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="10dp"
-                    android:paddingBottom="20dp"
-                    android:textColor="@android:color/background_light"
-                    android:textColorHint="@android:color/background_light" />
+                    android:textColorHint="@color/colorPrimaryDark"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:errorEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/signup_profile_lastname"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:inputType="text"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textColorHighlight="@color/colorPrimaryDark" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
             </RelativeLayout>
 
         </RelativeLayout>
@@ -121,38 +128,34 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp">
 
-            <TextView
-                android:id="@+id/signup_profile_birth_date_title"
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/birth_date" />
-
-
-            <EditText
-                android:id="@+id/signup_profile_birth_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/signup_profile_birth_date_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners_with_press_state"
-                android:drawableStart="@drawable/ic_calendar"
-                android:drawablePadding="20dp"
-                android:focusable="false"
-                android:gravity="center_vertical"
                 android:hint="@string/birth_date"
-                android:inputType="date"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light"
-                android:textCursorDrawable="@null"
-                android:textSize="18sp" />
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_profile_birth_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:cursorVisible="false"
+                    android:drawableStart="@drawable/ic_calendar"
+                    android:drawablePadding="20dp"
+                    android:editable="false"
+                    android:inputType="none"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+            </com.google.android.material.textfield.TextInputLayout>
+
         </RelativeLayout>
 
         <RelativeLayout
@@ -162,35 +165,31 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp">
 
-            <TextView
-                android:id="@+id/signup_profile_email_title"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/email" />
-
-
-            <EditText
-                android:id="@+id/signup_profile_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/signup_profile_email_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners"
-                android:drawableStart="@drawable/ic_email"
-                android:drawablePadding="20dp"
-                android:gravity="center_vertical"
                 android:hint="@string/email"
-                android:inputType="textEmailAddress"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light" />
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_profile_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:drawableStart="@drawable/ic_email"
+                    android:drawablePadding="20dp"
+                    android:inputType="textEmailAddress"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+
+            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -200,35 +199,32 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp">
 
-            <TextView
-                android:id="@+id/signup_profile_city_title"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/city" />
-
-
-            <EditText
-                android:id="@+id/signup_profile_city"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/signup_profile_city_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners"
-                android:drawableStart="@drawable/ic_city"
-                android:drawablePadding="20dp"
-                android:gravity="center_vertical"
                 android:hint="@string/city"
-                android:inputType="text"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light" />
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_profile_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:drawableStart="@drawable/ic_city"
+                    android:drawablePadding="20dp"
+                    android:inputType="text"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
         </RelativeLayout>
 
         <RelativeLayout
@@ -239,36 +235,31 @@
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="50dp">
 
-            <TextView
-                android:id="@+id/signup_profile_tel_title"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/tel" />
-
-
-            <EditText
-                android:id="@+id/signup_profile_tel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/signup_profile_tel_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners"
-                android:drawableStart="@drawable/ic_phone"
-                android:drawablePadding="20dp"
-                android:gravity="center_vertical"
                 android:hint="@string/tel"
-                android:inputType="phone"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light" />
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/signup_profile_tel"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:drawableStart="@drawable/ic_phone"
+                    android:drawablePadding="20dp"
+                    android:inputType="phone"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+
+            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
     </LinearLayout>

@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -102,7 +101,6 @@ public class ChangePasswordActivity extends CommonActivity
         return isCheck;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void saveChangedPassword(final String new_hash){
         try {
             final JSONObject bodyJson = new JSONObject()
@@ -113,7 +111,7 @@ public class ChangePasswordActivity extends CommonActivity
                     .put(NetworkHelper.Constant.NEW_PASSWORD, new_hash);
             Log.e(TAG, bodyJson.toString());
 
-            NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.CHANGE_PASSWORD, bodyJson);
+            NetworkHelper.HttpRequest.request(ChangePasswordActivity.this, NetworkHelper.Constant.CHANGE_PASSWORD, bodyJson);
 
         }catch (JSONException json){
             json.printStackTrace();

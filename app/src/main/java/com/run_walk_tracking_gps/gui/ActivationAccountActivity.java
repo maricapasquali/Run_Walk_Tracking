@@ -2,11 +2,11 @@ package com.run_walk_tracking_gps.gui;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.material.button.MaterialButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.KeysIntent;
@@ -14,12 +14,14 @@ import com.run_walk_tracking_gps.utilities.AppUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.annotation.RequiresApi;
+
 public class ActivationAccountActivity extends CommonActivity
         //implements  Response.Listener<JSONObject>
 {
     private static final String TAG = ActivationAccountActivity.class.getName();
 
-    private Button access;
+    private MaterialButton access;
     private EditText token;
     private String username;
     private String password;

@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import androidx.annotation.RequiresApi;
 
 public class FileUtilities {
 

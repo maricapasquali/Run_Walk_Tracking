@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,8 @@ import com.run_walk_tracking_gps.R;
 
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.RequiresApi;
 
 public abstract class NewInformationAdapter<T> extends BaseAdapter {
 

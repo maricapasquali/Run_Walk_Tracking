@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.material.button.MaterialButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.utilities.AppUtilities;
@@ -18,6 +18,8 @@ import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.RequiresApi;
 
 public class LoginActivity extends CommonActivity
         //implements  Response.Listener<JSONObject>
@@ -28,7 +30,7 @@ public class LoginActivity extends CommonActivity
     private EditText username;
     private EditText password;
     private TextView forgotPassword;
-    private Button login;
+    private MaterialButton login;
 
     private JSONObject bodyJson;
     private String hash_password;

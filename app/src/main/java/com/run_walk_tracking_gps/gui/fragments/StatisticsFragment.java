@@ -3,11 +3,6 @@ package com.run_walk_tracking_gps.gui.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.controller.ErrorQueue;
@@ -31,6 +27,8 @@ import com.run_walk_tracking_gps.utilities.FilterUtilities;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+
+import androidx.fragment.app.Fragment;
 
 public class StatisticsFragment extends Fragment {
 
@@ -61,7 +59,7 @@ public class StatisticsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_statistic, container, false);
 

@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 
@@ -14,6 +13,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import androidx.annotation.RequiresApi;
 
 public class SessionUtilities {
 

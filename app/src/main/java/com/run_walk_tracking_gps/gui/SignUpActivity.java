@@ -6,8 +6,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +13,8 @@ import android.widget.ImageView;
 
 
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.run_walk_tracking_gps.model.User;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
@@ -30,6 +30,9 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.Fragment;
 
 public class SignUpActivity extends CommonActivity
         implements PersonalDataFragment.PersonalDataListener,
@@ -111,7 +114,7 @@ public class SignUpActivity extends CommonActivity
     }
 
     @Override
-    public void personalData(JSONObject personalInfoUser) {
+    public void receivePersonalData(JSONObject personalInfoUser) {
         try {
             user = JSONUtilities.replace(user, personalInfoUser);
             Log.d(TAG, user.toString());
@@ -119,6 +122,7 @@ public class SignUpActivity extends CommonActivity
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void physicalData(JSONObject jsonPhysical) {
@@ -188,7 +192,6 @@ public class SignUpActivity extends CommonActivity
         imagePicker = new ImagePicker(this,
                 null ,
                 imageUri -> {
-
                     String newName = ImageFileHelper.createNameRandom();
                     Log.e("PICKERIMAGE", "Name : "+ newName);
                     ImageFileHelper imageFileHelper = ImageFileHelper.create(this);
@@ -212,8 +215,6 @@ public class SignUpActivity extends CommonActivity
                             }else {
                                 user.remove(NetworkHelper.Constant.IMAGE);
                             }
-
-
 
                         } catch (Exception e) {
                             e.printStackTrace();

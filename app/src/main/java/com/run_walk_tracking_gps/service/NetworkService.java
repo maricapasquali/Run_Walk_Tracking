@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
@@ -22,6 +21,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * Service -> SEND DATA TO SERVER

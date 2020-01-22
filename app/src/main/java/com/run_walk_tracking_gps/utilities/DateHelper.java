@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
 
 import com.run_walk_tracking_gps.model.enumerations.Language;
 
@@ -15,6 +14,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import java.util.TimeZone;
+
+import androidx.core.util.Pair;
 
 
 public final class DateHelper {

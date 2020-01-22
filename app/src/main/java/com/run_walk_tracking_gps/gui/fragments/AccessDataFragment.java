@@ -2,9 +2,6 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.material.button.MaterialButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
@@ -22,6 +20,8 @@ import org.json.JSONObject;
 
 import java.util.stream.Stream;
 
+import androidx.fragment.app.Fragment;
+
 public class AccessDataFragment extends Fragment {
 
     private final static String TAG = AccessDataFragment.class.getName();
@@ -30,7 +30,7 @@ public class AccessDataFragment extends Fragment {
     private EditText password;
     private EditText conf_password;
 
-    private Button login;
+    private MaterialButton login;
     private AccessDataListener accessDataListener;
 
     @Override
@@ -61,9 +61,9 @@ public class AccessDataFragment extends Fragment {
         return isOk;
     }
 
-    @Nullable
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_signup_3, container, false);
 
         username = view.findViewById(R.id.signup_profile_username);
