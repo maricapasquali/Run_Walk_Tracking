@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         android:orientation="vertical"
         android:paddingTop="20dp"
         android:paddingBottom="50dp">
@@ -19,9 +19,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="10dp">
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/access_username_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,7 +51,34 @@
                 android:paddingBottom="20dp"
                 android:textColor="@android:color/background_light"
                 android:textColorHint="@android:color/background_light"
-                android:textSize="18sp" />
+                android:textSize="18sp" />-->
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/username"
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/access_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:drawableStart="@drawable/ic_user"
+                    android:drawablePadding="20dp"
+                    android:inputType="text"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+
+            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -59,9 +87,37 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
+            android:layout_marginBottom="10dp"
             android:paddingTop="20dp">
 
-            <TextView
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:textColorHint="@color/colorPrimaryDark"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusTopStart="10dp"
+                app:errorEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/access_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:drawableStart="@drawable/ic_password"
+                    android:drawablePadding="20dp"
+                    android:inputType="textPassword"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textColorHighlight="@color/colorPrimaryDark" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!--<TextView
                 android:id="@+id/access_password_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -88,7 +144,7 @@
                 android:paddingEnd="10dp"
                 android:paddingBottom="20dp"
                 android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light" />
+                android:textColorHint="@android:color/background_light" />-->
 
 
         </RelativeLayout>
@@ -115,9 +171,9 @@
             android:paddingTop="15dp"
             android:paddingEnd="20dp"
             android:paddingBottom="15dp"
-            app:cornerRadius="10dp"
             android:text="@string/login"
             app:backgroundTint="@color/colorPrimaryDark"
+            app:cornerRadius="10dp"
             app:icon="@drawable/ic_login" />
 
     </LinearLayout>

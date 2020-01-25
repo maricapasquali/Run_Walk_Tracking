@@ -68,10 +68,6 @@ public class PersonalDataFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Nullable
     @Override
@@ -101,7 +97,6 @@ public class PersonalDataFragment extends Fragment {
 
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                         String error = null;
                         if(editText.equals(name) && count <= 0)
                             error = getString(R.string.name_not_empty);
@@ -111,7 +106,7 @@ public class PersonalDataFragment extends Fragment {
                             error = getString(R.string.email_not_empty);
                         if(editText.equals(city) && count <= 0)
                             error = getString(R.string.city_not_empty);
-                        if(editText.equals(phone) && count <= 0)
+                        if(editText.equals(phone) && s.length() <= 0)
                             error = getString(R.string.tel_not_empty);
 
                         ((TextInputLayout) editText.getParent().getParent()).setError(error);
@@ -143,16 +138,23 @@ public class PersonalDataFragment extends Fragment {
     }
 
     private void validation(){
-        personalDataListener.next(name.getError()==null && last_name.getError()==null &&
-                                       email.getError()==null && city.getError()==null &&
-                                       phone.getError()==null &&
+
+        TextInputLayout nameL = ((TextInputLayout) name.getParent().getParent());
+        TextInputLayout lastNameL = ((TextInputLayout) last_name.getParent().getParent());
+        TextInputLayout birthDateL = ((TextInputLayout) birthDate.getParent().getParent());
+        TextInputLayout emailL = ((TextInputLayout) email.getParent().getParent());
+        TextInputLayout cityL = ((TextInputLayout) city.getParent().getParent());
+        TextInputLayout phoneL = ((TextInputLayout) phone.getParent().getParent());
+
+        personalDataListener.next(nameL.getError()==null && lastNameL.getError()==null &&
+                                       emailL.getError()==null && cityL.getError()==null &&
+                                       phoneL.getError()==null && birthDateL.getError()==null &&
                                         (!TextUtils.isEmpty(birthDate.getText()) &&
                                          !TextUtils.isEmpty(name.getText()) &&
                                          !TextUtils.isEmpty(last_name.getText()) &&
                                          !TextUtils.isEmpty(email.getText()) &&
                                          !TextUtils.isEmpty(phone.getText()) &&
                                          !TextUtils.isEmpty(city.getText())));
-
     }
 
     @Override

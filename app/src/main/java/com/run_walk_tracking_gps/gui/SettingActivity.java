@@ -60,8 +60,9 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout info;
     private LinearLayout exit;
 
-    private int idStrTarget;
     private Sport sportDefault;
+
+    private Target targetDefault;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -76,7 +77,7 @@ public class SettingActivity extends CommonActivity {
 
         // target
         target = findViewById(R.id.setting_spinner_target);
-        final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this, false);
+        final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this);
         target.setAdapter(spinnerAdapterTarget);
 
         profile = findViewById(R.id.profile);
@@ -96,8 +97,8 @@ public class SettingActivity extends CommonActivity {
             sportDefault = Sport.valueOf(SqlLiteSettingsDao.create(this).getSportDefault());
             sport.setSelection(Stream.of(Sport.values()).collect(Collectors.toList()).indexOf(sportDefault));
 
-            idStrTarget = Target.valueOf(SqlLiteSettingsDao.create(this).getTargetDefault()).getStrId();
-            target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
+            targetDefault = Target.valueOf(SqlLiteSettingsDao.create(this).getTargetDefault());
+            target.setSelection(Stream.of(Target.values()).collect(Collectors.toList()).indexOf(targetDefault));
 
 
             coachOnOff.setChecked(VoiceCoach.create(this).isActive());
@@ -152,7 +153,7 @@ public class SettingActivity extends CommonActivity {
                     sportDefault = (Sport) type;
                     filter = NetworkHelper.Constant.SPORT;
                 }else if(type instanceof Target){
-                    idStrTarget = ((Target) type).getStrId();
+                    targetDefault = (Target) type;
                     filter = NetworkHelper.Constant.TARGET;
                 }
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE, filter, data.toString())
@@ -183,11 +184,10 @@ public class SettingActivity extends CommonActivity {
         target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                int selectedTargetID = (int) parent.getSelectedItem();
-                if (idStrTarget != selectedTargetID) {
-                    Target target = (Target) EnumUtilities.getEnumFromStrId(Target.class, selectedTargetID);
-                    onChangeSpinnerSelection(target);
-                    Log.e(TAG, "Target = " + target.toString());
+                Target selectedTarget = (Target) parent.getSelectedItem();
+                if (targetDefault != selectedTarget) {
+                    onChangeSpinnerSelection(selectedTarget);
+                    Log.e(TAG, "Target = " + selectedTarget.toString());
                 }
             }
             @Override

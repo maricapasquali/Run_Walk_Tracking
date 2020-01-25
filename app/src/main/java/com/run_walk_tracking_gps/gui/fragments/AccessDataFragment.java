@@ -2,14 +2,16 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.exception.PasswordNotCorrectException;
@@ -26,9 +28,9 @@ public class AccessDataFragment extends Fragment {
 
     private final static String TAG = AccessDataFragment.class.getName();
 
-    private EditText username;
-    private EditText password;
-    private EditText conf_password;
+    private TextInputEditText username;
+    private TextInputEditText password;
+    private TextInputEditText conf_password;
 
     private MaterialButton login;
     private AccessDataListener accessDataListener;
@@ -41,26 +43,24 @@ public class AccessDataFragment extends Fragment {
         }catch (ClassCastException e){
             throw new ClassCastException(context.toString() + " must implement AccessDataListener");
         }
-
     }
 
-    private boolean isSetAll(){
+    private boolean isValid(){
         boolean isOk = true;
         if(TextUtils.isEmpty(username.getText())){
             isOk =false;
-            username.setError(getString(R.string.username_not_empty));
+            ((TextInputLayout) username.getParent().getParent()).setError(getString(R.string.username_not_empty));
         }
         if(TextUtils.isEmpty(password.getText()) ){
             isOk =false;
-            password.setError(getString(R.string.password_not_empty));
+            ((TextInputLayout) password.getParent().getParent()).setError(getString(R.string.password_not_empty));
         }
         if(TextUtils.isEmpty(conf_password.getText()) ){
             isOk =false;
-            conf_password.setError(getString(R.string.confirm_password_not_empty));
+            ((TextInputLayout) conf_password.getParent().getParent()).setError(getString(R.string.confirm_password_not_empty));
         }
         return isOk;
     }
-
 
     @Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,9 +81,10 @@ public class AccessDataFragment extends Fragment {
                 final String hash_password = CryptographicHashFunctions.md5(password.getText().toString());
                 final String hash_conf_password = CryptographicHashFunctions.md5(conf_password.getText().toString());
 
-                if(isSetAll()){
+                if(isValid()){
 
-                    if(!hash_password.equals(hash_conf_password)) throw new PasswordNotCorrectException(getContext());
+                    if(!hash_password.equals(hash_conf_password))
+                        throw new PasswordNotCorrectException(getContext());
 
                     final JSONObject accessData = new JSONObject().put(NetworkHelper.Constant.USERNAME, username.getText())
                             .put(NetworkHelper.Constant.PASSWORD, hash_password);
@@ -93,10 +94,36 @@ public class AccessDataFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (PasswordNotCorrectException e) {
-                conf_password.setError(e.getMessage());
                 conf_password.setText("");
+                ((TextInputLayout) conf_password.getParent().getParent()).setError(e.getMessage());
             }
         });
+
+        Stream.of(username, password, conf_password).forEach( editText ->
+            editText.addTextChangedListener(new TextWatcher() {
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String error = null;
+                    if(editText.equals(username) && s.length() <= 0)
+                        error = getString(R.string.username_not_empty);
+                    if(editText.equals(password) && s.length() <= 0)
+                        error = getString(R.string.password_not_empty);
+                    if(editText.equals(conf_password) && s.length() <= 0)
+                        error = getString(R.string.confirm_password_not_empty);
+
+                    ((TextInputLayout) editText.getParent().getParent()).setError(error);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            })
+        );
     }
 
     @Override

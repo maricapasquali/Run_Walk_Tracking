@@ -101,7 +101,8 @@ public class SignUpActivity extends CommonActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        next.setVisible(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=ACCESS_DATA);
+        if(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=PERSONAL_DATA)
+            next.setVisible(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=ACCESS_DATA);
     }
 
     @Override
@@ -122,7 +123,6 @@ public class SignUpActivity extends CommonActivity
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void physicalData(JSONObject jsonPhysical) {
