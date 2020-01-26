@@ -14,11 +14,11 @@ class SessionDao implements ISessionDao{
     return self::$instance;
   }
 
-  public function create($id_user, $device){
-    if($this->daoFactory->transaction(function() use ($id_user, $device){
-      $stmt = $this->daoFactory->getConnection()->prepare("INSERT INTO session(id_user, device, token, last_update) VALUES (?, MD5(?), ?, ?)");
+  public function create($id_user){
+    if($this->daoFactory->transaction(function() use ($id_user){
+      $stmt = $this->daoFactory->getConnection()->prepare("INSERT INTO session(id_user, token, last_update) VALUES (?, ?, ?)");
       if(!$stmt) throw new Exception("create session : Preparazione fallita. Errore: ". $this->daoFactory->getErrorConnection());
-      $stmt->bind_param("issi", $id_user, $device, getToken(100), current_unixdatetime());
+      $stmt->bind_param("isi", $id_user, getToken(100), current_unixdatetime());
       if(!$stmt->execute()) throw new Exception("create session : Selezione fallita. Errore: ". $this->daoFactory->getErrorConnection());
       $stmt->close();
     }))

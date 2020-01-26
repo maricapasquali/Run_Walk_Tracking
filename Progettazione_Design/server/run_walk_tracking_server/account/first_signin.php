@@ -10,10 +10,10 @@ try{
 
    $id_user = UserDao::instance()->checkSignUp($userCredentials);
 
-   $session = SessionDao::instance()->create($id_user, $userCredentials[DEVICE]);
-
+   $session = SessionDao::instance()->create($id_user);
+   $session[DEVICE] = $userCredentials[DEVICE];
    print json_encode(array(SESSION => getEncodedSession($session),
-                           DATA =>UserDao::instance()->allData($session[TOKEN], $userCredentials[DEVICE])));
+                           DATA =>UserDao::instance()->allData($session[TOKEN], $session[DEVICE])));
 
  }catch(Exception $e){
   print json_errors($e);
