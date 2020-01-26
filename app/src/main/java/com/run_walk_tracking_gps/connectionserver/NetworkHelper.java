@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -59,6 +60,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -344,6 +346,7 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean requestContinueHere(AppCompatActivity activity) {
             try {
                 JSONObject s = Preferences.Session.getSession(activity);
@@ -518,6 +521,7 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithProgressBar(activity, SIGN_IN, bodyJson, HttpResponse.onResponseLogin(activity, bodyJson));
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestFirstSignIn(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForFirstSignIn());
@@ -669,6 +673,7 @@ public class NetworkHelper {
             }
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseSync(Context context, OnUpdateGuiListener onUpdateGuiListener){
             return response -> {
                 try {
@@ -770,6 +775,7 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseContinueHere(AppCompatActivity activity) {
             return response -> {
                 try {
@@ -818,6 +824,7 @@ public class NetworkHelper {
             };
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseFirstLogin(Activity activity) {
             return response -> {
                 if(response.has(NetworkHelper.Constant.SESSION) && response.has(NetworkHelper.Constant.DATA)){
@@ -855,6 +862,7 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseLogin(AppCompatActivity activity, JSONObject credential){
             return response ->{
                 try {

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
@@ -33,14 +34,14 @@ public class UserActivity extends CommonActivity {
     private static final int REQUEST_MODIFY_PROFILE = 11;
 
     private ImageView img;
-    private TextView name;
-    private TextView lastName;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView email;
-    private TextView city;
-    private TextView tel;
-    private TextView height;
+    private TextInputEditText name;
+    private TextInputEditText lastName;
+    private TextInputEditText gender;
+    private TextInputEditText birthDate;
+    private TextInputEditText email;
+    private TextInputEditText city;
+    private TextInputEditText tel;
+    private TextInputEditText height;
 
     private User user;
 

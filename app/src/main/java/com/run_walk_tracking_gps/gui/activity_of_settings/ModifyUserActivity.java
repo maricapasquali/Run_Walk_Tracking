@@ -7,17 +7,25 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.dialog.MeasureDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
+import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.CommonActivity;
@@ -43,22 +51,30 @@ public class ModifyUserActivity extends CommonActivity {
     private static final String TAG = ModifyUserActivity.class.getName();
 
     private ImageView img;
-    private EditText name;
-    private EditText lastName;
-    private EditText email;
-    private EditText city;
-    private EditText tel;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView height;
+    private TextInputEditText name;
+    private TextInputEditText lastName;
+    private TextInputEditText email;
+    private TextInputEditText city;
+    private TextInputEditText tel;
+
+    private TextInputEditText gender;
+    private TextInputEditText birthDate;
+    private TextInputEditText height;
+
+    private ListPopupWindow popup;
+    private GenderAdapterSpinner spinnerGenderAdapter;
+    private View.OnFocusChangeListener listenerDialog = (v, hasFocus) -> {
+        if(hasFocus) showDialog(v);
+    };
+    private View.OnFocusChangeListener listenerPopup = (v, hasFocus) -> {
+        if(hasFocus) showPopup(v);
+    };
 
     private ImagePicker imagePicker;
     private User oldUser;
     private User user;
     private JSONObject bodyJson;
-
     private ImageFileHelper imageFileHelper;
-
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -98,6 +114,9 @@ public class ModifyUserActivity extends CommonActivity {
 
             user = oldUser.clone();
         }
+
+        popup = new ListPopupWindow(this);
+        spinnerGenderAdapter = new GenderAdapterSpinner(this);
     }
 
     @Override
@@ -204,40 +223,49 @@ public class ModifyUserActivity extends CommonActivity {
             imagePicker.choosePicture(true);
         });
 
-        gender.setOnClickListener(v ->{
-            final ChooseDialog<Gender> genderDialog = new ChooseDialog<>(this, Gender.values(),
-                    ((TextView) v).getText(),
-                    (val, description) -> {
-                        TextView gView = ((TextView) v);
-                        gView.setText(val.getStrId());
-                        gView.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null, null);
-                        user.setGender(val);
-                    },
-                    () -> Arrays.stream(Gender.values())
-                            .map(g -> getString(g.getStrId()))
-                            .toArray(String[]::new)
-            );
-            genderDialog.setTitle(R.string.gender);
-            genderDialog.create().show();
+        popup.setOnItemClickListener((parent, view, position, id) -> {
+            //gender
+            final Gender gObjectSelect = (Gender)parent.getAdapter().getItem(position);
+            Log.e(TAG, gObjectSelect.toString());
+            gender.setText(getString(gObjectSelect.getStrId()));
+            gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(gObjectSelect.getIconId()),
+                        null, null, null);
+            popup.dismiss();
         });
+        gender.setOnClickListener(this::showPopup);
+        gender.setOnFocusChangeListener(listenerPopup);
 
-        birthDate.setOnClickListener(v ->{
-            final TextView d = ((TextView) v);
-            DateTimePickerDialog.createDatePicker(this, (date, calendar) -> {
-                d.setText(date);
-                user.setBirthDate(calendar.getTime());
-            }).show();
-        });
+        height.setOnClickListener(this::showDialog);
+        height.setOnFocusChangeListener(listenerDialog);
 
-        height.setOnClickListener(v ->{
-            final TextView h = ((TextView) v);
-            HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
+        birthDate.setOnClickListener(this::showDialog);
+        birthDate.setOnFocusChangeListener(listenerDialog);
+    }
+
+    private void showPopup(View v){
+        popup.setAnchorView(v);
+        popup.setAdapter(spinnerGenderAdapter);
+        popup.show();
+    }
+
+    private void showDialog(View v) {
+        final TextInputEditText textView = ((TextInputEditText) v);
+
+        if(v.equals(height)) {
+            HeightDialog.create(this, textView.getText().toString(),  (heightMeasure) -> {
                 if(heightMeasure!=null){
-                    h.setText(heightMeasure.toString());
+                    textView.setText(heightMeasure.toString());
                     user.getHeight().setValue(false, heightMeasure.getValue(false));
                 }
             }).create().show();
-        });
+        }
+        if(v.equals(birthDate)) {
+
+            DateTimePickerDialog.createDatePicker(this, (date, calendar) -> {
+                textView.setText(date);
+                user.setBirthDate(calendar.getTime());
+            }).show();
+        }
     }
 
     @Override

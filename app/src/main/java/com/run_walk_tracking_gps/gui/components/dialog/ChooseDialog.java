@@ -50,7 +50,7 @@ public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterf
         try {
             if(type.length!=strings.length) throw new ArrayIndexOutOfBoundsException(ERROR);
 
-            indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem);
+            indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem.toString());
             setSingleChoiceItems(strings, indexCheckedItem, this);
         } catch (Exception e) {
             e.printStackTrace();

@@ -2,34 +2,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
     android:background="@drawable/costum_item_details_workout"
     android:orientation="vertical">
 
-    <TextView
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/detail_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:text="TextView" />
+        android:layout_margin="10dp"
+        android:textColorHint="@color/colorPrimaryDark"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusBottomEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusTopStart="10dp"
+        app:errorEnabled="false"
+        >
 
-    <TextView
-        android:id="@+id/detail_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/textview_rounded_corners"
-        android:drawablePadding="20dp"
-        android:gravity="center_vertical"
-        android:paddingStart="15dp"
-        android:paddingTop="25dp"
-        android:paddingEnd="0dp"
-        android:paddingBottom="25dp"
-        android:textColor="@android:color/background_light" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/detail_description"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cursorVisible="false"
+            android:drawablePadding="20dp"
+            android:editable="false"
+            android:focusable="false"
+            android:inputType="text"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:textColorHighlight="@color/colorPrimaryDark" />
+    </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

@@ -241,7 +241,7 @@
         android:layout_below="@+id/info_workout_numbers" />-->
 
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/block_screen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -284,7 +284,7 @@
             app:text_size="15sp" />
 
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/start_workout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -297,7 +297,7 @@
             app:backgroundTint="@color/startBtn"
             app:srcCompat="@drawable/ic_play_button" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/restart_workout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -312,7 +312,7 @@
             app:backgroundTint="@color/RestartBtn"
             app:srcCompat="@drawable/ic_play_button" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/stop_workout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -327,7 +327,7 @@
             app:backgroundTint="@color/stopBtn"
             app:srcCompat="@drawable/ic_stop" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/pause_workout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

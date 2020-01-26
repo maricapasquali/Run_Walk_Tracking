@@ -127,7 +127,7 @@ public class PersonalDataFragment extends Fragment {
     }
 
     private void showDateDialog(View v) {
-        final TextView birthText = (TextView)v;
+        final TextInputEditText birthText = (TextInputEditText)v;
         DateTimePickerDialog.createDatePicker(getContext(),
                 (date, calendar) -> {
                     birthText.setText(date);
