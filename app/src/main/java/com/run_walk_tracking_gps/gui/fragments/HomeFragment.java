@@ -3,8 +3,6 @@ package com.run_walk_tracking_gps.gui.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,9 +25,9 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.MapRouteDraw;
-import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
@@ -144,8 +142,8 @@ public class HomeFragment extends Fragment
         try {
             final Sport sport_e = Sport.valueOf(SqlLiteSettingsDao.create(getContext()).getSportDefault());
             sport.setText(getString(sport_e.getStrId()));
-            sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
-            sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+            sport.setCompoundDrawablesWithIntrinsicBounds(
+                    ColorUtilities.colorIcon(getContext(), sport_e.getIconId(), sport.getTextColors().getDefaultColor()), null, null, null);
         } catch (JSONException e) {
             e.printStackTrace();
         }catch (NullPointerException e){

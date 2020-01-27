@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.gui.fragments;
 import android.content.Context;
 import android.content.res.TypedArray;
 
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +22,7 @@ import com.run_walk_tracking_gps.gui.components.adapter.spinner.FilterAdapterSpi
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.utilities.FilterUtilities;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 
 import java.util.ArrayList;
 
@@ -114,9 +114,7 @@ public class WorkoutsFragment extends Fragment {
         final TypedArray expandableListViewStyle = getContext().getTheme().obtainStyledAttributes(new int[]{android.R.attr.expandableListViewStyle});
         //obtain attr from style
         final TypedArray groupIndicator = getContext().getTheme().obtainStyledAttributes(expandableListViewStyle.getResourceId(0,0),new int[]{android.R.attr.groupIndicator});
-        final Drawable indicator = groupIndicator.getDrawable(0);
-        indicator.setColorFilter(getContext().getColor(R.color.divColor), PorterDuff.Mode.MULTIPLY);
-        return indicator;
+        return ColorUtilities.lightIcon(getContext(), groupIndicator.getDrawable(0));
     }
 
     private void setAdapter(FilterTime filterTime){

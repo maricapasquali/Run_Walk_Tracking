@@ -2,15 +2,12 @@ package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
 
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -18,6 +15,7 @@ import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -91,16 +89,13 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         if(Workout.Info.isSport(info)){
             Sport sport = ((Sport)det);
             viewHolder.details.setText(sport.getStrId());
-            icon = context.getDrawable(sport.getIconId());
+            icon = ColorUtilities.darkIcon(context, sport.getIconId());
         }
         else{
-            icon = context.getDrawable(info.getIconId());
+            icon = ColorUtilities.darkIcon(context, info.getIconId());
             viewHolder.details.setText((String)det);
         }
-        if(icon!=null){
-            icon.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
-            viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(icon,null,null,null);
-        }
+        viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(icon,null,null,null);
 
         return view;
     }

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 
@@ -49,15 +48,10 @@ public abstract class NewInformationActivity extends CommonActivity {
         setModel();
     }
 
-
     protected abstract void setModel();
 
     @Override
     protected void listenerAction() {
-
-        listView.setOnItemClickListener((parent, view, position, id) ->
-                onAddInfoListener.onSetInfo(parent, view, position, id));
-
     }
 
     @Override
@@ -81,7 +75,7 @@ public abstract class NewInformationActivity extends CommonActivity {
 
     public interface OnAddInfoListener{
         NewInformationAdapter getAdapterListView();
-        void onSetInfo(AdapterView<?> parent, View view, int position, long id);
+        View.OnClickListener onSetInfo();
         void onClickAddInfo();
     }
 }
