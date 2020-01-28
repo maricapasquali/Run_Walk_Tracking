@@ -26,7 +26,7 @@ import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener{
+public class NewWeightActivity extends NewInformationActivity {
 
     private final static String TAG = NewWeightActivity.class.getName();
 

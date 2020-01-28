@@ -30,7 +30,7 @@ import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewManualWorkoutActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener{
+public class NewManualWorkoutActivity extends NewInformationActivity {
 
     private final static String TAG = NewManualWorkoutActivity.class.getName();
 
