@@ -24,7 +24,8 @@
         android:id="@+id/list_workouts_expandable"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/filter_workouts">
+        android:layout_below="@+id/filter_workouts"
+        android:dividerHeight="2dp">
 
     </android.widget.ExpandableListView>
 
