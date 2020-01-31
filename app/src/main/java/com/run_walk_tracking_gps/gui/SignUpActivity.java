@@ -1,13 +1,12 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +14,9 @@ import android.widget.ImageView;
 
 
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.myhexaville.smartimagepicker.OnImagePickedListener;
+import com.run_walk_tracking_gps.model.User;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
@@ -30,6 +32,9 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.Fragment;
 
 public class SignUpActivity extends CommonActivity
         implements PersonalDataFragment.PersonalDataListener,
@@ -49,7 +54,6 @@ public class SignUpActivity extends CommonActivity
     private MenuItem next;
     private List<Fragment> fragmentSignUp = new LinkedList<>();
 
-    private ImagePicker imagePicker;
     private Uri imageUri;
 
     @Override
@@ -98,7 +102,8 @@ public class SignUpActivity extends CommonActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        next.setVisible(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=ACCESS_DATA);
+        if(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=PERSONAL_DATA)
+            next.setVisible(fragmentSignUp.indexOf(getSupportFragmentManager().findFragmentByTag(TAG))!=ACCESS_DATA);
     }
 
     @Override
@@ -111,7 +116,7 @@ public class SignUpActivity extends CommonActivity
     }
 
     @Override
-    public void personalData(JSONObject personalInfoUser) {
+    public void receivePersonalData(JSONObject personalInfoUser) {
         try {
             user = JSONUtilities.replace(user, personalInfoUser);
             Log.d(TAG, user.toString());
@@ -174,21 +179,20 @@ public class SignUpActivity extends CommonActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imagePicker.handleActivityResult(resultCode,requestCode, data);
+        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
+        fragment.getTakePhoto().getImagePiker().handleActivityResult(resultCode,requestCode, data);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        imagePicker.handlePermission(requestCode, grantResults);
+        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
+        fragment.getTakePhoto().getImagePiker().handlePermission(requestCode, grantResults);
     }
 
     @Override
-    public void imagePickerHandler(ImageView imageView) {
-        imagePicker = new ImagePicker(this,
-                null ,
-                imageUri -> {
-
+    public OnImagePickedListener imagePickerHandler(ImageView imageView) {
+        return imageUri -> {
                     String newName = ImageFileHelper.createNameRandom();
                     Log.e("PICKERIMAGE", "Name : "+ newName);
                     ImageFileHelper imageFileHelper = ImageFileHelper.create(this);
@@ -213,21 +217,23 @@ public class SignUpActivity extends CommonActivity
                                 user.remove(NetworkHelper.Constant.IMAGE);
                             }
 
-
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
 
 
                     }
-                }).setWithImageCrop(1,1);
-        imagePicker.choosePicture(true);
+        };
     }
 
     @Override
     public Uri getImageUri() {
         return imageUri;
+    }
+
+    @Override
+    public Activity getActivity() {
+        return this;
     }
 
 }

@@ -5,9 +5,9 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.location.LocationManager;
-import android.support.v4.app.ActivityCompat;
-
 import com.google.android.gms.location.LocationRequest;
+
+import androidx.core.app.ActivityCompat;
 
 public class LocationUtilities {
 

@@ -3,14 +3,7 @@ package com.run_walk_tracking_gps.gui.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ncorti.slidetoact.SlideToActView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -31,9 +25,9 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.MapRouteDraw;
-import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.service.WorkoutServiceHandler;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
@@ -41,6 +35,9 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment
                           implements WorkoutService.OnReceiverListener,
@@ -59,8 +56,8 @@ public class HomeFragment extends Fragment
     @SuppressLint("StaticFieldLeak")
     private static FloatingActionButton restart;
     private FloatingActionButton stop;
-    private FloatingActionButton block_screen;
-    private SlideToActView unlock_screen;
+    /*private FloatingActionButton block_screen;
+    private SlideToActView unlock_screen;*/
     private TextView workout_duration;
     private TextView workout_distance;
     private TextView workout_energy;
@@ -98,7 +95,7 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         final Bundle bundle = getArguments();
@@ -111,7 +108,7 @@ public class HomeFragment extends Fragment
     }
 
     @SuppressLint("RestrictedApi")
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
@@ -121,8 +118,8 @@ public class HomeFragment extends Fragment
         pause = rootView.findViewById(R.id.pause_workout);
         restart = rootView.findViewById(R.id.restart_workout);
         stop = rootView.findViewById(R.id.stop_workout);
-        block_screen = rootView.findViewById(R.id.block_screen);
-        unlock_screen = rootView.findViewById(R.id.unlock_screen);
+        /*block_screen = rootView.findViewById(R.id.block_screen);
+        unlock_screen = rootView.findViewById(R.id.unlock_screen);*/
 
         sport = rootView.findViewById(R.id.sport);
         setSport();
@@ -145,8 +142,8 @@ public class HomeFragment extends Fragment
         try {
             final Sport sport_e = Sport.valueOf(SqlLiteSettingsDao.create(getContext()).getSportDefault());
             sport.setText(getString(sport_e.getStrId()));
-            sport.setCompoundDrawablesWithIntrinsicBounds(sport_e.getIconId(), 0, 0,0);
-            sport.getCompoundDrawables()[0].setColorFilter(sport.getTextColors().getDefaultColor(), PorterDuff.Mode.MULTIPLY);
+            sport.setCompoundDrawablesWithIntrinsicBounds(
+                    ColorUtilities.colorIcon(getContext(), sport_e.getIconId(), sport.getTextColors().getDefaultColor()), null, null, null);
         } catch (JSONException e) {
             e.printStackTrace();
         }catch (NullPointerException e){
@@ -172,30 +169,30 @@ public class HomeFragment extends Fragment
         ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
         getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
         start.setVisibility(View.GONE);
-        block_screen.setVisibility(View.VISIBLE);
+        //block_screen.setVisibility(View.VISIBLE);
         pause.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void pauseState(){
         pause.setVisibility(View.GONE);
-        block_screen.setVisibility(View.GONE);
+        //block_screen.setVisibility(View.GONE);
         restart.setVisibility(View.VISIBLE);
         stop.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void lockState(){
-        block_screen.setVisibility(View.GONE);
+        //block_screen.setVisibility(View.GONE);
         pause.setVisibility(View.GONE);
-        unlock_screen.setVisibility(View.VISIBLE);
+        //unlock_screen.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void unlockState(){
-        unlock_screen.setVisibility(View.GONE);
+        //unlock_screen.setVisibility(View.GONE);
         pause.setVisibility(View.VISIBLE);
-        block_screen.setVisibility(View.VISIBLE);
+        //block_screen.setVisibility(View.VISIBLE);
     }
     /* -- FINE UPDATE GUI ACTION RUNNING WORKOUTSERVICE -- */
 
@@ -220,7 +217,7 @@ public class HomeFragment extends Fragment
 
             v.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
-            block_screen.setVisibility(View.VISIBLE);
+           //block_screen.setVisibility(View.VISIBLE);
             pause.setVisibility(View.VISIBLE);
             //RESTART SERVICE
             serviceHandler.restartService();
@@ -234,7 +231,7 @@ public class HomeFragment extends Fragment
             onStopWorkoutClickListener.OnStopWorkoutClick(workout);
         });
 
-        block_screen.setOnClickListener(v -> {
+        /*block_screen.setOnClickListener(v -> {
             lockState();
             setClickable(false);
             // BLOCK (remove controller button) NOTIFICATION SERVICE
@@ -247,7 +244,7 @@ public class HomeFragment extends Fragment
             setClickable(true);
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
             serviceHandler.unLockService();
-        });
+        });*/
     }
 
     private void setClickable(final boolean is) {
@@ -378,14 +375,14 @@ public class HomeFragment extends Fragment
                 HomeFragment.this.setIndoor(!LocationUtilities.isGpsEnable(getContext()));
                 HomeFragment.this.startState();
                 if(wService.isPause())  HomeFragment.this.pauseState();
-                else{
+                /*else{
                     if(wService.isLock()){
                         HomeFragment.this.lockState();
                         // TODO: 12/10/2019 NON FUNZIONA perchè menu viene creato dopo
                         //setClickable(false);
                     }else
                         HomeFragment.this.unlockState();
-                }
+                }*/
             }
             break;
         }

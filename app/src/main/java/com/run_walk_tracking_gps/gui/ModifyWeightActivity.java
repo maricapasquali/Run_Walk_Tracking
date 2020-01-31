@@ -2,13 +2,15 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -16,72 +18,30 @@ import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.appcompat.app.AlertDialog;
 
-public class ModifyWeightActivity extends CommonActivity {
+public class ModifyWeightActivity extends NewInformationActivity {
 
     private static final String TAG = ModifyWeightActivity.class.getName();
-
-
-    private ListView listView;
 
     private StatisticsData statisticsData;
     private StatisticsData oldStatisticsData;
 
     private boolean isLastWeight;
 
-    @Override
-    protected void init(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_add_info);
-
-        getSupportActionBar().setTitle(R.string.modify);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        listView = findViewById(R.id.info_to_add);
-
-        if(getIntent()!=null){
-            oldStatisticsData = getIntent().getParcelableExtra(KeysIntent.MODIFY_WEIGHT);
-            if(oldStatisticsData!=null){
-                oldStatisticsData.setContext(this);
-                ModifyWeightAdapter adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString());
-                listView.setAdapter(adapter);
-                statisticsData = oldStatisticsData.clone();
-            }
-            isLastWeight = SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).isOne();
-        }
-    }
-
-    @Override
-    protected void listenerAction() {
-        listView.setOnItemClickListener((parent, view, position, id) ->{
-            final StatisticsData.InfoWeight title =(StatisticsData.InfoWeight) parent.getAdapter().getItem(position);
-            final TextView detail = view.findViewById(R.id.detail_description);
-
-            switch (title){
-                case DATE:
-                    DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
-                            (date, calendar) -> {
-                                detail.setText(date);
-                                statisticsData.setDate(calendar.getTime());
-                                Log.e(TAG, statisticsData.getDateStr());
-                            }).show();
-                    break;
-                case WEIGHT:
-                    WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
-                        detail.setText(weightMeasure.toString());
-                        statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
-                    }).show();
-                    break;
-            }
-        });
+    public ModifyWeightActivity() {
+        super(R.string.modify);
     }
 
     @Override
@@ -90,7 +50,7 @@ public class ModifyWeightActivity extends CommonActivity {
         if(isLastWeight){
             menu.findItem(R.id.delete_weight).setVisible(false);
         }
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -167,4 +127,61 @@ public class ModifyWeightActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void setModel() {
+    }
+
+    @Override
+    public NewInformationAdapter getAdapterListView() {
+        ModifyWeightAdapter adapter = null;
+        if(getIntent()!=null) {
+            oldStatisticsData = getIntent().getParcelableExtra(KeysIntent.MODIFY_WEIGHT);
+            if (oldStatisticsData != null) {
+                oldStatisticsData.setContext(this);
+                adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString(), onSetInfo());
+                statisticsData = oldStatisticsData.clone();
+            }
+            isLastWeight = SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).isOne();
+        }
+        return adapter ;
+    }
+
+    @Override
+    public View.OnFocusChangeListener onSetInfo() {
+        return (view, hasFocus) ->{
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
+
+                StatisticsData.InfoWeight title = null;
+                try{
+                    title = (StatisticsData.InfoWeight) EnumUtilities.getEnumFromString(StatisticsData.InfoWeight.class , this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
+
+                switch (title){
+                    case DATE:
+                        DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
+                                (date, calendar) -> {
+                                    detail.setText(date);
+                                    statisticsData.setDate(calendar.getTime());
+                                    Log.e(TAG, statisticsData.getDateStr());
+                                }).show();
+                        break;
+                    case WEIGHT:
+                        WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
+                            detail.setText(weightMeasure.toString());
+                            statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
+                        }).show();
+                        break;
+                }
+            }
+
+        };
+    }
+
+    @Override
+    public void onClickAddInfo() {
+    }
 }

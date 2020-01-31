@@ -4,10 +4,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.run_walk_tracking_gps.R;
 
 public class ZoomImageDialog extends AlertDialog {

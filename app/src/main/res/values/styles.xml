@@ -1,12 +1,233 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item> <!-- TODO : CHANGE COLOR -->
     </style>
+<!--
+    TODO: Riguardare
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimaryLight</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkLight</item>
+        <item name="colorAccent">@color/colorAccentLight</item>
+    </style>
+  -->
+
+
+    <!-- COMMON ELEMENT -->
+
+    <style name="ImageProfileTheme">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="srcCompat">@drawable/ic_user_empty</item>
+        <item name="android:contentDescription">@string/img_profile</item>
+    </style>
+
+    <style name="ListViewTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:dividerHeight">2dp</item>
+    </style>
+
+    <style name="ListViewTheme.WithoutDivider">
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
+    </style>
+
+    <style name="ScrollView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="RelativeLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:layout_marginEnd">20dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+    </style>
+
+    <style name="LinearLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">40dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingBottom">30dp</item>
+    </style>
+
+    <style name="ButtonTheme" parent="Base.TextAppearance.AppCompat.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">15dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:layout_gravity">center_horizontal|center_vertical</item>
+        <item name="android:radius">10dp</item>
+    </style>
+
+    <style name="EditTextLayoutTheme" parent="Base.Widget.MaterialComponents.TextInputLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColorHint">@color/colorPrimaryDark</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="errorEnabled">true</item>
+    </style>
+
+    <style name="EditTextLayoutTheme.TextViewLayout">
+        <item name="errorEnabled">false</item>
+        <item name="android:paddingBottom">20dp</item>
+    </style>
+
+    <style name="EditTextTheme" parent="Base.Widget.MaterialComponents.TextInputEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColorHighlight">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:drawablePadding">20dp</item>
+    </style>
+
+    <style name="EditTextTheme.Text">
+        <item name="android:inputType">text</item>
+    </style>
+
+    <style name="EditTextTheme.Email">
+        <item name="android:inputType">textEmailAddress</item>
+    </style>
+
+    <style name="EditTextTheme.Password">
+        <item name="android:inputType">textPassword</item>
+    </style>
+
+    <style name="EditTextTheme.Phone">
+        <item name="android:inputType">phone</item>
+    </style>
+
+    <style name="EditTextTheme.None">
+        <item name="android:inputType">none</item>
+        <item name="android:cursorVisible">false</item>
+        <item name="android:editable">false</item>
+    </style>
+
+
+    <style name="EditTextTheme.TextViewLayout" parent="EditTextTheme.None">
+        <item name="android:focusable">false</item>
+    </style>
+
+    <style name="FloatingButton" parent="Widget.Design.FloatingActionButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+
+        <item name="backgroundTint">@color/colorAccent</item> <!-- TODO : CHANGE COLOR -->
+
+        <item name="android:layout_alignParentEnd">true</item>
+        <item name="android:layout_alignParentBottom">true</item>
+
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">30dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">30dp</item>
+
+        <item name="android:layout_weight">1</item>
+
+        <item name="android:padding">10dp</item>
+        <item name="elevation">24dp</item>
+
+    </style>
+
+    <style name="FloatingButton.Add">
+        <item name="srcCompat">@drawable/ic_add</item>
+    </style>
+
+    <style name="FloatingButton.Ok" >
+        <item name="srcCompat">@drawable/ic_ok</item>
+    </style>
+
+    <style name="FloatingButton.Photo">
+        <item name="srcCompat">@drawable/ic_camera</item>
+        <item name="fabSize">mini</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+
+    </style>
+
+    <style name="FloatingButton.Play">
+        <item name="backgroundTint">@color/startBtn</item>
+        <item name="srcCompat">@drawable/ic_play_button</item>
+        <item name="android:contentDescription">@string/start</item>
+        <item name="android:visibility">visible</item>
+    </style>
+
+    <style name="FloatingButton.Pause">
+        <item name="backgroundTint">@color/pauseBtn</item>
+        <item name="srcCompat">@drawable/ic_pause</item>
+        <item name="android:contentDescription">@string/pause</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="FloatingButton.Restart">
+        <item name="backgroundTint">@color/RestartBtn</item>
+        <item name="srcCompat">@drawable/ic_play_button</item>
+        <item name="android:contentDescription">@string/restart</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="FloatingButton.Stop">
+        <item name="backgroundTint">@color/stopBtn</item>
+        <item name="srcCompat">@drawable/ic_stop</item>
+        <item name="android:contentDescription">@string/stop</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- END COMMON ELEMENT -->
+
+
+    <!-- BOOT -->
+    <style name="ButtonTheme.Boot">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- END BOOT -->
+
+    <!-- SIGN UP -->
+    <style name="TitlesSignUp">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingBottom">30dp</item>
+        <item name="android:textSize">30dp</item>
+    </style>
+    <!-- END SIGN UP -->
+
+
+
+
+
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -24,4 +245,5 @@
     <style name="AppTheme.PrimaryDarkAccent">
         <item name="colorAccent">@color/colorPrimaryDark</item>
     </style>
+
 </resources>

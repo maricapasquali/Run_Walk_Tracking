@@ -5,8 +5,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class AppUtilities {
 

@@ -2,11 +2,11 @@ package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
 
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 
-import android.widget.TextView;
-
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -21,11 +21,12 @@ import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewWeightActivity extends NewInformationActivity implements NewInformationActivity.OnAddInfoListener{
+public class NewWeightActivity extends NewInformationActivity {
 
     private final static String TAG = NewWeightActivity.class.getName();
 
@@ -42,37 +43,47 @@ public class NewWeightActivity extends NewInformationActivity implements NewInfo
 
     @Override
     public NewInformationAdapter getAdapterListView() {
-        return new NewWeightAdapter(this);
+        return new NewWeightAdapter(this, onSetInfo());
     }
 
-
     @Override
-    public void onSetInfo(AdapterView<?> parent, View view, int position, long id) {
-        final StatisticsData.InfoWeight title =(StatisticsData.InfoWeight) parent.getAdapter().getItem(position);
-        final TextView detail = view.findViewById(R.id.detail_description);
+    public View.OnFocusChangeListener onSetInfo() {
+        return (view, hasFocus) -> {
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
 
-        switch (title){
-            case DATE:
-                DateTimePickerDialog.createDatePicker(NewWeightActivity.this,
-                        (date, calendar) -> {
-                            detail.setText(date);
-                            statisticsData.setDate(calendar.getTime());
+                StatisticsData.InfoWeight title = null;
+                try{
+                    title = (StatisticsData.InfoWeight) EnumUtilities.getEnumFromString(StatisticsData.InfoWeight.class ,
+                            this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
+
+                switch (title){
+                    case DATE:
+                        DateTimePickerDialog.createDatePicker(NewWeightActivity.this,
+                                (date, calendar) -> {
+                                    detail.setText(date);
+                                    statisticsData.setDate(calendar.getTime());
+                                }).show();
+                        break;
+                    case WEIGHT:
+                        WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {
+                            if(weightMeasure!=null){
+                                detail.setText(weightMeasure.toString());
+                                statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
+                            }
                         }).show();
-                break;
-            case WEIGHT:
-                WeightDialog.create(NewWeightActivity.this, (weightMeasure)-> {
-                   if(weightMeasure!=null){
-                       detail.setText(weightMeasure.toString());
-                       statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
-                   }
-                }).show();
-                break;
-        }
+                        break;
+                }
+            }
+        };
     }
 
     @Override
     public void onClickAddInfo() {
-
         try{
             if(!statisticsData.isSet())
                 throw new DataException(this, StatisticsData.class);

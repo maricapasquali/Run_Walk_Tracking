@@ -1,31 +1,36 @@
 package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.RequiresApi;
 
 public abstract class NewInformationAdapter<T> extends BaseAdapter {
 
     private final String TAG = NewInformationAdapter.class.getName();
     private Context context;
-
+    private View.OnFocusChangeListener listener;
     private List<T> info;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public NewInformationAdapter(Context _context_, T[] info) {
+    NewInformationAdapter(Context _context_, T[] info, View.OnFocusChangeListener onClickListener) {
         this.context = _context_;
         this.info = Arrays.asList(info);
+        this.listener = onClickListener;
         Log.d(TAG, Arrays.toString(info));
     }
 
@@ -58,10 +63,12 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
         if(convertView==null){
             view = LayoutInflater.from(context).inflate(R.layout.custom_item_details_workout, null);
 
-
-            final TextView title = view.findViewById(R.id.detail_title);
-            final TextView detail = view.findViewById(R.id.detail_description);
-
+            final TextInputLayout title = view.findViewById(R.id.detail_title);
+            final TextInputEditText detail = view.findViewById(R.id.detail_description);
+            if(listener!=null){
+                detail.setOnFocusChangeListener(listener);
+                detail.setOnClickListener(v -> listener.onFocusChange(v, true));
+            }
             viewHolder = new ListHolder(title, detail);
 
             view.setTag(viewHolder);
@@ -76,16 +83,20 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
         return view;
     }
 
-    protected abstract void addInfo(TextView title, TextView detail, T item, int position);
+    protected abstract void addInfo(TextInputLayout title, TextInputEditText detail, T item, int position);
 
+
+    Drawable darkIcon(int icon){
+        return ColorUtilities.darkIcon(context, icon);
+    }
 
     private class ListHolder {
 
-        private TextView title;
-        private TextView detail;
+        private TextInputLayout title;
+        private TextInputEditText detail;
 
 
-        private ListHolder(TextView title, TextView detail) {
+        private ListHolder(TextInputLayout title, TextInputEditText detail) {
             this.title = title;
             this.detail = detail;
 

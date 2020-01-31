@@ -1,24 +1,36 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.gui.components.Factory;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
+import com.run_walk_tracking_gps.gui.components.dialog.MeasureDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
+import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.CommonActivity;
@@ -37,28 +49,38 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.Arrays;
 
+import androidx.annotation.RequiresApi;
+
 public class ModifyUserActivity extends CommonActivity {
 
     private static final String TAG = ModifyUserActivity.class.getName();
 
     private ImageView img;
-    private EditText name;
-    private EditText lastName;
-    private EditText email;
-    private EditText city;
-    private EditText tel;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView height;
+    private Factory.CustomTakePhotoButton take_photo;
+    private TextInputEditText name;
+    private TextInputEditText lastName;
+    private TextInputEditText email;
+    private TextInputEditText city;
+    private TextInputEditText tel;
 
-    private ImagePicker imagePicker;
+    private TextInputEditText gender;
+    private TextInputEditText birthDate;
+    private TextInputEditText height;
+
+    private ListPopupWindow popup;
+    private GenderAdapterSpinner spinnerGenderAdapter;
+    private View.OnFocusChangeListener listenerDialog = (v, hasFocus) -> {
+        if(hasFocus) showDialog(v);
+    };
+    private View.OnFocusChangeListener listenerPopup = (v, hasFocus) -> {
+        if(hasFocus) showPopup(v);
+    };
+
     private User oldUser;
     private User user;
     private JSONObject bodyJson;
-
     private ImageFileHelper imageFileHelper;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_modify_profile);
@@ -67,7 +89,8 @@ public class ModifyUserActivity extends CommonActivity {
 
         imageFileHelper = ImageFileHelper.create(this);
 
-        img = findViewById(R.id.modify_profile_img);
+        img = findViewById(R.id.profile_img);
+        take_photo = findViewById(R.id.take_photo);
         name = findViewById(R.id.modify_profile_name);
         lastName = findViewById(R.id.modify_profile_lastname);
         email = findViewById(R.id.modify_profile_email);
@@ -97,6 +120,9 @@ public class ModifyUserActivity extends CommonActivity {
 
             user = oldUser.clone();
         }
+
+        popup = new ListPopupWindow(this);
+        spinnerGenderAdapter = new GenderAdapterSpinner(this);
     }
 
     @Override
@@ -160,7 +186,7 @@ public class ModifyUserActivity extends CommonActivity {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -184,71 +210,87 @@ public class ModifyUserActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
     protected void listenerAction() {
-        img.setOnClickListener( v ->{
-            imagePicker = new ImagePicker(this,
-                    null ,
-                    imageUri -> {
-                        String newName = ImageFileHelper.createNameRandom();
-                        Log.e(TAG, "Name : "+ newName);
-                        if(imageFileHelper.moveToTmpDir(imageUri, newName)){
-                            File imageTmp = imageFileHelper.getImageTmp(newName);
-                            imageFileHelper.load(img, imageTmp);
-                            user.setImageProfile(imageTmp);
 
-                            Log.e(TAG, "Name File user changed : "+ user.getImage());
-                        }
-                    }).setWithImageCrop(1,1);
-            imagePicker.choosePicture(true);
+        take_photo.onTakePhotoListener(new Factory.CustomTakePhotoButton.OnTakePhotoListener() {
+            @Override
+            public Activity getActivity() {
+                return ModifyUserActivity.this;
+            }
+
+            @Override
+            public OnImagePickedListener setonClickListener() {
+                return imageUri -> {
+                    String newName = ImageFileHelper.createNameRandom();
+                    Log.e(TAG, "Name : "+ newName);
+                    if(imageFileHelper.moveToTmpDir(imageUri, newName)){
+                        File imageTmp = imageFileHelper.getImageTmp(newName);
+                        imageFileHelper.load(img, imageTmp);
+                        user.setImageProfile(imageTmp);
+
+                        Log.e(TAG, "Name File user changed : "+ user.getImage());
+                    }
+                };
+            }
         });
 
-        gender.setOnClickListener(v ->{
-            final ChooseDialog<Gender> genderDialog = new ChooseDialog<>(this, Gender.values(),
-                    ((TextView) v).getText(),
-                    (val, description) -> {
-                        TextView gView = ((TextView) v);
-                        gView.setText(val.getStrId());
-                        gView.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null, null);
-                        user.setGender(val);
-                    },
-                    () -> Arrays.stream(Gender.values())
-                            .map(g -> getString(g.getStrId()))
-                            .toArray(String[]::new)
-            );
-            genderDialog.setTitle(R.string.gender);
-            genderDialog.create().show();
+        popup.setOnItemClickListener((parent, view, position, id) -> {
+            //gender
+            final Gender gObjectSelect = (Gender)parent.getAdapter().getItem(position);
+            Log.e(TAG, gObjectSelect.toString());
+            gender.setText(getString(gObjectSelect.getStrId()));
+            gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(gObjectSelect.getIconId()),
+                        null, null, null);
+            popup.dismiss();
         });
+        gender.setOnClickListener(this::showPopup);
+        gender.setOnFocusChangeListener(listenerPopup);
 
-        birthDate.setOnClickListener(v ->{
-            final TextView d = ((TextView) v);
-            DateTimePickerDialog.createDatePicker(this, (date, calendar) -> {
-                d.setText(date);
-                user.setBirthDate(calendar.getTime());
-            }).show();
-        });
+        height.setOnClickListener(this::showDialog);
+        height.setOnFocusChangeListener(listenerDialog);
 
-        height.setOnClickListener(v ->{
-            final TextView h = ((TextView) v);
-            HeightDialog.create(this, h.getText().toString(),  (heightMeasure) -> {
+        birthDate.setOnClickListener(this::showDialog);
+        birthDate.setOnFocusChangeListener(listenerDialog);
+    }
+
+    private void showPopup(View v){
+        popup.setAnchorView(v);
+        popup.setAdapter(spinnerGenderAdapter);
+        popup.show();
+    }
+
+    private void showDialog(View v) {
+        final TextInputEditText textView = ((TextInputEditText) v);
+
+        if(v.equals(height)) {
+            HeightDialog.create(this, textView.getText().toString(),  (heightMeasure) -> {
                 if(heightMeasure!=null){
-                    h.setText(heightMeasure.toString());
+                    textView.setText(heightMeasure.toString());
                     user.getHeight().setValue(false, heightMeasure.getValue(false));
                 }
             }).create().show();
-        });
+        }
+        if(v.equals(birthDate)) {
+
+            DateTimePickerDialog.createDatePicker(this, (date, calendar) -> {
+                textView.setText(date);
+                user.setBirthDate(calendar.getTime());
+            }).show();
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imagePicker.handleActivityResult(resultCode,requestCode, data);
+        take_photo.getImagePiker().handleActivityResult(resultCode,requestCode, data);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        imagePicker.handlePermission(requestCode, grantResults);
+        take_photo.getImagePiker().handlePermission(requestCode, grantResults);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

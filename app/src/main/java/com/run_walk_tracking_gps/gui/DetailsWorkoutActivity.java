@@ -4,15 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -26,6 +24,9 @@ import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 public class DetailsWorkoutActivity extends  CommonActivity{
 

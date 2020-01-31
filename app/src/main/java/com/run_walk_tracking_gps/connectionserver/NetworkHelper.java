@@ -9,9 +9,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -62,6 +59,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 public class NetworkHelper {
 
@@ -238,7 +239,7 @@ public class NetworkHelper {
         private static final String TAG = NetworkHelper.class.getName();
         private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
 
-        // private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
+        //private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
         // SERVER LOCALE
         private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
         //private static final String SERVER = "http://172.20.10.5/run_walk_tracking_server/";
@@ -344,6 +345,7 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DELETE, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
+
         @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean requestContinueHere(AppCompatActivity activity) {
             try {
@@ -365,6 +367,7 @@ public class NetworkHelper {
             return false;
         }
 
+
         @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
             try{
@@ -379,10 +382,12 @@ public class NetworkHelper {
             return false;
         }
 
+
         @RequiresApi(api = Build.VERSION_CODES.O)
         public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
             return sync(context, onUpdateGuiListener);
         }
+
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean syncInForeground(AppCompatActivity activity) {
@@ -438,6 +443,7 @@ public class NetworkHelper {
         }
 
         // ACCOUNT
+
         @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
             try {
@@ -510,6 +516,7 @@ public class NetworkHelper {
             check(bodyJson, NetworkHelper.Constant.fieldRequiredForDownloadImage());
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DOWNLOAD_IMAGE, bodyJson, HttpResponse.onResponseDownloadImageProfile(context));
         }
+
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestSignIn(AppCompatActivity activity, JSONObject bodyJson)
@@ -858,6 +865,7 @@ public class NetworkHelper {
                 }
             };
         }
+
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseLogin(AppCompatActivity activity, JSONObject credential){

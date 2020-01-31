@@ -3,11 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
@@ -28,6 +25,8 @@ import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
 
+import androidx.appcompat.app.AlertDialog;
+
 public class UserActivity extends CommonActivity {
 
     private static final String TAG = UserActivity.class.getName();
@@ -35,18 +34,18 @@ public class UserActivity extends CommonActivity {
     private static final int REQUEST_MODIFY_PROFILE = 11;
 
     private ImageView img;
-    private TextView name;
-    private TextView lastName;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView email;
-    private TextView city;
-    private TextView tel;
-    private TextView height;
+    private TextInputEditText name;
+    private TextInputEditText lastName;
+    private TextInputEditText gender;
+    private TextInputEditText birthDate;
+    private TextInputEditText email;
+    private TextInputEditText city;
+    private TextInputEditText tel;
+    private TextInputEditText height;
 
     private User user;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_profile);
@@ -77,7 +76,6 @@ public class UserActivity extends CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -111,9 +109,8 @@ public class UserActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
@@ -130,18 +127,8 @@ public class UserActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
-
-        findViewById(R.id.profile_img).setOnClickListener(v ->{
-            ImageView i = (ImageView)v;
-            try {
-                ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
-            }catch (ClassCastException e){
-                Log.e(TAG, "Immagine vuota");
-            }
-        });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
         if(user!=null){
 

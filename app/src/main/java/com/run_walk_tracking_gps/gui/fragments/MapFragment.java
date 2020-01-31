@@ -2,15 +2,13 @@ package com.run_walk_tracking_gps.gui.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -29,6 +27,8 @@ import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.List;
+
+import androidx.fragment.app.Fragment;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -55,7 +55,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
 
@@ -64,9 +64,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
@@ -77,7 +76,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         myLocation = view.findViewById(R.id.mylocation);
         typeMap = view.findViewById(R.id.type_map);
 
-        if(routeStr!=null) ((LinearLayout)myLocation.getParent()).setVisibility(View.GONE);
+        if(routeStr!=null) ((RelativeLayout)myLocation.getParent()).setVisibility(View.GONE);
         setListener();
 
         return view;
@@ -147,7 +146,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             googleMap.setMapType(MAP_TYPE_DEFAULT);
 
             if(myLocation){
-                googleMap.setMyLocationEnabled(true);
+                //googleMap.setMyLocationEnabled(true);
                 myLocation(activity);
             }
 

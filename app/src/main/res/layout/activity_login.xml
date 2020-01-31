@@ -1,95 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    style="@style/ScrollView">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:orientation="vertical"
-        android:paddingTop="20dp"
-        android:paddingBottom="50dp">
-
+    <LinearLayout style="@style/LinearLayout" >
 
         <RelativeLayout
             android:id="@+id/layout_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
-            <TextView
-                android:id="@+id/access_username_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/username" />
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/EditTextLayoutTheme"
+                android:hint="@string/username">
 
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/access_username"
+                    style="@style/EditTextTheme.Text"
+                    android:drawableStart="@drawable/ic_user" />
 
-            <EditText
-                android:id="@+id/access_username"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/access_username_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners"
-                android:drawableStart="@drawable/ic_user"
-                android:drawablePadding="20dp"
-                android:gravity="center_vertical"
-                android:hint="@string/username"
-                android:inputType="text"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light"
-                android:textSize="18sp" />
+            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/layout_old_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:paddingTop="20dp">
+            style="@style/RelativeLayout">
 
-            <TextView
-                android:id="@+id/access_password_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/password" />
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/EditTextLayoutTheme"
+                android:hint="@string/password">
 
-            <EditText
-                android:id="@+id/access_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/access_password_title"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/textview_rounded_corners"
-                android:drawableStart="@drawable/ic_password"
-                android:drawablePadding="20dp"
-                android:gravity="center_vertical"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:paddingStart="15dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="20dp"
-                android:textColor="@android:color/background_light"
-                android:textColorHint="@android:color/background_light" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/access_password"
+                    style="@style/EditTextTheme.Password"
+                    android:drawableStart="@drawable/ic_password" />
 
+            </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>
 
@@ -104,22 +50,12 @@
             android:textColor="@android:color/background_light"
             android:textSize="18sp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
+            style="@style/ButtonTheme"
             android:layout_marginTop="20dp"
-            android:background="@drawable/button_boot_app"
-            android:drawableStart="@drawable/ic_login"
-            android:drawablePadding="20dp"
-            android:gravity="center_horizontal|center_vertical"
-            android:paddingStart="20dp"
-            android:paddingTop="15dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="15dp"
             android:text="@string/login"
-            android:textColor="@android:color/background_light" />
+            app:icon="@drawable/ic_login" />
 
     </LinearLayout>
 </ScrollView>

@@ -255,7 +255,7 @@ public class Workout implements Parcelable, Cloneable{
     public enum Info {
 
         DATE(R.string.date, R.drawable.ic_calendar),
-        SPORT(R.string.sport),
+        SPORT(R.string.sport, R.drawable.ic_sport),
         TIME(Measure.Type.DURATION),
         DISTANCE(Measure.Type.DISTANCE),
         CALORIES(Measure.Type.ENERGY),

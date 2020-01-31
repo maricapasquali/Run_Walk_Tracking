@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#706F6F</color>
-    <color name="colorPrimaryOpaque">#4DF0D7BD</color>
+<!-- TODO : CHANGE COLOR  -->
     <color name="colorPrimaryDark">#2B2827</color>
-    <color name="colorAccent">#4DF0D7BD</color>
+    <color name="colorPrimary">#A3A2A2</color>
+    <color name="colorAccent">#A81F90FF</color>
+
+    <color name="colorPrimaryOpaque">#4DF0D7BD</color>
+
+<!--
+TODO: Riguardare
+    <color name="colorPrimaryLight">#0014BD</color>
+    <color name="colorPrimaryDarkLight">#00B8D4</color>
+    <color name="colorAccentLight">#5B304FFE</color>
+-->
 
     <color name="divColor">#F0EEEB</color>
 
     <!-- Color State -->
-    <color name="pressState">#A2A0A0</color>
+    <color name="pressState">#3BA2A0A0</color>
     <color name="checkState">#FFFFFF</color>
     <color name="NoCheckState">#A2A0A0</color>
 

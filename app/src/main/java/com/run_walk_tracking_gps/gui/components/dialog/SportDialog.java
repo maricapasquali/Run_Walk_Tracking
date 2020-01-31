@@ -2,15 +2,16 @@ package com.run_walk_tracking_gps.gui.components.dialog;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 
 import java.util.Arrays;
 
+import androidx.annotation.RequiresApi;
+
 @RequiresApi(api = Build.VERSION_CODES.N)
-public class SportDialog extends ChooseDialog<Sport> {
+public class SportDialog extends ChooseDialog<Sport> { // FIXME : ME SE NE APRONO 2
 
     private static Sport[] sports = Sport.values();
 

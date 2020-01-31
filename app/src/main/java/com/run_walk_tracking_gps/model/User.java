@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.model;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -64,21 +65,21 @@ public class User implements Parcelable {
         return new User(this);
     }
 
-    public User(Context context, JSONObject userJson) throws JSONException {
+    public User(Context context, JSONObject userJson){
         try {
             id_user = Preferences.Session.getIdUser(context);
-            name = userJson.getString(UserDescriptor.NAME);
-            last_name = userJson.getString(UserDescriptor.LAST_NAME);
-            gender = Gender.valueOf(userJson.getString(UserDescriptor.GENDER));
-            birth_date = DateHelper.create(context).parseShortToDate(userJson.getString(UserDescriptor.BIRTH_DATE));
-            email = userJson.getString(UserDescriptor.EMAIL);
-            city = userJson.getString(UserDescriptor.CITY);
-            phone = userJson.getString(UserDescriptor.PHONE);
-            height = Measure.create(context, Measure.Type.HEIGHT, userJson.getDouble(UserDescriptor.HEIGHT));
+            name = userJson.optString(UserDescriptor.NAME);
+            last_name = userJson.optString(UserDescriptor.LAST_NAME);
+            if(userJson.has(UserDescriptor.GENDER))
+                gender = Gender.valueOf(userJson.optString(UserDescriptor.GENDER));
+            birth_date = DateHelper.create(context).parseShortToDate(userJson.optString(UserDescriptor.BIRTH_DATE));
+            email = userJson.optString(UserDescriptor.EMAIL);
+            city = userJson.optString(UserDescriptor.CITY);
+            phone = userJson.optString(UserDescriptor.PHONE);
+            height = Measure.create(context, Measure.Type.HEIGHT, userJson.optDouble(UserDescriptor.HEIGHT));
             if(userJson.has(NetworkHelper.Constant.IMAGE)){
-                nameImageProfile = userJson.getJSONObject(NetworkHelper.Constant.IMAGE).getString(ImageProfileDescriptor.NAME);
+                nameImageProfile = userJson.optJSONObject(NetworkHelper.Constant.IMAGE).optString(ImageProfileDescriptor.NAME);
             }
-
         }
         catch (ParseException e) {
             e.printStackTrace();

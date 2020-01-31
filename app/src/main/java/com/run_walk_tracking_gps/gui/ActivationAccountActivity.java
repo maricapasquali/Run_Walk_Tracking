@@ -2,11 +2,15 @@ package com.run_walk_tracking_gps.gui;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.KeysIntent;
@@ -14,13 +18,14 @@ import com.run_walk_tracking_gps.utilities.AppUtilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ActivationAccountActivity extends CommonActivity
-        //implements  Response.Listener<JSONObject>
-{
+import androidx.annotation.RequiresApi;
+
+public class ActivationAccountActivity extends CommonActivity {
+
     private static final String TAG = ActivationAccountActivity.class.getName();
 
-    private Button access;
-    private EditText token;
+    private MaterialButton access;
+    private TextInputEditText token;
     private String username;
     private String password;
 
@@ -40,9 +45,27 @@ public class ActivationAccountActivity extends CommonActivity
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void listenerAction() {
+
+        token.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String error = null;
+                if(s.length() <= 0) error = getString(R.string.check_code) + getString(R.string.not_empty);
+                ((TextInputLayout) token.getParent().getParent()).setError(error);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         access.setOnClickListener(v ->{
             if(TextUtils.isEmpty(token.getText())){
-                token.setError(getString(R.string.check_code)+ getString(R.string.not_empty));
+                ((TextInputLayout) token.getParent().getParent()).setError(getString(R.string.check_code)+ getString(R.string.not_empty));
             }
             else{
                 try {
@@ -59,36 +82,4 @@ public class ActivationAccountActivity extends CommonActivity
             }
         });
     }
-/*
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public void onResponse(JSONObject response) {
-
-        if(response.has(Constant.SESSION) && response.has(Constant.DATA)){
-            try {
-                // SESSION TO SHAREDPREFERENCE
-                DefaultPreferencesUser.setSession(this, response.getJSONObject(Constant.SESSION));
-
-                // DATA TO DATABASE
-                JSONObject data = response.getJSONObject(Constant.DATA);
-                final  JSONObject user = data.getJSONObject(Constant.USER);
-                if(SqlLiteUserDao.create(this).insert(user)){
-                    // TODO: 1/2/2020 DECOMPRESSIONE IMMAGINE E SALVATAGGIO IN image/
-                    final JSONObject image = user.getJSONObject(Constant.IMAGE);
-                    final String name = image.getString(ImageProfileDescriptor.NAME);
-                    final String encode = image.getString(Constant.IMG_ENCODE);
-
-                    DecompressionEncodeImageTask.create(this, name).execute(encode);
-                }
-                SqlLiteSettingsDao.create(this).insert(data.getJSONObject(Constant.SETTINGS));
-                SqlLiteStatisticsDao.createWeightDao(this).insert(data.getJSONArray(Constant.WEIGHTS).getJSONObject(0));
-
-                startActivity(new Intent(this, ApplicationActivity.class));
-                finishAffinity();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    */
 }

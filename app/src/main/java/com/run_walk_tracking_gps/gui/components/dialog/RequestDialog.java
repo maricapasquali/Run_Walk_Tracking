@@ -3,10 +3,10 @@ package com.run_walk_tracking_gps.gui.components.dialog;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.ForgotPassword;
 import com.run_walk_tracking_gps.gui.LoginActivity;

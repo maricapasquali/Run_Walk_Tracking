@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
@@ -15,6 +14,8 @@ import com.run_walk_tracking_gps.model.Workout;
 
 
 import org.json.JSONException;
+
+import androidx.annotation.RequiresApi;
 
 public class WorkoutServiceHandler implements ServiceConnection {
     private static final String TAG = WorkoutServiceHandler.class.getName();

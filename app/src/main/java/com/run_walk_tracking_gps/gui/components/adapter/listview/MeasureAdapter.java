@@ -1,8 +1,6 @@
 package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +13,7 @@ import android.widget.TextView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.utilities.EnumUtilities;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -76,8 +75,7 @@ public class MeasureAdapter extends BaseAdapter {
 
         viewHolder.textViewMeasure.setText(measure.getStrId());
         viewHolder.textViewMeasure.setCompoundDrawablesWithIntrinsicBounds(
-                context.getDrawable(measure.getIconId()), null, null, null);
-        viewHolder.textViewMeasure.getCompoundDrawables()[0].setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
+                ColorUtilities.darkIcon(context, measure.getIconId()), null, null, null);
 
         final Measure.Unit[] measureUnits = measure.getMeasureUnit();
         if(measureUnits.length==2){

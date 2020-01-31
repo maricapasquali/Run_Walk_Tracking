@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
@@ -16,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import androidx.annotation.RequiresApi;
 
 public class EnumUtilities {
 

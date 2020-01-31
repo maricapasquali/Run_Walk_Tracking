@@ -11,7 +11,6 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
@@ -27,6 +26,8 @@ import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import androidx.annotation.RequiresApi;
 
 public class WorkoutService extends Service {
 
