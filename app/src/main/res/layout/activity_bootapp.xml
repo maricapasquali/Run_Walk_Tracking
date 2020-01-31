@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bootappLayout"
@@ -62,26 +63,14 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/recbtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="15dp"
-                        android:paddingBottom="15dp"
+                        style="@style/ButtonTheme.Boot"
                         android:text="@string/rec"
-                        android:textSize="18sp"
-                        app:backgroundTint="@color/colorPrimaryDark"
-                        app:cornerRadius="10dp"
                         app:icon="@drawable/ic_sign_up" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/loginbtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="15dp"
-                        android:paddingBottom="15dp"
+                        style="@style/ButtonTheme.Boot"
                         android:text="@string/login"
-                        android:textSize="18sp"
-                        app:backgroundTint="@color/colorPrimaryDark"
-                        app:cornerRadius="10dp"
                         app:icon="@drawable/ic_login" />
                 </LinearLayout>
 

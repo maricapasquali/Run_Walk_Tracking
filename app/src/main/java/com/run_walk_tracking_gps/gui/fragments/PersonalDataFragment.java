@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.myhexaville.smartimagepicker.ImagePickerContract;
+import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.gui.components.Factory;
@@ -33,12 +36,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-
 public class PersonalDataFragment extends Fragment {
 
     private static final String TAG = PersonalDataFragment.class.getName();
     private Factory.CustomImageView img;
-    private FloatingActionButton takePhoto;
+    private Factory.CustomTakePhotoButton takePhoto;
 
     private TextInputEditText name ;
     private TextInputEditText last_name ;
@@ -74,7 +76,7 @@ public class PersonalDataFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_signup_1, container, false);
         Log.d(TAG,"onCreateView");
-        img = view.findViewById(R.id.signup_profile_img);
+        img = view.findViewById(R.id.profile_img);
         takePhoto = view.findViewById(R.id.take_photo);
 
         name = view.findViewById(R.id.signup_profile_name);
@@ -123,7 +125,18 @@ public class PersonalDataFragment extends Fragment {
         birthDate.setOnFocusChangeListener((v, hasFocus)->{
             if(hasFocus) showDateDialog(v);
         });
-        takePhoto.setOnClickListener(v -> imagePickerHandlerListener.imagePickerHandler(img));
+
+        takePhoto.onTakePhotoListener(new Factory.CustomTakePhotoButton.OnTakePhotoListener() {
+            @Override
+            public Activity getActivity() {
+                return imagePickerHandlerListener.getActivity();
+            }
+
+            @Override
+            public OnImagePickedListener setonClickListener() {
+                return imagePickerHandlerListener.imagePickerHandler(img);
+            }
+        });
     }
 
     private void showDateDialog(View v) {
@@ -188,9 +201,14 @@ public class PersonalDataFragment extends Fragment {
         }
     }
 
+    public Factory.CustomTakePhotoButton getTakePhoto() {
+        return takePhoto;
+    }
+
     public interface ImagePickerHandlerListener{
-        void imagePickerHandler(ImageView imageView);
+        OnImagePickedListener imagePickerHandler(ImageView imageView);
         Uri getImageUri();
+        Activity getActivity();
     }
 
     public interface PersonalDataListener{

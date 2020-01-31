@@ -13,8 +13,8 @@ public class ModifyWeightAdapter extends NewWeightAdapter{
 
     private List<String> modifyWeight;
 
-    public ModifyWeightAdapter(Context _context_, List<String> modifyWeight, View.OnClickListener onClickListener) {
-        super(_context_, onClickListener);
+    public ModifyWeightAdapter(Context _context_, List<String> modifyWeight, View.OnFocusChangeListener listener) {
+        super(_context_, listener);
         this.modifyWeight = modifyWeight;
     }
 

@@ -1,90 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    android:orientation="vertical">
+    style="@style/ScrollView">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/check_code_text"
-            android:textAlignment="center"
-            android:textSize="18sp" />
-
-        <RelativeLayout
-            android:id="@+id/access_layout_token"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textView3"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
-
-            <com.google.android.material.textfield.TextInputLayout
+    <LinearLayout style="@style/LinearLayout">
+            <TextView
+                android:id="@+id/textView3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/check_code"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/check_code_text"
+                android:textAlignment="center"
+                android:textSize="18sp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/access_token"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:inputType="text"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/access_layout_token"
+                style="@style/RelativeLayout">
 
-        <RelativeLayout
-            android:id="@+id/access_layout_login_token"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/access_layout_token"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditTextLayoutTheme"
+                    android:hint="@string/check_code">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/access_login_token"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_marginTop="20dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:paddingStart="20dp"
-                android:paddingTop="15dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="15dp"
-                android:text="@string/login"
-                app:backgroundTint="@color/colorPrimaryDark"
-                app:cornerRadius="10dp"
-                app:icon="@drawable/ic_login" />
-        </RelativeLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/access_token"
+                        style="@style/EditTextTheme.Text"/>
 
-    </RelativeLayout>
+                </com.google.android.material.textfield.TextInputLayout>
+            </RelativeLayout>
 
+            <RelativeLayout
+                android:id="@+id/access_layout_login_token"
+                style="@style/RelativeLayout">
 
-</RelativeLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/access_login_token"
+                    style="@style/ButtonTheme"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/login"
+                    app:icon="@drawable/ic_login" />
+            </RelativeLayout>
+
+    </LinearLayout>
+
+</ScrollView>

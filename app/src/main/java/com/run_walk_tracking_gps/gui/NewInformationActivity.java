@@ -46,7 +46,7 @@ public abstract class NewInformationActivity extends CommonActivity {
 
     protected abstract NewInformationAdapter getAdapterListView();
 
-    protected abstract View.OnClickListener onSetInfo();
+    protected abstract View.OnFocusChangeListener onSetInfo();
 
     protected abstract void onClickAddInfo();
 

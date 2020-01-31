@@ -23,11 +23,11 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
 
     private final String TAG = NewInformationAdapter.class.getName();
     private Context context;
-    private View.OnClickListener listener;
+    private View.OnFocusChangeListener listener;
     private List<T> info;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    NewInformationAdapter(Context _context_, T[] info, View.OnClickListener onClickListener) {
+    NewInformationAdapter(Context _context_, T[] info, View.OnFocusChangeListener onClickListener) {
         this.context = _context_;
         this.info = Arrays.asList(info);
         this.listener = onClickListener;
@@ -65,7 +65,10 @@ public abstract class NewInformationAdapter<T> extends BaseAdapter {
 
             final TextInputLayout title = view.findViewById(R.id.detail_title);
             final TextInputEditText detail = view.findViewById(R.id.detail_description);
-            if(listener!=null) detail.setOnClickListener(listener);
+            if(listener!=null){
+                detail.setOnFocusChangeListener(listener);
+                detail.setOnClickListener(v -> listener.onFocusChange(v, true));
+            }
             viewHolder = new ListHolder(title, detail);
 
             view.setTag(viewHolder);

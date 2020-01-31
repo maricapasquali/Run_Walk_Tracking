@@ -1,61 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    style="@style/ScrollView">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:orientation="vertical"
-        android:paddingBottom="50dp">
-
+    <LinearLayout style="@style/LinearLayout">
 
         <TextView
             android:id="@+id/signup_access_data"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="30dp"
-            android:text="@string/access_data"
-            android:textSize="30sp" />
+            style="@style/TitlesSignUp"
+            android:text="@string/access_data" />
 
         <RelativeLayout
             android:id="@+id/profile_layout_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="10dp">
+            style="@style/RelativeLayout">
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/username"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme"
+                android:hint="@string/username">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/signup_profile_username"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:drawableStart="@drawable/ic_user"
-                    android:drawablePadding="20dp"
-                    android:inputType="text"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.Text"
+                    android:drawableStart="@drawable/ic_user"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,36 +32,17 @@
 
         <RelativeLayout
             android:id="@+id/profile_layout_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="10dp">
+            style="@style/RelativeLayout">
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/password"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme"
+                android:hint="@string/password">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/signup_profile_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:drawableStart="@drawable/ic_password"
-                    android:drawablePadding="20dp"
-                    android:inputType="textPassword"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.Password"
+                    android:drawableStart="@drawable/ic_password" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,36 +50,16 @@
 
         <RelativeLayout
             android:id="@+id/profile_layout_confirm_password"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="10dp">
-
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/confirm_password"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme"
+                android:hint="@string/confirm_password">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/signup_profile_confirm_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:drawableStart="@drawable/ic_check_password"
-                    android:drawablePadding="20dp"
-                    android:inputType="textPassword"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.Password"
+                    android:drawableStart="@drawable/ic_check_password"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -138,18 +67,8 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/signup_login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_marginTop="30dp"
-            android:backgroundTint="@color/colorPrimaryDark"
-            android:gravity="center_horizontal|center_vertical"
-            android:paddingStart="20dp"
-            android:paddingTop="15dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="15dp"
+            style="@style/ButtonTheme"
             android:text="@string/rec"
-            app:cornerRadius="10dp"
             app:icon="@drawable/ic_sign_up" />
 
     </LinearLayout>

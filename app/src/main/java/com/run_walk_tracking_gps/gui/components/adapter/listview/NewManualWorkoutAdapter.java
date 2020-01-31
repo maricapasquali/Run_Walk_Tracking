@@ -12,8 +12,8 @@ public class NewManualWorkoutAdapter extends NewInformationAdapter<Workout.Info>
 
     private final String TAG = NewManualWorkoutAdapter.class.getName();
 
-    public NewManualWorkoutAdapter(Context context, View.OnClickListener onClickListener) {
-        super(context, Workout.Info.infoWorkoutNoSpeed(),onClickListener);
+    public NewManualWorkoutAdapter(Context context, View.OnFocusChangeListener listener) {
+        super(context, Workout.Info.infoWorkoutNoSpeed(), listener);
     }
 
     @Override

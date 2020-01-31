@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,13 +16,16 @@ import android.widget.ListPopupWindow;
 import android.widget.TextView;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.dialog.MeasureDialog;
@@ -51,6 +56,7 @@ public class ModifyUserActivity extends CommonActivity {
     private static final String TAG = ModifyUserActivity.class.getName();
 
     private ImageView img;
+    private Factory.CustomTakePhotoButton take_photo;
     private TextInputEditText name;
     private TextInputEditText lastName;
     private TextInputEditText email;
@@ -70,7 +76,6 @@ public class ModifyUserActivity extends CommonActivity {
         if(hasFocus) showPopup(v);
     };
 
-    private ImagePicker imagePicker;
     private User oldUser;
     private User user;
     private JSONObject bodyJson;
@@ -84,7 +89,8 @@ public class ModifyUserActivity extends CommonActivity {
 
         imageFileHelper = ImageFileHelper.create(this);
 
-        img = findViewById(R.id.modify_profile_img);
+        img = findViewById(R.id.profile_img);
+        take_photo = findViewById(R.id.take_photo);
         name = findViewById(R.id.modify_profile_name);
         lastName = findViewById(R.id.modify_profile_lastname);
         email = findViewById(R.id.modify_profile_email);
@@ -204,23 +210,30 @@ public class ModifyUserActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
     protected void listenerAction() {
-        img.setOnClickListener( v ->{
-            imagePicker = new ImagePicker(this,
-                    null ,
-                    imageUri -> {
-                        String newName = ImageFileHelper.createNameRandom();
-                        Log.e(TAG, "Name : "+ newName);
-                        if(imageFileHelper.moveToTmpDir(imageUri, newName)){
-                            File imageTmp = imageFileHelper.getImageTmp(newName);
-                            imageFileHelper.load(img, imageTmp);
-                            user.setImageProfile(imageTmp);
 
-                            Log.e(TAG, "Name File user changed : "+ user.getImage());
-                        }
-                    }).setWithImageCrop(1,1);
-            imagePicker.choosePicture(true);
+        take_photo.onTakePhotoListener(new Factory.CustomTakePhotoButton.OnTakePhotoListener() {
+            @Override
+            public Activity getActivity() {
+                return ModifyUserActivity.this;
+            }
+
+            @Override
+            public OnImagePickedListener setonClickListener() {
+                return imageUri -> {
+                    String newName = ImageFileHelper.createNameRandom();
+                    Log.e(TAG, "Name : "+ newName);
+                    if(imageFileHelper.moveToTmpDir(imageUri, newName)){
+                        File imageTmp = imageFileHelper.getImageTmp(newName);
+                        imageFileHelper.load(img, imageTmp);
+                        user.setImageProfile(imageTmp);
+
+                        Log.e(TAG, "Name File user changed : "+ user.getImage());
+                    }
+                };
+            }
         });
 
         popup.setOnItemClickListener((parent, view, position, id) -> {
@@ -271,13 +284,13 @@ public class ModifyUserActivity extends CommonActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imagePicker.handleActivityResult(resultCode,requestCode, data);
+        take_photo.getImagePiker().handleActivityResult(resultCode,requestCode, data);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        imagePicker.handlePermission(requestCode, grantResults);
+        take_photo.getImagePiker().handlePermission(requestCode, grantResults);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

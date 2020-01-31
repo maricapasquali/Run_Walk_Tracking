@@ -147,34 +147,37 @@ public class ModifyWeightActivity extends NewInformationActivity {
     }
 
     @Override
-    public View.OnClickListener onSetInfo() {
-        return v ->{
-            final TextInputEditText detail = (TextInputEditText)v;
-            final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
+    public View.OnFocusChangeListener onSetInfo() {
+        return (view, hasFocus) ->{
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
 
-            StatisticsData.InfoWeight title = null;
-            try{
-                title = (StatisticsData.InfoWeight) EnumUtilities.getEnumFromString(StatisticsData.InfoWeight.class , this, detailTitle.getHint().toString());
-            }catch (Exception ignored){
-            }
-            Log.d(TAG, detailTitle.getHint().toString());
+                StatisticsData.InfoWeight title = null;
+                try{
+                    title = (StatisticsData.InfoWeight) EnumUtilities.getEnumFromString(StatisticsData.InfoWeight.class , this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
 
-            switch (title){
-                case DATE:
-                    DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
-                            (date, calendar) -> {
-                                detail.setText(date);
-                                statisticsData.setDate(calendar.getTime());
-                                Log.e(TAG, statisticsData.getDateStr());
-                            }).show();
-                    break;
-                case WEIGHT:
-                    WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
-                        detail.setText(weightMeasure.toString());
-                        statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
-                    }).show();
-                    break;
+                switch (title){
+                    case DATE:
+                        DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
+                                (date, calendar) -> {
+                                    detail.setText(date);
+                                    statisticsData.setDate(calendar.getTime());
+                                    Log.e(TAG, statisticsData.getDateStr());
+                                }).show();
+                        break;
+                    case WEIGHT:
+                        WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
+                            detail.setText(weightMeasure.toString());
+                            statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
+                        }).show();
+                        break;
+                }
             }
+
         };
     }
 

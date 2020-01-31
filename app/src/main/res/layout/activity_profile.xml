@@ -1,321 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    style="@style/ScrollView">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:orientation="vertical">
+    <LinearLayout style="@style/LinearLayout">
 
-
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/profile_layout_name_lastname"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp">
+            style="@style/RelativeLayout">
 
             <view
-                android:id="@+id/profile_img"
-                class="com.run_walk_tracking_gps.gui.components.Factory$CustomImageView"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerInParent="true"
-                android:layout_marginEnd="20dp"
-                android:contentDescription="@string/img_profile"
-                app:srcCompat="@drawable/ic_user_empty" />
+                android:id="@+id/profile_img_layout"
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomImageProfile"
+                style="@style/ImageProfileTheme"/>
 
             <RelativeLayout
-                android:id="@+id/profile_layout_name"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_toEndOf="@+id/profile_img">
+                android:layout_height="wrap_content">
 
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/name"
-                    android:textColorHint="@color/colorPrimaryDark"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="10dp"
-                    app:boxCornerRadiusBottomStart="10dp"
-                    app:boxCornerRadiusTopEnd="10dp"
-                    app:boxCornerRadiusTopStart="10dp"
-                    app:errorEnabled="true">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/profile_name"
+                    <RelativeLayout
+                        android:id="@+id/profile_layout_name"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:drawablePadding="20dp"
-                        android:inputType="text"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textColorHighlight="@color/colorPrimaryDark" />
+                        android:layout_height="wrap_content">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/EditTextLayoutTheme.TextViewLayout"
+                            android:hint="@string/name">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/profile_name"
+                                style="@style/EditTextTheme.TextViewLayout" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/profile_layout_lastname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/profile_layout_name">
+
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/EditTextLayoutTheme.TextViewLayout"
+                            android:hint="@string/lastname">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/profile_lastname"
+                            style="@style/EditTextTheme.TextViewLayout" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </RelativeLayout>
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/profile_layout_lastname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/profile_layout_name"
-                android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/profile_img">
-
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/lastname"
-                    android:textColorHint="@color/colorPrimaryDark"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="10dp"
-                    app:boxCornerRadiusBottomStart="10dp"
-                    app:boxCornerRadiusTopEnd="10dp"
-                    app:boxCornerRadiusTopStart="10dp"
-                    app:errorEnabled="true">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/profile_lastname"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:drawablePadding="20dp"
-                    android:inputType="text"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
-                </com.google.android.material.textfield.TextInputLayout>
-            </RelativeLayout>
-
-        </RelativeLayout>
+        </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_gender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/gender"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/gender">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_gender"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:drawablePadding="20dp"
-                    android:inputType="text"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_gender" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_birth_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/birth_date"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/birth_date">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_birth_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="false"
-                    android:drawableStart="@drawable/ic_calendar"
-                    android:drawablePadding="20dp"
-                    android:focusable="false"
-                    android:inputType="text"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_calendar" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/email"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_email"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="false"
-                    android:drawableStart="@drawable/ic_email"
-                    android:drawablePadding="20dp"
-                    android:focusable="false"
-                    android:inputType="textEmailAddress"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_email"/>
             </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_city"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/city"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/city">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_city"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="false"
-                    android:drawableStart="@drawable/ic_city"
-                    android:drawablePadding="20dp"
-                    android:focusable="false"
-                    android:inputType="text"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_city" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_tel"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/tel"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/tel">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_tel"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="false"
-                    android:drawableStart="@drawable/ic_phone"
-                    android:drawablePadding="20dp"
-                    android:focusable="false"
-                    android:inputType="phone"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/profile_layout_height"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="50dp">
+            style="@style/RelativeLayout">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/height"
-                android:textColorHint="@color/colorPrimaryDark"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusTopStart="10dp"
-                app:errorEnabled="true">
+                style="@style/EditTextLayoutTheme.TextViewLayout"
+                android:hint="@string/height">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_height"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="false"
-                    android:drawableStart="@drawable/ic_height"
-                    android:drawablePadding="20dp"
-                    android:focusable="false"
-                    android:inputType="text"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textColorHighlight="@color/colorPrimaryDark" />
+                    style="@style/EditTextTheme.TextViewLayout"
+                    android:drawableStart="@drawable/ic_height" />
             </com.google.android.material.textfield.TextInputLayout>
 
         </RelativeLayout>

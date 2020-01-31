@@ -1,5 +1,6 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 
 
 import com.myhexaville.smartimagepicker.ImagePicker;
+import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.model.User;
 import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
@@ -52,7 +54,6 @@ public class SignUpActivity extends CommonActivity
     private MenuItem next;
     private List<Fragment> fragmentSignUp = new LinkedList<>();
 
-    private ImagePicker imagePicker;
     private Uri imageUri;
 
     @Override
@@ -178,20 +179,20 @@ public class SignUpActivity extends CommonActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imagePicker.handleActivityResult(resultCode,requestCode, data);
+        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
+        fragment.getTakePhoto().getImagePiker().handleActivityResult(resultCode,requestCode, data);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        imagePicker.handlePermission(requestCode, grantResults);
+        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
+        fragment.getTakePhoto().getImagePiker().handlePermission(requestCode, grantResults);
     }
 
     @Override
-    public void imagePickerHandler(ImageView imageView) {
-        imagePicker = new ImagePicker(this,
-                null ,
-                imageUri -> {
+    public OnImagePickedListener imagePickerHandler(ImageView imageView) {
+        return imageUri -> {
                     String newName = ImageFileHelper.createNameRandom();
                     Log.e("PICKERIMAGE", "Name : "+ newName);
                     ImageFileHelper imageFileHelper = ImageFileHelper.create(this);
@@ -222,13 +223,17 @@ public class SignUpActivity extends CommonActivity
 
 
                     }
-                }).setWithImageCrop(1,1);
-        imagePicker.choosePicture(true);
+        };
     }
 
     @Override
     public Uri getImageUri() {
         return imageUri;
+    }
+
+    @Override
+    public Activity getActivity() {
+        return this;
     }
 
 }

@@ -20,10 +20,12 @@ import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import java.util.ArrayList;
 import java.util.Map;
 
+import androidx.appcompat.view.ContextThemeWrapper;
+
 public class DetailsWorkoutAdapter extends BaseAdapter {
 
     private final static String TAG = DetailsWorkoutAdapter.class.getName();
-    private View.OnClickListener listener;
+    private View.OnFocusChangeListener listener;
 
     private Context context;
     private Map<Workout.Info, Object> details;
@@ -33,7 +35,7 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         this.details = map;
     }
 
-    public DetailsWorkoutAdapter(Context context, Map<Workout.Info, Object> map, View.OnClickListener listener){
+    public DetailsWorkoutAdapter(Context context, Map<Workout.Info, Object> map, View.OnFocusChangeListener listener){
         this(context,map);
         this.listener = listener;
     }
@@ -70,7 +72,13 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
 
             final TextInputLayout title = view.findViewById(R.id.detail_title);
             final TextInputEditText description = view.findViewById(R.id.detail_description);
-            if(listener!=null) description.setOnClickListener(listener);
+            if(listener==null) {
+                title.setErrorEnabled(false);
+                description.setFocusable(false);
+            }else{
+                description.setOnFocusChangeListener(listener);
+                description.setOnClickListener(v -> listener.onFocusChange(v, true));
+            }
             viewHolder = new ListHolder(title, description);
 
             view.setTag(viewHolder);

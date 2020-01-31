@@ -12,7 +12,7 @@ public class NewWeightAdapter extends NewInformationAdapter<StatisticsData.InfoW
 
     private final String TAG = NewWeightAdapter.class.getName();
 
-    public NewWeightAdapter(Context context, View.OnClickListener listener) {
+    public NewWeightAdapter(Context context, View.OnFocusChangeListener listener) {
         super(context, StatisticsData.InfoWeight.values(), listener);
     }
 

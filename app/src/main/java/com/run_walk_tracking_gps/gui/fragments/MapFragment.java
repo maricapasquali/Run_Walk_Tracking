@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -75,7 +76,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         myLocation = view.findViewById(R.id.mylocation);
         typeMap = view.findViewById(R.id.type_map);
 
-        if(routeStr!=null) ((LinearLayout)myLocation.getParent()).setVisibility(View.GONE);
+        if(routeStr!=null) ((RelativeLayout)myLocation.getParent()).setVisibility(View.GONE);
         setListener();
 
         return view;
@@ -145,7 +146,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             googleMap.setMapType(MAP_TYPE_DEFAULT);
 
             if(myLocation){
-                googleMap.setMyLocationEnabled(true);
+                //googleMap.setMyLocationEnabled(true);
                 myLocation(activity);
             }
 

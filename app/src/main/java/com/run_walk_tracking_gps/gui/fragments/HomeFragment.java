@@ -56,8 +56,8 @@ public class HomeFragment extends Fragment
     @SuppressLint("StaticFieldLeak")
     private static FloatingActionButton restart;
     private FloatingActionButton stop;
-    private FloatingActionButton block_screen;
-    private SlideToActView unlock_screen;
+    /*private FloatingActionButton block_screen;
+    private SlideToActView unlock_screen;*/
     private TextView workout_duration;
     private TextView workout_distance;
     private TextView workout_energy;
@@ -118,8 +118,8 @@ public class HomeFragment extends Fragment
         pause = rootView.findViewById(R.id.pause_workout);
         restart = rootView.findViewById(R.id.restart_workout);
         stop = rootView.findViewById(R.id.stop_workout);
-        block_screen = rootView.findViewById(R.id.block_screen);
-        unlock_screen = rootView.findViewById(R.id.unlock_screen);
+        /*block_screen = rootView.findViewById(R.id.block_screen);
+        unlock_screen = rootView.findViewById(R.id.unlock_screen);*/
 
         sport = rootView.findViewById(R.id.sport);
         setSport();
@@ -169,30 +169,30 @@ public class HomeFragment extends Fragment
         ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
         getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
         start.setVisibility(View.GONE);
-        block_screen.setVisibility(View.VISIBLE);
+        //block_screen.setVisibility(View.VISIBLE);
         pause.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void pauseState(){
         pause.setVisibility(View.GONE);
-        block_screen.setVisibility(View.GONE);
+        //block_screen.setVisibility(View.GONE);
         restart.setVisibility(View.VISIBLE);
         stop.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void lockState(){
-        block_screen.setVisibility(View.GONE);
+        //block_screen.setVisibility(View.GONE);
         pause.setVisibility(View.GONE);
-        unlock_screen.setVisibility(View.VISIBLE);
+        //unlock_screen.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
     private void unlockState(){
-        unlock_screen.setVisibility(View.GONE);
+        //unlock_screen.setVisibility(View.GONE);
         pause.setVisibility(View.VISIBLE);
-        block_screen.setVisibility(View.VISIBLE);
+        //block_screen.setVisibility(View.VISIBLE);
     }
     /* -- FINE UPDATE GUI ACTION RUNNING WORKOUTSERVICE -- */
 
@@ -217,7 +217,7 @@ public class HomeFragment extends Fragment
 
             v.setVisibility(View.GONE);
             stop.setVisibility(View.GONE);
-            block_screen.setVisibility(View.VISIBLE);
+           //block_screen.setVisibility(View.VISIBLE);
             pause.setVisibility(View.VISIBLE);
             //RESTART SERVICE
             serviceHandler.restartService();
@@ -231,7 +231,7 @@ public class HomeFragment extends Fragment
             onStopWorkoutClickListener.OnStopWorkoutClick(workout);
         });
 
-        block_screen.setOnClickListener(v -> {
+        /*block_screen.setOnClickListener(v -> {
             lockState();
             setClickable(false);
             // BLOCK (remove controller button) NOTIFICATION SERVICE
@@ -244,7 +244,7 @@ public class HomeFragment extends Fragment
             setClickable(true);
             // UNBLOCK (add controller button) NOTIFICATION SERVICE
             serviceHandler.unLockService();
-        });
+        });*/
     }
 
     private void setClickable(final boolean is) {
@@ -375,14 +375,14 @@ public class HomeFragment extends Fragment
                 HomeFragment.this.setIndoor(!LocationUtilities.isGpsEnable(getContext()));
                 HomeFragment.this.startState();
                 if(wService.isPause())  HomeFragment.this.pauseState();
-                else{
+                /*else{
                     if(wService.isLock()){
                         HomeFragment.this.lockState();
                         // TODO: 12/10/2019 NON FUNZIONA perchè menu viene creato dopo
                         //setClickable(false);
                     }else
                         HomeFragment.this.unlockState();
-                }
+                }*/
             }
             break;
         }

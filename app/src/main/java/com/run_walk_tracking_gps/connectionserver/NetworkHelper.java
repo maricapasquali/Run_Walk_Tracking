@@ -239,7 +239,7 @@ public class NetworkHelper {
         private static final String TAG = NetworkHelper.class.getName();
         private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
 
-        // private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
+        //private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
         // SERVER LOCALE
         private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
         //private static final String SERVER = "http://172.20.10.5/run_walk_tracking_server/";
@@ -368,6 +368,7 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
             try{
                 JSONObject bodyJson = Preferences.Session.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
@@ -382,11 +383,13 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
             return sync(context, onUpdateGuiListener);
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean syncInForeground(AppCompatActivity activity) {
             return sync(activity, HttpResponse.onResponseSyncInForeground(activity));
         }
@@ -441,6 +444,7 @@ public class NetworkHelper {
 
         // ACCOUNT
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
             try {
                 switch (action){
@@ -514,6 +518,7 @@ public class NetworkHelper {
         }
 
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestSignIn(AppCompatActivity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSignIn());

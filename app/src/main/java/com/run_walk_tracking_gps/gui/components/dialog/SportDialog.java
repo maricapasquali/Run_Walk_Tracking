@@ -11,7 +11,7 @@ import java.util.Arrays;
 import androidx.annotation.RequiresApi;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
-public class SportDialog extends ChooseDialog<Sport> {
+public class SportDialog extends ChooseDialog<Sport> { // FIXME : ME SE NE APRONO 2
 
     private static Sport[] sports = Sport.values();
 

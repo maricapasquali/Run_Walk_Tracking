@@ -51,65 +51,67 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
     }
 
     @Override
-    public View.OnClickListener onSetInfo() {
-        return v ->{
-            final TextInputEditText detail = (TextInputEditText)v;
-            final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
+    public View.OnFocusChangeListener onSetInfo() {
+        return (view, hasFocus) ->{
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
 
-            Workout.Info title = null;
+                Workout.Info title = null;
 
-            try{
-                title = (Workout.Info) EnumUtilities.getEnumFromString(Workout.Info.class , this, detailTitle.getHint().toString());
-            }catch (Exception ignored){
-            }
-            Log.d(TAG, detailTitle.getHint().toString());
+                try{
+                    title = (Workout.Info) EnumUtilities.getEnumFromString(Workout.Info.class , this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
 
-            switch (title){
-                case DATE:
-                    DateTimePickerDialog.createDateTimePicker(NewManualWorkoutActivity.this, (date, calendar) -> {
-                        workout.setDate(calendar.getTime());
-                        detail.setText(date);
-                    }).show();
-                    break;
-                case SPORT:
-                    SportDialog.create(NewManualWorkoutActivity.this, detail.getText(), (val, description) -> {
-                        detail.setText(val.getStrId());
-                        detail.setCompoundDrawablesWithIntrinsicBounds(ColorUtilities.darkIcon(this, val.getIconId()), null, null, null);
-                        workout.setSport(val);
-                    }).show();
-                    break;
-                case TIME:
-                    DurationDialog.create(NewManualWorkoutActivity.this, (durationMeasure) -> {
-                        if(durationMeasure!=null){
-                            workout.getDuration().setValue(true, durationMeasure.getValue(true));
-                            detail.setText(durationMeasure.toString());
-                        }
-                        workout.setMiddleSpeed();
-                    }).show();
-                    break;
-                case DISTANCE:
-                    DistanceDialog.create(NewManualWorkoutActivity.this, (distanceMeasure) -> {
-                        if(distanceMeasure==null){
-                            detail.setText(R.string.no_available_abbr);
-                            workout.getDistance().setValue(true, 0d);
-                        }else{
-                            detail.setText(distanceMeasure.toString());
-                            workout.getDistance().setValue(false, distanceMeasure.getValue(false));
-                        }
-                        workout.setMiddleSpeed();
-                    }).show();
-                    break;
-                case CALORIES:
-                    EnergyDialog.create(NewManualWorkoutActivity.this, (caloriesMeasure)  -> {
-                        if(caloriesMeasure==null){
-                            detail.setText(R.string.no_available_abbr);
-                            workout.getCalories().setValue(true, 0d);
-                        }else{
-                            detail.setText(caloriesMeasure.toString());
-                            workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
-                        }
-                    }).show();
-                    break;
+                switch (title){
+                    case DATE:
+                        DateTimePickerDialog.createDateTimePicker(NewManualWorkoutActivity.this, (date, calendar) -> {
+                            workout.setDate(calendar.getTime());
+                            detail.setText(date);
+                        }).show();
+                        break;
+                    case SPORT:
+                        SportDialog.create(NewManualWorkoutActivity.this, detail.getText(), (val, description) -> {
+                            detail.setText(val.getStrId());
+                            detail.setCompoundDrawablesWithIntrinsicBounds(ColorUtilities.darkIcon(this, val.getIconId()), null, null, null);
+                            workout.setSport(val);
+                        }).show();
+                        break;
+                    case TIME:
+                        DurationDialog.create(NewManualWorkoutActivity.this, (durationMeasure) -> {
+                            if(durationMeasure!=null){
+                                workout.getDuration().setValue(true, durationMeasure.getValue(true));
+                                detail.setText(durationMeasure.toString());
+                            }
+                            workout.setMiddleSpeed();
+                        }).show();
+                        break;
+                    case DISTANCE:
+                        DistanceDialog.create(NewManualWorkoutActivity.this, (distanceMeasure) -> {
+                            if(distanceMeasure==null){
+                                detail.setText(R.string.no_available_abbr);
+                                workout.getDistance().setValue(true, 0d);
+                            }else{
+                                detail.setText(distanceMeasure.toString());
+                                workout.getDistance().setValue(false, distanceMeasure.getValue(false));
+                            }
+                            workout.setMiddleSpeed();
+                        }).show();
+                        break;
+                    case CALORIES:
+                        EnergyDialog.create(NewManualWorkoutActivity.this, (caloriesMeasure)  -> {
+                            if(caloriesMeasure==null){
+                                detail.setText(R.string.no_available_abbr);
+                                workout.getCalories().setValue(true, 0d);
+                            }else{
+                                detail.setText(caloriesMeasure.toString());
+                                workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
+                            }
+                        }).show();
+                        break;
+                }
             }
         };
     }
