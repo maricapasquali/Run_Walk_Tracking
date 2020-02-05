@@ -204,8 +204,6 @@ public class Measure implements Parcelable {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public static Measure create(Context context, Measure.Type type){
@@ -500,12 +498,24 @@ public class Measure implements Parcelable {
             return (decimal*60)+(integer*3600);
         }
 
+        public static String format(String time){
+            return format(toSeconds(time));
+        }
+
         public static Integer toSeconds(String duration){
             try{
+                int hours = 0, minutes = 0, sec = 0;
                 String[] split = duration.split(":");
-                int hours = Integer.valueOf(split[0]);
-                int minutes = Integer.valueOf(split[1]);
-                int sec = Integer.valueOf(split[2]);
+                if(split.length==2){
+                    hours = 0;
+                    minutes = Integer.valueOf(split[0]);
+                    sec = Integer.valueOf(split[1]);
+
+                }else{
+                    hours = Integer.valueOf(split[0]);
+                    minutes = Integer.valueOf(split[1]);
+                    sec = Integer.valueOf(split[2]);
+                }
                 return sec + (minutes*60)+(hours*3600);
 
             }catch (PatternSyntaxException e){
@@ -513,16 +523,27 @@ public class Measure implements Parcelable {
             }
         }
 
-        private static List<Integer> time(int seconds){
-            int hours = seconds / 3600;
-            int minutes = (seconds /60) % 60;
-            int sec = seconds%60;
+        private static List<Long> time(long seconds){
+            long hours = seconds / 3600;
+            long minutes = (seconds /60) % 60;
+            long sec = seconds%60;
             return Arrays.asList(hours, minutes, sec);
         }
 
         @SuppressLint("DefaultLocale")
-        public static String format(int seconds){
-            final List<Integer> time = time(seconds);
+        public static String format(long seconds){
+            final List<Long> time = time(seconds);
+            return String.format(Measure.Format.FORMAT_DURATION, time.get(0), time.get(1), time.get(2));
+        }
+
+
+        private static List<Long> timeMill(long milSeconds){
+            return time(milSeconds/1000);
+        }
+
+        @SuppressLint("DefaultLocale")
+        public static String formatMill(long millSeconds){
+            final List<Long> time = timeMill(millSeconds);
             return String.format(Measure.Format.FORMAT_DURATION, time.get(0), time.get(1), time.get(2));
         }
 

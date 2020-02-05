@@ -8,10 +8,12 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Chronometer;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -19,6 +21,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.myhexaville.smartimagepicker.ImagePickerContract;
 import com.myhexaville.smartimagepicker.OnImagePickedListener;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
 
@@ -120,5 +123,59 @@ public class Factory {
         public static PolylineOptions create(){
             return new PolylineOptions().color(COLOR_DEFAULT).width(WIDTH_DEFAULT);
         }
+    }
+
+    public static  class CustomChronometer extends Chronometer{
+
+        private static final String TAG = CustomChronometer.class.getName();
+        private boolean isRunning = false;
+        private long pauseOffSet = 0;
+
+        public CustomChronometer(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public CustomChronometer(Context context) {
+            super(context);
+        }
+
+        public void setTimeInMillSec(long base, long pauseOffSet){
+            super.setBase(base);
+            this.pauseOffSet = pauseOffSet;
+        }
+
+        public void start(){
+           if(!isRunning){
+               super.setBase(SystemClock.elapsedRealtime());
+               super.start();
+               isRunning = true;
+           }
+        }
+
+        public void pause(){
+           if(isRunning){
+               this.pauseOffSet = SystemClock.elapsedRealtime() - super.getBase();
+               super.stop();
+               isRunning = false;
+           }
+           super.setBase(SystemClock.elapsedRealtime() - pauseOffSet);
+        }
+
+        public void restart(){
+           if(!isRunning){
+               super.setBase(SystemClock.elapsedRealtime() - pauseOffSet);
+               super.start();
+               isRunning = true;
+           }
+        }
+
+        public void stop(){
+           if(isRunning){
+               pauseOffSet = 0;
+               super.stop();
+               isRunning = false;
+           }
+        }
+
     }
 }

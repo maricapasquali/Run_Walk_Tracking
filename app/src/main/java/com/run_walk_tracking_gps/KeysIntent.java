@@ -22,9 +22,13 @@ public class KeysIntent {
     public static final String SECONDS = "Seconds" ;
     public static final String DISTANCE = "Distance" ;
     public static final String ENERGY = "Energy" ;
-
+    public static final String ROUTE = "route";
+    public static final String WORKOUT = "workout";
 
     public static final String FILTER = "filter";
     public static final String DATA_REQUEST = "data json request";
 
+
+    public static final String TIMER = "time";
+    public static final String FROM_NOTIFICATION = "from_notification";
 }

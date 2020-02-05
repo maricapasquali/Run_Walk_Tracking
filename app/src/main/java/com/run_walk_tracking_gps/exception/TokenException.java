@@ -33,7 +33,7 @@ public class TokenException extends BackgroundException {
                        .setMessage(getMessage())
                        .setCancelable(false)
                        .setNegativeButton(R.string.logout, (dialog, which) -> {
-                            SyncServiceHandler.create(getContext()).stop();
+                            //SyncServiceHandler.create(getContext()).stop();
                             Preferences.Session.logout(getContext());
                             ErrorQueue.getInstance(getContext()).remove(this);
                             getContext().startActivity(new Intent(getContext(), BootAppActivity.class)

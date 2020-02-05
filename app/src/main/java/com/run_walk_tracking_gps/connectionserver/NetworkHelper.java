@@ -239,9 +239,9 @@ public class NetworkHelper {
         private static final String TAG = NetworkHelper.class.getName();
         private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
 
-        //private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
+        private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
         // SERVER LOCALE
-        private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
+        //private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
         //private static final String SERVER = "http://172.20.10.5/run_walk_tracking_server/";
 
         private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
@@ -856,7 +856,7 @@ public class NetworkHelper {
                         SqlLiteStatisticsDao.SqlLiteWeightDao.create(activity)
                                                              .insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS)
                                                                          .getJSONObject(0));
-                        SyncServiceHandler.create(activity).start();
+                        //SyncServiceHandler.create(activity).start();
                         activity.startActivity(new Intent(activity, ApplicationActivity.class));
                         activity.finish();
                     } catch (JSONException e) {
@@ -918,7 +918,7 @@ public class NetworkHelper {
 
         private static Response.Listener<JSONObject> onResponseDeleteAccount(Activity activity) {
             return response -> {
-                SyncServiceHandler.create(activity).stop();
+                //SyncServiceHandler.create(activity).stop();
                 try {
                     final JSONObject image = SqlLiteImageDao.create(activity).getImage();
                     if(image!=null)
@@ -940,7 +940,7 @@ public class NetworkHelper {
             return () -> {
                 // UPDATE GUI IF RECEIVED DATA ( INTO FRAGMENT WORKOUT OR STATISTICS )
                 if(activity instanceof SplashScreenActivity || activity instanceof LoginActivity){
-                    SyncServiceHandler.create(activity).start();
+                    //SyncServiceHandler.create(activity).start();
                     activity.startActivity(new Intent(activity, ApplicationActivity.class));
                     activity.finish();
                 }

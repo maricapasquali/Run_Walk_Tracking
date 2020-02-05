@@ -6,6 +6,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 
+import java.util.stream.Stream;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -30,7 +32,7 @@ public final class NotificationHelper {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createChannels() {
 
-        NotificationChannel channel = new NotificationChannel(CHANNEL_1, "Canale Principale", NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_1, "Canale Principale", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 = new NotificationChannel(CHANNEL_2, "Canale Secondario", NotificationManager.IMPORTANCE_DEFAULT);
 
         channel.setDescription("Canale usato per la ricezione delle notifiche generali");
@@ -38,6 +40,7 @@ public final class NotificationHelper {
 
         notificationManager.createNotificationChannel(channel);
         notificationManager.createNotificationChannel(channel2);
+
 
     }
 

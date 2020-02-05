@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import com.google.android.gms.location.LocationRequest;
 
@@ -12,7 +13,7 @@ import androidx.core.app.ActivityCompat;
 public class LocationUtilities {
 
     private static final String TAG = LocationUtilities.class.getName();
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    public static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     public static boolean isGpsEnable(Context context) {
         return ((LocationManager) context.getSystemService(Service.LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -23,6 +24,11 @@ public class LocationUtilities {
                               .setInterval(5000)
                               .setFastestInterval(5000)
                               .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    public static boolean hasPermission(Context context){
+        return context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static void setLocationPermission(final Activity activity) {

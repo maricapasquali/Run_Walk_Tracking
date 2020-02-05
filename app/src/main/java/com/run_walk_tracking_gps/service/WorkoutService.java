@@ -3,16 +3,22 @@ package com.run_walk_tracking_gps.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Chronometer;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.model.Measure;
@@ -21,19 +27,17 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
-import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
 import com.run_walk_tracking_gps.utilities.DateHelper;
+import com.run_walk_tracking_gps.utilities.TimerHelper;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import androidx.annotation.RequiresApi;
 
-public class WorkoutService extends Service {
-
+public class WorkoutService extends Service implements MapRouteDraw.OnChangeLocationListener{
     private static final String TAG = WorkoutService.class.getName();
 
-    private final IBinder binder = new LocalBinder();
+    private IBinder binder = null;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -45,21 +49,37 @@ public class WorkoutService extends Service {
             return WorkoutService.this;
         }
     }
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind : INTENT = " + intent);
+        if(binder==null) binder = new LocalBinder();
+        return binder;
+    }
+    @Override
+    public void onRebind(Intent intent) {
+        Log.d(TAG, "onRebind : INTENT = " + intent);
+        if(binder==null) binder = new LocalBinder();
+        super.onRebind(intent);
+    }
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG, "onUnbind : INTENT = " + intent);
+        binder = null;
+        return true;
+    }
 
-    private boolean isLock = false;
-    private boolean isWorkoutServiceRunning = false;
-    private boolean isWorkoutServicePause = false;
-
-    private Context context;
-    private ReceiverWorkoutElement receiver;
     private NotificationWorkout notificationWorkout;
     private Workout workout;
+    private boolean isRunning = false;
+    private boolean isInPause = false;
+
     /* VOCAL COACH*/
     private VoiceCoach voiceCoach;
 
-    /* MAP */
-    private MapRouteDraw mapRouteDraw;
 
+    /* MOVIMENT */
+
+    /* CALORIES AND DISTANCE */
     /* ENERGY */
     private Sport sport;
     private double weight;
@@ -71,31 +91,36 @@ public class WorkoutService extends Service {
     private boolean firstTime = true;
     private int oldValue = 0;
     private int milestoneStep;
+
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             Log.d(TAG, "onSensorChanged");
-            if(isRunning()&& !isPause()){
-                if(firstTime) {
+            if (isRunning && !isInPause) {
+                //if (firstTime &&(kcal==0 && km==0)) {
+                if (firstTime) {
                     Log.d(TAG, "Reset milestoneStep");
                     firstTime = false;
-                    milestoneStep = (int)event.values[0];
+                    milestoneStep = (int) event.values[0];
 
-                    if(oldValue>0) milestoneStep-=oldValue;
+                    if (oldValue > 0) milestoneStep -= oldValue;
                 }
-                oldValue = (int)event.values[0] - milestoneStep;
+                oldValue = (int) event.values[0] - milestoneStep;
 
                 // distance and energy
-                final double km = oldValue * STEPS_TO_KM;
-                final double kcal = sport.getConsumedEnergy(weight, km);
-               // Log.e(TAG, "Distance = " +km + " Km, Energy = " +kcal + " kcal");
+                double km = oldValue * STEPS_TO_KM;
+                double kcal = sport.getConsumedEnergy(weight, km);
+                // Log.e(TAG, "Distance = " +km + " Km, Energy = " +kcal + " kcal");
                 workout.getDistance().setValue(true, km);
                 workout.getCalories().setValue(true, kcal);
 
-                sendBroadcast(new Intent(ActionReceiver.DISTANCE_ENERGY_ACTION)
-                                     .putExtra(KeysIntent.DISTANCE, workout.getDistance().toString(true))
-                                     .putExtra(KeysIntent.ENERGY, workout.getCalories().toString(true)));
 
+                sendBroadcast(new Intent(ActionReceiver.DISTANCE_ENERGY_ACTION)
+                        .putExtra(KeysIntent.DISTANCE, workout.getDistance().toString(true))
+                        .putExtra(KeysIntent.ENERGY, workout.getCalories().toString(true)));
+
+                notificationWorkout.updateDistance(workout.getDistance().toString(true));
+                notificationWorkout.updateEnergy(workout.getCalories().toString(true));
             }
         }
 
@@ -105,189 +130,162 @@ public class WorkoutService extends Service {
         }
     };
 
-    /* TIMER */
-    private static final long TIMER_INTERVAL = 1000;
-    private int time = 0;
-    private Timer mTimer;
-    private TimerTask timerTask = new TimerTask() {
-        @Override
-        public void run() {
-            //Log.d(TAG, "TimerTask");
-            if(isRunning() && !isPause()){
-                ++time;
-               // Log.e(TAG, "Timer = " +time);
-                workout.getDuration().setValue(true, (double) time);
+    /* MAP */
+    private MapRouteDraw mapRouteDraw;
 
-                String timeFormat = workout.getDuration().toString(true);
-                /*voice coach*/
-                voiceCoach.speakIfIsActive(timeFormat,
-                                           workout.getDistance().toString(true),
-                                           workout.getCalories().toString(true));
-
-                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(KeysIntent.SECONDS, timeFormat));
-            }
-        }
-    };
-
-    public WorkoutService(){}
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void setOnReceiverListener(Context context, final OnReceiverListener onReceiverListener){
-        if(this.receiver==null){
-            this.notificationWorkout = NotificationWorkout.create(context);
-            this.receiver = ReceiverWorkoutElement.create(notificationWorkout, onReceiverListener);
-        }
-        else
-            this.receiver.setBroadcastReceiver(onReceiverListener);
-
-        if(this.mapRouteDraw ==null)
-            this.mapRouteDraw = MapRouteDraw.create(context, onReceiverListener.onReceiverMapRoute());
-        else
-            this.mapRouteDraw.setOnChangeLocationListener(onReceiverListener.onReceiverMapRoute());
-
+    @Override
+    public void addPolyLineOnMap(PolylineOptions options) {
+        if(binder!=null)
+            sendBroadcast(new Intent(ActionReceiver.DRAWING_MAP_TIMER_ACTION).putExtra(KeysIntent.ROUTE, options));
     }
+
+    private boolean isIndoor = false;
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate() {
+        super.onCreate();
         Log.d(TAG, "onCreate");
-        this.context = getApplicationContext();
-        this.workout = WorkoutBuilder.create(context).setDate(DateHelper.create(context).getCalendar().getTime()).build();
+        final Context context = getApplicationContext();
+        notificationWorkout = NotificationWorkout.create(context);
+        workout = WorkoutBuilder.create(context).setDate(DateHelper.create(context).getCalendar().getTime()).build();
 
-        /* notifiation */
-        this.notificationWorkout = NotificationWorkout.create(context);
-        this.receiver = ReceiverWorkoutElement.create(notificationWorkout);
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ActionReceiver.TIMER_ACTION);
-        intentFilter.addAction(ActionReceiver.DISTANCE_ENERGY_ACTION);
-        context.registerReceiver(receiver, intentFilter);
-
-        /* map */
-        this.mapRouteDraw = MapRouteDraw.create(context);
-
-        /* distance*/
-        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
-
-        /* timer */
-        this.mTimer = new Timer();
-        this.time = 0;
-
-        /*voice coach*/
+        /*VOICE COACH*/
         voiceCoach = VoiceCoach.create(context);
         voiceCoach.start();
+
+        /* MOVIMENT */
+        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
+        /* MAP */
+        this.mapRouteDraw = MapRouteDraw.create(context, this);
+        isIndoor = (mapRouteDraw==null);
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
-        if(intent!=null){
-            weight = intent.getDoubleExtra(KeysIntent.WEIGHT_MORE_RECENT, 0d);
-            sport = Sport.valueOf(intent.getStringExtra(KeysIntent.SPORT_DEFAULT));
+
+        if(intent!=null && intent.getAction()!=null){
+            isRunning = true;
+            switch (intent.getAction()){
+                case ActionReceiver.START_ACTION:
+                    start(intent);
+                    break;
+
+                case ActionReceiver.PAUSE_ACTION:
+                    pause(intent);
+                    break;
+
+                case ActionReceiver.RESTART_ACTION:
+                    restart(intent);
+                    break;
+
+                case ActionReceiver.STOP_ACTION:
+                    stop();
+                    break;
+
+                case ActionReceiver.VOICE:
+                    voiceCoach();
+                    break;
+            }
         }
-        if(isWorkoutServiceRunning) return super.onStartCommand(intent, flags, startId);
-        isWorkoutServiceRunning = true;
-        /* notification */
+        return START_NOT_STICKY;
+    }
+
+
+    private void start(Intent intent){
+        Log.d(TAG, "START REQUEST");
+        weight = intent.getDoubleExtra(KeysIntent.WEIGHT_MORE_RECENT, 0d);
+        sport = Sport.valueOf(intent.getStringExtra(KeysIntent.SPORT_DEFAULT));
+
+        final Workout w = intent.getParcelableExtra(KeysIntent.WORKOUT);
+        if(w!=null) workout = w.clone();
+
+
         startForeground(NotificationWorkout.NOTIFICATION_ID, notificationWorkout.build());
-        /* timer */
-        mTimer.scheduleAtFixedRate(timerTask, 0, TIMER_INTERVAL);
-        /* map */
-        mapRouteDraw.start();
-        return super.onStartCommand(intent, flags, startId);
+        notificationWorkout.startClicked();
+
+        sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
+        if(!isIndoor) this.mapRouteDraw.startDrawing();
+
+    }
+    private void pause(Intent intent){
+        Log.d(TAG, "PAUSE REQUEST");
+        isInPause = true;
+
+        notificationWorkout.pauseClicked();
+
+        sensorManager.unregisterListener(sensorEventListener);
+        if(!isIndoor) this.mapRouteDraw.pause();
+        if(intent.getBooleanExtra(KeysIntent.FROM_NOTIFICATION,true))
+        {
+            Log.d(TAG, "SEND REQUEST");
+            sendBroadcast(new Intent(ActionReceiver.PAUSE_ACTION).putExtra(KeysIntent.TIMER, getTimeInMillSec()));
+        }
+    }
+    private void restart(Intent intent){
+        Log.d(TAG, "RESTART REQUEST");
+        isInPause = false;
+        notificationWorkout.restartClicked();
+
+
+        sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
+        if(!isIndoor) this.mapRouteDraw.restart();
+        if(intent.getBooleanExtra(KeysIntent.FROM_NOTIFICATION,true))
+        {
+            Log.d(TAG, "SEND REQUEST");
+            sendBroadcast(new Intent(ActionReceiver.RESTART_ACTION).putExtra(KeysIntent.TIMER, getTimeInMillSec()));
+        }
+
+    }
+    private void stop(){
+        Log.d(TAG, "STOP REQUEST");
+        isRunning = false;
+
+        sensorManager.unregisterListener(sensorEventListener);
+        if(!isIndoor) this.mapRouteDraw.stopDrawing();
+
+        voiceCoach.stop();
+        notificationWorkout.stopClicked();
+    }
+
+    public void voiceCoach(){
+        String timeFormat = notificationWorkout.getTimeStamp();
+        Log.d(TAG, timeFormat+ ", distanza = " + workout.getDistance().toString(true)+ ", calorie = " + workout.getCalories().toString(true));
+        if(Measure.Utilities.toSeconds(timeFormat)>=60)
+            voiceCoach.speakIfIsActive(timeFormat, workout.getDistance().toString(true), workout.getCalories().toString(true));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        isWorkoutServiceRunning = false;
-
-        /* timer */
-        this.mTimer.cancel();
-        this.mTimer.purge();
-        this.mTimer = null;
-
-        /* distance*/
-        oldValue = 0;
-        firstTime = true;
-        context.unregisterReceiver(receiver);
-        sensorManager.unregisterListener(sensorEventListener);
-
-        /* map */
-        mapRouteDraw.stop();
-
-        /* notification */
-        notificationWorkout.stopClicked();
-
-        /*voice coach*/
-        voiceCoach.stop();
+        stop();
     }
 
-    public Workout getWorkout() {
+    public Workout getWorkout(){
         workout.setMiddleSpeed();
-        workout.setMapRoute(mapRouteDraw.getListCoordinates());
+        workout.getDuration().setValue(true, (double)notificationWorkout.getTimeInMillSec()/1000);
+        if(!isIndoor) workout.setMapRoute(this.mapRouteDraw.getListCoordinates());
         return workout;
     }
 
-    public void pause(){
-        Log.d(TAG, "pause");
-        isWorkoutServicePause = true;
-        /* map */
-        mapRouteDraw.pause();
-
-        /* notification */
-        notificationWorkout.pauseClicked();
-    }
-
-    public void restart(){
-        Log.d(TAG, "restart");
-        isWorkoutServicePause = false;
-        /* distance*/
-        firstTime = true;
-        /* map */
-        mapRouteDraw.start();
-
-        /* notification */
-        notificationWorkout.restartClicked();
-    }
-
-    public void lock() {
-        Log.d(TAG, "lock_screen");
-        isLock = true;
-        /* notification */
-        notificationWorkout.lockClicked();
-    }
-
-    public void unlock() {
-        Log.d(TAG, "unlock_screen");
-        isLock = false;
-        /* notification */
-        notificationWorkout.unlockClicked();
-    }
-
-    public boolean isRunning(){
-        return isWorkoutServiceRunning;
-    }
-
-    public boolean isLock(){
-        return isLock;
-    }
-
     public boolean isPause() {
-        return isWorkoutServicePause;
+        return isInPause;
     }
 
-    public interface OnReceiverListener{
-        void onReceiverDuration(String sec);
-        void onReceiverDistance(String distance);
-        void onReceiverEnergy(String energy);
-        MapRouteDraw.OnChangeLocationListener onReceiverMapRoute();
+    public boolean isRunning() {
+        return isRunning;
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
+    public long getChronoBase() {
+        return notificationWorkout.getChronoBase();
     }
+
+    public long getTimeInMillSec() {
+        return notificationWorkout.getTimeInMillSec();
+    }
+
 }

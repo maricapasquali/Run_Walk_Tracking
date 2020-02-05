@@ -4,7 +4,11 @@
     package="com.run_walk_tracking_gps">
 
 
+    <uses-permission android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="android.permission.INTERNET"/>
+
 
     <!-- Permission for IMEI code -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
@@ -13,7 +17,9 @@
     <uses-permission android:name="com.example.permission.MAPS_RECEIVE" />
 
     <!-- Permission Position  -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 
     <!-- Permissions to Take or Write image -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -35,6 +41,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".RunWalkTracking"
         android:icon="@mipmap/ic_launcher_runwalktracking"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_runwalktracking_round"
@@ -42,8 +49,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         android:usesCleartextTraffic="true"
-        tools:replace="android:appComponentFactory"
-        android:appComponentFactory="whateverString">
+        >
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -93,6 +99,7 @@
             android:name=".gui.ApplicationActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask">
+
         </activity>
 
         <activity
@@ -143,15 +150,15 @@
             android:parentActivityName=".gui.SettingActivity" />
 
         <!-- SERVICE -->
-        <service android:name=".service.WorkoutService"/>
+
         <service android:name=".service.NetworkService"/>
+        <service android:name=".service.WorkoutService" />
 
         <!-- RECEIVER -->
-        <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
 
-        <receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
+        <!--<receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
             android:exported="false">
-        </receiver>
+        </receiver>-->
 
     </application>
 

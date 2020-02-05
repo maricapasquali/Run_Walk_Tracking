@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
+import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.KeysIntent;
@@ -21,16 +23,19 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+
+import static com.run_walk_tracking_gps.utilities.LocationUtilities.LOCATION_PERMISSION_REQUEST_CODE;
 
 public class ApplicationActivity extends CommonActivity
         implements  WorkoutsFragment.OnWorkOutSelectedListener,
                     WorkoutsFragment.OnManualAddClickedListener,
                     HomeFragment.OnStopWorkoutClickListener ,
-                    HomeFragment.OnBlockScreenClickListener ,
-                    StatisticsFragment.OnWeightListener{
+                    //HomeFragment.OnBlockScreenClickListener ,
+                    StatisticsFragment.OnWeightListener {
 
     public final static String TAG = ApplicationActivity.class.getName();
     //private final static int REQUEST_SETTINGS = 1;
@@ -72,6 +77,7 @@ public class ApplicationActivity extends CommonActivity
             }
 
         }
+        //addFragment(new HomeViewFragment(),false);
     }
 
     @Override
@@ -112,7 +118,10 @@ public class ApplicationActivity extends CommonActivity
             }
             else
             {
-                NetworkHelper.HttpRequest.syncInForeground(this);
+               if(!(getSupportFragmentManager().findFragmentByTag(TAG) instanceof HomeFragment)){
+                   Log.d(TAG, "SYNC In foreground");
+                   NetworkHelper.HttpRequest.syncInForeground(this);
+               }
             }
             return true;
         });
@@ -122,15 +131,15 @@ public class ApplicationActivity extends CommonActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.d(TAG, "New Intent Action = " + intent.getAction());
-        if(intent.getAction()!=null){
-            switch (intent.getAction()){
-                case ActionReceiver.STOP_ACTION:{
-                    final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
-                    if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
-                        ((HomeFragment)fragment).stop();
+        if(intent.getAction()!=null) {
+            final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
+            if (fragment instanceof HomeFragment && ((HomeFragment) fragment).isInWorkout()) {
+                switch (intent.getAction()){
+                    case ActionReceiver.STOP_ACTION: {
+                        ((HomeFragment) fragment).getStop().callOnClick();
                     }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -177,8 +186,12 @@ public class ApplicationActivity extends CommonActivity
     @Override
     public void onBackPressed() {
         final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
-        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
+        if(fragment instanceof HomeFragment && ((HomeFragment)fragment).isInWorkout()){
+        //if(fragment instanceof HomeFragment && ((HomeFragment)fragment).getServiceHandler().isWorkoutRunning()){
             moveTaskToBack(true);
+
+            /*((HomeFragment)fragment).unRegisterBroadcastReceiver();
+            ((HomeFragment)fragment).unBindService();*/
         } else{
             finishAffinity();
         }
@@ -200,10 +213,10 @@ public class ApplicationActivity extends CommonActivity
                 .putExtra(KeysIntent.SUMMARY, workout), REQUEST_SUMMARY);
     }
 
-    @Override
+    /*@Override
     public void onBlockScreenClick(boolean isClickable) {
         menuApp.findItem(R.id.setting).setEnabled(isClickable);
-    }
+    }*/
 
     // NewManualWorkoutActivity Listener
     @Override
@@ -230,6 +243,27 @@ public class ApplicationActivity extends CommonActivity
     }
 
     //Results
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(TAG, "onRequestPermissionsResult");
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    ((MapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).myLocation(this);
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

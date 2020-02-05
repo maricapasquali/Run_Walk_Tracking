@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -40,6 +41,8 @@ import org.json.JSONObject;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import androidx.annotation.RequiresApi;
 
 public class SettingActivity extends CommonActivity {
 
@@ -107,6 +110,7 @@ public class SettingActivity extends CommonActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onResume() {
         super.onResume();
@@ -219,7 +223,7 @@ public class SettingActivity extends CommonActivity {
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
 
         exit.setOnClickListener(v -> {
-            SyncServiceHandler.create(this).stop();
+            //SyncServiceHandler.create(this).stop();
             Preferences.Session.logout(this);
             startActivity(new Intent(this, BootAppActivity.class)
                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));

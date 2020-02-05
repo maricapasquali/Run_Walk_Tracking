@@ -1,12 +1,17 @@
 package com.run_walk_tracking_gps.gui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.util.Log;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.utilities.ServiceUtilities;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashScreenActivity extends AppCompatActivity {
@@ -19,6 +24,12 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
     }
 
+    private void startApplicationActivity(String action){
+        startActivity(new Intent(this, ApplicationActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setAction(action));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -28,12 +39,12 @@ public class SplashScreenActivity extends AppCompatActivity {
             ( getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT) ||
               getIntent().getAction().equals(ActionReceiver.STOP_ACTION)))
         {
+            startApplicationActivity(getIntent().getAction());
 
-            startActivity(new Intent(this, ApplicationActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .setAction(getIntent().getAction()));
-
-        }else{
+        }else if(ServiceUtilities.isServiceRunningInForeground(this, WorkoutService.class)){
+            startApplicationActivity(ActionReceiver.RUNNING_WORKOUT);
+        }
+        else {
             if(Preferences.Session.isLogged(this)) {
                 // TODO: 12/26/2019 REQUEST SYNC
                 NetworkHelper.HttpRequest.syncInForeground(this);

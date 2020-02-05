@@ -66,7 +66,8 @@ public class VoiceCoach {
      * @return
      */
     private boolean isNowToSpeak(String time){
-        return Measure.Utilities.toSeconds(time)%(interval*60)== 0;
+        int sec = Measure.Utilities.toSeconds(time);
+        return sec> 0 && sec%(interval*60)== 0;
     }
 
     private void speak(CharSequence speak){
@@ -81,13 +82,11 @@ public class VoiceCoach {
      * @param calories
      */
     public void speakIfIsActive(String time, CharSequence distance, CharSequence calories){
-        if(isNowToSpeak(time)){
-            StringBuilder speak = new StringBuilder().append(speakString(Measure.Type.DURATION, time))
-                                                     .append(speakString(Measure.Type.DISTANCE, distance))
-                                                     .append(speakString(Measure.Type.ENERGY, calories));
+        StringBuilder speak = new StringBuilder().append(speakString(Measure.Type.DURATION, time))
+                .append(speakString(Measure.Type.DISTANCE, distance))
+                .append(speakString(Measure.Type.ENERGY, calories));
 
-            if(speak.length()>0) speak(speak.toString());
-        }
+        if (speak.length() > 0) speak(speak.toString());
     }
 
     private String speakString(Measure.Type type, CharSequence val){

@@ -95,6 +95,10 @@
         <item name="hybrid">Hybrid</item>
     </string-array>
 
+    <!-- MapFragment -->
+    <string name="departure">Departure</string>
+    <string name="arrivals">Arrivals</string>
+
     <!-- Riepilogo / Dettaglio Allenamento -->
     <string name="summary_workout">Summary</string>
     <string name="modify">Modify</string>
@@ -185,7 +189,7 @@
     <!-- Home -->
     <string name="home" translatable="false">Home</string>
 
-    <string name="time_workout" translatable="false">00:00:00</string>
+    <string name="time_workout" translatable="false">00:00</string>
     <string name="distance_workout" translatable="false">0.00</string>
     <string name="calories_workout" translatable="false">0.00</string>
 
@@ -198,6 +202,7 @@
     <string name="it_code" translatable="false">it</string>
     <string name="en_code" translatable="false">en</string>
     <string name="es_code" translatable="false">es</string>
+
 
 
 </resources>

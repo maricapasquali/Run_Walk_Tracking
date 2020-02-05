@@ -32,7 +32,19 @@
                 android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
-            <TextView
+            <!--<TextView
+                android:id="@+id/time_workout_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:text="@string/time_workout"
+                android:textAlignment="center"
+                android:textColor="@color/checkState"
+                android:textSize="18sp" />-->
+
+            <view
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomChronometer"
                 android:id="@+id/time_workout_indoor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -186,7 +198,8 @@
             android:orientation="horizontal"
             android:visibility="visible">
 
-            <TextView
+            <view
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomChronometer"
                 android:id="@+id/time_workout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -197,6 +210,17 @@
                 android:textAlignment="center"
                 android:textColor="@color/checkState"
                 android:textSize="18sp" />
+            <!--<TextView
+                android:id="@+id/time_workout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/time_workout"
+                android:textAlignment="center"
+                android:textColor="@color/checkState"
+                android:textSize="18sp" />-->
 
             <TextView
                 android:id="@+id/distance_workout"

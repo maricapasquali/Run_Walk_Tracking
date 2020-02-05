@@ -50,8 +50,7 @@
         android:layout_below="@+id/info_workout"
         android:orientation="horizontal">
 
-
-        <TextView
+        <Chronometer
             android:id="@+id/time_workout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,6 +59,15 @@
             android:textAlignment="center"
             android:textColor="@color/checkState"
             android:textSize="18sp" />
+        <!--<TextView
+            android:id="@+id/time_workout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/time_workout"
+            android:textAlignment="center"
+            android:textColor="@color/checkState"
+            android:textSize="18sp" />-->
 
         <TextView
             android:id="@+id/distance_workout"

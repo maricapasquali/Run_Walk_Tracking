@@ -27,8 +27,8 @@ public class CollectionsUtilities <K, V>{
     }
 
     // TODO: 12/5/2019 MIGLIORARE 
-    public static List<LatLng> convertStringToListLatLng(String toString){
-        List<LatLng> list = new ArrayList<>();
+    public static ArrayList<LatLng> convertStringToListLatLng(String toString){
+        ArrayList<LatLng> list = new ArrayList<>();
 
         Object[] o = toString.replace("lat/lng:", "")
                              .replace("(","")
