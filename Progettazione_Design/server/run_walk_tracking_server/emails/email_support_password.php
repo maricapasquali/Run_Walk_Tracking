@@ -21,7 +21,7 @@
       <p>Otherwise, ignore this email.</p>
       <div class="mt-5 mb-5">
         <p><a id='link_change_password' class="btn btn-primary">Click here</a> </p>
-        <strong>ATTENTION:<p> The link will be valid only for 30 minutes after receiving this email. </p></strong>
+        <strong>ATTENTION:<p> The link will be valid only for 24 hours after receiving this email. </p></strong>
       </div>
       <p>Team <strong><?= APP_NAME ?></strong></p>
     </div>

@@ -153,7 +153,7 @@
              post_ajax_json("../account/password_forgot.php", {username: $("input#username").val(), password: hash_md5_password }, function(data){
                 console.log(data);
                   if(data["Error"]){
-                    error(data["Error"]);
+                    error(JSON.stringify(data));
                     $("#change_password").removeClass('was-validated');
                     $("input").removeClass("is-valid");
                   }else{

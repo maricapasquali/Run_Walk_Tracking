@@ -129,7 +129,7 @@ function formatDate($date){
 }
 
 function date_end_validity_link(){
-  return date('Y-m-d H:i:s',strtotime('+30 minutes',strtotime(current_datetime())));
+  return date('Y-m-d H:i:s',strtotime('+24 hours',strtotime(current_datetime())));
 }
 
 function docHtml($url){
