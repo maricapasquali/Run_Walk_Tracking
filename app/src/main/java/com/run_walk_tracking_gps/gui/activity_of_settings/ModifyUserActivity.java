@@ -240,6 +240,7 @@ public class ModifyUserActivity extends CommonActivity {
             //gender
             final Gender gObjectSelect = (Gender)parent.getAdapter().getItem(position);
             Log.e(TAG, gObjectSelect.toString());
+            user.setGender(gObjectSelect);
             gender.setText(getString(gObjectSelect.getStrId()));
             gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(gObjectSelect.getIconId()),
                         null, null, null);

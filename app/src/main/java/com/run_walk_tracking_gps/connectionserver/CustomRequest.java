@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.connectionserver;
 import android.content.Context;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
@@ -13,6 +14,7 @@ import com.run_walk_tracking_gps.exception.BackgroundException;
 import com.run_walk_tracking_gps.exception.SomeErrorHttpException;
 import com.run_walk_tracking_gps.exception.TokenException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.run_walk_tracking_gps.connectionserver.NetworkHelper.Constant.ERROR;
@@ -41,10 +43,16 @@ public class CustomRequest extends StringRequest {
                 responseJsonListener.onResponse(JSONResponse);
             } catch (Exception e) {
                 Log.e(TAG, "Error = " + e);
-                BackgroundException ex = e instanceof TokenException ? (TokenException) e :
-                                         e instanceof SomeErrorHttpException ? (SomeErrorHttpException)e : // error server
-                                                                                SomeErrorHttpException.create(context,
-                                                                                                              e.getMessage()); // error client
+                Log.e(TAG, "Error (response) = " + response);
+
+                BackgroundException ex;
+                if(e instanceof TokenException)
+                    ex = (TokenException) e;
+                else if(e instanceof SomeErrorHttpException)
+                    ex = (SomeErrorHttpException)e;
+                else{
+                    ex = SomeErrorHttpException.create(context, e instanceof JSONException? response: e.getMessage());
+                }
                 ex.alert();
             }
         }, error -> {

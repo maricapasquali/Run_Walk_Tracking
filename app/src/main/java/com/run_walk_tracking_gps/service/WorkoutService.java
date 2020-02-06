@@ -28,9 +28,6 @@ import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.utilities.DateHelper;
-import com.run_walk_tracking_gps.utilities.TimerHelper;
-
-import java.util.function.Consumer;
 
 import androidx.annotation.RequiresApi;
 
