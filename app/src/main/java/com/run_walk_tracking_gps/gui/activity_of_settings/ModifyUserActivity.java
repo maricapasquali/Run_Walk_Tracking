@@ -167,9 +167,11 @@ public class ModifyUserActivity extends CommonActivity {
 
             if(SqlLiteUserDao.create(this).update(bodyJson)){
                 Preferences.Session.update(this);
-                imageFileHelper.moveToImageDir(user.getImage().getName());
-                if(oldUser.getImage()!=null && oldUser.getImage().exists()) oldUser.getImage().delete();
-                imageFileHelper.deleteTmpDir();
+                if(imageFileHelper.moveToImageDir(user.getImage().getName())){
+                    if(oldUser.getImage()!=null && oldUser.getImage().exists())
+                        oldUser.getImage().delete();
+                    imageFileHelper.deleteTmpDir();
+                }
 
                 NetworkServiceHandler.getInstance(this,
                         NetworkHelper.Constant.UPDATE, NetworkHelper.Constant.USER,
