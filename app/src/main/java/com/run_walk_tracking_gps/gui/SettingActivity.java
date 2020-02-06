@@ -10,7 +10,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -32,8 +31,6 @@ import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
-import com.run_walk_tracking_gps.service.SyncServiceHandler;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
@@ -161,7 +158,7 @@ public class SettingActivity extends CommonActivity {
                     filter = NetworkHelper.Constant.TARGET;
                 }
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE, filter, data.toString())
-                                     .bindService();
+                                     .startService();
             } catch (JSONException e) {
                 e.printStackTrace();
             }

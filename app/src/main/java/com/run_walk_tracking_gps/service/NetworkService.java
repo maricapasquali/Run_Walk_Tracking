@@ -30,23 +30,23 @@ import androidx.annotation.RequiresApi;
 public class NetworkService extends Service {
 
     private final String TAG = NetworkService.class.getName();
-    private final IBinder binder = new NetworkService.LocalBinder();
+    //private final IBinder binder = new NetworkService.LocalBinder();
 
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
-    public class LocalBinder extends Binder {
+    /*public class LocalBinder extends Binder {
         public NetworkService getService() {
             // Return this instance of LocalService so clients can call public methods
             return NetworkService.this;
         }
-    }
+    }*/
 
     private Context context;
     //private Response.Listener<JSONObject> responseListener;
 
-    private ServiceConnection serviceConnection;
+    //private ServiceConnection serviceConnection;
 
     @Override
     public void onCreate() {
@@ -76,7 +76,8 @@ public class NetworkService extends Service {
 
                         NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data , response -> {
                             Log.e(TAG, "Response after "+ intent.getAction() +" : "+ response.toString());
-                            context.unbindService(serviceConnection);
+                            //context.unbindService(serviceConnection);
+                           NetworkService.this.stopSelf();
                         });
                     }
                 } catch (JSONException e) {
@@ -94,14 +95,14 @@ public class NetworkService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return null; //binder;
     }
 
     /*public void setResponseListener(Response.Listener<JSONObject> responseListener) {
         this.responseListener = responseListener;
-    }*/
+    }
     public void setServiceConnection(ServiceConnection serviceConnection) {
         this.serviceConnection = serviceConnection;
-    }
+    }*/
 
 }

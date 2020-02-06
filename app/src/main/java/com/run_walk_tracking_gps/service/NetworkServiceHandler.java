@@ -3,13 +3,13 @@ package com.run_walk_tracking_gps.service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
 
-public class NetworkServiceHandler implements ServiceConnection {
+public class NetworkServiceHandler
+        //implements ServiceConnection
+{
 
     private static final String TAG = NetworkServiceHandler.class.getName();
 
@@ -55,24 +55,23 @@ public class NetworkServiceHandler implements ServiceConnection {
         return handler;
     }
 
-    public void bindService(){
-        context.bindService(intent, this,  Context.BIND_AUTO_CREATE);
+    public void startService(){
+        //context.bindService(intent, this,  Context.BIND_AUTO_CREATE);
+        context.startService(intent);
     }
 
-    @Override
+
+    /*@Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         Log.d(TAG, "onServiceConnected");
         final NetworkService.LocalBinder binder = (NetworkService.LocalBinder) service;
         NetworkService nService = binder.getService();
-        /*nService.setResponseListener(response -> {
-            Log.e(TAG, response.toString());
-            context.unbindService(this);
-        });*/
+        //nService.setResponseListener(response -> {Log.e(TAG, response.toString());context.unbindService(this);});
         nService.setServiceConnection(this);
         context.startService(intent);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-    }
+    }*/
 }

@@ -8,17 +8,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListPopupWindow;
-import android.widget.TextView;
 
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.myhexaville.smartimagepicker.ImagePicker;
 import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
@@ -27,14 +22,9 @@ import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.GenderAdapterSpinner;
-import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
-import com.run_walk_tracking_gps.gui.components.dialog.MeasureDialog;
-import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
-import com.run_walk_tracking_gps.model.enumerations.Target;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.CommonActivity;
-import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.HeightDialog;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
@@ -47,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Arrays;
 
 import androidx.annotation.RequiresApi;
 
@@ -175,7 +164,7 @@ public class ModifyUserActivity extends CommonActivity {
 
                 NetworkServiceHandler.getInstance(this,
                         NetworkHelper.Constant.UPDATE, NetworkHelper.Constant.USER,
-                        bodyJson.toString()).bindService();
+                        bodyJson.toString()).startService();
 
                 setResult(RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_USER, user));
             }else{

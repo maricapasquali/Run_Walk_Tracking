@@ -1,13 +1,10 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -77,7 +74,7 @@ public class ModifyWeightActivity extends NewInformationActivity {
 
                             NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
                                     NetworkHelper.Constant.WEIGHT, bodyJson.toString())
-                                    .bindService();
+                                    .startService();
 
                             setResult(RESULT_OK, new Intent());
                         }else {
@@ -105,7 +102,7 @@ public class ModifyWeightActivity extends NewInformationActivity {
                                         NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.DELETE,
                                                 NetworkHelper.Constant.WEIGHT, new JSONObject()
                                                         .put(WeightDescriptor.ID_WEIGHT, statisticsData.getId()).toString())
-                                                .bindService();
+                                                .startService();
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }

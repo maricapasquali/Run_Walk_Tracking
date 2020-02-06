@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -31,8 +30,6 @@ import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 public class ModifyWorkoutActivity extends  CommonActivity{
 
@@ -190,7 +187,7 @@ public class ModifyWorkoutActivity extends  CommonActivity{
 
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
                         NetworkHelper.Constant.WORKOUT, bodyJson.toString())
-                        .bindService();
+                        .startService();
 
                 setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_WORKOUT, workout));
             } else

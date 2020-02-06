@@ -140,7 +140,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
 
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
-                                     .bindService();
+                                     .startService();
 
                 setResult(RESULT_OK, new Intent());
             }else {

@@ -98,7 +98,7 @@ public class NewWeightActivity extends NewInformationActivity {
                 Preferences.Session.update(this);
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WEIGHT, bodyJson.put(WeightDescriptor.ID_WEIGHT, id_weight).toString())
-                        .bindService();
+                        .startService();
 
                 setResult(RESULT_OK, new Intent());
             }else {

@@ -135,7 +135,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
                                                 NetworkHelper.Constant.WORKOUT,
                                                 new JSONObject().put(WorkoutDescriptor.ID_WORKOUT,
                                                         workout.getIdWorkout()).toString())
-                                                .bindService();
+                                                .startService();
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -199,7 +199,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
 
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
-                        .bindService();
+                        .startService();
 
 
                 setResult(RESULT_OK, new Intent());

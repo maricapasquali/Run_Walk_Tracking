@@ -75,7 +75,7 @@ public class MeasureUnitActivity extends CommonActivity implements MeasureAdapte
                         filterNetwork = NetworkHelper.Constant.UNIT_HEIGHT;
                         break;
                 }
-                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE, filterNetwork, data.toString()).bindService();
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE, filterNetwork, data.toString()).startService();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
