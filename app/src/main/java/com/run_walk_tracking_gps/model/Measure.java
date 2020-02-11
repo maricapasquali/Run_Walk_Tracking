@@ -507,7 +507,6 @@ public class Measure implements Parcelable {
                 int hours = 0, minutes = 0, sec = 0;
                 String[] split = duration.split(":");
                 if(split.length==2){
-                    hours = 0;
                     minutes = Integer.valueOf(split[0]);
                     sec = Integer.valueOf(split[1]);
 
@@ -523,7 +522,7 @@ public class Measure implements Parcelable {
             }
         }
 
-        private static List<Long> time(long seconds){
+        public static List<Long> time(long seconds){
             long hours = seconds / 3600;
             long minutes = (seconds /60) % 60;
             long sec = seconds%60;

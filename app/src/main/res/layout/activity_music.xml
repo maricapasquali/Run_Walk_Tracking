@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     style="@style/ScrollView">
+
+    <LinearLayout
+        android:id="@+id/music"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/custom_item_setting"
+        android:orientation="horizontal"
+        android:padding="30dp">
+
+        <Switch
+            android:id="@+id/music_on_off"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:elevation="8dp"
+            android:text="@string/use_playlist"
+            android:textColor="@android:color/background_light"
+            android:textColorLink="@color/colorPrimaryDark"
+            android:textOff="@string/off"
+            android:textOn="@string/on"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/playlists"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/music"
+        android:horizontalSpacing="10sp"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="auto_fit"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:verticalSpacing="10sp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/create_playlist"
+        style="@style/FloatingButton.Add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

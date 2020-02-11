@@ -31,4 +31,8 @@ public class KeysIntent {
 
     public static final String TIMER = "time";
     public static final String FROM_NOTIFICATION = "from_notification";
+
+    public static final String PLAYLIST = "playlist";
+    public static final String CHANGED_PLAYLIST = "Changed playlist";
+    public static final String DELETE_PLAYLIST = "Delete playlist";
 }

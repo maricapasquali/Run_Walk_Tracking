@@ -1,6 +1,6 @@
 package com.run_walk_tracking_gps.gui.components.dialog;
 
-import android.app.AlertDialog;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.run_walk_tracking_gps.R;
+
+import androidx.appcompat.app.AlertDialog;
 
 public class DelayedStartWorkoutDialog extends AlertDialog {
 

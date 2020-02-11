@@ -114,5 +114,25 @@ public class Preferences {
         }
     }
 
+    public static class Music{
+
+        private static final boolean IS_ACTIVE_DEFAULT = false;
+        private static final String PREFERENCE_MUSIC = "music";
+
+        private static SharedPreferences getSharedPreferencesCoach(Context context) {
+            return context.getSharedPreferences(PREFERENCE_MUSIC, Context.MODE_PRIVATE);
+        }
+
+        public static boolean isActive(Context context) {
+            String id_user = String.valueOf(Session.getIdUser(context));
+            return getSharedPreferencesCoach(context).getBoolean(id_user, IS_ACTIVE_DEFAULT);
+        }
+
+        public static void setActive(Context context, boolean isActive) {
+            String id_user = String.valueOf(Session.getIdUser(context));
+            getSharedPreferencesCoach(context).edit().putBoolean(id_user, isActive).apply();
+        }
+    }
+
 }
 

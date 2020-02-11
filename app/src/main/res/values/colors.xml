@@ -27,5 +27,9 @@ TODO: Riguardare
     <color name="RestartBtn">#93c47d</color>
     <color name="stopBtn">#cc0000</color>
 
+    <!-- Overlay -->
     <color name="overlay">#80333333</color>
+    <color name="overlay_dark">#E91F1E1E</color>
+
+
 </resources>

@@ -37,6 +37,8 @@
     <!-- Feature SENSOR (distance) -->
     <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
 
+    <!-- Permission READ CONTENT SONG -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 
     <application
@@ -148,6 +150,21 @@
             android:name=".gui.activity_of_settings.InfoActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".gui.SettingActivity" />
+
+
+        <activity
+            android:name=".gui.activity_of_settings.MusicActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".gui.SettingActivity" />
+
+        <activity android:name=".gui.activity_of_settings.NewPlayListActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".gui.activity_of_settings.PlayListActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".gui.activity_of_settings.AddSongToPlayListActivity"
+            android:screenOrientation="portrait" />
 
         <!-- SERVICE -->
 

@@ -15,15 +15,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.myhexaville.smartimagepicker.ImagePickerContract;
 import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.activity_of_settings.PlayListActivity;
 import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
+import com.run_walk_tracking_gps.model.Song;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
@@ -125,7 +130,7 @@ public class Factory {
         }
     }
 
-    public static  class CustomChronometer extends Chronometer{
+    public static class CustomChronometer extends Chronometer{
 
         private static final String TAG = CustomChronometer.class.getName();
         private boolean isRunning = false;
@@ -177,5 +182,19 @@ public class Factory {
            }
         }
 
+    }
+
+    public static class CustomDragSortController extends DragSortController{
+
+        private CustomDragSortController(DragSortListView dslv) {
+            super(dslv);
+            setDragInitMode(DragSortController.ON_LONG_PRESS);
+            setDragHandleId(R.id.order);
+            setBackgroundColor(R.color.colorAccent);
+        }
+
+        public static CustomDragSortController create(DragSortListView dslv){
+            return new CustomDragSortController(dslv);
+        }
     }
 }

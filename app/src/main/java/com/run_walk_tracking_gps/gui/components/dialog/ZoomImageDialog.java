@@ -1,6 +1,6 @@
 package com.run_walk_tracking_gps.gui.components.dialog;
 
-import android.app.AlertDialog;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.widget.RelativeLayout;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.run_walk_tracking_gps.R;
+
+import androidx.appcompat.app.AlertDialog;
 
 public class ZoomImageDialog extends AlertDialog {
 

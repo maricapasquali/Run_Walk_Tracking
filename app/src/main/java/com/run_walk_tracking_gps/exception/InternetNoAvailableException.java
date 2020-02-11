@@ -1,12 +1,13 @@
 package com.run_walk_tracking_gps.exception;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
+
+import androidx.appcompat.app.AlertDialog;
 
 public class InternetNoAvailableException extends BackgroundException {
 

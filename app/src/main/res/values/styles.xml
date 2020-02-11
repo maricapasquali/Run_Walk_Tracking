@@ -163,6 +163,10 @@
         <item name="srcCompat">@drawable/ic_ok</item>
     </style>
 
+    <style name="FloatingButton.Search">
+        <item name="srcCompat">@android:drawable/ic_menu_search</item>
+    </style>
+
     <style name="FloatingButton.Photo">
         <item name="srcCompat">@drawable/ic_camera</item>
         <item name="fabSize">mini</item>
@@ -224,7 +228,14 @@
     </style>
     <!-- END SIGN UP -->
 
-
+    <style name="DialogFullScreen">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 
 
 

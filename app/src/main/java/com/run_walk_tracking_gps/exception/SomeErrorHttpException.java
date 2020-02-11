@@ -1,9 +1,10 @@
 package com.run_walk_tracking_gps.exception;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.run_walk_tracking_gps.R;
+
+import androidx.appcompat.app.AlertDialog;
 
 public class SomeErrorHttpException extends BackgroundException{
 

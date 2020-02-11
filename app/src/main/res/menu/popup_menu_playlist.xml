@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/rename_playlist"
+        android:contentDescription="@string/rename"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="@string/rename"
+        app:showAsAction="ifRoom">
+
+    </item>
+    <item
+        android:id="@+id/delete_playlist"
+        android:contentDescription="@string/delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/use_primary"
+        android:icon="@drawable/ic_music"
+        android:title="@string/use_like_primary"
+        android:contentDescription="@string/use_like_primary"
+        app:showAsAction="ifRoom" />
+</menu>

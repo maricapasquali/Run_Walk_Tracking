@@ -132,6 +132,18 @@
     <string name="use_coach">Usar entrenador de voz</string>
     <string name="interval">Intervalo (min)</string>
 
+    <!-- Music -->
+    <string name="music"></string>
+    <string name="use_playlist"></string>
+    <string name="rename"></string>
+    <string name="use_like_primary"></string>
+    <string name="preview"></string>
+    <string name="create"></string>
+    <string name="search"></string>
+    <string name="close"></string>
+    <string name="num_songs">Songs Number</string>
+    <string name="date_creation">Creation Date</string>
+
     <!-- Informazioni account -->
 
     <string name="info_description">
@@ -149,6 +161,7 @@
     <string name="gps_disabled">El GPS parece estar deshabilitado, ¿quieres activarlo?</string>
     <string name="delete_weight_mex">¿Estás seguro de que deseas eliminar este peso?</string>
     <string name="delete_workout_mex">¿Estás seguro de que deseas eliminar este entrenamiento?</string>
+    <string name="delete_playlist_mex">¿Estás seguro de que deseas eliminar este playlist?</string>
     <string name="correctly_sign_up">¡Registro exitoso! Recibirá un correo electrónico con un código.</string>
     <string name="account_use_other_device">Cuenta en uso en otro dispositivo. Continuar aqui?</string>
     <string name="check_code_text">Ingrese el código de activación de la cuenta que se le envió por correo electrónico.</string>
@@ -167,8 +180,8 @@
     <string name="internet_not_available_title">Datos móviles desactivados</string>
     <string name="internet_not_available_mex">Activa la conexión de datos móviles o utiliza la red WI-FI para acceder a los datos.</string>
     <string name="token_not_valid">Sesión inválida</string>
-    <string name="connection_slow">Ops ! Connessione lenta, riprova più tardi.</string>
     <string name="arrivals">llegada</string>
+    <string name="connection_slow">¡Uy! Conexión lenta, intente nuevamente más tarde.</string>
 
 
 </resources>

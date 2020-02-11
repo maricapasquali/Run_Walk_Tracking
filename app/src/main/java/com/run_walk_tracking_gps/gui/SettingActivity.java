@@ -21,6 +21,7 @@ import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.MusicActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.VoiceCoachActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
@@ -53,7 +54,8 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout location;
     private LinearLayout unit;
 
-    private LinearLayout playlist;
+    private TextView music;
+    private Switch music_on_off;
     private TextView coach;
     private Switch coachOnOff;
 
@@ -85,7 +87,8 @@ public class SettingActivity extends CommonActivity {
         location = findViewById(R.id.location);
         unit = findViewById(R.id.unit);
 
-        playlist = findViewById(R.id.playlist);
+        music = findViewById(R.id.setting_playlist);
+        music_on_off = findViewById(R.id.setting_playlist_on_off);
         coach = findViewById(R.id.setting_vocal);
         coachOnOff = findViewById(R.id.setting_vocal_on_off);
 
@@ -102,6 +105,7 @@ public class SettingActivity extends CommonActivity {
 
 
             coachOnOff.setChecked(VoiceCoach.create(this).isActive());
+            music_on_off.setChecked(Preferences.Music.isActive(this));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -116,6 +120,7 @@ public class SettingActivity extends CommonActivity {
         //SyncServiceHandler.create(this).start();
 
         coachOnOff.setChecked(VoiceCoach.create(this).isActive());
+        music_on_off.setChecked(Preferences.Music.isActive(this));
 
         if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
                 (!LocationUtilities.isGpsEnable(this) && locationOnOff.isChecked())){
@@ -198,20 +203,24 @@ public class SettingActivity extends CommonActivity {
 
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
 
-        playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
-
-
-        coach.setOnTouchListener((v, event) -> {
-            final LinearLayout parent = ((LinearLayout)((TextView)v).getParent());
-            if(event.getAction()==MotionEvent.ACTION_DOWN ||
-               event.getAction()==MotionEvent.ACTION_UP ||
-               event.getAction()==MotionEvent.ACTION_CANCEL  )
-                    parent.setPressed(!parent.isPressed());
-
-            return false;
+        music_on_off.setOnCheckedChangeListener((buttonView, isChecked) ->{
+            // TODO: 07/02/2020
+            Preferences.Music.setActive(this, isChecked);
         });
-        coach.setOnClickListener(v -> startActivity(new Intent(this, VoiceCoachActivity.class)));
         coachOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> VoiceCoach.create(this).setActive(isChecked));
+
+        Stream.of(music, coach).forEach(view-> {
+            view.setOnTouchListener((v, event) -> {
+                final LinearLayout parent = ((LinearLayout)((TextView)v).getParent());
+                if(event.getAction()==MotionEvent.ACTION_DOWN ||
+                        event.getAction()==MotionEvent.ACTION_UP ||
+                        event.getAction()==MotionEvent.ACTION_CANCEL  )
+                    parent.setPressed(!parent.isPressed());
+                if(view.equals(music)) startActivity(new Intent(this, MusicActivity.class));
+                else if(view.equals(coach)) startActivity(new Intent(this, VoiceCoachActivity.class));
+                return false;
+            });
+        });
 
         info.setOnClickListener(v -> startActivity(new Intent(this, InfoActivity.class)));
 
@@ -226,6 +235,7 @@ public class SettingActivity extends CommonActivity {
                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
         });
+
     }
 
 }
