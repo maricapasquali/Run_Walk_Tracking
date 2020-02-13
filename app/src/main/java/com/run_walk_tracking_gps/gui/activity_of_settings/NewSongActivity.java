@@ -19,14 +19,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewPlayListAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.SearchSongDialog;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 import com.run_walk_tracking_gps.model.builder.SongBuilder;
+import com.run_walk_tracking_gps.utilities.DateHelper;
+import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +73,7 @@ public abstract class NewSongActivity extends CommonActivity {
             if(getIntent()!=null){
                 playList = getIntent().getParcelableExtra(KeysIntent.PLAYLIST);
                 namePlaylist.setText(playList.getName());
+                Log.d(TAG, playList.toString());
             }
 
             List<Song> sFilter = filterSong();
@@ -76,10 +81,6 @@ public abstract class NewSongActivity extends CommonActivity {
             else sFilter.forEach(s -> songs.put(s, false));
         }
 
-        //for (int i=1; i < 20; i++)
-        // songs.put(SongBuilder.create().setArtist("Madonna").setTitle("Die Another Day "+i).build(), false);
-
-        //Log.d(TAG, songs.toString());
         playListAdapter = new NewPlayListAdapter(this, songs);
         songsView.setAdapter(playListAdapter);
 
@@ -103,23 +104,36 @@ public abstract class NewSongActivity extends CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void result(boolean isChanged, Intent intent){
+        if(isChanged) setResult(Activity.RESULT_OK, intent);
+        else setResult(Activity.RESULT_CANCELED);
+        finish();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.add_info:
 
-                // TODO: 09/02/2020 DATABASE
-                playList.setId(1);
-                playList.setUseLikePrimary(usePrimary.isChecked());
-                playList.setName(namePlaylist.getText().toString());
+                if(playList.exist()){
+                    final ArrayList<Song> addSongs =
+                            SqlLitePlayListDao.create(this).updateSongs(playListAdapter.getChosenSong(), playList.getId());
+                    Log.d(TAG, "List songs : " + addSongs);
 
-                playList.replaceAll(playListAdapter.getChosenSong());
-                Log.d(TAG, "Playlist : " + playList);
+                    result(!addSongs.isEmpty(), new Intent().putExtra(KeysIntent.LIST_SONG, addSongs));
+                }else{
+                    final DateHelper dateHelper = DateHelper.create(this);
+                    final String date_creation = dateHelper.formatShortDateTimeToString(new Date(dateHelper.getCurrentDate()*1000));
+                    playList.setCreationDate(date_creation);
+                    playList.setUseLikePrimary(usePrimary.isChecked());
+                    playList.setName(namePlaylist.getText().toString());
 
-                if(playList.songs().isEmpty()) setResult(Activity.RESULT_CANCELED);
-                else setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.PLAYLIST, playList));
-                finish();
+                    playList.replaceAll(playListAdapter.getChosenSong());
+                    Log.d(TAG, "Playlist : " + playList);
 
+                    playList = SqlLitePlayListDao.create(this).insert(playList);
+                    result(playList!=null, new Intent().putExtra(KeysIntent.PLAYLIST, playList));
+                }
                 break;
             case android.R.id.home:
                 super.onBackPressed();
@@ -141,6 +155,12 @@ public abstract class NewSongActivity extends CommonActivity {
                 }).show());
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MediaPlayerHelper.getInstance(this).stop();
+    }
+
     protected List<Song> getMusic(){
         final ContentResolver contentResolver = getContentResolver();
         final Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -150,12 +170,20 @@ public abstract class NewSongActivity extends CommonActivity {
 
         if(songCursor!=null && songCursor.moveToFirst()){
             do{
-                s.add(SongBuilder.create()
-                        .setTitle(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)))
-                        .setArtist(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)))
-                        .setDuration(songCursor.getLong(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION)))
-                        .build());
+
+                long duration = songCursor.getLong(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+                if(duration>=30000){
+                    s.add(SongBuilder.create()
+                            .setTitle(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)))
+                            .setArtist(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)))
+                            .setDuration(duration)
+                            .setPathPreview(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)))
+                            .build());
+                    Log.d(TAG, songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                }
+
             }while(songCursor.moveToNext());
+            songCursor.close();
         }
         return s;
     }

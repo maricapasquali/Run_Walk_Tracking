@@ -179,7 +179,7 @@
 
     <style name="FloatingButton.Play">
         <item name="backgroundTint">@color/startBtn</item>
-        <item name="srcCompat">@drawable/ic_play_button</item>
+        <item name="srcCompat">@drawable/ic_play</item>
         <item name="android:contentDescription">@string/start</item>
         <item name="android:visibility">visible</item>
     </style>
@@ -193,7 +193,7 @@
 
     <style name="FloatingButton.Restart">
         <item name="backgroundTint">@color/RestartBtn</item>
-        <item name="srcCompat">@drawable/ic_play_button</item>
+        <item name="srcCompat">@drawable/ic_play</item>
         <item name="android:contentDescription">@string/restart</item>
         <item name="android:visibility">gone</item>
     </style>

@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.PlayListsAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
@@ -37,7 +38,7 @@ public class MusicActivity extends CommonActivity {
     private GridView playlistView;
     private FloatingActionButton create_playlist;
 
-    private Map<PlayList, Long> playLists;
+    private Map<Integer, PlayList> playLists;
     private PlayListsAdapter playListsAdapter;
 
     @Override
@@ -51,8 +52,7 @@ public class MusicActivity extends CommonActivity {
         create_playlist = findViewById(R.id.create_playlist);
 
         use.setChecked(Preferences.Music.isActive(this));
-        playLists = new LinkedHashMap<>();
-        //for (int i=1; i < 20; i++) playLists.put(PlayListBuilder.create().setName("Corsa " + i).setUsePrimary(i==1).build(), (long)i*10000);
+        playLists = SqlLitePlayListDao.create(this).getAll();
         playListsAdapter = new PlayListsAdapter(this, playLists);
         playlistView.setAdapter(playListsAdapter);
 
@@ -79,9 +79,7 @@ public class MusicActivity extends CommonActivity {
         });
 
         playlistView.setOnItemClickListener((parent, view, position, id) ->{
-            PlayList playList = ((Map.Entry<PlayList, Long>)parent.getAdapter().getItem(position)).getKey();
-            Toast.makeText(MusicActivity.this, "Position = "+position +", Item = " +
-                    parent.getAdapter().getItem(position), Toast.LENGTH_LONG).show();
+            PlayList playList = ((Map.Entry<Integer, PlayList>)parent.getAdapter().getItem(position)).getValue();
             startActivityForResult(new Intent(this, PlayListActivity.class)
                     .putExtra(KeysIntent.PLAYLIST, playList), REQUEST_CHANGE_PLAYLIST);
         });

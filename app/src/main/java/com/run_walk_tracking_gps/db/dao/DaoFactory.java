@@ -3,17 +3,22 @@ package com.run_walk_tracking_gps.db.dao;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import com.run_walk_tracking_gps.db.tables.CompoundDescriptor;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
+import com.run_walk_tracking_gps.db.tables.PlayListDescriptor;
 import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
+import com.run_walk_tracking_gps.db.tables.SongDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 
 public class DaoFactory extends SQLiteOpenHelper {
+    private static final String TAG = DaoFactory.class.getName();
     private static DaoFactory DaoFactoryInstance = null;
     private static final String DB_NAME = "RUN_WALK_TRACKING_DB.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 3;
 
     /*
         perchè syncronized? cosa succede se accedo all'istanza da diversi flussi di controllo?
@@ -74,6 +79,10 @@ public class DaoFactory extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(WeightDescriptor.CREATE_TABLE_WEIGHT);
         sqLiteDatabase.execSQL(WorkoutDescriptor.CREATE_TABLE_WORKOUT);
 
+        sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_TABLE_PLAYLIST);
+        sqLiteDatabase.execSQL(SongDescriptor.CREATE_TABLE_SONG);
+        sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_TABLE_COMPOUND);
+
         // CREAZIONE INDICI
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_USER);
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_NAME);
@@ -90,12 +99,22 @@ public class DaoFactory extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL(WorkoutDescriptor.CREATE_INDEX);
 
+
+        sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_INDEX_PLAYLIST);
+        sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_INDEX_USER);
+        sqLiteDatabase.execSQL(SongDescriptor.CREATE_INDEX_SONG);
+        sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_INDEX_COMPOUND);
+        sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_INDEX_PLAYLIST);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.e(TAG, "onUpgrade");
         if(newVersion > oldVersion){
             //adatto il db con delle query alla versione richiesta
+            onCreate(db);
         }
+
     }
 }

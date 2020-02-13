@@ -32,10 +32,26 @@ public class CollectionsUtilities <K, V>{
     public static class ListUtilities<T>{
         public ArrayList<T> difference(List<T> bigger, List<T>  small){
             final Set<T> biggerSet = new HashSet<>(bigger);
-            final Set<Object> smallerSet = new HashSet<>(small);
+            final Set<T> smallerSet = new HashSet<>(small);
             biggerSet.removeAll(smallerSet);
             return new ArrayList<>(biggerSet);
         }
+
+        public static class ArrayListAnySize<T> extends ArrayList<T>{
+            @Override
+            public void add(int index, T element){
+                if(index >= 0 && index <= size()){
+                    super.add(index, element);
+                    return;
+                }
+                int insertNulls = index - size();
+                for(int i = 0; i < insertNulls; i++){
+                    super.add(null);
+                }
+                super.add(element);
+            }
+        }
+
     }
 
 

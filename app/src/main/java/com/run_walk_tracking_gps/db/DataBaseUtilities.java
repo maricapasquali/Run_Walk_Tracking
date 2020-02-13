@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
+import com.run_walk_tracking_gps.db.tables.CompoundDescriptor;
+import com.run_walk_tracking_gps.db.tables.PlayListDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 
 import org.json.JSONArray;
@@ -22,7 +24,7 @@ public class DataBaseUtilities {
      * @param columnNames set con i nomi delle colonne su cui basare la costruzione della clausola where in formato stringa
      * @return la stringa corrispondente alla clausola where
      */
-    private static String buildWhereClause(Set<String> columnNames){
+    public static String buildWhereClause(Set<String> columnNames){
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for(String columnName: columnNames) {
@@ -64,7 +66,7 @@ public class DataBaseUtilities {
         return transaction(db, () -> db.delete(table, buildWhereClause(whereCondition.keySet()), whereCondition.values().toArray(new String[0]))!=-1);
     }
 
-    private static boolean transaction(SQLiteDatabase db, Supplier<Boolean> supplier){
+    public static boolean transaction(SQLiteDatabase db, Supplier<Boolean> supplier){
         boolean success = false;
         try {
             db.beginTransaction();
@@ -86,6 +88,12 @@ public class DataBaseUtilities {
     public static int getNextId(SQLiteDatabase db, int id_user, String table, String idField){
         try (Cursor c = db.rawQuery("SELECT MAX("+ idField+") as next FROM " +table + " WHERE "+ UserDescriptor.ID_USER +"=? ",
                 new String[]{String.valueOf(id_user)})) {
+            return (!c.moveToFirst()) ? 1 : c.getInt(c.getColumnIndex("next"))+1 ;
+        }
+    }
+
+    public static int getNextId(SQLiteDatabase db, String table, String idField){
+        try (Cursor c = db.rawQuery("SELECT MAX("+ idField+") as next FROM " +table, null)) {
             return (!c.moveToFirst()) ? 1 : c.getInt(c.getColumnIndex("next"))+1 ;
         }
     }

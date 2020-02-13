@@ -1,6 +1,10 @@
 package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +16,9 @@ import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.Song;
+import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +85,18 @@ public class NewPlayListAdapter extends BaseAdapter {
         check.setChecked(element.getValue());
 
         preview.setOnClickListener(v -> {
-            // TODO: 09/02/2020  PREVIEW MUSIC ( 30 SEC ) 
-            Toast.makeText(context, "Preview : "+
-                    ((Map.Entry<Song, Boolean>) getItem(position)).getKey(), Toast.LENGTH_LONG).show();
+            // TODO: 09/02/2020  PREVIEW MUSIC ( 30 SEC )
+            final Song song = ((Map.Entry<Song, Boolean>) getItem(position)).getKey();
+            if(song.getPathPreview()!=null) {
+                if(MediaPlayerHelper.getInstance(context).isPlaying()){
+                    MediaPlayerHelper.getInstance(context).stop();
+                    ((ImageView)v).setImageDrawable(context.getDrawable(R.drawable.ic_play));
+                }else{
+                    MediaPlayerHelper.getInstance(context).preview(song.getPathPreview());
+                    ((ImageView)v).setImageDrawable(context.getDrawable(R.drawable.ic_stop));
+                }
+            }
+            Log.d(TAG, song.getPathPreview().toString());
         });
 
         check.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -91,10 +106,11 @@ public class NewPlayListAdapter extends BaseAdapter {
     }
 
     public List<Song> getChosenSong(){
-        return chosenSong.entrySet().stream()
-                                    .filter(Map.Entry::getValue)
-                                    .map(Map.Entry::getKey)
-                                    .collect(Collectors.toList());
+        return chosenSong.entrySet()
+                         .stream()
+                         .filter(Map.Entry::getValue)
+                         .map(Map.Entry::getKey)
+                         .collect(Collectors.toList());
     }
 
 }

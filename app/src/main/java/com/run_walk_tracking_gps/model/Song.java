@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.model;
 
 import android.content.Context;
 import android.icu.util.MeasureUnit;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -24,6 +25,8 @@ public class Song implements Parcelable {
     private String artist;
     private long duration; // millisecondi
 
+    private Uri pathPreview;
+
     private Song(){}
 
     // PARCELABLE
@@ -33,6 +36,8 @@ public class Song implements Parcelable {
         title = in.readString();
         artist = in.readString();
         duration = in.readLong();
+
+        pathPreview = Uri.parse(in.readString());
     }
 
     @Override
@@ -41,6 +46,8 @@ public class Song implements Parcelable {
         dest.writeString(title);
         dest.writeString(artist);
         dest.writeLong(duration);
+
+        dest.writeString(pathPreview.toString());
     }
 
     @Override
@@ -103,6 +110,14 @@ public class Song implements Parcelable {
         this.duration = duration;
     }
 
+    public Uri getPathPreview() {
+        return pathPreview;
+    }
+
+    public void setPathPreview(String pathPreview) {
+        this.pathPreview = Uri.parse(pathPreview);
+    }
+
     public static class DurationUtilities {
 
         private static final String TAG = DurationUtilities.class.getName();
@@ -139,20 +154,19 @@ public class Song implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Song song = (Song) o;
-        return id_song == song.id_song &&
-                duration == song.duration &&
+        return  duration == song.duration &&
                 Objects.equals(title, song.title) &&
                 Objects.equals(artist, song.artist);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id_song, title, artist, duration);
+        return Objects.hash(title, artist, duration);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Song : [ id_song = "+id_song+", Title = " +title +", Artist = " +artist + ", Duration = "+getDurationFormat()+" ]";
+        return "Song : [ id_song = "+id_song+", Title = " +title +", Artist = " +artist + ", Duration = "+getDurationFormat() +", path = "+pathPreview +" ]";
     }
 }

@@ -2,6 +2,8 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,12 +14,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortListView;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.db.dao.PlayListDao;
+import com.run_walk_tracking_gps.db.dao.SqlLiteCompoundDao;
+import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.SongsAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
+import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +36,6 @@ public class PlayListActivity extends CommonActivity {
 
     private static final String TAG = PlayListActivity.class.getName();
     private static final int REQUEST_ADD_SONG = 66;
-    private List<Song> songs = new ArrayList<>();
 
     private DragSortListView songsView;
 
@@ -61,18 +67,28 @@ public class PlayListActivity extends CommonActivity {
             oldPlayList = getIntent().getParcelableExtra(KeysIntent.PLAYLIST);
             if(oldPlayList!=null){
                 getSupportActionBar().setTitle(oldPlayList.getName());
+
+                Log.d(TAG, "OLD = " + oldPlayList);
+                if(oldPlayList.songs().isEmpty())
+                    oldPlayList.addAll(SqlLitePlayListDao.create(this).getAllSong(oldPlayList.getId()));
+
                 newPlayList = oldPlayList.clone();
 
-                if(oldPlayList.songs().size()> 0) {
-                    num_song.setText(String.valueOf(oldPlayList.songs().size()));
-                    duration.setText(Song.DurationUtilities.format(oldPlayList.duration()));
-                    create_date.setText(oldPlayList.getCreationDate());
-                    songs.addAll(oldPlayList.songs());
-                }
+                create_date.setText(oldPlayList.getCreationDate());
+                num_song.setText(String.valueOf(oldPlayList.songs().size()));
+                duration.setText(Song.DurationUtilities.format(oldPlayList.duration()));
             }
         }
 
-        adapter = new SongsAdapter(this, songs);
+        adapter = new SongsAdapter(this, newPlayList, (id_song, isEmpty) -> {
+            if(isEmpty){
+                setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, newPlayList.getId()));
+                finish();
+            }
+            duration.setText(Song.DurationUtilities.format(newPlayList.duration()));
+            num_song.setText(String.valueOf(newPlayList.songs().size()));
+        });
+
         Factory.CustomDragSortController customDragSortController = Factory.CustomDragSortController.create(songsView);
         songsView.setAdapter(adapter);
         songsView.setFloatViewManager(customDragSortController);
@@ -95,9 +111,10 @@ public class PlayListActivity extends CommonActivity {
                            .setHint(R.string.playlist)
                            .setContent(oldPlayList.getName())
                            .setPositiveButton(R.string.ok, text -> {
-                                // TODO: 09/02/2020  DATABASE
-                                newPlayList.setName(text);
-                                getSupportActionBar().setTitle(newPlayList.getName());
+                                if(SqlLitePlayListDao.create(this).updateName(text, newPlayList.getId())){
+                                    newPlayList.setName(text);
+                                    getSupportActionBar().setTitle(newPlayList.getName());
+                                }
                            })
                            .create()
                            .show();
@@ -108,9 +125,10 @@ public class PlayListActivity extends CommonActivity {
                         .setMessage(R.string.delete_playlist_mex)
                         .setPositiveButton(R.string.delete,
                                 (dialog, which) -> {
-                                    // TODO: 09/02/2020  DATABASE
-                                    setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, oldPlayList.getId()));
-                                    finish();
+                                    if(SqlLitePlayListDao.create(this).delete(oldPlayList.getId())){
+                                        setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, oldPlayList.getId()));
+                                        finish();
+                                    }
                                 })
                         .setNegativeButton(R.string.cancel, null)
                         .create()
@@ -118,9 +136,10 @@ public class PlayListActivity extends CommonActivity {
             }
             break;
             case R.id.use_primary: {
-                // TODO: 09/02/2020  DATABASE
-                newPlayList.setUseLikePrimary(true);
-                item.setVisible(false);
+                if(SqlLitePlayListDao.create(this).updateUse(newPlayList.getId())){
+                    newPlayList.setUseLikePrimary(true);
+                    item.setVisible(false);
+                }
             }
             break;
             case android.R.id.home:
@@ -135,13 +154,13 @@ public class PlayListActivity extends CommonActivity {
         DragSortListView.DropListener onDrop = (from, to) -> {
             if (from != to) {
                 Song item = adapter.getItem(from);
+
                 adapter.remove(item);
                 adapter.insert(item, to);
 
-                Log.d(TAG, songs.toString());
-                // TODO: 09/02/2020  DATABASE
-                newPlayList.replaceAll(songs);
+                SqlLiteCompoundDao.create(this).reOrderSong(newPlayList.getId(),  newPlayList.songs());
 
+                Log.d(TAG, newPlayList.toString());
                 Log.d(TAG, adapter.getItem(to).toString());
             }
         };
@@ -155,12 +174,21 @@ public class PlayListActivity extends CommonActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MediaPlayerHelper.getInstance(this).stop();
+    }
+
+    @Override
     public void onBackPressed() {
         Log.e(TAG, "Change PLAYLITS = " +  !oldPlayList.equals(newPlayList));
 
-        if(oldPlayList.equals(newPlayList)) setResult(Activity.RESULT_CANCELED);
-        else setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_PLAYLIST, newPlayList));
-        finish();
+        if(oldPlayList.equals(newPlayList))
+            setResult(Activity.RESULT_CANCELED);
+        else
+            setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_PLAYLIST, newPlayList));
+
+        super.onBackPressed();
     }
 
     @Override
@@ -170,24 +198,16 @@ public class PlayListActivity extends CommonActivity {
         switch (requestCode){
             case REQUEST_ADD_SONG:{
                 if(resultCode == Activity.RESULT_OK){
-                    PlayList playList = data.getParcelableExtra(KeysIntent.PLAYLIST);
-                    Log.d(TAG, "New songs " + playList.songs().toString());
-                    songs.addAll(playList.songs());
+                    ArrayList<Song> list = data.getParcelableArrayListExtra(KeysIntent.LIST_SONG);
+                    Log.d(TAG, "New songs " + list);
+                    newPlayList.addAll(list);
                     adapter.notifyDataSetChanged();
-
-                    updatePlaylist(playList);
+                    num_song.setText(String.valueOf(newPlayList.songs().size()));
+                    duration.setText(Song.DurationUtilities.format(newPlayList.duration()));
                 }
             }
             break;
         }
-    }
-
-    public void updatePlaylist(PlayList playList) {
-        newPlayList.addAll(playList.songs());
-        Log.e(TAG, "SONGS = " +  newPlayList.songs());
-        Log.e(TAG, "OLD SONGS = " +  oldPlayList.songs());
-        num_song.setText(String.valueOf(newPlayList.songs().size()));
-        duration.setText(Song.DurationUtilities.format(newPlayList.duration()));
     }
 
 }

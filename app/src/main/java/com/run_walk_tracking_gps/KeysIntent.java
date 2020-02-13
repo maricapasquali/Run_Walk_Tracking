@@ -35,4 +35,5 @@ public class KeysIntent {
     public static final String PLAYLIST = "playlist";
     public static final String CHANGED_PLAYLIST = "Changed playlist";
     public static final String DELETE_PLAYLIST = "Delete playlist";
+    public static final String LIST_SONG = "list_songs";
 }

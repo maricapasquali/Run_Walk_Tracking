@@ -12,17 +12,20 @@ import androidx.annotation.NonNull;
 public class PlayList implements Parcelable{
 
     private static final String DEFAULT_NAME = "PlayList";
-    private int id_playlist;
+    private int id_playlist = -1;
 
     private String name;
     private ArrayList<Song> songs;
     private boolean useLikePrimary;
     private String create_date;
 
+    private Long duration;
+
     private PlayList(){
         name = DEFAULT_NAME;
         songs = new ArrayList<>();
         useLikePrimary = false;
+        duration = null;
     }
 
     private PlayList(PlayList playList){
@@ -31,6 +34,8 @@ public class PlayList implements Parcelable{
         this.useLikePrimary = playList.useLikePrimary;
         this.songs = (ArrayList<Song>)playList.songs.clone();
         this.create_date = playList.create_date;
+
+        this.duration = playList.duration;
     }
 
     public PlayList clone() {
@@ -46,6 +51,9 @@ public class PlayList implements Parcelable{
         songs = new ArrayList<>();
         in.readTypedList(songs, Song.CREATOR);
         useLikePrimary = in.readByte() != 0;
+        create_date = in.readString();
+
+        duration = in.readLong();
     }
 
     @Override
@@ -54,6 +62,9 @@ public class PlayList implements Parcelable{
         dest.writeString(name);
         dest.writeTypedList(songs);
         dest.writeByte((byte) (useLikePrimary ? 1 : 0));
+        dest.writeString(create_date);
+
+        if(duration!=null)dest.writeLong(duration);
     }
 
     @Override
@@ -103,7 +114,8 @@ public class PlayList implements Parcelable{
     }
 
     public void addAll(final List<Song> songs){
-        this.songs.addAll(songs);
+        if(songs!=null)
+            this.songs.addAll(songs);
     }
 
     public void add(final Song song){
@@ -115,8 +127,7 @@ public class PlayList implements Parcelable{
     }
 
     public long duration() {
-        if(songs.isEmpty()) return 0;
-        return songs.stream().map(Song::getDuration).reduce(0L, Long::sum);
+        return songs.isEmpty() ? duration : songs.stream().map(Song::getDuration).reduce(0L, Long::sum);
     }
 
     public boolean isUseLikePrimary() {
@@ -133,6 +144,14 @@ public class PlayList implements Parcelable{
 
     public void setCreationDate(String date) {
         this.create_date = date;
+    }
+
+    public boolean exist() {
+        return id_playlist!=-1;
+    }
+
+    public void setDuration(long duration_playlist) {
+        this.duration = duration_playlist;
     }
 
     @Override
@@ -155,6 +174,9 @@ public class PlayList implements Parcelable{
     @NonNull
     @Override
     public String toString() {
-        return "PlayList [ id_playlist = "+id_playlist+", Name = " + name + ", Songs = "+ songs + ", Primary = " + useLikePrimary+" ]";
+        return "PlayList [ id_playlist = "+id_playlist+", Name = " + name + ", Songs = "+ songs +
+               ", Primary = " + useLikePrimary +", Date Creation = " +create_date+" ]";
     }
+
+
 }

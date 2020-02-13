@@ -14,6 +14,11 @@ public class SongBuilder {
         return new SongBuilder();
     }
 
+    public SongBuilder setId(int id) {
+        song.setId(id);
+        return this;
+    }
+
     public SongBuilder setTitle(String title){
         song.setTitle(title);
         return this;
@@ -29,7 +34,16 @@ public class SongBuilder {
         return this;
     }
 
+    public SongBuilder setPathPreview(String pathPreview){
+        song.setPathPreview(pathPreview);
+        return this;
+    }
+
     public Song build() {
         return song;
     }
+
+
+
+
 }

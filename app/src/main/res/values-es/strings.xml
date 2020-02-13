@@ -162,6 +162,7 @@
     <string name="delete_weight_mex">¿Estás seguro de que deseas eliminar este peso?</string>
     <string name="delete_workout_mex">¿Estás seguro de que deseas eliminar este entrenamiento?</string>
     <string name="delete_playlist_mex">¿Estás seguro de que deseas eliminar este playlist?</string>
+    <string name="delete_song_mex">¿Estás seguro de que deseas eliminar este canción?</string>
     <string name="correctly_sign_up">¡Registro exitoso! Recibirá un correo electrónico con un código.</string>
     <string name="account_use_other_device">Cuenta en uso en otro dispositivo. Continuar aqui?</string>
     <string name="check_code_text">Ingrese el código de activación de la cuenta que se le envió por correo electrónico.</string>
