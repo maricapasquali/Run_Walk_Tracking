@@ -2,32 +2,29 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortListView;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.PlayListDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteCompoundDao;
 import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.SongsAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
+import com.run_walk_tracking_gps.model.MusicCoach;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -93,6 +90,37 @@ public class PlayListActivity extends CommonActivity {
         songsView.setAdapter(adapter);
         songsView.setFloatViewManager(customDragSortController);
         songsView.setOnTouchListener(customDragSortController);
+
+        songsView.setOnItemClickListener((parent, view, position, id) -> {
+
+            view.findViewById(R.id.preview).setOnClickListener(v -> {
+                ImageView finalPView = (ImageView)v;
+                final Song song = (Song)parent.getAdapter().getItem(position);
+                for (int i = 0; i < adapter.getCount(); i++) {
+                    ((ImageView)parent.getChildAt(i).findViewById(R.id.preview))
+                            .setImageDrawable(getDrawable(position == i ? R.drawable.ic_stop : R.drawable.ic_play ));
+                }
+                final MediaPlayerHelper mediaPlayerHelper = MediaPlayerHelper.getInstance(PlayListActivity.this);
+                final MediaPlayerHelper.OnStartAndEndPreviewListener listener = new MediaPlayerHelper.OnStartAndEndPreviewListener() {
+                    @Override
+                    public void onStart() {
+                        finalPView.setImageDrawable(PlayListActivity.this.getDrawable(R.drawable.ic_stop));
+                    }
+                    @Override
+                    public void onStop() {
+                        finalPView.setImageDrawable(PlayListActivity.this.getDrawable(R.drawable.ic_play));
+                    }
+                };
+                if(mediaPlayerHelper.getSoundUri().equals(song.getPathPreview())) {
+                    mediaPlayerHelper.togglePreview(song.getPathPreview(), listener);
+                }else{
+                    mediaPlayerHelper.stopPreview();
+                    mediaPlayerHelper.preview(song.getPathPreview(), listener);
+                }
+            });
+
+
+        });
     }
 
     @Override
@@ -126,6 +154,7 @@ public class PlayListActivity extends CommonActivity {
                         .setPositiveButton(R.string.delete,
                                 (dialog, which) -> {
                                     if(SqlLitePlayListDao.create(this).delete(oldPlayList.getId())){
+                                        if(oldPlayList.isUseLikePrimary()) MusicCoach.reset();
                                         setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, oldPlayList.getId()));
                                         finish();
                                     }
@@ -139,6 +168,7 @@ public class PlayListActivity extends CommonActivity {
                 if(SqlLitePlayListDao.create(this).updateUse(newPlayList.getId())){
                     newPlayList.setUseLikePrimary(true);
                     item.setVisible(false);
+                    MusicCoach.reset();
                 }
             }
             break;
@@ -154,11 +184,10 @@ public class PlayListActivity extends CommonActivity {
         DragSortListView.DropListener onDrop = (from, to) -> {
             if (from != to) {
                 Song item = adapter.getItem(from);
-
                 adapter.remove(item);
                 adapter.insert(item, to);
-
                 SqlLiteCompoundDao.create(this).reOrderSong(newPlayList.getId(),  newPlayList.songs());
+                MusicCoach.reset();
 
                 Log.d(TAG, newPlayList.toString());
                 Log.d(TAG, adapter.getItem(to).toString());
@@ -176,7 +205,7 @@ public class PlayListActivity extends CommonActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MediaPlayerHelper.getInstance(this).stop();
+        MediaPlayerHelper.getInstance(this).stopPreview();
     }
 
     @Override

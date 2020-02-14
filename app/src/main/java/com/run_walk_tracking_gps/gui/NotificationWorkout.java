@@ -19,6 +19,7 @@ import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.utilities.NotificationHelper;
@@ -39,7 +40,7 @@ public class NotificationWorkout {
     private static final int REQUEST_CODE_RESTART = 2;
     private static final int REQUEST_CODE_PAUSE = 3;
     private static final int REQUEST_CODE_STOP = 4;
-    private static final int REQUEST_CODE_VOICE = 6;
+
 
     private Context context;
 
@@ -51,9 +52,6 @@ public class NotificationWorkout {
 
     private Chronometer chronometer;
     private long timeWhenPaused = 0;
-
-    private AlarmManager alarmManager;
-    private PendingIntent voicePendingIntent;
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -114,12 +112,6 @@ public class NotificationWorkout {
         PendingIntent stopPendingClick = PendingIntent.getActivity(context, REQUEST_CODE_STOP, stopClick, 0);
 
 
-        if(Preferences.VoiceCoach.isActive(context)){
-            alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Intent voiceIntent = new Intent(context, WorkoutService.class).setAction(ActionReceiver.VOICE);
-            voicePendingIntent = PendingIntent.getService(context, REQUEST_CODE_VOICE, voiceIntent,0);
-        }
-
 
         remoteViewBig.setOnClickPendingIntent(R.id.pause_workout, pausePendingClick);
         remoteViewBig.setOnClickPendingIntent(R.id.stop_workout, stopPendingClick);
@@ -163,13 +155,13 @@ public class NotificationWorkout {
         chronometer.setBase(elapsed);
         start();
 
-        setAlarmVoice();
+        VoiceCoach.create(context).setAlarmVoice();
     }
 
 
     public void pauseClicked() {
         setVisibleButton(false);
-        cancelAlarmVoice();
+        VoiceCoach.create(context).cancelAlarmVoice();
 
         long elapsed = SystemClock.elapsedRealtime();
         timeWhenPaused  = elapsed - chronometer.getBase();
@@ -178,7 +170,7 @@ public class NotificationWorkout {
 
     public void restartClicked() {
         setVisibleButton(true);
-        setAlarmVoice();
+        VoiceCoach.create(context).setAlarmVoice();
 
         long elapsed = SystemClock.elapsedRealtime();
         chronometer.setBase(elapsed - timeWhenPaused);
@@ -187,23 +179,12 @@ public class NotificationWorkout {
     }
 
     public void stopClicked() {
-        cancelAlarmVoice();
+        VoiceCoach.create(context).cancelAlarmVoice();
         notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
         context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
-    private void setAlarmVoice(){
-        if(Preferences.VoiceCoach.isActive(context)){
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                    Preferences.VoiceCoach.getInterval(context)*60000, voicePendingIntent);
-        }
-    }
 
-    private void cancelAlarmVoice(){
-        if(Preferences.VoiceCoach.isActive(context)){
-            alarmManager.cancel(voicePendingIntent);
-        }
-    }
 
     private void setVisibleButton(final boolean isPause){
         remoteViewBig.setViewVisibility(R.id.restart_workout, isPause ?  View.GONE: View.VISIBLE);

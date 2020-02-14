@@ -29,6 +29,8 @@ import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.MusicCoach;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
@@ -56,6 +58,10 @@ public class HomeFragment extends Fragment {
     private View rootView;
 
     private TextView sport;
+
+    private FloatingActionButton music;
+    private FloatingActionButton voice;
+
     private FloatingActionButton start;
     private FloatingActionButton pause;
     private FloatingActionButton restart;
@@ -104,6 +110,11 @@ public class HomeFragment extends Fragment {
 
         Log.d(TAG, "onCreateView");
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        music = rootView.findViewById(R.id.musicCoach);
+        voice = rootView.findViewById(R.id.voiceCoach);
+        //music.setImageResource(R.drawable.ic_music_off);
+
 
         start = rootView.findViewById(R.id.start_workout);
         pause = rootView.findViewById(R.id.pause_workout);
@@ -181,6 +192,15 @@ public class HomeFragment extends Fragment {
         getActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
         start.setVisibility(View.GONE);
         pause.setVisibility(View.VISIBLE);
+
+        MusicCoach musicCoach = MusicCoach.create(getContext());
+        if(!musicCoach.isEmpty()) {
+            music.setImageResource(musicCoach.isActive() ? R.drawable.ic_music : R.drawable.ic_music_off );
+            music.setVisibility(View.VISIBLE);
+        }
+
+        voice.setImageResource(VoiceCoach.create(getContext()).isActive() ? R.drawable.ic_voice_coach : R.drawable.ic_voice_coach_off);
+        voice.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("RestrictedApi")
@@ -188,6 +208,8 @@ public class HomeFragment extends Fragment {
         restart.setVisibility(View.GONE);
         stop.setVisibility(View.GONE);
         pause.setVisibility(View.VISIBLE);
+
+        //voice.setImageResource(R.drawable.ic_voice_coach);
     }
 
     @SuppressLint("RestrictedApi")
@@ -195,9 +217,43 @@ public class HomeFragment extends Fragment {
         pause.setVisibility(View.GONE);
         restart.setVisibility(View.VISIBLE);
         stop.setVisibility(View.VISIBLE);
+
+        //voice.setImageResource(R.drawable.ic_voice_coach_off);
     }
 
     private void setListener(){
+
+        music.setOnClickListener(v ->{
+            FloatingActionButton musicButton = ((FloatingActionButton)v);
+            MusicCoach.create(getContext()).toggleStartAndStop(new MusicCoach.OnStartOrStopListener() {
+                @Override
+                public void onStop() {
+                    musicButton.setImageResource(R.drawable.ic_music_off);
+                }
+
+                @Override
+                public void onStart() {
+                    musicButton.setImageResource(R.drawable.ic_music);
+                }
+
+            });
+        });
+
+        voice.setOnClickListener(v -> {
+            FloatingActionButton voiceButton = ((FloatingActionButton)v);
+            VoiceCoach.create(getContext()).toggleActiveAndInActive(new VoiceCoach.OnActiveOrInActiveListener() {
+                @Override
+                public void onActive() {
+                    voiceButton.setImageResource(R.drawable.ic_voice_coach);
+                }
+
+                @Override
+                public void onInActive() {
+                    voiceButton.setImageResource(R.drawable.ic_voice_coach_off);
+                }
+            });
+        });
+
         workout_duration.setOnChronometerTickListener(chronometer -> {
             long time = (SystemClock.elapsedRealtime() - chronometer.getBase()) /1000;
             String timer = Measure.Utilities.format(time);
@@ -206,11 +262,8 @@ public class HomeFragment extends Fragment {
 
         start.setOnClickListener(v ->{
             DelayedStartWorkoutDialog.create(getContext(), () -> {
-
                 startState();
-
                 workout_duration.start();
-
                 try {
                     registerBroadcastReceiver();
                     bindService();

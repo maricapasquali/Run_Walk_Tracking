@@ -212,14 +212,28 @@ public class SettingActivity extends CommonActivity {
         Stream.of(music, coach).forEach(view-> {
             view.setOnTouchListener((v, event) -> {
                 final LinearLayout parent = ((LinearLayout)((TextView)v).getParent());
-                if(event.getAction()==MotionEvent.ACTION_DOWN ||
-                        event.getAction()==MotionEvent.ACTION_UP ||
-                        event.getAction()==MotionEvent.ACTION_CANCEL  )
-                    parent.setPressed(!parent.isPressed());
-                if(view.equals(music)) startActivity(new Intent(this, MusicActivity.class));
-                else if(view.equals(coach)) startActivity(new Intent(this, VoiceCoachActivity.class));
-                return false;
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        parent.setPressed(true);
+                        break;
+                    case MotionEvent.ACTION_CANCEL:
+                        parent.setPressed(false);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        parent.setPressed(false);
+                        switch(v.getId()){
+                            case R.id.setting_playlist:
+                                startActivity(new Intent(this, MusicActivity.class));
+                                break;
+                            case R.id.setting_vocal:
+                                startActivity(new Intent(this, VoiceCoachActivity.class));
+                                break;
+                        }
+                        break;
+                }
+                return true;
             });
+
         });
 
         info.setOnClickListener(v -> startActivity(new Intent(this, InfoActivity.class)));

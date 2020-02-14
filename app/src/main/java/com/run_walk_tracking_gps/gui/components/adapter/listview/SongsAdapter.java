@@ -10,22 +10,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.CheckedOutputStream;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 public class SongsAdapter extends ArrayAdapter<Song> {
 
+    private static final String TAG = SongsAdapter.class.getName();
     private PlayList playList;
     private OnClickDeleteSongListener listener;
 
@@ -47,7 +42,7 @@ public class SongsAdapter extends ArrayAdapter<Song> {
             final TextView title = view.findViewById(R.id.title);
             final TextView artist = view.findViewById(R.id.artist);
             final ImageView delete = view.findViewById(R.id.delete);
-            final ImageView preview = view.findViewById(R.id.preview);
+
             delete.setOnClickListener(v -> {
 
                 new AlertDialog.Builder(getContext())
@@ -68,22 +63,10 @@ public class SongsAdapter extends ArrayAdapter<Song> {
 
             });
 
-            preview.setOnClickListener(v -> {
-                Song song = getItem(position);
-                if(song.getPathPreview()!=null){
-                    if(MediaPlayerHelper.getInstance(getContext()).isPlaying()){
-                        MediaPlayerHelper.getInstance(getContext()).stop();
-                        ((ImageView)v).setImageDrawable(getContext().getDrawable(R.drawable.ic_play));
-                    }else{
-                        MediaPlayerHelper.getInstance(getContext()).preview(song.getPathPreview());
-                        ((ImageView)v).setImageDrawable(getContext().getDrawable(R.drawable.ic_stop));
-                    }
-                }
-            });
-
             viewHolder = new ListHolder(title, artist);
 
             view.setTag(viewHolder);
+
         } else {
             view = convertView;
             viewHolder = (ListHolder) convertView.getTag();
@@ -91,6 +74,7 @@ public class SongsAdapter extends ArrayAdapter<Song> {
 
         viewHolder.title.setText(getItem(position).getTitle());
         viewHolder.artist.setText(getItem(position).getArtist());
+
 
         return view;
     }

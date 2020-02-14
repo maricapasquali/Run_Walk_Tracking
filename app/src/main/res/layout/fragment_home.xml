@@ -271,6 +271,12 @@
         app:backgroundTint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/ic_locked" />-->
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/voiceCoach"
+        style="@style/FloatingButtonStart"
+        android:layout_marginBottom="50dp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/layout_btn_workout"
         android:layout_width="wrap_content"
@@ -278,7 +284,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="20dp"
         android:paddingStart="30dp"
         android:paddingEnd="0dp"
         android:orientation="horizontal"
@@ -317,6 +323,12 @@
             style="@style/FloatingButton.Pause"/>
 
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/musicCoach"
+        style="@style/FloatingButton"
+        android:layout_marginBottom="50dp"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

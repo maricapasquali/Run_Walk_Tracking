@@ -13,12 +13,12 @@ import android.widget.Toast;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
+import com.run_walk_tracking_gps.model.MusicCoach;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
@@ -28,7 +28,6 @@ public class PlayListsAdapter extends BaseAdapter {
     private String TAG = PlayListsAdapter.class.getName();
 
     private Context context;
-    //private Map<PlayList, Long> playlists;
     private Map<Integer, PlayList> playlists;
 
     public PlayListsAdapter(Context context, Map<Integer, PlayList> playlists){
@@ -88,7 +87,6 @@ public class PlayListsAdapter extends BaseAdapter {
         return position;
     }
 
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = LayoutInflater.from(context).inflate(R.layout.custom_playlist, null);
@@ -97,11 +95,9 @@ public class PlayListsAdapter extends BaseAdapter {
         final TextView duration = convertView.findViewById(R.id.duration);
         final ImageView options = convertView.findViewById(R.id.options);
 
-
         final Map.Entry<Integer, PlayList> element = (Map.Entry<Integer, PlayList>) getItem(position);
         duration.setText(Song.DurationUtilities.format(element.getValue().duration()));
         name.setText(element.getValue().getName());
-
 
         //Creating the instance of PopupMenu
         final PopupMenu popup = new PopupMenu(context, options);
@@ -109,28 +105,29 @@ public class PlayListsAdapter extends BaseAdapter {
         popup.getMenuInflater().inflate(R.menu.popup_menu_playlist, popup.getMenu());
         //registering popup with OnMenuItemClickListener
 
-        View finalConvertView = convertView;
         popup.setOnMenuItemClickListener(item -> {
             Toast.makeText(context,element + " - Click Option : " + item.getTitle(), Toast.LENGTH_SHORT).show();
             switch (item.getItemId()){
-                case R.id.rename_playlist:
-                    InputDialog.Builder.getInstance(context)
-                               .setTitle(R.string.rename)
-                               .setHint(R.string.playlist)
-                               .setContent(((Map.Entry<Integer, PlayList>) getItem(position)).getValue().getName())
-                               .setPositiveButton(R.string.ok, text -> {
+                case R.id.rename_playlist: {
+                    InputDialog.Builder
+                            .getInstance(context)
+                            .setTitle(R.string.rename)
+                            .setHint(R.string.playlist)
+                            .setContent(((Map.Entry<Integer, PlayList>) getItem(position)).getValue().getName())
+                            .setPositiveButton(R.string.ok, text -> {
 
-                                   PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
-                                   if(SqlLitePlayListDao.create(context).updateName(text, p.getId())){
-                                       p.setName(text);
-                                       notifyDataSetChanged();
-                                       Log.d(TAG, p.toString() );
-                                   }
+                                PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
+                                if (SqlLitePlayListDao.create(context).updateName(text, p.getId())) {
+                                    p.setName(text);
+                                    notifyDataSetChanged();
+                                    Log.d(TAG, p.toString());
+                                }
 
-                               })
-                               .create()
-                               .show();
-                    break;
+                            })
+                            .create()
+                            .show();
+                }
+                break;
                 case R.id.delete_playlist: {
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.delete)
@@ -140,6 +137,7 @@ public class PlayListsAdapter extends BaseAdapter {
                                         PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
                                         if(SqlLitePlayListDao.create(context).delete(p.getId())){
                                             remove(p.getId());
+                                            if(p.isUseLikePrimary()) MusicCoach.reset();
                                         }
 
                                     })
@@ -148,14 +146,15 @@ public class PlayListsAdapter extends BaseAdapter {
                             .show();
                 }
                 break;
-                case R.id.use_primary:
-                {
+                case R.id.use_primary: {
+
                     PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
                     if(SqlLitePlayListDao.create(context).updateUse(p.getId())){
                         playlists.entrySet().forEach(e -> e.getValue().setUseLikePrimary(false));
                         p.setUseLikePrimary(true);
                         notifyDataSetChanged();
                         Log.d(TAG, p.toString());
+                        MusicCoach.reset();
                     }
 
                 }
@@ -169,7 +168,7 @@ public class PlayListsAdapter extends BaseAdapter {
             popup.getMenu().removeItem(R.id.use_primary);
             convertView.setBackground(context.getDrawable(R.color.colorAccent));
         }
-        //else view.setBackground(context.getDrawable(R.color.colorPrimaryDark));
+
 
         return convertView;
     }

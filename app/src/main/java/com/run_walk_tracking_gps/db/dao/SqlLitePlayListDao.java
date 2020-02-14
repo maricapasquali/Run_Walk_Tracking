@@ -76,6 +76,31 @@ public class SqlLitePlayListDao implements PlayListDao {
     }
 
     @Override
+    public List<Song> getPrimaryPlayList() {
+        SQLiteDatabase db = daoFactory.getReadableDatabase();
+        try (Cursor cursor = db.rawQuery("SELECT c." +CompoundDescriptor.ORDER+",s." +SongDescriptor.ID_SONG + ", s." + SongDescriptor.PATH +
+                                             " FROM " + CompoundDescriptor.TABLE_COMPOUND +" c JOIN " + PlayListDescriptor.TABLE_PLAYLIST
+                                                +" p ON(c." + PlayListDescriptor.ID_PLAYLIST+" = p." + PlayListDescriptor.ID_PLAYLIST+") " +
+                                             "JOIN " + SongDescriptor.TABLE_SONG +" s ON (s."+SongDescriptor.ID_SONG+" = c."+SongDescriptor.ID_SONG+") " +
+                                             "WHERE p." + UserDescriptor.ID_USER +"=? AND  p." +PlayListDescriptor.USE_PRIMARY +" = 1 " +
+                                             "ORDER BY c."+CompoundDescriptor.ORDER,
+                new String[]{String.valueOf(Preferences.Session.getIdUser(context))})){
+
+            List<Song> songs = new ArrayList<>();
+            if(cursor.moveToFirst()) {
+                do {
+                    songs.add(cursor.getInt(cursor.getColumnIndex(CompoundDescriptor.ORDER)),
+                            SongBuilder.create().setId(cursor.getInt(cursor.getColumnIndex(SongDescriptor.ID_SONG)))
+                                    .setPathPreview(cursor.getString(cursor.getColumnIndex(SongDescriptor.PATH)))
+                                    .build());
+
+                } while (cursor.moveToNext());
+            }
+            return songs;
+        }
+    }
+
+    @Override
     public List<Song> getAllSong(int id_playlist) {
         SQLiteDatabase db = daoFactory.getReadableDatabase();
 

@@ -131,6 +131,30 @@
         <item name="android:focusable">false</item>
     </style>
 
+    <style name="FloatingButtonStart" parent="Widget.Design.FloatingActionButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+
+        <item name="backgroundTint">@color/colorAccent</item> <!-- TODO : CHANGE COLOR -->
+
+        <item name="android:layout_alignParentStart">true</item>
+        <item name="android:layout_alignParentBottom">true</item>
+
+        <item name="android:layout_marginStart">30dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">30dp</item>
+
+        <item name="android:layout_weight">1</item>
+
+        <item name="android:padding">10dp</item>
+        <item name="elevation">24dp</item>
+
+    </style>
+
     <style name="FloatingButton" parent="Widget.Design.FloatingActionButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

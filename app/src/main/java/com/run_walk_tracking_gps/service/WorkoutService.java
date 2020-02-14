@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.MusicCoach;
 import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
@@ -73,6 +74,8 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     /* VOCAL COACH*/
     private VoiceCoach voiceCoach;
 
+    /* MUSIC COACH */
+    private MusicCoach musicCoach;
 
     /* MOVIMENT */
 
@@ -152,6 +155,9 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         voiceCoach = VoiceCoach.create(context);
         voiceCoach.start();
 
+        /* MUSIC COACH */
+        musicCoach = MusicCoach.create(context);
+
         /* MOVIMENT */
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
@@ -201,6 +207,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         final Workout w = intent.getParcelableExtra(KeysIntent.WORKOUT);
         if(w!=null) workout = w.clone();
 
+        musicCoach.start();
 
         startForeground(NotificationWorkout.NOTIFICATION_ID, notificationWorkout.build());
         notificationWorkout.startClicked();
@@ -245,6 +252,8 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         sensorManager.unregisterListener(sensorEventListener);
         if(!isIndoor) this.mapRouteDraw.stopDrawing();
 
+        musicCoach.stop();
+
         voiceCoach.stop();
         notificationWorkout.stopClicked();
     }
@@ -252,8 +261,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     public void voiceCoach(){
         String timeFormat = notificationWorkout.getTimeStamp();
         Log.d(TAG, timeFormat+ ", distanza = " + workout.getDistance().toString(true)+ ", calorie = " + workout.getCalories().toString(true));
-        if(Measure.Utilities.toSeconds(timeFormat)>=60)
-            voiceCoach.speakIfIsActive(timeFormat, workout.getDistance().toString(true), workout.getCalories().toString(true));
+        voiceCoach.speakIfIsActive(timeFormat, workout.getDistance().toString(true), workout.getCalories().toString(true));
     }
 
     @Override

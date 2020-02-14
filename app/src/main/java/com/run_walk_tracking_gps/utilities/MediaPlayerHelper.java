@@ -13,11 +13,13 @@ public class MediaPlayerHelper {
     private static final int PREVIEW_INTERVAL = 1000;
     private static final int PREVIEW_TIME = 30000;
 
-    private boolean isPlaying = false;
     private static MediaPlayerHelper helper;
 
     private Context context;
     private MediaPlayer mediaPlayer;
+    private MediaPlayer.OnCompletionListener completionListener;
+
+    private Uri soundUriPreviewPlaying;
 
     private CountDownTimer countDownTimer;
 
@@ -25,6 +27,7 @@ public class MediaPlayerHelper {
         this.context = context;
         mediaPlayer = null;
         countDownTimer = null;
+        soundUriPreviewPlaying = Uri.EMPTY ;
     }
 
     public static synchronized MediaPlayerHelper getInstance(Context context){
@@ -33,8 +36,24 @@ public class MediaPlayerHelper {
         return helper;
     }
 
-    public void preview(Uri soundUri){
-        stop();
+    public void togglePreview(Uri pathPreview) {
+        togglePreview(pathPreview, null);
+    }
+
+    public void togglePreview(Uri pathPreview, OnStartAndEndPreviewListener onStartAndEndPreviewListener) {
+        if(isPlaying()){
+            stopPreview();
+            if(onStartAndEndPreviewListener != null)
+                onStartAndEndPreviewListener.onStop();
+        }else{
+            preview(pathPreview, onStartAndEndPreviewListener);
+            if(onStartAndEndPreviewListener != null)
+                onStartAndEndPreviewListener.onStart();
+        }
+    }
+
+    public void preview(Uri soundUri, OnStartAndEndPreviewListener onStartAndEndPreviewListener){
+        //stopPreview();
 
         countDownTimer = new CountDownTimer(PREVIEW_TIME, PREVIEW_INTERVAL){
 
@@ -47,43 +66,68 @@ public class MediaPlayerHelper {
             @Override
             public void onFinish() {
                 MediaPlayerHelper.this.stopMedia();
+                if(onStartAndEndPreviewListener != null)
+                    onStartAndEndPreviewListener.onStop();
             }
         };
         countDownTimer.start();
-        isPlaying = true;
     }
 
-    public boolean isPlaying(){
-        return isPlaying;
-    }
-
-    public void stop(){
+    public void stopPreview(){
         if(countDownTimer!=null){
             countDownTimer.cancel();
             stopMedia();
         }
     }
 
-    private void stopMedia(){
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-            isPlaying = false;
-        }
+    public Uri getSoundUri() {
+        return soundUriPreviewPlaying;
     }
 
-    private void startMedia(Uri soundUri){
+    public boolean isPlaying(){
+        return mediaPlayer != null && mediaPlayer.isPlaying();
+    }
+
+    public void startMedia(Uri soundUri){
         try {
-            if(mediaPlayer==null){
+            if(mediaPlayer == null){
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setDataSource(context, soundUri);
+                mediaPlayer.setOnCompletionListener(completionListener);
                 mediaPlayer.prepare();
                 mediaPlayer.start();
+
+                soundUriPreviewPlaying = soundUri;
             }
         }catch(Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void stopMedia() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+
+            soundUriPreviewPlaying = Uri.EMPTY;
+        }
+    }
+
+    public void downVolume(float volume){
+        mediaPlayer.setVolume(volume, volume);
+    }
+
+    public void restoreVolume() {
+        mediaPlayer.setVolume(1,1);
+    }
+
+    public void setOnCompleteSong(MediaPlayer.OnCompletionListener completionListener){
+        this.completionListener = completionListener;
+    }
+
+    public  interface OnStartAndEndPreviewListener {
+        void onStart();
+        void onStop();
+    }
 }

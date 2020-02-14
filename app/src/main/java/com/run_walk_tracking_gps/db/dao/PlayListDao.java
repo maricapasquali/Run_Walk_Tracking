@@ -11,6 +11,8 @@ public interface PlayListDao {
 
     Map<Integer, PlayList> getAll();
 
+    List<Song> getPrimaryPlayList();
+
     List<Song>  getAllSong(int id_playlist);
 
     PlayList insert(PlayList playList);
@@ -22,5 +24,6 @@ public interface PlayListDao {
     ArrayList<Song> updateSongs(List<Song> songs, int id_playlist);
 
     boolean delete(int id_playlist);
+
 
 }

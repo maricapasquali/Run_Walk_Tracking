@@ -12,7 +12,10 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,6 +25,7 @@ import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewPlayListAdapter;
+import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SearchSongDialog;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
@@ -83,6 +87,8 @@ public abstract class NewSongActivity extends CommonActivity {
 
         playListAdapter = new NewPlayListAdapter(this, songs);
         songsView.setAdapter(playListAdapter);
+        //songsView.setItemsCanFocus(true);
+
 
         findViewById(R.id.playlist_layout).setVisibility(visibility());
         usePrimary.setVisibility(visibility());
@@ -158,7 +164,7 @@ public abstract class NewSongActivity extends CommonActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MediaPlayerHelper.getInstance(this).stop();
+        MediaPlayerHelper.getInstance(this).stopPreview();
     }
 
     protected List<Song> getMusic(){
