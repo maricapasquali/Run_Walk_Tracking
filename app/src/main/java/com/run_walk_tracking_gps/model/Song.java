@@ -1,15 +1,10 @@
 package com.run_walk_tracking_gps.model;
 
-import android.content.Context;
-import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.run_walk_tracking_gps.R;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +20,7 @@ public class Song implements Parcelable {
     private String artist;
     private long duration; // millisecondi
 
-    private Uri pathPreview;
+    private Uri path;
 
     private Song(){}
 
@@ -37,7 +32,7 @@ public class Song implements Parcelable {
         artist = in.readString();
         duration = in.readLong();
 
-        pathPreview = Uri.parse(in.readString());
+        path = Uri.parse(in.readString());
     }
 
     @Override
@@ -47,7 +42,7 @@ public class Song implements Parcelable {
         dest.writeString(artist);
         dest.writeLong(duration);
 
-        dest.writeString(pathPreview.toString());
+        dest.writeString(path.toString());
     }
 
     @Override
@@ -110,12 +105,12 @@ public class Song implements Parcelable {
         this.duration = duration;
     }
 
-    public Uri getPathPreview() {
-        return pathPreview;
+    public Uri getPath() {
+        return path;
     }
 
-    public void setPathPreview(String pathPreview) {
-        this.pathPreview = Uri.parse(pathPreview);
+    public void setPath(String path) {
+        this.path = Uri.parse(path);
     }
 
     public static class DurationUtilities {
@@ -131,10 +126,10 @@ public class Song implements Parcelable {
             return h_mill+min_mill+sec_mill;
         }
 
-        public static String format(long millisec){
+        public static String format(long milliSec){
             StringBuilder s = new StringBuilder();
 
-            List<Long> time = Measure.Utilities.time(millisec/1000);
+            List<Long> time = Measure.Utilities.time(milliSec/1000);
 
             if(time.get(0)>0)
                 s.append(time.get(0)).append(" ").append(Measure.Unit.HOURS.getString()).append(" ");
@@ -154,19 +149,20 @@ public class Song implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Song song = (Song) o;
-        return  duration == song.duration &&
+        return duration == song.duration &&
                 Objects.equals(title, song.title) &&
-                Objects.equals(artist, song.artist);
+                Objects.equals(artist, song.artist) &&
+                Objects.equals(path, song.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, artist, duration);
+        return Objects.hash(title, artist, duration, path);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Song : [ id_song = "+id_song+", Title = " +title +", Artist = " +artist + ", Duration = "+getDurationFormat() +", path = "+pathPreview +" ]";
+        return "Song : [ id_song = "+id_song+", Title = " +title +", Artist = " +artist + ", Duration = "+getDurationFormat() +", path = "+path +" ]";
     }
 }

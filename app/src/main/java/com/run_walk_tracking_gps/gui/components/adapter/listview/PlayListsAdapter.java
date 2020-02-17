@@ -137,7 +137,7 @@ public class PlayListsAdapter extends BaseAdapter {
                                         PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
                                         if(SqlLitePlayListDao.create(context).delete(p.getId())){
                                             remove(p.getId());
-                                            if(p.isUseLikePrimary()) MusicCoach.reset();
+                                            if(p.isUseLikePrimary()) MusicCoach.release();
                                         }
 
                                     })
@@ -154,7 +154,7 @@ public class PlayListsAdapter extends BaseAdapter {
                         p.setUseLikePrimary(true);
                         notifyDataSetChanged();
                         Log.d(TAG, p.toString());
-                        MusicCoach.reset();
+                        MusicCoach.release();
                     }
 
                 }

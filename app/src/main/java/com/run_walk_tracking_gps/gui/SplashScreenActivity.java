@@ -1,17 +1,20 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.service.CheckSongService;
 import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.task.CheckSongTask;
 import com.run_walk_tracking_gps.utilities.ServiceUtilities;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashScreenActivity extends AppCompatActivity {
@@ -31,9 +34,17 @@ public class SplashScreenActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         Log.e(TAG, "onResume");
+
+        CheckSongTask.create(this).execute();
+        //startService(new Intent(this, CheckSongService.class));
 
         if( getIntent().getAction()!=null &&
             ( getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT) ||
@@ -47,7 +58,9 @@ public class SplashScreenActivity extends AppCompatActivity {
         else {
             if(Preferences.Session.isLogged(this)) {
                 // TODO: 12/26/2019 REQUEST SYNC
+
                 NetworkHelper.HttpRequest.syncInForeground(this);
+
             } else {
                 startActivity(new Intent(SplashScreenActivity.this, BootAppActivity.class));
                 finish();

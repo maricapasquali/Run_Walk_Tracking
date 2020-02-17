@@ -64,11 +64,11 @@ public class NewPlayListAdapter extends BaseAdapter {
         convertView = LayoutInflater.from(context).inflate(R.layout.custom_new_playlist_song, parent, false);
         convertView.setOnClickListener(v -> {
             final Song song = ((Map.Entry<Song, Boolean>)getItem(position)).getKey();
-            if(song.getPathPreview() != null)
+            if(song.getPath() != null)
                 MediaPlayerHelper.getInstance(context)
-                                 .togglePreview(song.getPathPreview());
+                                 .togglePreview(song.getPath());
 
-            Log.d(TAG, song.getPathPreview().toString());
+            Log.d(TAG, song.getPath().toString());
         });
 
         if(isSearch) convertView.setBackgroundColor(context.getColor(R.color.colorPrimary));

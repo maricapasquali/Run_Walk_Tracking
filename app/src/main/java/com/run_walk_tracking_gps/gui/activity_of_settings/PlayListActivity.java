@@ -15,6 +15,7 @@ import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.db.dao.SqlLiteCompoundDao;
 import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.SongsAdapter;
@@ -111,16 +112,23 @@ public class PlayListActivity extends CommonActivity {
                         finalPView.setImageDrawable(PlayListActivity.this.getDrawable(R.drawable.ic_play));
                     }
                 };
-                if(mediaPlayerHelper.getSoundUri().equals(song.getPathPreview())) {
-                    mediaPlayerHelper.togglePreview(song.getPathPreview(), listener);
+                if(mediaPlayerHelper.getSoundUri().equals(song.getPath())) {
+                    mediaPlayerHelper.togglePreview(song.getPath(), listener);
                 }else{
                     mediaPlayerHelper.stopPreview();
-                    mediaPlayerHelper.preview(song.getPathPreview(), listener);
+                    mediaPlayerHelper.preview(song.getPath(), listener);
                 }
             });
 
 
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("PROVA_", SqlLiteSongDao.create(this).getAll().toString());
     }
 
     @Override
@@ -154,7 +162,7 @@ public class PlayListActivity extends CommonActivity {
                         .setPositiveButton(R.string.delete,
                                 (dialog, which) -> {
                                     if(SqlLitePlayListDao.create(this).delete(oldPlayList.getId())){
-                                        if(oldPlayList.isUseLikePrimary()) MusicCoach.reset();
+                                        if(oldPlayList.isUseLikePrimary()) MusicCoach.release();
                                         setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, oldPlayList.getId()));
                                         finish();
                                     }
@@ -168,7 +176,7 @@ public class PlayListActivity extends CommonActivity {
                 if(SqlLitePlayListDao.create(this).updateUse(newPlayList.getId())){
                     newPlayList.setUseLikePrimary(true);
                     item.setVisible(false);
-                    MusicCoach.reset();
+                    MusicCoach.release();
                 }
             }
             break;
@@ -187,7 +195,7 @@ public class PlayListActivity extends CommonActivity {
                 adapter.remove(item);
                 adapter.insert(item, to);
                 SqlLiteCompoundDao.create(this).reOrderSong(newPlayList.getId(),  newPlayList.songs());
-                MusicCoach.reset();
+                MusicCoach.release();
 
                 Log.d(TAG, newPlayList.toString());
                 Log.d(TAG, adapter.getItem(to).toString());

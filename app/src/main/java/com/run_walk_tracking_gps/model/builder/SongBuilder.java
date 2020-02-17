@@ -34,8 +34,8 @@ public class SongBuilder {
         return this;
     }
 
-    public SongBuilder setPathPreview(String pathPreview){
-        song.setPathPreview(pathPreview);
+    public SongBuilder setPath(String pathPreview){
+        song.setPath(pathPreview);
         return this;
     }
 

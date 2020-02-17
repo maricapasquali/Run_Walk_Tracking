@@ -91,7 +91,7 @@ public class SqlLitePlayListDao implements PlayListDao {
                 do {
                     songs.add(cursor.getInt(cursor.getColumnIndex(CompoundDescriptor.ORDER)),
                             SongBuilder.create().setId(cursor.getInt(cursor.getColumnIndex(SongDescriptor.ID_SONG)))
-                                    .setPathPreview(cursor.getString(cursor.getColumnIndex(SongDescriptor.PATH)))
+                                    .setPath(cursor.getString(cursor.getColumnIndex(SongDescriptor.PATH)))
                                     .build());
 
                 } while (cursor.moveToNext());
@@ -118,7 +118,7 @@ public class SqlLitePlayListDao implements PlayListDao {
                                     .setTitle(cursor.getString(cursor.getColumnIndex(SongDescriptor.TITLE)))
                                     .setArtist(cursor.getString(cursor.getColumnIndex(SongDescriptor.ARTIST)))
                                     .setDuration(cursor.getLong(cursor.getColumnIndex(SongDescriptor.DURATION)))
-                                    .setPathPreview(cursor.getString(cursor.getColumnIndex(SongDescriptor.PATH)))
+                                    .setPath(cursor.getString(cursor.getColumnIndex(SongDescriptor.PATH)))
                                     .build());
 
                 } while (cursor.moveToNext());

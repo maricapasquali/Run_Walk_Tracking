@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.gui.activity_of_settings;
 
-import android.util.Log;
 import android.view.View;
 
 import com.run_walk_tracking_gps.R;
@@ -15,9 +14,7 @@ public class AddSongToPlayListActivity extends NewSongActivity {
 
     @Override
     protected List<Song> filterSong() {
-        List<Song> diff = new CollectionsUtilities.ListUtilities<Song>().difference(super.getMusic(), super.getPlayList().songs());
-        Log.d(TAG, "DIFF = " +diff);
-        return diff;
+        return new CollectionsUtilities.ListUtilities<Song>().difference(super.audioFileHelper.getMusicMore30Sec(), super.getPlayList().songs());
     }
 
     @Override

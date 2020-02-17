@@ -30,6 +30,7 @@ import com.run_walk_tracking_gps.gui.components.dialog.SearchSongDialog;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 import com.run_walk_tracking_gps.model.builder.SongBuilder;
+import com.run_walk_tracking_gps.utilities.AudioFileHelper;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
@@ -57,13 +58,16 @@ public abstract class NewSongActivity extends CommonActivity {
     private PlayList playList = PlayList.create();
 
     private Map<Song, Boolean> songs = new LinkedHashMap<>();
-
+    
+    protected AudioFileHelper audioFileHelper;
 
     @Override
     protected void init(Bundle savedInstanceState) {
         setContentView(R.layout.activity_new_playlist);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(title());
+
+        audioFileHelper = AudioFileHelper.getInstance(this);
 
         namePlaylist = findViewById(R.id.create_name_playlist);
         songsView = findViewById(R.id.songs);
@@ -81,7 +85,7 @@ public abstract class NewSongActivity extends CommonActivity {
             }
 
             List<Song> sFilter = filterSong();
-            if(sFilter==null) getMusic().forEach(s -> songs.put(s, false));
+            if(sFilter==null) audioFileHelper.getMusicMore30Sec().forEach(s -> songs.put(s, false));
             else sFilter.forEach(s -> songs.put(s, false));
         }
 
@@ -167,32 +171,6 @@ public abstract class NewSongActivity extends CommonActivity {
         MediaPlayerHelper.getInstance(this).stopPreview();
     }
 
-    protected List<Song> getMusic(){
-        final ContentResolver contentResolver = getContentResolver();
-        final Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        final Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
-
-        final List<Song> s = new ArrayList<>();
-
-        if(songCursor!=null && songCursor.moveToFirst()){
-            do{
-
-                long duration = songCursor.getLong(songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-                if(duration>=30000){
-                    s.add(SongBuilder.create()
-                            .setTitle(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)))
-                            .setArtist(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)))
-                            .setDuration(duration)
-                            .setPathPreview(songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)))
-                            .build());
-                    Log.d(TAG, songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                }
-
-            }while(songCursor.moveToNext());
-            songCursor.close();
-        }
-        return s;
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -202,7 +180,7 @@ public abstract class NewSongActivity extends CommonActivity {
                 if(grantResults.length> 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
                     if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
                     {
-                        getMusic().forEach(s -> songs.put(s, false));
+                        audioFileHelper.getMusicMore30Sec().forEach(s -> songs.put(s, false));
                         Log.d(TAG, songs.toString());
                         playListAdapter.update(songs);
                     }

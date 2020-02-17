@@ -38,7 +38,7 @@ public class MusicCoach {
         return handler;
     }
 
-    public static void reset(){
+    public static void release(){
         if(handler != null) handler = null;
     }
 
@@ -110,7 +110,7 @@ public class MusicCoach {
     }
 
     private void next() {
-        this.mediaPlayerHelper.startMedia(this.songs.get(songPlaying).getPathPreview());
+        this.mediaPlayerHelper.startMedia(this.songs.get(songPlaying).getPath());
         Log.d(TAG, "Index =" + songPlaying + ", Song = " + songs.get(songPlaying));
     }
 

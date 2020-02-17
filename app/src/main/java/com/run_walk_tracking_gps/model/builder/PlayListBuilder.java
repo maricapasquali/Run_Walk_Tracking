@@ -17,6 +17,11 @@ public class PlayListBuilder {
         return new PlayListBuilder();
     }
 
+    public PlayListBuilder setId(int id){
+        playList.setId(id);
+        return this;
+    }
+
     public PlayListBuilder setName(final String name){
         playList.setName(name);
         return this;
