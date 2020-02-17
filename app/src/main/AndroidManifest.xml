@@ -4,41 +4,36 @@
     package="com.run_walk_tracking_gps">
 
 
-    <uses-permission android:name="android.permission.READ_LOGS"
-        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-
-    <!-- Permission for IMEI code -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <!-- Permission for map -->
-    <uses-permission android:name="com.example.permission.MAPS_RECEIVE" />
+    <permission
+        android:name="com.run_walk_tracking_gps.permission.MAPS_RECEIVE" android:protectionLevel="signature" />
+    <uses-permission
+        android:name="com.run_walk_tracking_gps.permission.MAPS_RECEIVE"/>
 
     <!-- Permission Position  -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 
-    <!-- Permissions to Take or Write image -->
+    <!-- Permissions to Take or Write image /Audio-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Permissions to speech with server -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--<uses-permission android:name="android.permission.INTERNET" />-->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <!-- Permission to FOREGROUND SERVICE -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+
     <!-- Feature SENSOR (distance) -->
     <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
-
-    <!-- Permission READ CONTENT SONG -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 
     <application
@@ -171,7 +166,20 @@
         <service android:name=".service.NetworkService"/>
         <service android:name=".service.WorkoutService" />
 
+        <!--<service android:name=".service.LocationBackgroundService"/>-->
         <!-- RECEIVER -->
+
+        <receiver android:name=".service.MapRouteDraw$MapRouteBackgroundReceiver"
+            android:exported="true"
+            android:permission="android.permission.ACCESS_COARSE_LOCATION">
+        </receiver>
+
+        <!--<receiver android:name=".service.LocationBackgroundService$RouteBackgroundReceiver"
+            android:exported="true"
+            android:permission="android.permission.ACCESS_COARSE_LOCATION">
+        </receiver>-->
+
+
 
         <!--<receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
             android:exported="false">

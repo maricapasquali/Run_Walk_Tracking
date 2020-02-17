@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class AppUtilities {
 
+    private static final String TAG = AppUtilities.class.getName();
+
     public static boolean isInForeground(Context context){
         ActivityManager.RunningAppProcessInfo myProcess = new ActivityManager.RunningAppProcessInfo();
         ActivityManager.getMyMemoryState(myProcess);
@@ -20,9 +22,7 @@ public class AppUtilities {
 
     @SuppressLint("HardwareIds")
     public static String id(Context context){
-        Log.d("MAC", "Mac = " + ((WifiManager)context.getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getMacAddress());
-        return CryptographicHashFunctions.md5(
-                Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)
-        );
+        Log.d(TAG, "Android-ID = " + Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
+        return CryptographicHashFunctions.md5(Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
     }
 }

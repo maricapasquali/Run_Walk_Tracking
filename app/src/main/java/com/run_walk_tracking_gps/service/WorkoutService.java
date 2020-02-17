@@ -9,17 +9,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Chronometer;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.KeysIntent;
+import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.gui.NotificationWorkout;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.MusicCoach;
@@ -28,6 +25,7 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.utilities.AppUtilities;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import androidx.annotation.RequiresApi;
@@ -57,12 +55,22 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     public void onRebind(Intent intent) {
         Log.d(TAG, "onRebind : INTENT = " + intent);
         if(binder==null) binder = new LocalBinder();
+        if(isRunning() &&  !isPause() && !isIndoor ){
+            mapRouteDraw.stopDrawing();
+            mapRouteDraw.setBackground(false);
+            mapRouteDraw.startDrawing(Looper.myLooper());
+        }
         super.onRebind(intent);
     }
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "onUnbind : INTENT = " + intent);
         binder = null;
+        if(isRunning() && !isPause() && !isIndoor){
+            mapRouteDraw.stopDrawing();
+            mapRouteDraw.setBackground(true);
+            mapRouteDraw.startDrawing(Looper.myLooper());
+        }
         return true;
     }
 
@@ -136,7 +144,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     @Override
     public void addPolyLineOnMap(PolylineOptions options) {
         if(binder!=null)
-            sendBroadcast(new Intent(ActionReceiver.DRAWING_MAP_TIMER_ACTION).putExtra(KeysIntent.ROUTE, options));
+            sendBroadcast(new Intent(ActionReceiver.DRAWING_MAP_TIMER_ACTION)); //.putExtra(KeysIntent.ROUTE, options));
     }
 
     private boolean isIndoor = false;
@@ -147,7 +155,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
-        final Context context = getApplicationContext();
+        Context context = getApplicationContext();
         notificationWorkout = NotificationWorkout.create(context);
         workout = WorkoutBuilder.create(context).setDate(DateHelper.create(context).getCalendar().getTime()).build();
 
@@ -170,32 +178,36 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        new Thread(()->{
+            Looper.prepare();
+            if(intent!=null && intent.getAction()!=null){
+                isRunning = true;
+                switch (intent.getAction()){
+                    case ActionReceiver.START_ACTION:
+                        start(intent);
+                        break;
 
-        if(intent!=null && intent.getAction()!=null){
-            isRunning = true;
-            switch (intent.getAction()){
-                case ActionReceiver.START_ACTION:
-                    start(intent);
-                    break;
+                    case ActionReceiver.PAUSE_ACTION:
+                        pause(intent);
+                        break;
 
-                case ActionReceiver.PAUSE_ACTION:
-                    pause(intent);
-                    break;
+                    case ActionReceiver.RESTART_ACTION:
+                        restart(intent);
+                        break;
 
-                case ActionReceiver.RESTART_ACTION:
-                    restart(intent);
-                    break;
+                    case ActionReceiver.STOP_ACTION:
+                        stop();
+                        break;
 
-                case ActionReceiver.STOP_ACTION:
-                    stop();
-                    break;
-
-                case ActionReceiver.VOICE:
-                    voiceCoach();
-                    break;
+                    case ActionReceiver.VOICE:
+                        voiceCoach();
+                        break;
+                }
             }
-        }
-        return START_NOT_STICKY;
+            Looper.loop();
+        }).start();
+
+        return START_REDELIVER_INTENT;
     }
 
 
@@ -213,7 +225,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         notificationWorkout.startClicked();
 
         sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
-        if(!isIndoor) this.mapRouteDraw.startDrawing();
+        if(!isIndoor) this.mapRouteDraw.startDrawing(Looper.myLooper());
 
     }
     private void pause(Intent intent){
@@ -237,7 +249,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
 
 
         sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
-        if(!isIndoor) this.mapRouteDraw.restart();
+        if(!isIndoor) this.mapRouteDraw.restart(Looper.myLooper());
         if(intent.getBooleanExtra(KeysIntent.FROM_NOTIFICATION,true))
         {
             Log.d(TAG, "SEND REQUEST");
@@ -273,7 +285,6 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
     public Workout getWorkout(){
         workout.setMiddleSpeed();
         workout.getDuration().setValue(true, (double)notificationWorkout.getTimeInMillSec()/1000);
-        if(!isIndoor) workout.setMapRoute(this.mapRouteDraw.getListCoordinates());
         return workout;
     }
 

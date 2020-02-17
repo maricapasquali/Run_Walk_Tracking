@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
-import android.support.test.InstrumentationRegistry;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +11,8 @@ import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import org.junit.Test;
+
+import androidx.test.InstrumentationRegistry;
 
 public class SpeechTest {
 

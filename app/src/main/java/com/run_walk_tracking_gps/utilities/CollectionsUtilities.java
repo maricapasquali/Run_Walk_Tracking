@@ -3,8 +3,6 @@ package com.run_walk_tracking_gps.utilities;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.run_walk_tracking_gps.model.PlayList;
-import com.run_walk_tracking_gps.model.Song;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,7 +25,6 @@ public class CollectionsUtilities <K, V>{
     public ArrayList<Map.Entry<K, V>> mapToListOfMapEntry(Map<K, V> map){
         return new ArrayList<>(map.entrySet());
     }
-
 
     public static class ListUtilities<T>{
         public ArrayList<T> difference(List<T> bigger, List<T>  small){
@@ -55,22 +52,25 @@ public class CollectionsUtilities <K, V>{
     }
 
 
+    private static final String TAG =CollectionsUtilities.class.getName();
+
     // TODO: 12/5/2019 MIGLIORARE 
     public static ArrayList<LatLng> convertStringToListLatLng(String toString){
         ArrayList<LatLng> list = new ArrayList<>();
+        if(toString!=null && !toString.isEmpty()){
+            Log.d(TAG, toString);
+            Object[] o = toString.replace("lat/lng:", "")
+                    .replace("(","")
+                    .replace(")", "")
+                    .replace("[", "")
+                    .replace("]", "")
+                    .split(",");
 
-        Object[] o = toString.replace("lat/lng:", "")
-                             .replace("(","")
-                             .replace(")", "")
-                             .replace("[", "")
-                             .replace("]", "")
-                             .split(",");
-
-        for (int i=0; i<o.length; i+=2){
-            list.add(new LatLng(Double.valueOf(o[i].toString()), Double.valueOf(o[i+1].toString())));
+            for (int i=0; i<o.length; i+=2){
+                list.add(new LatLng(Double.valueOf(o[i].toString()), Double.valueOf(o[i+1].toString())));
+            }
         }
         return list;
     }
-
 
 }

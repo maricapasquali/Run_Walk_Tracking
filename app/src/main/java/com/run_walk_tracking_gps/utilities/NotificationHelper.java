@@ -32,7 +32,7 @@ public final class NotificationHelper {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createChannels() {
 
-        NotificationChannel channel = new NotificationChannel(CHANNEL_1, "Canale Principale", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_1, "Canale Principale", NotificationManager.IMPORTANCE_DEFAULT);
         NotificationChannel channel2 = new NotificationChannel(CHANNEL_2, "Canale Secondario", NotificationManager.IMPORTANCE_DEFAULT);
 
         channel.setDescription("Canale usato per la ricezione delle notifiche generali");

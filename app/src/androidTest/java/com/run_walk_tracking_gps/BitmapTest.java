@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 import com.run_walk_tracking_gps.utilities.BitmapUtilities;
 
@@ -13,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import androidx.test.InstrumentationRegistry;
 
 public class BitmapTest {
 

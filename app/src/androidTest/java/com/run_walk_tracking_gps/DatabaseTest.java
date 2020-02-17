@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -20,6 +19,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import androidx.test.InstrumentationRegistry;
 
 public class DatabaseTest {
     private Context context= InstrumentationRegistry.getTargetContext();

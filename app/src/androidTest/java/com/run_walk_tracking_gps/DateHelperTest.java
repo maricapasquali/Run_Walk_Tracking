@@ -1,16 +1,16 @@
 package com.run_walk_tracking_gps;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import org.junit.Test;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+
+import androidx.test.InstrumentationRegistry;
 
 public class DateHelperTest {
 
