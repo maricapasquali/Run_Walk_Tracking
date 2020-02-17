@@ -363,9 +363,7 @@ public class HomeFragment extends Fragment {
                 if(workout!=null){
                     workout_distance.setText(workout.getDistance().toString(true));
                     workout_energy.setText(workout.getCalories().toString(true));
-                    final String map_route = workout.getMapRoute();
-                    if(map_route!=null)
-                        renderingMap(Factory.CustomPolylineOptions.create().addAll(CollectionsUtilities.convertStringToListLatLng(map_route)));
+                    renderingMap(Factory.CustomPolylineOptions.create().addAll(Preferences.MapLocation.get(getContext())));
                 }
             }
         }
@@ -445,9 +443,10 @@ public class HomeFragment extends Fragment {
                     }
                     break;
                     case ActionReceiver.DRAWING_MAP_TIMER_ACTION:
-                        final PolylineOptions route = intent.getParcelableExtra(KeysIntent.ROUTE);
+                       // final PolylineOptions route = intent.getParcelableExtra(KeysIntent.ROUTE);
                         Log.e(TAG, "Route polyline receive");
-                        HomeFragment.this.renderingMap(route);
+                        //HomeFragment.this.renderingMap(route);
+                        HomeFragment.this.renderingMap(Factory.CustomPolylineOptions.create().addAll(Preferences.MapLocation.get(getContext())));
                         break;
                 }
             }

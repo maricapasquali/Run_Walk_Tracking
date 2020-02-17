@@ -2,7 +2,6 @@ package com.run_walk_tracking_gps;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.gui.components.Factory;
@@ -16,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 
 import com.run_walk_tracking_gps.utilities.ImageFileHelper;
+
+import androidx.test.InstrumentationRegistry;
 
 public class ImageTest {
 

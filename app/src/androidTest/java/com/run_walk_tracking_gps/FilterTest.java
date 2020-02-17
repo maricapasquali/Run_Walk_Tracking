@@ -1,8 +1,6 @@
 package com.run_walk_tracking_gps;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.StatisticsData;
@@ -21,6 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.test.InstrumentationRegistry;
 
 public class FilterTest {
 

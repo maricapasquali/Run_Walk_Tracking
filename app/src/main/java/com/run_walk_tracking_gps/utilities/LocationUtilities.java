@@ -15,15 +15,21 @@ public class LocationUtilities {
     private static final String TAG = LocationUtilities.class.getName();
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    private static final long SMALL_DISPLACEMENT = 30;
+
     public static boolean isGpsEnable(Context context) {
         return ((LocationManager) context.getSystemService(Service.LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
     // TODO: 12/5/2019 DA RIGUARDARE
-    public static LocationRequest createLocationRequest() {
+    public static LocationRequest createLocationRequest(int priority) {
         return LocationRequest.create()
-                              .setInterval(5000)
-                              .setFastestInterval(5000)
-                              .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                              .setInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
+                              .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+                              //.setSmallestDisplacement(SMALL_DISPLACEMENT)
+                              .setPriority(priority);
+
     }
 
     public static boolean hasPermission(Context context){

@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.gui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
@@ -21,9 +23,12 @@ import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -59,7 +64,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
             workout.setContext(this);
             Log.d(TAG, workout.toString());
 
-            setMapView(workout.getMapRoute());
+            setMapView();
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -68,10 +73,8 @@ public class DetailsWorkoutActivity extends  CommonActivity{
             workout = (Workout)getIntent().getParcelableExtra(KeysIntent.DETAIL);
             if(workout!=null){
                 workout.setContext(this);
-
                 Log.d(TAG, workout.toString());
-                setMapView(workout.getMapRoute());
-
+                setMapView();
                 summary_ok.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(R.string.detail_workout);
             }
@@ -82,15 +85,17 @@ public class DetailsWorkoutActivity extends  CommonActivity{
        }
     }
 
-    private void setMapView(String mapRoute){
-        if(mapRoute!=null && !mapRoute.equals("null")){
-            Log.e(TAG, "MAP ROUTE "+(mapRoute.equals("null")));
+    private void setMapView(){
+        ArrayList<LatLng> mapRoute = Preferences.MapLocation.get(this.getApplicationContext());
+        Log.e(TAG, "MAP ROUTE "+ mapRoute.toString());
+        if(LocationUtilities.isGpsEnable(this) && mapRoute.size()>0){
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute))
-                    .commit();
+                        .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute.toString()))
+                        .commit();
         }else {
             findViewById(R.id.summary_map).setVisibility(View.GONE);
         }
+        Preferences.MapLocation.delete(this.getApplicationContext());
     }
 
     @Override
