@@ -17,7 +17,7 @@ import java.io.IOException;
 import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import androidx.test.InstrumentationRegistry;
-
+// TODO: 2/17/2020 RIMUOVERE
 public class ImageTest {
 
     private final static String TAG = ImageTest.class.getName();

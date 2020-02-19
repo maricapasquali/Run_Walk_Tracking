@@ -1,5 +1,5 @@
 package com.run_walk_tracking_gps;
-
+// TODO: 2/17/2020 RIMUOVERE
 public class HttpRequestVolleyTest {
 /*
     private final static String ERROR ="Error";

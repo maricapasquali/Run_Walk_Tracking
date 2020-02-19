@@ -51,6 +51,9 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -166,20 +169,7 @@
         <service android:name=".service.NetworkService"/>
         <service android:name=".service.WorkoutService" />
 
-        <!--<service android:name=".service.LocationBackgroundService"/>-->
         <!-- RECEIVER -->
-
-        <receiver android:name=".service.MapRouteDraw$MapRouteBackgroundReceiver"
-            android:exported="true"
-            android:permission="android.permission.ACCESS_COARSE_LOCATION">
-        </receiver>
-
-        <!--<receiver android:name=".service.LocationBackgroundService$RouteBackgroundReceiver"
-            android:exported="true"
-            android:permission="android.permission.ACCESS_COARSE_LOCATION">
-        </receiver>-->
-
-
 
         <!--<receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
             android:exported="false">

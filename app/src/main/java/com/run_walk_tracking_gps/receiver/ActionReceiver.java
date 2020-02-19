@@ -15,4 +15,5 @@ public class ActionReceiver{
 
 
     public static final String VOICE = "voice";
+    public static final String UPDATE_CHANGE_LOCATION = "update_change_location";
 }

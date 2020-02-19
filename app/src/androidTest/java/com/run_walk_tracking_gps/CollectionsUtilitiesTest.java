@@ -14,9 +14,10 @@ import java.util.List;
 
 import androidx.test.InstrumentationRegistry;
 
+// TODO: 2/17/2020 RIMUOVERE
 public class CollectionsUtilitiesTest {
 
-    private Context context= InstrumentationRegistry.getTargetContext();
+    /*private Context context= InstrumentationRegistry.getTargetContext();
     private List<LatLng> list;
     private String string;
 
@@ -39,5 +40,5 @@ public class CollectionsUtilitiesTest {
     @Test
     public void convertStringToListObject(){
         Assert.assertEquals(list, CollectionsUtilities.convertStringToListLatLng(string));
-    }
+    }*/
 }

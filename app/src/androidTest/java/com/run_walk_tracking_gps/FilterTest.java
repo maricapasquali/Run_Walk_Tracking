@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.test.InstrumentationRegistry;
-
+// TODO: 2/17/2020 RIMUOVERE
 public class FilterTest {
 
     private Context context= InstrumentationRegistry.getTargetContext();

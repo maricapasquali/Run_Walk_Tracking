@@ -95,7 +95,7 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         workoutContentValues.put(WorkoutDescriptor.SPORT, workout.getString(WorkoutDescriptor.SPORT));
         workoutContentValues.put(WorkoutDescriptor.DURATION, workout.getInt(WorkoutDescriptor.DURATION));
 
-        workoutContentValues.put(WorkoutDescriptor.MAP_ROUTE, workout.optString(WorkoutDescriptor.MAP_ROUTE, null));
+        workoutContentValues.put(WorkoutDescriptor.MAP_ROUTE, workout.optString(WorkoutDescriptor.MAP_ROUTE));
         workoutContentValues.put(WorkoutDescriptor.DISTANCE, workout.optDouble(WorkoutDescriptor.DISTANCE, 0));
         workoutContentValues.put(WorkoutDescriptor.CALORIES, workout.optDouble(WorkoutDescriptor.CALORIES, 0));
 
