@@ -5,8 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
-import com.run_walk_tracking_gps.db.tables.CompoundDescriptor;
-import com.run_walk_tracking_gps.db.tables.PlayListDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 
 import org.json.JSONArray;

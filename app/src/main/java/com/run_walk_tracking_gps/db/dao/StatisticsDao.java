@@ -12,11 +12,11 @@ public interface StatisticsDao {
 
     interface  WeightDao{
 
+        JSONArray getAll();
+
         double getLast();
 
         long insert(JSONObject weight) throws JSONException;
-
-        boolean insertAll(JSONArray weights) throws JSONException;
 
         boolean replaceAll(JSONArray weights) throws JSONException;
 

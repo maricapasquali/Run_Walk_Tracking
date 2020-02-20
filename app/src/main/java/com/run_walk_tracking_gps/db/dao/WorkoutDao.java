@@ -10,8 +10,6 @@ public interface WorkoutDao {
 
     long insert(JSONObject workout) throws JSONException;
 
-    boolean insertAll(JSONArray workouts) throws JSONException;
-
     boolean replaceAll(JSONArray workouts) throws JSONException;
 
     boolean update(JSONObject workout) throws JSONException;

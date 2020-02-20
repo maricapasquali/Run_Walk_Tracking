@@ -18,7 +18,7 @@ public class DaoFactory extends SQLiteOpenHelper {
     private static final String TAG = DaoFactory.class.getName();
     private static DaoFactory DaoFactoryInstance = null;
     private static final String DB_NAME = "RUN_WALK_TRACKING_DB.db";
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
 
     /*
         perchè syncronized? cosa succede se accedo all'istanza da diversi flussi di controllo?
@@ -83,6 +83,11 @@ public class DaoFactory extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SongDescriptor.CREATE_TABLE_SONG);
         sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_TABLE_COMPOUND);
 
+        // CREAZIONE TRIGGER
+        sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_TRIGGER_BEFORE_INSERT);
+        sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_TRIGGER_BEFORE_UPDATE);
+        sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_TRIGGER_BEFORE_DELETE);
+
         // CREAZIONE INDICI
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_USER);
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_NAME);
@@ -113,6 +118,7 @@ public class DaoFactory extends SQLiteOpenHelper {
         Log.e(TAG, "onUpgrade");
         if(newVersion > oldVersion){
             //adatto il db con delle query alla versione richiesta
+            // TODO: 19/02/2020 DELETE TABLE AND TRIGGER 
             onCreate(db);
         }
 

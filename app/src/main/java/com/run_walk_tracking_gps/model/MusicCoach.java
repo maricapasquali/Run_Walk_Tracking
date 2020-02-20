@@ -105,7 +105,7 @@ public class MusicCoach {
 
     private void resetPrimaryPlayList(){
         this.songs.clear();
-        this.songs.addAll(SqlLitePlayListDao.create(context).getPrimaryPlayList());
+        this.songs.addAll(SqlLitePlayListDao.create(context).getSongsFromPrimaryPlayList());
         Log.d(TAG, "Songs = " + this.songs);
     }
 

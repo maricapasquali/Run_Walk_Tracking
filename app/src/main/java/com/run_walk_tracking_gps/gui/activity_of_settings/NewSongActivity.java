@@ -78,11 +78,7 @@ public abstract class NewSongActivity extends CommonActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
         }else{
 
-            if(getIntent()!=null){
-                playList = getIntent().getParcelableExtra(KeysIntent.PLAYLIST);
-                namePlaylist.setText(playList.getName());
-                Log.d(TAG, playList.toString());
-            }
+            setIntent();
 
             List<Song> sFilter = filterSong();
             if(sFilter==null) audioFileHelper.getMusicMore30Sec().forEach(s -> songs.put(s, false));
@@ -180,12 +176,21 @@ public abstract class NewSongActivity extends CommonActivity {
                 if(grantResults.length> 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
                     if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
                     {
+                        setIntent();
                         audioFileHelper.getMusicMore30Sec().forEach(s -> songs.put(s, false));
                         Log.d(TAG, songs.toString());
                         playListAdapter.update(songs);
                     }
                 }
                 break;
+        }
+    }
+
+    private void setIntent(){
+        if(getIntent()!=null){
+            playList = getIntent().getParcelableExtra(KeysIntent.PLAYLIST);
+            namePlaylist.setText(playList.getName());
+            Log.d(TAG, playList.toString());
         }
     }
 

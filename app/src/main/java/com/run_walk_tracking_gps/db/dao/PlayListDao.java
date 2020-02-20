@@ -11,19 +11,18 @@ public interface PlayListDao {
 
     Map<Integer, PlayList> getAll();
 
-    List<Song> getPrimaryPlayList();
+    List<Song> getSongsFromPrimaryPlayList();
 
-    List<Song>  getAllSong(int id_playlist);
+    List<Song> getAllSongs(int id_playlist);
 
     PlayList insert(PlayList playList);
 
     boolean updateName(String name, int id_playlist);
 
-    boolean updateUse(int id_playlist);
+    boolean updateUsePrimary(int id_playlist);
 
     ArrayList<Song> updateSongs(List<Song> songs, int id_playlist);
 
     boolean delete(int id_playlist);
-
 
 }

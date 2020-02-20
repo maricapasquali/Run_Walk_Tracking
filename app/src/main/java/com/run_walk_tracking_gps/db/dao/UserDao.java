@@ -12,4 +12,15 @@ public interface UserDao {
     boolean update(JSONObject user) throws JSONException;
 
     boolean delete();
+
+    interface ImageDao {
+
+        JSONObject getImage() throws JSONException;
+
+        boolean save(JSONObject image) throws JSONException;
+
+        boolean delete();
+
+    }
+
 }

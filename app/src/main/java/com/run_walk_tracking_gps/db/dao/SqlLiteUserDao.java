@@ -9,6 +9,7 @@ import android.util.Log;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.DataBaseUtilities;
+import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.utilities.JSONUtilities;
 
@@ -47,7 +48,7 @@ public class SqlLiteUserDao implements UserDao {
                 new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             user =  (!c.moveToFirst()) ? null : UserDescriptor.from(c);
         }
-        final JSONObject image = SqlLiteImageDao.create(context).getImage();
+        final JSONObject image = SqlLiteUserDao.SqlLiteImageDao.create(context).getImage();
 
         return image==null ? user : JSONUtilities.merge(user, image);
     }
@@ -66,8 +67,8 @@ public class SqlLiteUserDao implements UserDao {
         userContentValues.put(UserDescriptor.HEIGHT, user.getDouble(UserDescriptor.HEIGHT));
 
         return DataBaseUtilities.replace(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER, userContentValues)
-                && ( user.isNull(NetworkHelper.Constant.IMAGE) ? SqlLiteImageDao.create(context).delete() :
-                SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE)));
+                && ( user.isNull(NetworkHelper.Constant.IMAGE) ? SqlLiteUserDao.SqlLiteImageDao.create(context).delete() :
+                SqlLiteUserDao.SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE)));
     }
 
     @Override
@@ -102,7 +103,7 @@ public class SqlLiteUserDao implements UserDao {
         }
 
         if(user.has(NetworkHelper.Constant.IMAGE)){
-            success = SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE));
+            success = SqlLiteUserDao.SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE));
         }
 
         return success;
@@ -116,4 +117,66 @@ public class SqlLiteUserDao implements UserDao {
         whereCondition.put(UserDescriptor.ID_USER, String.valueOf(id_user));
         return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER, whereCondition);
     }
+
+    public static class SqlLiteImageDao implements UserDao.ImageDao {
+
+        private static final String TAG = SqlLiteImageDao.class.getName();
+        private static UserDao.ImageDao imageDao;
+        private Context context;
+        private DaoFactory daoFactory;
+
+        private SqlLiteImageDao(Context context){
+            this.context = context;
+            daoFactory = DaoFactory.getInstance(context);
+        }
+
+        public static synchronized UserDao.ImageDao  create(Context context) {
+            if(imageDao==null){
+                imageDao = new SqlLiteImageDao(context.getApplicationContext());
+            }
+            return imageDao;
+        }
+
+        @Override
+        public JSONObject getImage() throws JSONException {
+            SQLiteDatabase db = daoFactory.getReadableDatabase();
+            try(Cursor c = db.rawQuery("SELECT "+ ImageProfileDescriptor.NAME+" FROM "+
+                            ImageProfileDescriptor.TABLE_IMG +" WHERE "+ UserDescriptor.ID_USER+"=?",
+                    new String[]{String.valueOf(Preferences.Session.getIdUser(context))})){
+                return (!c.moveToFirst()) ? null :ImageProfileDescriptor.from(c);
+            }
+        }
+
+        private boolean hasImage() {
+            SQLiteDatabase db = daoFactory.getReadableDatabase();
+            try(Cursor c = db.rawQuery("SELECT * FROM "+ ImageProfileDescriptor.TABLE_IMG +" WHERE "+ UserDescriptor.ID_USER+"=?",
+                    new String[]{String.valueOf(Preferences.Session.getIdUser(context))})){
+                return (c.moveToFirst()) && c.getCount() > 0;
+            }
+        }
+
+        @Override
+        public boolean save(JSONObject image) throws JSONException {
+            boolean success = false;
+            final ContentValues imgContentValues = new ContentValues();
+            imgContentValues.put(UserDescriptor.NAME, image.getString(UserDescriptor.NAME));
+
+            Map<String, String> whereCondition = new HashMap<>();
+            whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
+            imgContentValues.put(UserDescriptor.ID_USER, Preferences.Session.getIdUser(context));
+
+            success = DataBaseUtilities.replace(daoFactory.getWritableDatabase(), ImageProfileDescriptor.TABLE_IMG, imgContentValues);
+            return success;
+        }
+
+        @Override
+        public boolean delete() {
+            Map<String, String> whereCondition = new HashMap<>();
+            whereCondition.put(UserDescriptor.ID_USER, String.valueOf(Preferences.Session.getIdUser(context)));
+            // TODO: 1/1/2020 ELIMINARE DA STOREAGE
+            return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), ImageProfileDescriptor.TABLE_IMG, whereCondition);
+        }
+
+    }
+
 }

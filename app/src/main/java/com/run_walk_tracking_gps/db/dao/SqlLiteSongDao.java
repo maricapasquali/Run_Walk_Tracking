@@ -1,11 +1,9 @@
 package com.run_walk_tracking_gps.db.dao;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -83,28 +81,6 @@ public class SqlLiteSongDao implements SongDao {
     }
 
     @Override
-    public boolean insertAll(SQLiteDatabase db, List<Song> songs) {
-        songs.forEach(song -> {
-            int id_song = getIdIfExist(db, song);
-            if(id_song<0) {
-                final ContentValues songContentValues = new ContentValues();
-                id_song = DataBaseUtilities.getNextId(db, SongDescriptor.TABLE_SONG, SongDescriptor.ID_SONG);
-                songContentValues.put(SongDescriptor.ID_SONG, id_song);
-                songContentValues.put(SongDescriptor.TITLE, song.getTitle());
-                songContentValues.put(SongDescriptor.ARTIST, song.getArtist());
-                songContentValues.put(SongDescriptor.DURATION, song.getDuration());
-                songContentValues.put(SongDescriptor.PATH, song.getPath().toString());
-
-                if (db.insert(SongDescriptor.TABLE_SONG, null, songContentValues) == -1)
-                    throw new SQLiteException("Insert SONG FAIL");
-            }
-            song.setId(id_song);
-
-        });
-        return true;
-    }
-
-    @Override
     public boolean delete(int id_song, int id_playlist) {
         // ELIMINARE NELLA PLAYLIST IN CUI è SELEZIONATA ,
         // SE IN COUMPOUND NON CI SONO PIU ASSOCIAZIONI
@@ -149,7 +125,7 @@ public class SqlLiteSongDao implements SongDao {
     }
 
 
-    private int getIdIfExist(SQLiteDatabase db, Song song){
+    public static int getIdIfExist(SQLiteDatabase db, Song song){
         Map<String, String> whereCondition = new HashMap<>();
         whereCondition.put(SongDescriptor.TITLE, song.getTitle());
         whereCondition.put(SongDescriptor.ARTIST, song.getArtist());

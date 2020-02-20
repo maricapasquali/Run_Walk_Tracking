@@ -31,4 +31,18 @@ public class PlayListDescriptor {
             "CREATE INDEX IF NOT EXISTS FKcreate on "+ TABLE_PLAYLIST+" ("+UserDescriptor.ID_USER+");";
 
 
+    public static final String CREATE_TRIGGER_BEFORE_UPDATE =
+            "CREATE TRIGGER IF NOT EXISTS before_update_playlist BEFORE UPDATE ON "+TABLE_PLAYLIST +" FOR EACH ROW "+
+            "BEGIN "+
+            "UPDATE " +TABLE_PLAYLIST +" SET " + USE_PRIMARY +" = 0 " +
+            "WHERE " + UserDescriptor.ID_USER + " = old." +UserDescriptor.ID_USER +" AND "+ID_PLAYLIST+"<> old."+ID_PLAYLIST+"; " +
+            "end";
+
+    public static final String CREATE_TRIGGER_BEFORE_INSERT =
+            "CREATE TRIGGER IF NOT EXISTS before_insert_playlist BEFORE INSERT ON "+TABLE_PLAYLIST +" FOR EACH ROW "+
+                    "when new." + USE_PRIMARY +" = 1 " +
+                    "BEGIN "+
+                    "UPDATE " +TABLE_PLAYLIST +" SET " + USE_PRIMARY +" = 0 " +
+                    "WHERE " + UserDescriptor.ID_USER + " = new." +UserDescriptor.ID_USER +" AND "+ID_PLAYLIST+"<> new."+ID_PLAYLIST+"; " +
+                    "end";
 }

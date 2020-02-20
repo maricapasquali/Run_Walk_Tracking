@@ -19,11 +19,10 @@ import java.util.Map;
 public class SqlLiteCompoundDao implements CompoundDao {
 
     private static CompoundDao compoundDao;
-    private Context context;
+
     private DaoFactory daoFactory;
 
     private SqlLiteCompoundDao(Context context){
-        this.context = context;
         daoFactory = DaoFactory.getInstance(context);
     }
 
@@ -32,23 +31,6 @@ public class SqlLiteCompoundDao implements CompoundDao {
             compoundDao = new SqlLiteCompoundDao(context.getApplicationContext());
         }
         return compoundDao;
-    }
-
-    @Override
-    public boolean insertAll(SQLiteDatabase db, int id_playlist, List<Song> songs) {
-
-        for(int i=0; i < songs.size(); i++){
-            final ContentValues compoundContentValues = new ContentValues();
-            if(songs.get(i)!=null){
-                compoundContentValues.put(SongDescriptor.ID_SONG, songs.get(i).getId());
-                compoundContentValues.put(PlayListDescriptor.ID_PLAYLIST, id_playlist);
-                compoundContentValues.put(CompoundDescriptor.ORDER, i);
-                if(db.insert(CompoundDescriptor.TABLE_COMPOUND, null, compoundContentValues) == -1)
-                    throw new SQLiteException("Insert COMPOUND FAIL");
-            }
-        }
-
-        return true;
     }
 
     @Override
@@ -68,28 +50,6 @@ public class SqlLiteCompoundDao implements CompoundDao {
             }
             return true;
         });
-    }
-
-    @Override
-    public void delete(SQLiteDatabase db, int id_playlist) {
-        /*
-        DELETE FROM SONG WHERE ID_SONG IN (
-                SELECT ID_SONG
-                FROM COMPOUND
-                WHERE ID_SONG IN (SELECT ID_SONG FROM COMPOUND WHERE ID_PLAYLIST = ?)
-                GROUNP BY ID_SONG
-                HAVING COUNT(ID_SONG) == 1 )
-         */
-
-        db.execSQL("DELETE FROM " + SongDescriptor.TABLE_SONG +" WHERE " + SongDescriptor.ID_SONG +" IN ( " +
-                            "  SELECT " + SongDescriptor.ID_SONG +
-                            "  FROM " + CompoundDescriptor.TABLE_COMPOUND +
-                            "  WHERE " + SongDescriptor.ID_SONG +" IN (SELECT "+ SongDescriptor.ID_SONG +
-                                                                       " FROM "+CompoundDescriptor.TABLE_COMPOUND +
-                                                                       " WHERE " + PlayListDescriptor.ID_PLAYLIST +" = ?) " +
-                            "  GROUP BY " + SongDescriptor.ID_SONG +
-                            "  HAVING COUNT("+ SongDescriptor.ID_SONG +") == 1 )", new String[]{String.valueOf(id_playlist)});
-
     }
 
     public static int getNextOrder(SQLiteDatabase db, int id_playlist){

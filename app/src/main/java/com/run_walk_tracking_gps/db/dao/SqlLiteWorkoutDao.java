@@ -103,8 +103,8 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         return success ? id_workout : -1;
     }
 
-    @Override
-    public boolean insertAll(JSONArray workouts) throws JSONException {
+    // TODO: 19/02/2020  DA ELIMINARE
+    private boolean insertAll(JSONArray workouts) throws JSONException {
         final SQLiteDatabase db = daoFactory.getWritableDatabase();
         boolean success = false;
         try {

@@ -29,4 +29,13 @@ public class CompoundDescriptor {
     public static final String CREATE_INDEX_PLAYLIST =
             "CREATE INDEX IF NOT EXISTS FKcom_Pla on "+ TABLE_COMPOUND
                     +" ("+ PlayListDescriptor.ID_PLAYLIST + ");";
+
+
+
+    public static final String CREATE_TRIGGER_BEFORE_DELETE =
+            "CREATE TRIGGER IF NOT EXISTS before_delete_compound BEFORE DELETE ON "+TABLE_COMPOUND +" FOR EACH ROW "+
+            "WHEN ((SELECT COUNT("+PlayListDescriptor.ID_PLAYLIST +") FROM "+TABLE_COMPOUND +" WHERE "+SongDescriptor.ID_SONG+" = old."+SongDescriptor.ID_SONG+") = 1) "+
+            "BEGIN "+
+            "DELETE FROM "+SongDescriptor.TABLE_SONG+" WHERE "+SongDescriptor.ID_SONG+" = old."+SongDescriptor.ID_SONG+"; "+
+            "END";
 }

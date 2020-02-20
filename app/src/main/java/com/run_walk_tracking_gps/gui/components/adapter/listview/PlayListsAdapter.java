@@ -149,7 +149,7 @@ public class PlayListsAdapter extends BaseAdapter {
                 case R.id.use_primary: {
 
                     PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
-                    if(SqlLitePlayListDao.create(context).updateUse(p.getId())){
+                    if(SqlLitePlayListDao.create(context).updateUsePrimary(p.getId())){
                         playlists.entrySet().forEach(e -> e.getValue().setUseLikePrimary(false));
                         p.setUseLikePrimary(true);
                         notifyDataSetChanged();

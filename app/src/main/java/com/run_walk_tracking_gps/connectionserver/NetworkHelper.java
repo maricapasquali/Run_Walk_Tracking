@@ -25,7 +25,6 @@ import com.android.volley.toolbox.Volley;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteImageDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
@@ -42,7 +41,6 @@ import com.run_walk_tracking_gps.gui.fragments.HomeFragment;
 import com.run_walk_tracking_gps.gui.fragments.StatisticsFragment;
 import com.run_walk_tracking_gps.gui.fragments.WorkoutsFragment;
 import com.run_walk_tracking_gps.model.Measure;
-import com.run_walk_tracking_gps.service.SyncServiceHandler;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.task.DecompressionEncodeImageTask;
 import com.run_walk_tracking_gps.utilities.AppUtilities;
@@ -920,7 +918,7 @@ public class NetworkHelper {
             return response -> {
                 //SyncServiceHandler.create(activity).stop();
                 try {
-                    final JSONObject image = SqlLiteImageDao.create(activity).getImage();
+                    final JSONObject image = SqlLiteUserDao.SqlLiteImageDao.create(activity).getImage();
                     if(image!=null)
                         if(ImageFileHelper.create(activity).getImage(image.getJSONObject(Constant.IMAGE).getString(Constant.NAME)).delete())
                             Log.d(TAG, "Image delete from local storage");

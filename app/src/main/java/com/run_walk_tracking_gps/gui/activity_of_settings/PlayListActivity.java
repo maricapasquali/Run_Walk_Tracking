@@ -68,7 +68,7 @@ public class PlayListActivity extends CommonActivity {
 
                 Log.d(TAG, "OLD = " + oldPlayList);
                 if(oldPlayList.songs().isEmpty())
-                    oldPlayList.addAll(SqlLitePlayListDao.create(this).getAllSong(oldPlayList.getId()));
+                    oldPlayList.addAll(SqlLitePlayListDao.create(this).getAllSongs(oldPlayList.getId()));
 
                 newPlayList = oldPlayList.clone();
 
@@ -173,7 +173,7 @@ public class PlayListActivity extends CommonActivity {
             }
             break;
             case R.id.use_primary: {
-                if(SqlLitePlayListDao.create(this).updateUse(newPlayList.getId())){
+                if(SqlLitePlayListDao.create(this).updateUsePrimary(newPlayList.getId())){
                     newPlayList.setUseLikePrimary(true);
                     item.setVisible(false);
                     MusicCoach.release();

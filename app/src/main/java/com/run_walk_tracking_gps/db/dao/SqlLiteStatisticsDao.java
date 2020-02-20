@@ -48,13 +48,7 @@ public class SqlLiteStatisticsDao implements StatisticsDao{
         switch (type){
             case WEIGHT:
             {
-                SQLiteDatabase db = daoFactory.getReadableDatabase();
-                Cursor c = db.query(WeightDescriptor.TABLE_WEIGHT, null,
-                        UserDescriptor.ID_USER+"=?", new String[]{String.valueOf(Preferences.Session.getIdUser(context))},
-                        null , null , null);
-                JSONArray weights = DataBaseUtilities.getJSONArrayByCursor(c, WeightDescriptor::from);
-                db.close();
-                return weights;
+                return SqlLiteStatisticsDao.SqlLiteWeightDao.create(context).getAll();
             }
             case DISTANCE:
             {
@@ -118,6 +112,17 @@ public class SqlLiteStatisticsDao implements StatisticsDao{
         }
 
         @Override
+        public JSONArray getAll(){
+            SQLiteDatabase db = daoFactory.getReadableDatabase();
+            Cursor c = db.query(WeightDescriptor.TABLE_WEIGHT, null,
+                    UserDescriptor.ID_USER+"=?", new String[]{String.valueOf(Preferences.Session.getIdUser(context))},
+                    null , null , null);
+            JSONArray weights = DataBaseUtilities.getJSONArrayByCursor(c, WeightDescriptor::from);
+            db.close();
+            return weights;
+        }
+
+        @Override
         public double getLast() {
             SQLiteDatabase db = daoFactory.getReadableDatabase();
             try (Cursor c = db.rawQuery("SELECT * FROM "+WeightDescriptor.TABLE_WEIGHT +
@@ -172,8 +177,8 @@ public class SqlLiteStatisticsDao implements StatisticsDao{
             return id_weight;
         }
 
-        @Override
-        public boolean insertAll(JSONArray weights) throws JSONException {
+        // TODO: 19/02/2020  DA ELIMINARE
+        private boolean insertAll(JSONArray weights) throws JSONException {
             final SQLiteDatabase db = daoFactory.getWritableDatabase();
             boolean success = false;
             try {
