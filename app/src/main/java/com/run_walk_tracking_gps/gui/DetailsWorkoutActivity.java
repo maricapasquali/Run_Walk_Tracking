@@ -2,8 +2,9 @@ package com.run_walk_tracking_gps.gui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -11,24 +12,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.task.AutoWorkoutInsert;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+import com.run_walk_tracking_gps.utilities.MapsUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -86,17 +88,25 @@ public class DetailsWorkoutActivity extends  CommonActivity{
     }
 
     private void setMapView(){
-        ArrayList<LatLng> mapRoute = Preferences.MapLocation.get(this.getApplicationContext());
-        Log.e(TAG, "MAP ROUTE "+ mapRoute.toString());
-        if(LocationUtilities.isGpsEnable(this) && mapRoute.size()>0){
+        PolylineOptions mapRoute;
+        if(workout.getMapRoute()==null) {
+            mapRoute = Preferences.MapLocation.getPolylineOptions(this.getApplicationContext());
+            workout.setMapRoute(Preferences.MapLocation.getLocationsEncode(this.getApplicationContext()));
+        }else{
+            mapRoute = MapsUtilities.getPolylineOptions(workout.getMapRoute());
+        }
+        Log.e(TAG, "MAP ROUTE = "+ workout.getMapRoute());
+
+        if(LocationUtilities.isGpsEnable(this) && mapRoute.getPoints().size()>0){
             getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute.toString()))
+                        .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute))
                         .commit();
         }else {
             findViewById(R.id.summary_map).setVisibility(View.GONE);
         }
         Preferences.MapLocation.delete(this.getApplicationContext());
     }
+
 
     @Override
     protected void listenerAction() {
@@ -197,25 +207,54 @@ public class DetailsWorkoutActivity extends  CommonActivity{
 
         try {
             JSONObject bodyJson = workout.toJson(this);
+            /*
             Log.d(TAG, bodyJson.toString());
             long id_workout = SqlLiteWorkoutDao.create(this).insert(bodyJson);
             if(id_workout!=-1){
                 Preferences.Session.update(this);
-
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
                         NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
                         .startService();
-
 
                 setResult(RESULT_OK, new Intent());
             }else {
                 setResult(RESULT_CANCELED, new Intent());
             }
-            finish();
+            finish();*/
+            AutoWorkoutInsert.create(this, new OnInsertAutoWorkoutListener() {
+                @Override
+                public void onSuccess(long id_workout) {
+                    Preferences.Session.update(DetailsWorkoutActivity.this);
+
+                    try {
+                        NetworkServiceHandler.getInstance(DetailsWorkoutActivity.this, NetworkHelper.Constant.INSERT,
+                                NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
+                                .startService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    setResult(RESULT_OK, new Intent());
+                    finish();
+                }
+
+                @Override
+                public void onFail() {
+                    setResult(RESULT_CANCELED, new Intent());
+                    finish();
+                }
+            }).execute(workout.toJson(this));
+
+
         }catch (JSONException e){
             e.printStackTrace();
         }
 
+    }
+
+    public interface OnInsertAutoWorkoutListener{
+        void onSuccess(long id_workout);
+        void onFail();
     }
 
 }

@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.KeysIntent;
@@ -35,7 +39,6 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.WorkoutService;
-import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
@@ -47,6 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
@@ -267,10 +271,19 @@ public class HomeFragment extends Fragment {
                 try {
                     registerBroadcastReceiver();
                     bindService();
-
-                    getContext().startService(new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.START_ACTION)
+                    Intent startIntent = new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.START_ACTION)
                             .putExtra(KeysIntent.WEIGHT_MORE_RECENT, SqlLiteStatisticsDao.SqlLiteWeightDao.create(getContext()).getLast())
-                            .putExtra(KeysIntent.SPORT_DEFAULT, SqlLiteSettingsDao.create(getContext()).getSportDefault()));
+                            .putExtra(KeysIntent.SPORT_DEFAULT, SqlLiteSettingsDao.create(getContext()).getSportDefault());
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        getContext().startForegroundService(startIntent);
+                        Toast.makeText(getContext(), "startForegroundService", Toast.LENGTH_LONG).show();
+                    }else{
+                        getContext().startService(startIntent);
+                        Toast.makeText(getContext(), "startService", Toast.LENGTH_LONG).show();
+                    }
+                    //ContextCompat.startForegroundService(getContext(), startIntent);
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -281,19 +294,33 @@ public class HomeFragment extends Fragment {
         pause.setOnClickListener(v ->{
             pauseState();
 
-            getContext().startService(new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.PAUSE_ACTION)
+            Intent pauseIntent = new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.PAUSE_ACTION)
                     //.putExtra(KeysIntent.TIMER, time)
-                    .putExtra(KeysIntent.FROM_NOTIFICATION, false));
+                    .putExtra(KeysIntent.FROM_NOTIFICATION, false);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                getContext().startForegroundService(pauseIntent);
+            }else{
+                getContext().startService(pauseIntent);
+            }
+            //ContextCompat.startForegroundService(getContext(), pauseIntent);
+
             workout_duration.pause();
         });
         restart.setOnClickListener(v ->{
             restartState();
 
             workout_duration.restart();
-            getContext().startService(new Intent(getContext(), WorkoutService.class)
+
+            Intent restartIntent = new Intent(getContext(), WorkoutService.class)
                     .setAction(ActionReceiver.RESTART_ACTION)
                     //.putExtra(KeysIntent.TIMER, time)
-                    .putExtra(KeysIntent.FROM_NOTIFICATION, false));
+                    .putExtra(KeysIntent.FROM_NOTIFICATION, false);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                getContext().startForegroundService(restartIntent);
+            }else{
+                getContext().startService(restartIntent);
+            }
+            //ContextCompat.startForegroundService(getContext(), restartIntent);
         });
         stop.setOnClickListener(v ->{
             final Workout workout = myService.getWorkout();
@@ -416,7 +443,7 @@ public class HomeFragment extends Fragment {
                 if(workout!=null){
                     workout_distance.setText(workout.getDistance().toString(true));
                     workout_energy.setText(workout.getCalories().toString(true));
-                    renderingMap(Factory.CustomPolylineOptions.create().addAll(Preferences.MapLocation.get(getContext())));
+                    renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
                 }
             }
         }
@@ -499,7 +526,7 @@ public class HomeFragment extends Fragment {
                        // final PolylineOptions route = intent.getParcelableExtra(KeysIntent.ROUTE);
                         Log.e(TAG, "Route polyline receive");
                         //HomeFragment.this.renderingMap(route);
-                        HomeFragment.this.renderingMap(Factory.CustomPolylineOptions.create().addAll(Preferences.MapLocation.get(getContext())));
+                        HomeFragment.this.renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
                         break;
                 }
             }

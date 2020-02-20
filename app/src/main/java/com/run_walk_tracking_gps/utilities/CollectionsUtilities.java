@@ -54,8 +54,8 @@ public class CollectionsUtilities <K, V>{
 
     private static final String TAG =CollectionsUtilities.class.getName();
 
-    // TODO: 12/5/2019 MIGLIORARE 
-    public static ArrayList<LatLng> convertStringToListLatLng(String toString){
+    // TODO: 12/5/2019 RIMUOVERE
+    /*public static ArrayList<LatLng> convertStringToListLatLng(String toString){
         ArrayList<LatLng> list = new ArrayList<>();
         if(toString!=null && !toString.isEmpty()){
             Log.d(TAG, toString);
@@ -71,6 +71,6 @@ public class CollectionsUtilities <K, V>{
             }
         }
         return list;
-    }
+    }*/
 
 }

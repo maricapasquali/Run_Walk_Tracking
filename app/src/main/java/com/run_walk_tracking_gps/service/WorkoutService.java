@@ -228,6 +228,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         if(!isIndoor) this.mapRouteDraw.startDrawing(Looper.myLooper());
 
     }
+
     private void pause(Intent intent){
         Log.d(TAG, "PAUSE REQUEST");
         isInPause = true;
@@ -242,6 +243,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
             sendBroadcast(new Intent(ActionReceiver.PAUSE_ACTION).putExtra(KeysIntent.TIMER, getTimeInMillSec()));
         }
     }
+
     private void restart(Intent intent){
         Log.d(TAG, "RESTART REQUEST");
         isInPause = false;
@@ -257,6 +259,7 @@ public class WorkoutService extends Service implements MapRouteDraw.OnChangeLoca
         }
 
     }
+
     private void stop(){
         Log.d(TAG, "STOP REQUEST");
         isRunning = false;

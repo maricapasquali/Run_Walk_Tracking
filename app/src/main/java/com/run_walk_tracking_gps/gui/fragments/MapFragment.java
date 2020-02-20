@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -24,18 +23,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.exception.NoGPSException;
-import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
-import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
-import static com.run_walk_tracking_gps.utilities.LocationUtilities.LOCATION_PERMISSION_REQUEST_CODE;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -46,17 +40,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String ROUTE = "route";
 
-    private String routeStr;
+    private PolylineOptions routeStr;
     private MapView mapView;
     private GoogleMap googleMap;
 
     private ImageView myLocation;
     private ImageView typeMap;
 
-    public static MapFragment createWithArguments(final String routeStr) {
+    public static MapFragment createWithArguments(final PolylineOptions routeStr) {
         MapFragment mapFragment = new MapFragment();
         Bundle args = new Bundle();
-        args.putString(ROUTE, routeStr);
+        args.putParcelable(ROUTE, routeStr);
         mapFragment.setArguments(args);
         return mapFragment;
     }
@@ -67,7 +61,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onCreate");
 
         if (getArguments() != null) {
-            routeStr = getArguments().getString(ROUTE);
+            routeStr = getArguments().getParcelable(ROUTE);
         }
     }
 
@@ -109,8 +103,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onMapReady");
         setGoogleMap(getActivity(), googleMap, routeStr == null);
         if (routeStr != null) {
-            addPolyLine(routeStr);
+            addPolyLineFrom(routeStr);
         }
+    }
+
+    private void addPolyLineFrom(PolylineOptions mapRoute) {
+        /*final PolylineOptions polylineOptions = Factory.CustomPolylineOptions.create();
+        final List<LatLng> route = CollectionsUtilities.convertStringToListLatLng(mapRoute);
+        route.forEach(polylineOptions::add);
+        googleMap.addPolyline(polylineOptions);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapRoute.get(0), DEFAULT_ZOOM));
+        googleMap.addMarker(new MarkerOptions().position(route.get(0)).title(getContext().getString(R.string.departure)));
+        googleMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getContext().getString(R.string.arrivals)));*/
+        googleMap.clear();
+        googleMap.addPolyline(mapRoute);
+        List<LatLng> locations = mapRoute.getPoints();
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locations.get(0), DEFAULT_ZOOM));
+
+        googleMap.addMarker(new MarkerOptions().position(locations.get(0)).title(getContext().getString(R.string.departure)));
+        googleMap.addMarker(new MarkerOptions().position(locations.get(locations.size() - 1)).title(getContext().getString(R.string.arrivals)));
+        locations.clear();
     }
 
     @Override
@@ -143,23 +155,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void addPolyLine(String mapRoute) {
-        final PolylineOptions polylineOptions = Factory.CustomPolylineOptions.create();
-        final List<LatLng> route = CollectionsUtilities.convertStringToListLatLng(mapRoute);
-        route.forEach(polylineOptions::add);
-        googleMap.addPolyline(polylineOptions);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(0), DEFAULT_ZOOM));
-
-        googleMap.addMarker(new MarkerOptions().position(route.get(0)).title(getContext().getString(R.string.departure)));
-        googleMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getContext().getString(R.string.arrivals)));
-    }
 
     private void setGoogleMap(Activity activity, GoogleMap gMap, boolean myLocation) {
         googleMap = gMap;
         googleMap.setMapType(MAP_TYPE_DEFAULT);
 
         if (myLocation) {
-            //googleMap.setMyLocationEnabled(true);
             myLocation(activity);
         }
     }
@@ -177,6 +178,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             final FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
             if (LocationUtilities.hasPermission(getContext())) {
+                googleMap.setMyLocationEnabled(true);
+                googleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
                 fusedLocationProviderClient.getLastLocation().addOnSuccessListener(activity, location -> {
                     if (location != null) {

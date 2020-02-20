@@ -96,7 +96,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private void setMiddleSpeed(double distance,double duration){
-        getMiddleSpeed().setValue(true, NumberUtilities.round2(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d)));
+        getMiddleSpeed().setValue(true, NumberUtilities.round2(duration>0d ? distance/(duration/3600) : 0d));
     }
 
     public void setMiddleSpeed(){

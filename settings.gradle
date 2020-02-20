@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':android-maps-utils'
 include ':drag-sort-listview'

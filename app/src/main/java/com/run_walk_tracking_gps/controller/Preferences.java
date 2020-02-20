@@ -12,21 +12,13 @@ import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.model.Measure;
-import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
 import com.run_walk_tracking_gps.utilities.DateHelper;
+import com.run_walk_tracking_gps.utilities.MapsUtilities;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.SortedSet;
-import java.util.stream.Stream;
-
 
 public class Preferences {
 
@@ -151,7 +143,7 @@ public class Preferences {
     public static class MapLocation{
         private static final String PREFERENCE_LOCATION = "map_location";
 
-      //  private static String id = String.valueOf(11);
+        // private static String id = String.valueOf(11);
         // GETTER SharedPreferences
         private static SharedPreferences getSharedPreferencesLocation(Context context) {
             return context.getSharedPreferences(PREFERENCE_LOCATION, Context.MODE_PRIVATE);
@@ -159,20 +151,20 @@ public class Preferences {
 
         public static void create(Context context){
             String id = String.valueOf(Session.getIdUser(context));
-            getSharedPreferencesLocation(context).edit().putString(id, "").apply();
-        }
-
-        public static void add(Context context, LatLng location){
             SharedPreferences ss = getSharedPreferencesLocation(context);
-            String id = String.valueOf(Session.getIdUser(context));
-            ArrayList<LatLng> hs =  CollectionsUtilities.convertStringToListLatLng(ss.getString(id,""));
-            hs.add(location);
-            ss.edit().clear().putString(id, hs.toString()).apply();
+            if(ss.contains(id) && !ss.getString(id, "").isEmpty())
+               delete(context);
+
+            ss.edit().putString(id, "").apply();
         }
 
-        public static ArrayList<LatLng> get(Context context){
+        public static PolylineOptions getPolylineOptions(Context context){
+            return MapsUtilities.getPolylineOptions(getLocationsEncode(context));
+        }
+
+        public static String getLocationsEncode(Context context){
             String id = String.valueOf(Session.getIdUser(context));
-            return CollectionsUtilities.convertStringToListLatLng(getSharedPreferencesLocation(context).getString(id,""));
+            return getSharedPreferencesLocation(context).getString(id,"");
         }
 
         public static void delete(Context context) {
@@ -183,13 +175,22 @@ public class Preferences {
         public static void addAll(Context context, List<Location> locations) {
             SharedPreferences ss = getSharedPreferencesLocation(context);
             String id = String.valueOf(Session.getIdUser(context));
-            ArrayList<LatLng> route = new ArrayList<>();
+            List<LatLng> route = MapsUtilities.decodePolyLine(ss.getString(id,""));
             locations.forEach(l -> route.add(new LatLng(l.getLatitude(), l.getLongitude())));
-            ArrayList<LatLng> hs = CollectionsUtilities.convertStringToListLatLng(ss.getString(id,""));
-            hs.addAll(route);
-            ss.edit().clear().putString(id, hs.toString()).apply();
+            ss.edit().clear().putString(id, MapsUtilities.encodePolyLine(route)).apply();
             route.clear();
         }
+
+        public static void add(Context context, LatLng location){
+            SharedPreferences ss = getSharedPreferencesLocation(context);
+            String id = String.valueOf(Session.getIdUser(context));
+            List<LatLng> hs = MapsUtilities.decodePolyLine(ss.getString(id,""));
+            hs.add(location);
+            ss.edit().clear().putString(id, MapsUtilities.encodePolyLine(hs)).apply();
+        }
+
+
+
     }
 
 }
