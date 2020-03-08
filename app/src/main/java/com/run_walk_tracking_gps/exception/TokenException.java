@@ -25,7 +25,7 @@ public class TokenException extends BackgroundException {
         return new TokenException(context);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void createAlertDialog() {
         new AlertDialog.Builder(getContext())
@@ -40,7 +40,7 @@ public class TokenException extends BackgroundException {
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                        })
                        .setPositiveButton(R.string.continue_here, ((dialog, which) ->
-                                NetworkHelper.HttpRequest.requestContinueHere((AppCompatActivity) getContext())))
+                                NetworkHelper.HttpRequest.request((AppCompatActivity) getContext(), NetworkHelper.Constant.CONTINUE_HERE, null)))
                        .create()
                        .show();
     }

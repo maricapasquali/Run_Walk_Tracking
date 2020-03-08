@@ -100,6 +100,7 @@
 
     <!-- MapFragment -->
     <string name="departure">Partenza</string>
+    <string name="arrivals">Arrivo</string>
 
     <!-- Riepilogo / Dettaglio Allenamento -->
     <string name="summary_workout">Riepilogo</string>
@@ -180,8 +181,7 @@
     <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
     <string name="token_not_valid">Sessione non valida</string>
     <string name="connection_slow">Ops ! Connessione lenta, riprova più tardi.</string>
-    <string name="arrivals">Arrivo</string>
-
+    <string name="internal_server_error">Errore interno al Server</string>
 
 
 

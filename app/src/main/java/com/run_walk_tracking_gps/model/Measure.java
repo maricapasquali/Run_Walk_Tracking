@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.utilities.ConversionUnitUtilities;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -179,7 +180,7 @@ public class Measure implements Parcelable {
         this.type = type;
         this.value = 0d;
         try {
-            final JSONObject unitDefaultJson = SqlLiteSettingsDao.create(context).getUnitMeasureDefault();
+            final JSONObject unitDefaultJson = DaoFactory.getInstance(context).getSettingDao().getUnitMeasureDefault();
             unitsDefault = unitDefaultJson==null ? Type.getMapMeasureUnitDefault() : Measure.Unit.getAllDefault(unitDefaultJson);
             switch (type){
                 case HEIGHT:
@@ -275,7 +276,6 @@ public class Measure implements Parcelable {
         return unit;
     }
 
-
     public Double getValue(final boolean toDb){
         if(toDb){
             return getValueToDb();
@@ -289,65 +289,44 @@ public class Measure implements Parcelable {
         return NumberUtilities.round2(this.value);
     }
 
+    private Double get(Type typeToSet){
+        if(unitsDefault.get(typeToSet).equals(typeToSet.getMeasureUnitDefault()))
+            return getValueToDb();
+        else
+            return conversionTo(this.type.getMeasureUnit()[1], this.value);
+    }
+
     private Double getValueToGui(){
         if(this.value==null) return 0d;
         resetUnit();
         switch (this.type){
-            case DURATION: return getValueToDb();
+            case DURATION: {
+                return getValueToDb();
+            }
             case ENERGY:{
-                if(unitsDefault.get(Type.ENERGY).equals(Type.ENERGY.getMeasureUnitDefault()))
-                    return getValueToDb();
-                else return conversionTo(this.type.getMeasureUnit()[1], value);
+                return get(Type.ENERGY);
             }
-           case MIDDLE_SPEED: {
-               if(unitsDefault.get(Type.MIDDLE_SPEED).equals(Type.MIDDLE_SPEED.getMeasureUnitDefault()))
-                   return getValueToDb();
-               else
-                   return conversionTo(this.type.getMeasureUnit()[1], value);
-           }
-            case WEIGHT:
-            {
-                if(unitsDefault.get(Type.WEIGHT).equals(Type.WEIGHT.getMeasureUnitDefault()))
-                    return getValueToDb();
-                else
-                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            case MIDDLE_SPEED: {
+               return get(Type.MIDDLE_SPEED);
             }
-
-            case HEIGHT:
-            {
-                if(unitsDefault.get(Type.HEIGHT).equals(Type.HEIGHT.getMeasureUnitDefault()))
-                    return getValueToDb();
-                else
-                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            case WEIGHT: {
+                return get(Type.WEIGHT);
             }
-            case DISTANCE:
-            {
-                if(unitsDefault.get(Type.DISTANCE).equals(Type.DISTANCE.getMeasureUnitDefault()))
-                    return getValueToDb();
-                else
-                    return conversionTo(this.type.getMeasureUnit()[1], value);
+            case HEIGHT: {
+                return get(Type.HEIGHT);
             }
-
-           default:
-           {
-               /*
-               String unitStr = DefaultPreferencesUser.getUnitDefault(context, this.type.toString().toLowerCase());
-               if(unitStr==null || Measure.Unit.valueOf(unitStr).equals(this.type.getMeasureUnitDefault()))
-                   return getValueToDb();
-               else
-                   return conversionTo(this.type.getMeasureUnit()[1], value);
-                */
-           }
+            case DISTANCE: {
+                return get(Type.DISTANCE);
+            }
         }
         return this.value;
     }
-
 
     private void resetUnit(){
         if(!type.equals(Type.DURATION)){
             try {
                 Measure.Unit u = null;
-                final JSONObject unitDefaultJson = SqlLiteSettingsDao.create(context).getUnitMeasureDefault();
+                final JSONObject unitDefaultJson = DaoFactory.getInstance(context).getSettingDao().getUnitMeasureDefault();
                 unitsDefault = unitDefaultJson==null ? Type.getMapMeasureUnitDefault() : Unit.getAllDefault(unitDefaultJson);
                 switch (this.type){
                     case MIDDLE_SPEED:
@@ -478,6 +457,8 @@ public class Measure implements Parcelable {
         return UNSET_CONTEXT;
     }
 
+
+
     public String toString(boolean isHome) {
         if(isHome)
         {
@@ -486,6 +467,21 @@ public class Measure implements Parcelable {
             return getValueToGui() + context.getString(R.string.space) + getUnit().getString();
         }
         return toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Measure measure = (Measure) o;
+        return type == measure.type &&
+                Objects.equals(value, measure.value) &&
+                unit == measure.unit;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value, unit);
     }
 
     public static class Utilities {

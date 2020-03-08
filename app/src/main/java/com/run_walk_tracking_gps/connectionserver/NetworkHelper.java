@@ -7,32 +7,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
-import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
-import com.run_walk_tracking_gps.gui.ApplicationActivity;
 import com.run_walk_tracking_gps.gui.ActivationAccountActivity;
+import com.run_walk_tracking_gps.gui.ApplicationActivity;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.LoginActivity;
 import com.run_walk_tracking_gps.gui.SplashScreenActivity;
@@ -58,7 +49,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -66,8 +56,100 @@ public class NetworkHelper {
 
     static final String TAG = NetworkHelper.class.getName();
 
-    public interface OnUpdateGuiListener {
-        void onChangeStateDB();
+    private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
+
+    private static RequestQueue queue;
+
+
+// CHECKS -----------------------------
+
+    private static void check(JSONObject bodyJson, List<String> fieldRequired) throws NullPointerException, IllegalArgumentException{
+        if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
+        checkNotRequiredField(bodyJson::keys, s -> !fieldRequired.contains(s));
+        checkRequiredField(bodyJson::keys, (fieldSubmit) -> fieldRequired.stream().filter(f-> !fieldSubmit.contains(f)).toArray());
+    }
+
+    private static void checkNotRequiredField(Iterable<String> iterable, Function<String, Boolean> fieldRequired)
+            throws IllegalArgumentException{
+        Object[] notRequired = StreamSupport.stream(iterable.spliterator(), false)
+                .filter(fieldRequired::apply).toArray();
+        if(notRequired.length>0) throw new IllegalArgumentException("NOT required : " +  Arrays.toString(notRequired));
+    }
+
+    private static void checkRequiredField(Iterable<String> iterable, Function<List<String>, Object[]> fieldRequired)
+            throws IllegalArgumentException{
+        Object[] missing = fieldRequired.apply(StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList()));
+        if(missing.length>0) throw new IllegalArgumentException("Missing : " +  Arrays.toString(missing));
+    }
+
+
+// REQUEST UTILITIES -----------------------------
+
+    private static boolean isNetWorkAvailable(Context context){
+        final ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        return activeNetwork!=null && activeNetwork.isConnected();
+    }
+
+    private static boolean requestJsonPostToServerVolleyWithoutProgressBar(final Context context, final String url, final JSONObject bodyJson,
+                                                                           final Response.Listener<JSONObject> listenerResponse)
+            throws InternetNoAvailableException {
+
+        return requestJsonToServerVolleyWithoutProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
+    }
+
+    private static boolean requestJsonPostToServerVolleyWithProgressBar(final Activity context, final String url, final JSONObject bodyJson,
+                                                                        final Response.Listener<JSONObject> listenerResponse)
+            throws InternetNoAvailableException {
+
+        return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
+    }
+
+
+    // GENERAL
+    private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method,
+                                                                       final JSONObject bodyJson,
+                                                                       final Response.Listener<JSONObject> listenerResponse)
+            throws InternetNoAvailableException {
+
+        if(!isNetWorkAvailable(context)) throw new InternetNoAvailableException(context);
+        createRequest(context, method, url,  bodyJson,  listenerResponse);
+        return true;
+    }
+
+    private static boolean requestJsonToServerVolleyWithProgressBar(final Activity context, final String url, final int method,
+                                                                    final JSONObject bodyJson,
+                                                                    final Response.Listener<JSONObject> listenerResponse)
+            throws InternetNoAvailableException {
+        if(!isNetWorkAvailable(context)) throw new InternetNoAvailableException(context);
+
+        createRequest(context, method, url,  bodyJson,  listenerResponse);
+
+        if(!(context instanceof SplashScreenActivity))
+        {
+            RequestDialog progressDialog = RequestDialog.create(context);
+            progressDialog.show();
+            queue.addRequestFinishedListener((RequestQueue.RequestFinishedListener<String>) request -> {
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+            });
+        }
+
+
+        return true;
+    }
+
+    private static void createRequest(Context context, int method, String url, JSONObject bodyJson,
+                                      Response.Listener<JSONObject> responseJsonListener){
+
+        queue = Volley.newRequestQueue(context);
+        queue.add(new CustomRequest(context, method, url, bodyJson, responseJsonListener));
+    }
+
+    public static void cancelAllRequestPending(Object tag){
+        if(tag!=null){
+            queue.cancelAll(tag);
+            Log.d(TAG, "Richiesta ("+tag+") ANNULLATA..");
+        }
     }
 
     public static class Constant{
@@ -148,6 +230,7 @@ public class NetworkHelper {
         public static final String UNIT_WEIGHT = "unit_weight";
         public static final String UNIT_HEIGHT = "unit_height";
         public static final String DELETE_ACCOUNT = "delete_account";
+        public static final String CONTINUE_HERE = "continue_here";
 
         private static List<String> fieldRequiredForSync(){
             return Arrays.asList(TOKEN,LAST_UPDATE, DB_EXIST, DEVICE);
@@ -219,50 +302,37 @@ public class NetworkHelper {
 
     public static class HttpRequest{
 
-        // TODO: 12/30/2019 UTILIZZARE SYNGLETON (CONTEXT DELL'APPLICAZIONE)
-        private static HttpRequest httpRequest;
-
+        private static HttpRequest httpRequest = null;
         private Context context;
         private HttpRequest(Context context){
             this.context = context;
         }
 
         public static synchronized HttpRequest getInstance(Context context){
-            if(httpRequest == null){
+            if(httpRequest == null)
                 httpRequest = new HttpRequest(context.getApplicationContext());
-            }
             return httpRequest;
         }
 
         private static final String TAG = NetworkHelper.class.getName();
-        private static final String BODY_JSON_NOT_NULL = "bodyJson not null";
+
 
         private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
-        // SERVER LOCALE
-        //private static final String SERVER = "http://192.168.1.132/run_walk_tracking_server/";
-        //private static final String SERVER = "http://172.20.10.5/run_walk_tracking_server/";
-
-        private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
+        private static final String ACCOUNT = SERVER + "account/";
 
         private static final String INSERT = SERVER + "insert.php";
         private static final String UPDATE = SERVER + "update.php";
         private static final String DELETE = SERVER + "delete.php";
-
         private static final String UPDATE_ALL = SERVER + "updateAll.php";
         private static final String SYNC = SERVER + "sync.php";
 
+        private static final String FORGOT_PASSWORD = SERVER + "request_change_password.php";
         private static final String CONTINUE_HERE = SERVER + "continueHere.php";
-
-        // ACCOUNT
-        private static final String ACCOUNT = SERVER + "account/";
         private static final String DOWNLOAD_IMAGE = ACCOUNT + "download_image.php";
-
         private static final String SIGN_UP = ACCOUNT + "signup.php";
         private static final String FIRST_SIGN_IN = ACCOUNT + "first_signin.php";
         private static final String SIGN_IN = ACCOUNT + "signin.php";
         private static final String CHANGE_PASSWORD = ACCOUNT + "change_password.php";
-
-        private static RequestQueue queue;
 
         public boolean requestCUD(String action, String filter, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
                 throws NullPointerException, JSONException {
@@ -279,6 +349,66 @@ public class NetworkHelper {
                             return false;
                     }
                 }
+            }catch (InternetNoAvailableException e){
+                e.alert();
+            }
+            return false;
+        }
+
+        public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
+            try {
+                switch (action){
+                    case Constant.SIGN_UP:
+                        return requestSignUp(activity, bodyJson);
+                    case Constant.SIGN_IN:
+                        return requestSignIn(activity, bodyJson);
+                    case Constant.FIRST_LOGIN:
+                        return requestFirstSignIn(activity, bodyJson);
+                    case Constant.FORGOT_PASSWORD:
+                        return requestForgotPassword(activity, bodyJson);
+                    case Constant.CHANGE_PASSWORD:
+                        return requestChangePassword(activity, bodyJson);
+                    case Constant.DELETE_ACCOUNT:
+                        return requestDeleteAccount(activity);
+                    case Constant.CONTINUE_HERE:
+                        return requestContinueHere(activity);
+                    default:
+                        return false;
+                }
+            } catch (InternetNoAvailableException e) {
+                e.alert();
+            } catch (IllegalArgumentException e){
+                Log.e(TAG, e.getMessage());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        public static boolean syncInForeground(AppCompatActivity activity) {
+            return sync(activity, null, HttpResponse.onResponseSyncInForeground(activity));
+        }
+
+        public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
+            return sync(null, context, onUpdateGuiListener);
+        }
+
+        private static boolean sync(AppCompatActivity activity, Context context, OnUpdateGuiListener onUpdateGuiListener) {
+            try{
+
+                final boolean withProgress = (activity!=null);
+                final Context _context = withProgress ? activity.getApplicationContext() : context;
+
+                JSONObject bodyJson = Preferences.Session.getSession(_context).put(Constant.DEVICE, AppUtilities.id(_context));
+                check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSync());
+                return withProgress ?
+                        requestJsonPostToServerVolleyWithProgressBar(activity, SYNC, bodyJson,
+                        HttpResponse.onResponseSync(_context, onUpdateGuiListener)) :
+
+                        requestJsonPostToServerVolleyWithoutProgressBar(_context, SYNC, bodyJson,
+                                HttpResponse.onResponseSync(_context, onUpdateGuiListener));
+            }catch (JSONException e) {
+                e.printStackTrace();
             }catch (InternetNoAvailableException e){
                 e.alert();
             }
@@ -343,59 +473,10 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DELETE, getBodyRequest(context, filter, data),responseJsonListener);
         }
 
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        public static boolean requestContinueHere(AppCompatActivity activity) {
-            try {
-                JSONObject s = Preferences.Session.getSession(activity);
-
-                String sessionEncoded = SessionUtilities.getEncodedSession(Preferences.Session.getIdUser(activity),
-                                                                           s.getString(Constant.LAST_UPDATE),
-                                                                           s.getLong(Constant.LAST_UPDATE),
-                                                                           AppUtilities.id(activity));
-
-                final JSONObject session = new JSONObject().put(Constant.SESSION, sessionEncoded);
-
-                return requestJsonPostToServerVolleyWithoutProgressBar(activity, CONTINUE_HERE, session, HttpResponse.onResponseContinueHere(activity));
-            }catch (InternetNoAvailableException e){
-                e.alert();
-            }catch (JSONException e){
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        private static boolean sync(Context context, OnUpdateGuiListener onUpdateGuiListener) {
-            try{
-                JSONObject bodyJson = Preferences.Session.getSession(context).put(Constant.DEVICE, AppUtilities.id(context));
-                check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSync());
-                return requestJsonPostToServerVolleyWithoutProgressBar(context, SYNC, bodyJson, HttpResponse.onResponseSync(context, onUpdateGuiListener));
-            }catch (JSONException e) {
-                e.printStackTrace();
-            }catch (InternetNoAvailableException e){
-                e.alert();
-            }
-            return false;
-        }
-
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        public boolean syncInBackground(OnUpdateGuiListener onUpdateGuiListener) {
-            return sync(context, onUpdateGuiListener);
-        }
-
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        public static boolean syncInForeground(AppCompatActivity activity) {
-            return sync(activity, HttpResponse.onResponseSyncInForeground(activity));
-        }
-
         private static boolean requestUpdateAll(Context context, JSONObject data, Response.Listener<JSONObject> responseJsonListener)
                 throws NullPointerException, InternetNoAvailableException, JSONException, IllegalArgumentException {
             if(data==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-            // TODO: 12/26/2019 CONTROLLI
+            // TODO : SEPARARE LE RICHIESTE
             JSONObject user = (JSONObject)data.get(Constant.USER);
             if(user.get(Constant.NAME)==null ||
                     user.get(Constant.LAST_NAME)==null ||
@@ -441,41 +522,27 @@ public class NetworkHelper {
         }
 
         // ACCOUNT
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        public static boolean request(AppCompatActivity activity, String action , JSONObject bodyJson) {
+        private static boolean requestContinueHere(AppCompatActivity activity) {
             try {
-                switch (action){
-                    case Constant.SIGN_UP:
-                        return requestSignUp(activity, bodyJson);
-                    case Constant.SIGN_IN:
-                        //return requestSignIn(context, bodyJson, responseJsonListener);
-                        return requestSignIn(activity, bodyJson);
-                    case Constant.FIRST_LOGIN:
-                        //return requestFirstSignIn(context, bodyJson, responseJsonListener);
-                        return requestFirstSignIn(activity, bodyJson);
-                    case Constant.FORGOT_PASSWORD:
-                        //return requestForgotPassword(context, bodyJson, responseJsonListener);
-                        return requestForgotPassword(activity, bodyJson);
-                    case Constant.CHANGE_PASSWORD:
-                        //return requestChangePassword(context, bodyJson, responseJsonListener);
-                        return requestChangePassword(activity, bodyJson);
-                    case Constant.DELETE_ACCOUNT:
-                        return requestDeleteAccount(activity);
-                    default:
-                        return false;
-                }
-            } catch (InternetNoAvailableException e) {
+                JSONObject s = Preferences.Session.getSession(activity);
+
+                String sessionEncoded = SessionUtilities.getEncodedSession(Preferences.Session.getIdUser(activity),
+                        s.getString(Constant.TOKEN),
+                        s.getLong(Constant.LAST_UPDATE),
+                        AppUtilities.id(activity));
+
+                final JSONObject session = new JSONObject().put(Constant.SESSION, sessionEncoded);
+
+                return requestJsonPostToServerVolleyWithoutProgressBar(activity, CONTINUE_HERE, session, HttpResponse.onResponseContinueHere(activity));
+            }catch (InternetNoAvailableException e){
                 e.alert();
-            } catch (IllegalArgumentException e){
-                Log.e(TAG, e.getMessage());
-            } catch (JSONException e) {
+            }catch (JSONException e){
                 e.printStackTrace();
             }
             return false;
         }
 
-        public static boolean requestSignUp(Activity activity, JSONObject bodyJson)
+        private static boolean requestSignUp(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException, JSONException {
 
             if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
@@ -491,6 +558,7 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithProgressBar(activity, SIGN_UP, bodyJson, responseJsonListener);
         }
 
+        // UTILIZZATA NEL TASK SIGNUP (NON UTILIZZATO)
         public static boolean requestSignUp(Activity activity, JSONObject bodyJson, RequestDialog progressDialog)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException, JSONException {
 
@@ -515,8 +583,6 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithoutProgressBar(context, DOWNLOAD_IMAGE, bodyJson, HttpResponse.onResponseDownloadImageProfile(context));
         }
 
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestSignIn(AppCompatActivity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForSignIn());
@@ -524,7 +590,6 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithProgressBar(activity, SIGN_IN, bodyJson, HttpResponse.onResponseLogin(activity, bodyJson));
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static boolean requestFirstSignIn(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForFirstSignIn());
@@ -532,7 +597,6 @@ public class NetworkHelper {
             return requestJsonPostToServerVolleyWithProgressBar(activity, FIRST_SIGN_IN, bodyJson,
                     HttpResponse.onResponseFirstLogin(activity));
         }
-
 
         private static boolean requestForgotPassword(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
@@ -542,14 +606,12 @@ public class NetworkHelper {
                     HttpResponse.onResponseForgotPassword(activity));
         }
 
-
         private static boolean requestChangePassword(Activity activity, JSONObject bodyJson)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException {
             check(bodyJson,  NetworkHelper.Constant.fieldRequiredForUpdatePassword());
             //return requestJsonPostToServerVolleyWithProgressBar(context, CHANGE_PASSWORD, bodyJson,responseJsonListener);
             return requestJsonPostToServerVolleyWithProgressBar(activity, CHANGE_PASSWORD, bodyJson, HttpResponse.onResponseChangePassword(activity));
         }
-
 
         private static boolean requestDeleteAccount(Activity activity)
                 throws NullPointerException, IllegalArgumentException, InternetNoAvailableException, JSONException {
@@ -558,7 +620,8 @@ public class NetworkHelper {
         }
 
 
-// UTILITIES ---------------------------
+
+        // UTILITIES ---------------------------
 
         private static JSONObject getBodyRequest(Context context, JSONObject data)
                 throws JSONException{
@@ -568,96 +631,6 @@ public class NetworkHelper {
         private static JSONObject getBodyRequest(Context context, String filter, JSONObject data)
                 throws JSONException{
             return getBodyRequest(context, data).put(Constant.FILTER, filter);
-        }
-
-// CHECKS -----------------------------
-        private static void check(JSONObject bodyJson, List<String> fieldRequired) throws NullPointerException, IllegalArgumentException{
-            if(bodyJson==null) throw new NullPointerException(BODY_JSON_NOT_NULL);
-            checkNotRequiredField(bodyJson::keys, s -> !fieldRequired.contains(s));
-            checkRequiredField(bodyJson::keys, (fieldSubmit) -> fieldRequired.stream().filter(f-> !fieldSubmit.contains(f)).toArray());
-        }
-
-        private static void checkNotRequiredField(Iterable<String> iterable, Function<String, Boolean> fieldRequired)
-                throws IllegalArgumentException{
-            Object[] notRequired = StreamSupport.stream(iterable.spliterator(), false)
-                    .filter(k -> fieldRequired.apply(k)).toArray();
-            if(notRequired.length>0) throw new IllegalArgumentException("NOT required : " +  Arrays.toString(notRequired));
-        }
-
-        private static void checkRequiredField(Iterable<String> iterable, Function<List<String>, Object[]> fieldRequired)
-                throws IllegalArgumentException{
-            Object[] missing = fieldRequired.apply(StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList()));
-            if(missing.length>0) throw new IllegalArgumentException("Missing : " +  Arrays.toString(missing));
-        }
-
-// REQUEST UTILITIES -----------------------------
-
-        private static boolean isNetWorkAvailable(Context context){
-            final ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-            return activeNetwork!=null && activeNetwork.isConnected();
-        }
-
-        private static boolean requestJsonPostToServerVolleyWithoutProgressBar(final Context context, final String url, final JSONObject bodyJson,
-                                                                            final Response.Listener<JSONObject> listenerResponse)
-                throws InternetNoAvailableException {
-
-            return requestJsonToServerVolleyWithoutProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
-        }
-
-        private static boolean requestJsonPostToServerVolleyWithProgressBar(final Activity context, final String url, final JSONObject bodyJson,
-                                                                            final Response.Listener<JSONObject> listenerResponse)
-                throws InternetNoAvailableException {
-
-            return requestJsonToServerVolleyWithProgressBar(context, url, Request.Method.POST, bodyJson, listenerResponse);
-        }
-
-
-        // GENERAL
-        private static boolean requestJsonToServerVolleyWithoutProgressBar(final Context context, final String url, final int method,
-                                                                           final JSONObject bodyJson,
-                                                                           final Response.Listener<JSONObject> listenerResponse)
-                throws InternetNoAvailableException {
-
-            if(!isNetWorkAvailable(context)) throw new InternetNoAvailableException(context);
-            createRequest(context, method, url,  bodyJson,  listenerResponse);
-            return true;
-        }
-
-        private static boolean requestJsonToServerVolleyWithProgressBar(final Activity context, final String url, final int method,
-                                                                        final JSONObject bodyJson,
-                                                                        final Response.Listener<JSONObject> listenerResponse)
-                throws InternetNoAvailableException {
-            if(!isNetWorkAvailable(context)) throw new InternetNoAvailableException(context);
-
-            createRequest(context, method, url,  bodyJson,  listenerResponse);
-
-            RequestDialog progressDialog = RequestDialog.create(context);
-            progressDialog.show();
-            queue.addRequestFinishedListener((RequestQueue.RequestFinishedListener<String>) request -> {
-                if (progressDialog.isShowing()) progressDialog.dismiss();
-            });
-
-            return true;
-        }
-
-
-        private static void createRequest(Context context, int method, String url, JSONObject bodyJson,
-                                                  Response.Listener<JSONObject>  responseJsonListener){
-            queue = Volley.newRequestQueue(context);
-            final StringRequest jsonRequest = new CustomRequest(context, method, url, bodyJson, responseJsonListener);
-            jsonRequest.setTag(bodyJson);
-            // TODO: 12/5/2019 DA RIGUARDARE
-            jsonRequest.setRetryPolicy(new DefaultRetryPolicy(50000,3,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(jsonRequest);
-        }
-
-        public static void cancelAllRequestPending(Object tag){
-            if(tag!=null){
-                queue.cancelAll(tag);
-                Log.d(TAG, "Richiesta ANNULLATA..");
-            }
         }
     }
 
@@ -676,7 +649,6 @@ public class NetworkHelper {
             }
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseSync(Context context, OnUpdateGuiListener onUpdateGuiListener){
             return response -> {
                 try {
@@ -687,7 +659,7 @@ public class NetworkHelper {
                         case Code.StateDBServer.CONSISTENT:
                            if(onUpdateGuiListener!=null) onUpdateGuiListener.onChangeStateDB();
                         break;
-                        case Code.StateDBServer.INCONSISTENT_RECEIVE_DATA: // not consistent ( receive data to server )
+                        case Code.StateDBServer.INCONSISTENT_RECEIVE_DATA:
                         {
                             final JSONObject receivedData = state.getJSONObject(NetworkHelper.Constant.DATA);
                             final JSONObject session = SessionUtilities.getDecodedSession(receivedData.getString(NetworkHelper.Constant.SESSION));
@@ -696,34 +668,34 @@ public class NetworkHelper {
 
                             final JSONObject user = receivedData.getJSONObject(NetworkHelper.Constant.USER)
                                                                 .put(Constant.ID_USER, session.getInt(Constant.ID_USER));
-                            Log.e(NetworkHelper.TAG, "User receive " + user);
+
                             if(!user.isNull(Constant.IMAGE)){
                                 final JSONObject image = user.getJSONObject(Constant.IMAGE);
 
                                 final String name = image.getString(Constant.NAME);
-                                //if  file NON  esiste : download image with 'name'
+                                // se file immagine NON  esiste : download image with 'name'
                                 if(!ImageFileHelper.create(context).getImage(name).exists()){
-                                    Log.e(TAG, "Download Image");
+                                    Log.d(TAG, "Download Image");
                                     HttpRequest.downloadImageProfile(context, new JSONObject().put(Constant.IMAGE, name));
                                 }
                             }
 
-                            SqlLiteUserDao.create(context).insert(user);
-                            SqlLiteSettingsDao.create(context).insert(receivedData.getJSONObject(NetworkHelper.Constant.SETTINGS));
-                            SqlLiteWorkoutDao.create(context).replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WORKOUTS));
-                            SqlLiteStatisticsDao.SqlLiteWeightDao.create(context).replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WEIGHTS));
-                            // TODO: UPDATE GUI : se immagine presente (<> device -> storage image into internal memory )
+                            DaoFactory.getInstance(context).getUserDao().insert(user);
+                            DaoFactory.getInstance(context).getSettingDao().insert(receivedData.getJSONObject(NetworkHelper.Constant.SETTINGS));
+                            DaoFactory.getInstance(context).getWorkoutDao().replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WORKOUTS));
+                            DaoFactory.getInstance(context).getWeightDao().replaceAll(receivedData.getJSONArray(NetworkHelper.Constant.WEIGHTS));
+
                             if(onUpdateGuiListener!=null) onUpdateGuiListener.onChangeStateDB();
                         }
                         break;
-                        case Code.StateDBServer.INCONSISTENT_SEND_DATA: // not consistent ( send data to server )
+                        case Code.StateDBServer.INCONSISTENT_SEND_DATA:
                         {
                             final JSONObject data = new JSONObject();
-                            JSONObject userJson = SqlLiteUserDao.create(context).getUser();
-                            JSONObject settingsJson = SqlLiteSettingsDao.create(context).getSettings();
-                            JSONArray weights = SqlLiteStatisticsDao.create(context).getAll(Measure.Type.WEIGHT);
-                            JSONArray workouts = SqlLiteWorkoutDao.create(context).getAll();
-                            Log.e(NetworkHelper.TAG, "User send " +  userJson);
+                            JSONObject userJson = DaoFactory.getInstance(context).getUserDao().getUser();
+                            JSONObject settingsJson = DaoFactory.getInstance(context).getSettingDao().getSettings();
+                            JSONArray weights = DaoFactory.getInstance(context).getStatisticsDao().getAll(Measure.Type.WEIGHT);
+                            JSONArray workouts = DaoFactory.getInstance(context).getWorkoutDao().getAll();
+                          
                             data.put(NetworkHelper.Constant.USER, userJson);
                             data.put(NetworkHelper.Constant.SETTINGS, settingsJson);
                             data.put(NetworkHelper.Constant.WEIGHTS, weights);
@@ -733,18 +705,17 @@ public class NetworkHelper {
                                     BitmapFactory.decodeFile(
                                             ImageFileHelper.create(context).getPathImage(userJson.getJSONObject(Constant.IMAGE)
                                                                            .getString(ImageProfileDescriptor.NAME)));
-                            if(img==null)
-                                // TODO: UPDATE GUI
-                                HttpRequest.requestUpdateAll(context, data, responseUpdate-> {
-                                    if(onUpdateGuiListener!=null)
-                                        onUpdateGuiListener.onChangeStateDB();
-                                });
+                            if(img==null) {
+                              HttpRequest.requestUpdateAll(context, data, responseUpdate-> {
+                                  if(onUpdateGuiListener!=null)
+                                      onUpdateGuiListener.onChangeStateDB();
+                              });
+                            } else {
+                                //TODO: UPLOAD IMAGE SEPARATO DAL RESTO
 
-                            else
-                            {
                                 CompressionBitMapTask.create(context, image_encode -> {
                                     data.getJSONObject(NetworkHelper.Constant.USER).getJSONObject(Constant.IMAGE).put(Constant.IMG_ENCODE, image_encode);
-                                    // TODO: UPDATE GUI
+
                                     HttpRequest.requestUpdateAll(context, data, responseUpdate-> {
                                         if(onUpdateGuiListener!=null)
                                             onUpdateGuiListener.onChangeStateDB();
@@ -777,8 +748,6 @@ public class NetworkHelper {
             };
         }
 
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseContinueHere(AppCompatActivity activity) {
             return response -> {
                 try {
@@ -827,7 +796,6 @@ public class NetworkHelper {
             };
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseFirstLogin(Activity activity) {
             return response -> {
                 if(response.has(NetworkHelper.Constant.SESSION) && response.has(NetworkHelper.Constant.DATA)){
@@ -841,7 +809,7 @@ public class NetworkHelper {
                         final JSONObject user = data.getJSONObject(NetworkHelper.Constant.USER)
                                                     .put(Constant.ID_USER, Preferences.Session.getIdUser(activity));
 
-                        if(SqlLiteUserDao.create(activity).insert(user)){
+                        if(DaoFactory.getInstance(activity).getUserDao().insert(user)){
                            // TODO: 1/2/2020 DECOMPRESSIONE IMMAGINE E SALVATAGGIO IN image/
                            if(!user.isNull(NetworkHelper.Constant.IMAGE)){
                                final JSONObject image = user.getJSONObject(NetworkHelper.Constant.IMAGE);
@@ -850,9 +818,8 @@ public class NetworkHelper {
                                DecompressionEncodeImageTask.create(activity, name).execute(encode);
                            }
                         }
-                        SqlLiteSettingsDao.create(activity).insert(data.getJSONObject(NetworkHelper.Constant.SETTINGS));
-                        SqlLiteStatisticsDao.SqlLiteWeightDao.create(activity)
-                                                             .insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS)
+                        DaoFactory.getInstance(activity).getSettingDao().insert(data.getJSONObject(NetworkHelper.Constant.SETTINGS));
+                        DaoFactory.getInstance(activity).getWeightDao().insert(data.getJSONArray(NetworkHelper.Constant.WEIGHTS)
                                                                          .getJSONObject(0));
                         //SyncServiceHandler.create(activity).start();
                         activity.startActivity(new Intent(activity, ApplicationActivity.class));
@@ -864,8 +831,6 @@ public class NetworkHelper {
             };
         }
 
-
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private static Response.Listener<JSONObject> onResponseLogin(AppCompatActivity activity, JSONObject credential){
             return response ->{
                 try {
@@ -918,11 +883,11 @@ public class NetworkHelper {
             return response -> {
                 //SyncServiceHandler.create(activity).stop();
                 try {
-                    final JSONObject image = SqlLiteUserDao.SqlLiteImageDao.create(activity).getImage();
+                    final JSONObject image = DaoFactory.getInstance(activity).getImageDao().getImage();
                     if(image!=null)
                         if(ImageFileHelper.create(activity).getImage(image.getJSONObject(Constant.IMAGE).getString(Constant.NAME)).delete())
                             Log.d(TAG, "Image delete from local storage");
-                    if(SqlLiteUserDao.create(activity).delete())
+                    if(DaoFactory.getInstance(activity).getUserDao().delete())
                         Log.d(TAG, "Account delete from local DB");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -957,6 +922,10 @@ public class NetworkHelper {
             };
         }
 
+    }
+
+    public interface OnUpdateGuiListener {
+        void onChangeStateDB();
     }
 
 }

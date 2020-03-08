@@ -15,7 +15,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
@@ -182,7 +182,7 @@ public class ModifyWorkoutActivity extends  CommonActivity{
             }
 
             Log.d(TAG, bodyJson.toString());
-            if(SqlLiteWorkoutDao.create(this).update(bodyJson)){
+            if(DaoFactory.getInstance(this).getWorkoutDao().update(bodyJson)){
                 Preferences.Session.update(this);
 
                 NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,

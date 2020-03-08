@@ -42,7 +42,7 @@ public class SignUpTask extends AsyncTask<Bitmap, Void, String> {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected String doInBackground(Bitmap... bitmaps) {
         Bitmap imageProfile = bitmaps[0];

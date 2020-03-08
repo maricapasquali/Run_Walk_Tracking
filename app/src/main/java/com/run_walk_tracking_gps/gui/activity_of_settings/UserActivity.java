@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
@@ -64,7 +64,7 @@ public class UserActivity extends CommonActivity {
         height = findViewById(R.id.profile_height);
 
         try {
-            setGui(UserBuilder.create(this, SqlLiteUserDao.create(this).getUser()).build());
+            setGui(UserBuilder.create(this, DaoFactory.getInstance(this).getUserDao().getUser()).build());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -74,6 +74,12 @@ public class UserActivity extends CommonActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // TODO: 03/03/2020 CONTROLLARE CHE L'IMMAGINE ESISTA E CHE SIA STATA SCARICATA E DECOMPRESSA CORRETTAMENTE
     }
 
     @Override

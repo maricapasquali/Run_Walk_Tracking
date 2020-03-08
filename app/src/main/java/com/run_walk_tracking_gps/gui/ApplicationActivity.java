@@ -1,9 +1,8 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
+import android.content.ComponentCallbacks2;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,13 +21,11 @@ import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.utilities.PermissionUtilities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-
-import static com.run_walk_tracking_gps.utilities.LocationUtilities.LOCATION_PERMISSION_REQUEST_CODE;
 
 public class ApplicationActivity extends CommonActivity
         implements  WorkoutsFragment.OnWorkOutSelectedListener,
@@ -39,19 +36,18 @@ public class ApplicationActivity extends CommonActivity
 
     public final static String TAG = ApplicationActivity.class.getName();
     //private final static int REQUEST_SETTINGS = 1;
+
     private final static int REQUEST_CHANGED_DETAILS = 2;
     private final static int REQUEST_SUMMARY = 3;
     private final static int REQUEST_NEW_WORKOUT = 4;
     private final static int REQUEST_NEW_WEIGHT = 5;
     private final static int REQUEST_MODIFY_WEIGHT = 6;
 
+
     private BottomNavigationView navigationBarBottom;
-    private Menu menuApp;
 
     private String restore = null;
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
         Log.d(TAG,"init");
@@ -84,8 +80,6 @@ public class ApplicationActivity extends CommonActivity
     protected void listenerAction() {
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setNavigationBarBottom(){
         navigationBarBottom = findViewById(R.id.nav_bar);
 
@@ -118,10 +112,13 @@ public class ApplicationActivity extends CommonActivity
             }
             else
             {
-               if(!(getSupportFragmentManager().findFragmentByTag(TAG) instanceof HomeFragment)){
+               /*if(!(getSupportFragmentManager().findFragmentByTag(TAG) instanceof HomeFragment)){
                    Log.d(TAG, "SYNC In foreground");
                    NetworkHelper.HttpRequest.syncInForeground(this);
-               }
+               }*/
+
+                Log.d(TAG, "SYNC In foreground");
+                NetworkHelper.HttpRequest.syncInForeground(this);
             }
             return true;
         });
@@ -132,7 +129,7 @@ public class ApplicationActivity extends CommonActivity
         super.onNewIntent(intent);
         Log.d(TAG, "New Intent Action = " + intent.getAction());
         if(intent.getAction()!=null) {
-            final Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container_fragments_application);
+            final Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG);
             if (fragment instanceof HomeFragment && ((HomeFragment) fragment).isInWorkout()) {
                 switch (intent.getAction()){
                     case ActionReceiver.STOP_ACTION: {
@@ -168,7 +165,6 @@ public class ApplicationActivity extends CommonActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menuApp = menu;
         getMenuInflater().inflate(R.menu.menu_application, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -249,18 +245,21 @@ public class ApplicationActivity extends CommonActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(TAG, "onRequestPermissionsResult");
         switch (requestCode) {
-            case LOCATION_PERMISSION_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    ((MapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).myLocation(this);
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
+            case PermissionUtilities.LOCATION_PERMISSION_REQUEST_CODE: {
+                PermissionUtilities.onRequestPermissionsResult(grantResults, new PermissionUtilities.OnPermissionListener() {
+                    @Override
+                    public void onGranted() {
+                        ((MapFragment)getSupportFragmentManager().findFragmentById(R.id.map))
+                                .myLocation(ApplicationActivity.this);
+                    }
+
+                    @Override
+                    public void onDenied() {
+                    }
+                });
             }
+            break;
+
         }
     }
 
@@ -305,4 +304,16 @@ public class ApplicationActivity extends CommonActivity
                 break;*/
         }
     }
+
+    @Override
+    public void onTrimMemory(int level) {
+        switch (level){
+            case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                Log.e(TAG, "TRIM_MEMORY_UI_HIDDEN" );
+            break;
+        }
+        super.onTrimMemory(level);
+    }
+
+
 }

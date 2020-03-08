@@ -178,7 +178,7 @@
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
     <string name="token_not_valid">Invalid Session</string>
     <string name="connection_slow">Oops! Slow connection, try again later.</string>
-
+    <string name="internal_server_error">Internal Server Error</string>
 
     <!-- Da non TRADURRE -->
 

@@ -1,7 +1,5 @@
 package com.run_walk_tracking_gps;
 
-import java.util.Base64;
-import com.run_walk_tracking_gps.utilities.NumberUtilities;
 import com.run_walk_tracking_gps.utilities.SessionUtilities;
 
 import org.json.JSONException;
@@ -10,13 +8,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class SessionTokenTest {
 

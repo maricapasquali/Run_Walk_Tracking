@@ -16,7 +16,7 @@ import android.widget.Spinner;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.WorkoutsFilterAdapter;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.FilterAdapterSpinner;
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
@@ -31,19 +31,13 @@ import androidx.fragment.app.Fragment;
 public class WorkoutsFragment extends Fragment {
 
     private static final String TAG = WorkoutsFragment.class.getName();
-
     private Spinner filter;
     private ExpandableListView workoutsViewExpandable;
     private ImageButton addManualWorkout;
-
     private NoValueFragment no_value_fragment;
-
     private WorkoutsFilterAdapter workoutsFilterAdapter;
-
     private OnWorkOutSelectedListener onWorkOutSelectedListener;
     private OnManualAddClickedListener onManualAddClickedListener;
-
-
     private ArrayList<Workout> workouts = new ArrayList<>();
 
     public WorkoutsFragment() {
@@ -54,13 +48,13 @@ public class WorkoutsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.d(TAG, "onAttach");
-
         try {
             onWorkOutSelectedListener = (OnWorkOutSelectedListener) context;
         }
         catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnWorkOutSelectedListener");
         }
+
         try {
             onManualAddClickedListener =(OnManualAddClickedListener)context;
         }
@@ -73,9 +67,8 @@ public class WorkoutsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
-        workouts = Workout.createList(getContext(), SqlLiteWorkoutDao.create(getContext()).getAll());
+        workouts = Workout.createList(getContext(), DaoFactory.getInstance(getContext()).getWorkoutDao().getAll());
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
@@ -158,7 +151,7 @@ public class WorkoutsFragment extends Fragment {
         //SyncServiceHandler.create(getContext()).start();
 
         FilterTime filterTime = (FilterTime) filter.getSelectedItem();
-        workouts = Workout.createList(getContext(), SqlLiteWorkoutDao.create(getContext()).getAll());
+        workouts = Workout.createList(getContext(), DaoFactory.getInstance(getContext()).getWorkoutDao().getAll());
         workoutsFilterAdapter.update(FilterUtilities.createMapWorkouts(workouts, filterTime));
         checkSizeWorkouts();
     }

@@ -1,12 +1,13 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.app.AlarmManager;
+import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-
+import android.graphics.Color;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,20 +16,17 @@ import android.widget.Chronometer;
 import android.widget.RemoteViews;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.SettingsDescriptor;
 import com.run_walk_tracking_gps.model.Measure;
-import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.WorkoutService;
-import com.run_walk_tracking_gps.utilities.NotificationHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class NotificationWorkout {
 
@@ -53,8 +51,6 @@ public class NotificationWorkout {
     private Chronometer chronometer;
     private long timeWhenPaused = 0;
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private NotificationWorkout(Context c){
         this.context = c;
 
@@ -68,7 +64,7 @@ public class NotificationWorkout {
                 getActivity(context, REQUEST_CODE_RESUME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         try {
-            final JSONObject unitMeasureDefault = SqlLiteSettingsDao.create(c).getUnitMeasureDefault();
+            final JSONObject unitMeasureDefault = DaoFactory.getInstance(c).getSettingDao().getUnitMeasureDefault();
             final Measure.Unit distance = Measure.Unit.valueOf(unitMeasureDefault.getString(SettingsDescriptor.UnitMeasureDefault.DISTANCE));
             final Measure.Unit energy = Measure.Unit.valueOf(unitMeasureDefault.getString(SettingsDescriptor.UnitMeasureDefault.ENERGY));
 
@@ -111,15 +107,11 @@ public class NotificationWorkout {
         Intent stopClick = new Intent(context, SplashScreenActivity.class).setAction(ActionReceiver.STOP_ACTION);
         PendingIntent stopPendingClick = PendingIntent.getActivity(context, REQUEST_CODE_STOP, stopClick, 0);
 
-
-
         remoteViewBig.setOnClickPendingIntent(R.id.pause_workout, pausePendingClick);
         remoteViewBig.setOnClickPendingIntent(R.id.stop_workout, stopPendingClick);
         remoteViewBig.setOnClickPendingIntent(R.id.restart_workout, restartPendingClick);
-
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static NotificationWorkout create(Context context){
         return new NotificationWorkout(context);
     }
@@ -128,40 +120,27 @@ public class NotificationWorkout {
         return notificationBuilder.build();
     }
 
-
-    public void updateDistance(String distanceInKm) {
+    public void updateDistanceAndEnergy(String distanceInKm, String energyInKcal) {
         // aggiorno tramite builder il contenuto della notifica
         remoteViewBig.setTextViewText(R.id.distance_workout, distanceInKm);
         remoteViewSmall.setTextViewText(R.id.distance_workout, distanceInKm);
-
-        // invio la notifica aggiornata, per indicare che è sempre la stessa basta usere lo stesso ID di notifica.
-        notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
-    }
-
-    public void updateEnergy(String energyInKcal) {
-        // aggiorno tramite builder il contenuto della notifica
         remoteViewBig.setTextViewText(R.id.calories_workout, energyInKcal);
         remoteViewSmall.setTextViewText(R.id.calories_workout, energyInKcal);
-
         // invio la notifica aggiornata, per indicare che è sempre la stessa basta usere lo stesso ID di notifica.
         notificationHelper.getNotificationManager(context).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    public void startClicked() {
-        timeWhenPaused = 0;
+    public void startClicked(long time) {
+        timeWhenPaused = time;
         chronometer = new Chronometer(context);
         chronometer.setFormat(null);
         long elapsed = SystemClock.elapsedRealtime() - timeWhenPaused;
         chronometer.setBase(elapsed);
         start();
-
-        VoiceCoach.create(context).setAlarmVoice();
     }
-
 
     public void pauseClicked() {
         setVisibleButton(false);
-        VoiceCoach.create(context).cancelAlarmVoice();
 
         long elapsed = SystemClock.elapsedRealtime();
         timeWhenPaused  = elapsed - chronometer.getBase();
@@ -170,21 +149,16 @@ public class NotificationWorkout {
 
     public void restartClicked() {
         setVisibleButton(true);
-        VoiceCoach.create(context).setAlarmVoice();
 
         long elapsed = SystemClock.elapsedRealtime();
         chronometer.setBase(elapsed - timeWhenPaused);
         start();
-
     }
 
     public void stopClicked() {
-        VoiceCoach.create(context).cancelAlarmVoice();
         notificationHelper.getNotificationManager(context).cancel(NOTIFICATION_ID);
         context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
-
-
 
     private void setVisibleButton(final boolean isPause){
         remoteViewBig.setViewVisibility(R.id.restart_workout, isPause ?  View.GONE: View.VISIBLE);
@@ -218,7 +192,7 @@ public class NotificationWorkout {
     }
 
     public long getChronoBase(){
-        return chronometer.getBase();
+        return chronometer!=null ? chronometer.getBase() : SystemClock.elapsedRealtime();
     }
 
 /*
@@ -233,4 +207,39 @@ public class NotificationWorkout {
         setVisibleButton(true);
     }
 */
+
+    private class NotificationHelper {
+
+        private static final String CHANNEL_1 = "Channel_1";
+        private static final String CHANNEL_2 = "Channel_2";
+        private NotificationManager notificationManager;
+
+
+        private NotificationHelper(Context context) {
+            notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            createChannels();
+        }
+
+        @SuppressLint("WrongConstant")
+        private void createChannels() {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_1, "Canale Principale", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel2 = new NotificationChannel(CHANNEL_2, "Canale Secondario", NotificationManager.IMPORTANCE_DEFAULT);
+
+            channel.setDescription("Canale usato per la ricezione delle notifiche generali");
+            channel.setLightColor(Color.BLUE);
+
+            notificationManager.createNotificationChannel(channel);
+            notificationManager.createNotificationChannel(channel2);
+        }
+
+        private NotificationCompat.Builder getNotificationBuilder(Context context, String channelID) {
+            return new NotificationCompat.Builder(context, channelID);
+        }
+
+        private NotificationManagerCompat getNotificationManager(Context context) {
+            return NotificationManagerCompat.from(context);
+        }
+
+    }
+
 }

@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
@@ -21,6 +20,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +32,7 @@ public class Workout implements Parcelable, Cloneable{
     private String map_route = null;
     private Date date;
     private ArrayList<Measure> parameters;
-    private Sport sport;
+    private Sport sport = null;
 
     public Workout(){}
 
@@ -42,12 +42,6 @@ public class Workout implements Parcelable, Cloneable{
         parameters.add(Measure.create(context, Measure.Type.DISTANCE));
         parameters.add(Measure.create(context, Measure.Type.ENERGY));
         parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
-
-        try {
-            sport = Sport.valueOf(SqlLiteSettingsDao.create(context).getSportDefault());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
         setContext(context);
     }
@@ -236,6 +230,23 @@ public class Workout implements Parcelable, Cloneable{
                 .put(NetworkHelper.Constant.DISTANCE, this.getDistance().getValue(true))
                 .put(NetworkHelper.Constant.CALORIES, this.getCalories().getValue(true))
                 .put(NetworkHelper.Constant.SPORT, this.getSport());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Workout workout = (Workout) o;
+        return id_workout == workout.id_workout &&
+                Objects.equals(map_route, workout.map_route) &&
+                Objects.equals(date, workout.date) &&
+                Objects.equals(parameters, workout.parameters) &&
+                sport == workout.sport;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id_workout, map_route, date, parameters, sport);
     }
 
     @Override

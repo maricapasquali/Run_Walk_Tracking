@@ -99,6 +99,7 @@
 
     <!-- MapFragment -->
     <string name="departure">Salida</string>
+    <string name="arrivals">llegada</string>
 
     <!-- Riepilogo / Dettaglio Allenamento -->
 
@@ -133,14 +134,14 @@
     <string name="interval">Intervalo (min)</string>
 
     <!-- Music -->
-    <string name="music"></string>
-    <string name="use_playlist"></string>
-    <string name="rename"></string>
-    <string name="use_like_primary"></string>
-    <string name="preview"></string>
-    <string name="create"></string>
-    <string name="search"></string>
-    <string name="close"></string>
+    <string name="music">Música</string>
+    <string name="use_playlist">Usar Playlist</string>
+    <string name="rename">Rebautizar</string>
+    <string name="use_like_primary">Usar como primaria</string>
+    <string name="preview">Preestreno</string>
+    <string name="create">Crear</string>
+    <string name="search">Buscar</string>
+    <string name="close">Cerrar</string>
     <string name="num_songs">Songs Number</string>
     <string name="date_creation">Creation Date</string>
 
@@ -181,8 +182,7 @@
     <string name="internet_not_available_title">Datos móviles desactivados</string>
     <string name="internet_not_available_mex">Activa la conexión de datos móviles o utiliza la red WI-FI para acceder a los datos.</string>
     <string name="token_not_valid">Sesión inválida</string>
-    <string name="arrivals">llegada</string>
     <string name="connection_slow">¡Uy! Conexión lenta, intente nuevamente más tarde.</string>
-
+    <string name="internal_server_error">Error de servidor interno</string>
 
 </resources>

@@ -24,7 +24,8 @@
   try{
       if(isExpired($_GET[C_KEY])) throw new LinkExpiredException();
   }catch(Exception $e){
-      die(json_errors($e));
+    printf("<pre>%s</pre>", json_errors($e));
+    die();
   }
 ?>
 <!DOCTYPE html>
@@ -153,11 +154,11 @@
              post_ajax_json("../account/password_forgot.php", {username: $("input#username").val(), password: hash_md5_password }, function(data){
                 console.log(data);
                   if(data["Error"]){
-                    error(JSON.stringify(data));
+                    error(JSON.stringify(data, null, "\t"));
                     $("#change_password").removeClass('was-validated');
                     $("input").removeClass("is-valid");
                   }else{
-                    success(JSON.stringify(data));
+                    success(JSON.stringify(data, null, "\t"));
                     $("#change_password").remove();
                 }
               });

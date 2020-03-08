@@ -26,7 +26,7 @@ public class AudioFileHelper {
         contentResolver = context.getContentResolver();
     }
 
-    public static  synchronized AudioFileHelper getInstance(Context context){
+    public static synchronized AudioFileHelper getInstance(Context context){
         if(helper == null)
             helper = new AudioFileHelper(context.getApplicationContext());
         return helper;

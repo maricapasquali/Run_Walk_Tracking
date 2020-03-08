@@ -8,11 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-
 public abstract class CommonActivity extends AppCompatActivity {
 
     private final static String TAG = CommonActivity.class.getName();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +19,18 @@ public abstract class CommonActivity extends AppCompatActivity {
 
         init(savedInstanceState);
         listenerAction();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG,"onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG,"onDestroy");
     }
 
     protected abstract void init(Bundle savedInstanceState);

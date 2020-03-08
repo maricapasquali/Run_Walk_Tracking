@@ -16,7 +16,7 @@ import android.widget.ListPopupWindow;
 import com.google.android.material.textfield.TextInputEditText;
 import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.KeysIntent;
@@ -120,7 +120,7 @@ public class ModifyUserActivity extends CommonActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     private void saveUserChanged(){
         try {
             bodyJson = new JSONObject();
@@ -154,7 +154,7 @@ public class ModifyUserActivity extends CommonActivity {
 
             Log.d(TAG, user + ", count = "+ JSONUtilities.countKey(bodyJson));
 
-            if(SqlLiteUserDao.create(this).update(bodyJson)){
+            if(DaoFactory.getInstance(this).getUserDao().update(bodyJson)){
                 Preferences.Session.update(this);
                 if(imageFileHelper.moveToImageDir(user.getImage().getName())){
                     if(oldUser.getImage()!=null && oldUser.getImage().exists())
@@ -177,7 +177,7 @@ public class ModifyUserActivity extends CommonActivity {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -285,7 +285,7 @@ public class ModifyUserActivity extends CommonActivity {
         take_photo.getImagePiker().handlePermission(requestCode, grantResults);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

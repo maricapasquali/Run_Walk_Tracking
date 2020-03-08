@@ -15,13 +15,13 @@ public interface PlayListDao {
 
     List<Song> getAllSongs(int id_playlist);
 
-    PlayList insert(PlayList playList);
+    boolean insert(PlayList playList); // return boolean
 
     boolean updateName(String name, int id_playlist);
 
     boolean updateUsePrimary(int id_playlist);
 
-    ArrayList<Song> updateSongs(List<Song> songs, int id_playlist);
+    boolean updateSongs(List<Song> songs, int id_playlist); // return boolean
 
     boolean delete(int id_playlist);
 

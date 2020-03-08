@@ -144,8 +144,8 @@ public class Factory {
             super(context);
         }
 
-        public void setTimeInMillSec(long base, long pauseOffSet){
-            super.setBase(base);
+        public void setTimeInMillSec(Long base, long pauseOffSet){
+            if(base!=null) super.setBase(base);
             this.pauseOffSet = pauseOffSet;
         }
 

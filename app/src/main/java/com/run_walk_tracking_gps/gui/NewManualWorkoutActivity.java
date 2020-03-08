@@ -10,7 +10,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
@@ -96,6 +96,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
                             }else{
                                 detail.setText(distanceMeasure.toString());
                                 workout.getDistance().setValue(false, distanceMeasure.getValue(false));
+                                setAutoCalories();
                             }
                             workout.setMiddleSpeed();
                         }).show();
@@ -104,7 +105,8 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
                         EnergyDialog.create(NewManualWorkoutActivity.this, (caloriesMeasure)  -> {
                             if(caloriesMeasure==null){
                                 detail.setText(R.string.no_available_abbr);
-                                workout.getCalories().setValue(true, 0d);
+                                setAutoCalories();
+                                //workout.getCalories().setValue(true, 0d);
                             }else{
                                 detail.setText(caloriesMeasure.toString());
                                 workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
@@ -114,6 +116,14 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
                 }
             }
         };
+    }
+
+    private void setAutoCalories(){
+        if(workout.getCalories().getValue(true)==0){
+            workout.getCalories().setValue(false, workout.getSport()!=null && workout.getDistance().getValue(true)>0 ?
+                                workout.getSport().getConsumedEnergy(DaoFactory.getInstance(this).getWeightDao().getLast(),
+                                                    workout.getDistance().getValue(true)) : 0d);
+        }
     }
 
     @Override
@@ -134,7 +144,7 @@ public class NewManualWorkoutActivity extends NewInformationActivity {
                 bodyJson.put(WorkoutDescriptor.CALORIES, workout.getCalories().getValue(true));
 
 
-            long id_workout = SqlLiteWorkoutDao.create(this).insert(bodyJson);
+            long id_workout = DaoFactory.getInstance(this).getWorkoutDao().insert(bodyJson);
             if(id_workout!=-1){
                 Preferences.Session.update(this);
 

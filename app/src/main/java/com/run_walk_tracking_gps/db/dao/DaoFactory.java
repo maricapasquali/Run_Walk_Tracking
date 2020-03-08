@@ -14,63 +14,40 @@ import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 
-public class DaoFactory extends SQLiteOpenHelper {
+public class DaoFactory extends SQLiteOpenHelper implements Dao {
+
     private static final String TAG = DaoFactory.class.getName();
     private static DaoFactory DaoFactoryInstance = null;
     private static final String DB_NAME = "RUN_WALK_TRACKING_DB.db";
     private static final int DB_VERSION = 4;
+    private Context context;
 
-    /*
-        perchè syncronized? cosa succede se accedo all'istanza da diversi flussi di controllo?
-     */
     public static synchronized DaoFactory getInstance(Context context){
-        if(DaoFactoryInstance ==null){
-            /*
-             * usare il context dell'applicazione (context.getApplicationContext()).
-             * evita memory leak; rimane il riferimento dell'activity anche quando viene chiamata la onDestroy
-             * leggere il seguente articolo per ulteriori info:
-             * http://android-developers.blogspot.nl/2009/01/avoiding-memory-leaks.html)
-             */
+        if(DaoFactoryInstance == null)
             DaoFactoryInstance = new DaoFactory(context.getApplicationContext());
-
-        }
         return DaoFactoryInstance;
-    }
-
-
-    /**
-     * Check if the database exist and can be read.
-     *
-     * @return true if it exists and can be read, false if it doesn't
-     */
-    public static boolean existDatabase(Context context) {
-        return context.getDatabasePath(DB_NAME).exists();
     }
 
     private DaoFactory(Context context){
         super(context, DB_NAME, null, DB_VERSION);
+        this.context = context;
     }
 
-    /** Added for testing over different db */
-    static DaoFactory fromName(Context context, String dbName) {
-        return new DaoFactory(context, dbName, false);
-    }
-
-    private DaoFactory(Context context, String dbName, boolean inMem){
-        super(context, inMem ? null : dbName, null, DB_VERSION);
+    public static boolean existDatabase(Context context) {
+        return context.getDatabasePath(DB_NAME).exists();
     }
 
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
+        Log.d(TAG, "onOpen");
         db.execSQL("PRAGMA FOREIGN_KEYS=ON");
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        //creare qui tutte le tabelle del db
+        Log.d(TAG, "onCreate");
         // CREAZIONE TABELLE
-
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_TABLE_USER);
         sqLiteDatabase.execSQL(ImageProfileDescriptor.CREATE_TABLE_PROFILE_IMAGE);
         sqLiteDatabase.execSQL(SettingsDescriptor.SportDefault.CREATE_TABLE_SPORT_DEFAULT);
@@ -78,7 +55,6 @@ public class DaoFactory extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SettingsDescriptor.UnitMeasureDefault.CREATE_TABLE_UNIT_MEASURE_DEFAULT);
         sqLiteDatabase.execSQL(WeightDescriptor.CREATE_TABLE_WEIGHT);
         sqLiteDatabase.execSQL(WorkoutDescriptor.CREATE_TABLE_WORKOUT);
-
         sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_TABLE_PLAYLIST);
         sqLiteDatabase.execSQL(SongDescriptor.CREATE_TABLE_SONG);
         sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_TABLE_COMPOUND);
@@ -92,35 +68,90 @@ public class DaoFactory extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_USER);
         sqLiteDatabase.execSQL(UserDescriptor.CREATE_INDEX_NAME);
         sqLiteDatabase.execSQL(ImageProfileDescriptor.CREATE_INDEX_IMG);
-
         sqLiteDatabase.execSQL(SettingsDescriptor.SportDefault.CREATE_INDEX);
-
         sqLiteDatabase.execSQL(SettingsDescriptor.TargetDefault.CREATE_INDEX);
-
         sqLiteDatabase.execSQL(SettingsDescriptor.UnitMeasureDefault.CREATE_INDEX);
-
         sqLiteDatabase.execSQL(WeightDescriptor.CREATE_INDEX_WEIGHT);
         sqLiteDatabase.execSQL(WeightDescriptor.CREATE_INDEX_DATE);
-
         sqLiteDatabase.execSQL(WorkoutDescriptor.CREATE_INDEX);
-
-
         sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_INDEX_PLAYLIST);
         sqLiteDatabase.execSQL(PlayListDescriptor.CREATE_INDEX_USER);
         sqLiteDatabase.execSQL(SongDescriptor.CREATE_INDEX_SONG);
         sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_INDEX_COMPOUND);
         sqLiteDatabase.execSQL(CompoundDescriptor.CREATE_INDEX_PLAYLIST);
-
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.e(TAG, "onUpgrade");
+        Log.d(TAG, "onUpgrade");
         if(newVersion > oldVersion){
-            //adatto il db con delle query alla versione richiesta
-            // TODO: 19/02/2020 DELETE TABLE AND TRIGGER 
             onCreate(db);
         }
-
     }
+
+
+    private WorkoutDao workoutDao;
+    private UserDao userDao;
+    private UserDao.ImageDao imageDao;
+    private StatisticsDao statisticsDao;
+    private StatisticsDao.WeightDao weightDao;
+    private SettingsDao settingsDao;
+    private PlayListDao playListDao;
+    private SongDao songDao;
+    private CompoundDao compoundDao;
+
+    @Override
+    public WorkoutDao getWorkoutDao(){
+        if(workoutDao == null) workoutDao = SqlLiteWorkoutDao.create(context, this);
+        return workoutDao;
+    }
+
+    @Override
+    public UserDao getUserDao(){
+        if(userDao == null) userDao = SqlLiteUserDao.create(context, this);
+        return userDao;
+    }
+
+    @Override
+    public UserDao.ImageDao getImageDao(){
+        if(imageDao==null) imageDao = SqlLiteUserDao.SqlLiteImageDao.create(context, this);
+        return imageDao;
+    }
+
+    @Override
+    public StatisticsDao getStatisticsDao(){
+        if(statisticsDao == null) statisticsDao = SqlLiteStatisticsDao.create(context, this);
+        return statisticsDao;
+    }
+
+    @Override
+    public StatisticsDao.WeightDao getWeightDao(){
+        if(weightDao == null) weightDao = SqlLiteStatisticsDao.SqlLiteWeightDao.create(context, this);
+        return weightDao;
+    }
+
+    @Override
+    public SettingsDao getSettingDao(){
+        if(settingsDao == null) settingsDao = SqlLiteSettingsDao.create(context, this);
+        return settingsDao;
+    }
+
+    @Override
+    public PlayListDao getPlayListDao(){
+        if(playListDao == null) playListDao = SqlLitePlayListDao.create(context, this);
+        return playListDao;
+    }
+
+    @Override
+    public SongDao getSongDao(){
+        if(songDao == null) songDao = SqlLiteSongDao.create(context, this);
+        return songDao;
+    }
+
+    @Override
+    public CompoundDao getCompoundDao(){
+        if(compoundDao == null) compoundDao = SqlLiteCompoundDao.create(this);
+        return compoundDao;
+    }
+
 }

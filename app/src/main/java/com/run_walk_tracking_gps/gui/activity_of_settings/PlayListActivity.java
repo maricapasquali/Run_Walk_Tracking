@@ -13,9 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortListView;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLiteCompoundDao;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.SongsAdapter;
@@ -68,7 +66,7 @@ public class PlayListActivity extends CommonActivity {
 
                 Log.d(TAG, "OLD = " + oldPlayList);
                 if(oldPlayList.songs().isEmpty())
-                    oldPlayList.addAll(SqlLitePlayListDao.create(this).getAllSongs(oldPlayList.getId()));
+                    oldPlayList.addAll(DaoFactory.getInstance(this).getPlayListDao().getAllSongs(oldPlayList.getId()));
 
                 newPlayList = oldPlayList.clone();
 
@@ -98,8 +96,11 @@ public class PlayListActivity extends CommonActivity {
                 ImageView finalPView = (ImageView)v;
                 final Song song = (Song)parent.getAdapter().getItem(position);
                 for (int i = 0; i < adapter.getCount(); i++) {
-                    ((ImageView)parent.getChildAt(i).findViewById(R.id.preview))
-                            .setImageDrawable(getDrawable(position == i ? R.drawable.ic_stop : R.drawable.ic_play ));
+                    if((parent.getChildAt(i)!=null))
+                    {
+                        ((ImageView)parent.getChildAt(i).findViewById(R.id.preview))
+                                .setImageDrawable(getDrawable(position == i ? R.drawable.ic_stop : R.drawable.ic_play ));
+                    }
                 }
                 final MediaPlayerHelper mediaPlayerHelper = MediaPlayerHelper.getInstance(PlayListActivity.this);
                 final MediaPlayerHelper.OnStartAndEndPreviewListener listener = new MediaPlayerHelper.OnStartAndEndPreviewListener() {
@@ -128,7 +129,7 @@ public class PlayListActivity extends CommonActivity {
     protected void onResume() {
         super.onResume();
 
-        Log.e("PROVA_", SqlLiteSongDao.create(this).getAll().toString());
+        Log.e("PROVA_", DaoFactory.getInstance(this).getSongDao().getAll().toString());
     }
 
     @Override
@@ -147,7 +148,7 @@ public class PlayListActivity extends CommonActivity {
                            .setHint(R.string.playlist)
                            .setContent(oldPlayList.getName())
                            .setPositiveButton(R.string.ok, text -> {
-                                if(SqlLitePlayListDao.create(this).updateName(text, newPlayList.getId())){
+                                if(DaoFactory.getInstance(this).getPlayListDao().updateName(text, newPlayList.getId())){
                                     newPlayList.setName(text);
                                     getSupportActionBar().setTitle(newPlayList.getName());
                                 }
@@ -161,7 +162,7 @@ public class PlayListActivity extends CommonActivity {
                         .setMessage(R.string.delete_playlist_mex)
                         .setPositiveButton(R.string.delete,
                                 (dialog, which) -> {
-                                    if(SqlLitePlayListDao.create(this).delete(oldPlayList.getId())){
+                                    if(DaoFactory.getInstance(this).getPlayListDao().delete(oldPlayList.getId())){
                                         if(oldPlayList.isUseLikePrimary()) MusicCoach.release();
                                         setResult(RESULT_OK, new Intent().putExtra(KeysIntent.DELETE_PLAYLIST, oldPlayList.getId()));
                                         finish();
@@ -173,7 +174,7 @@ public class PlayListActivity extends CommonActivity {
             }
             break;
             case R.id.use_primary: {
-                if(SqlLitePlayListDao.create(this).updateUsePrimary(newPlayList.getId())){
+                if(DaoFactory.getInstance(this).getPlayListDao().updateUsePrimary(newPlayList.getId())){
                     newPlayList.setUseLikePrimary(true);
                     item.setVisible(false);
                     MusicCoach.release();
@@ -194,7 +195,7 @@ public class PlayListActivity extends CommonActivity {
                 Song item = adapter.getItem(from);
                 adapter.remove(item);
                 adapter.insert(item, to);
-                SqlLiteCompoundDao.create(this).reOrderSong(newPlayList.getId(),  newPlayList.songs());
+                DaoFactory.getInstance(this).getCompoundDao().reOrderSong(newPlayList.getId(),  newPlayList.songs());
                 MusicCoach.release();
 
                 Log.d(TAG, newPlayList.toString());

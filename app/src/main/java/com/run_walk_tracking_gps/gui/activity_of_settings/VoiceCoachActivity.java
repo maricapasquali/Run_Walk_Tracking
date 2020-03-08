@@ -32,7 +32,7 @@ public class VoiceCoachActivity extends CommonActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.vocal_coach);
 
-        voiceCoach = VoiceCoach.create(this);
+        voiceCoach = VoiceCoach.getInstance(this);
 
         useVoiceCoach = findViewById(R.id.vocal_coach_on_off);
         duration = findViewById(R.id.duration_on_off);

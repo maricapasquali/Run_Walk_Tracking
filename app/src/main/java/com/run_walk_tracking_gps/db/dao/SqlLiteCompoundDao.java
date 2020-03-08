@@ -16,21 +16,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SqlLiteCompoundDao implements CompoundDao {
-
-    private static CompoundDao compoundDao;
+class SqlLiteCompoundDao implements CompoundDao {
 
     private DaoFactory daoFactory;
 
-    private SqlLiteCompoundDao(Context context){
-        daoFactory = DaoFactory.getInstance(context);
+    private SqlLiteCompoundDao(DaoFactory daoFactory){
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized CompoundDao create(Context context) {
-        if(compoundDao==null){
-            compoundDao = new SqlLiteCompoundDao(context.getApplicationContext());
-        }
-        return compoundDao;
+    public static CompoundDao create(DaoFactory daoFactory) {
+        return new SqlLiteCompoundDao(daoFactory);
     }
 
     @Override

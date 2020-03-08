@@ -15,7 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.controller.ErrorQueue;
-import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.StatisticsData;
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
@@ -148,7 +148,7 @@ public class StatisticsFragment extends Fragment {
 
     private ArrayList<StatisticsData> getStatistics(Measure.Type measure){
         try {
-            return StatisticsData.createList(getContext(), measure, SqlLiteStatisticsDao.create(getContext()).getAll(measure));
+            return StatisticsData.createList(getContext(), measure, DaoFactory.getInstance(getContext()).getStatisticsDao().getAll(measure));
         } catch (JSONException e) {
             e.printStackTrace();
         }

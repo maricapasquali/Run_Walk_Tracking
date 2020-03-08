@@ -22,7 +22,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.NewPlayListAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
@@ -122,11 +122,9 @@ public abstract class NewSongActivity extends CommonActivity {
             case R.id.add_info:
 
                 if(playList.exist()){
-                    final ArrayList<Song> addSongs =
-                            SqlLitePlayListDao.create(this).updateSongs(playListAdapter.getChosenSong(), playList.getId());
-                    Log.d(TAG, "List songs : " + addSongs);
-
-                    result(!addSongs.isEmpty(), new Intent().putExtra(KeysIntent.LIST_SONG, addSongs));
+                    boolean success = DaoFactory.getInstance(this).getPlayListDao().updateSongs(playListAdapter.getChosenSong(), playList.getId());
+                    Log.d(TAG, "List songs : " + playListAdapter.getChosenSong());
+                    result(success, new Intent().putExtra(KeysIntent.LIST_SONG, new ArrayList<>(playListAdapter.getChosenSong())));
                 }else{
                     final DateHelper dateHelper = DateHelper.create(this);
                     final String date_creation = dateHelper.formatShortDateTimeToString(new Date(dateHelper.getCurrentDate()*1000));
@@ -135,10 +133,9 @@ public abstract class NewSongActivity extends CommonActivity {
                     playList.setName(namePlaylist.getText().toString());
 
                     playList.replaceAll(playListAdapter.getChosenSong());
+                    boolean success = DaoFactory.getInstance(this).getPlayListDao().insert(playList);
                     Log.d(TAG, "Playlist : " + playList);
-
-                    playList = SqlLitePlayListDao.create(this).insert(playList);
-                    result(playList!=null, new Intent().putExtra(KeysIntent.PLAYLIST, playList));
+                    result(success, new Intent().putExtra(KeysIntent.PLAYLIST, playList));
                 }
                 break;
             case android.R.id.home:

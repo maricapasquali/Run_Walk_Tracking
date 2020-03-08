@@ -22,25 +22,20 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SqlLiteStatisticsDao implements StatisticsDao{
+class SqlLiteStatisticsDao implements StatisticsDao{
 
     private static final String TAG = SqlLiteStatisticsDao.class.getName();
-
-    private static StatisticsDao statisticsDao;
 
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLiteStatisticsDao(Context context){
+    private SqlLiteStatisticsDao(Context context, DaoFactory daoFactory){
         this.context=context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized StatisticsDao create(Context context) {
-        if(statisticsDao==null){
-            statisticsDao = new SqlLiteStatisticsDao(context.getApplicationContext());
-        }
-        return statisticsDao; //new SqlLiteStatisticsDao(context.getApplicationContext());
+    public static StatisticsDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLiteStatisticsDao(context.getApplicationContext(), daoFactory);
     }
 
     @Override
@@ -48,7 +43,7 @@ public class SqlLiteStatisticsDao implements StatisticsDao{
         switch (type){
             case WEIGHT:
             {
-                return SqlLiteStatisticsDao.SqlLiteWeightDao.create(context).getAll();
+                return daoFactory.getWeightDao().getAll();
             }
             case DISTANCE:
             {
@@ -93,22 +88,17 @@ public class SqlLiteStatisticsDao implements StatisticsDao{
 
     public static class SqlLiteWeightDao implements StatisticsDao.WeightDao {
 
-        private static WeightDao weightDao;
-
         private Context context;
         private DaoFactory daoFactory;
 
 
-        private SqlLiteWeightDao(Context context){
+        private SqlLiteWeightDao(Context context, DaoFactory daoFactory){
             this.context = context;
-            daoFactory = DaoFactory.getInstance(context);
+            this.daoFactory = daoFactory;
         }
 
-        public static synchronized WeightDao create(Context context) {
-            if(weightDao==null){
-                weightDao = new SqlLiteWeightDao(context.getApplicationContext());
-            }
-            return weightDao; //new SqlLiteStatisticsDao(context.getApplicationContext());
+        public static WeightDao create(Context context, DaoFactory daoFactory) {
+            return new SqlLiteWeightDao(context.getApplicationContext(), daoFactory);
         }
 
         @Override

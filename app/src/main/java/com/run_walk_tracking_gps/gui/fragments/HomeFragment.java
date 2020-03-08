@@ -1,15 +1,12 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -27,8 +24,7 @@ import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
@@ -39,8 +35,10 @@ import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.task.RenderingMapTask;
 import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+import com.run_walk_tracking_gps.utilities.ServiceUtilities;
 
 import org.json.JSONException;
 
@@ -48,14 +46,12 @@ import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
 
-    private static final String TAG ="HomeViewFragment";
+    private static final String TAG = HomeFragment.class.getName();
 
     private static final String RESTORE_VIEW = "restore";
 
@@ -107,7 +103,7 @@ public class HomeFragment extends Fragment {
         restore = (bundle == null ? null : bundle.getString(RESTORE_VIEW));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -117,8 +113,6 @@ public class HomeFragment extends Fragment {
 
         music = rootView.findViewById(R.id.musicCoach);
         voice = rootView.findViewById(R.id.voiceCoach);
-        //music.setImageResource(R.drawable.ic_music_off);
-
 
         start = rootView.findViewById(R.id.start_workout);
         pause = rootView.findViewById(R.id.pause_workout);
@@ -143,7 +137,7 @@ public class HomeFragment extends Fragment {
 
     private void setSport(){
         try {
-            final Sport sport_e = Sport.valueOf(SqlLiteSettingsDao.create(getContext()).getSportDefault());
+            final Sport sport_e = Sport.valueOf(DaoFactory.getInstance(getContext()).getSettingDao().getSportDefault());
             sport.setText(getString(sport_e.getStrId()));
             sport.setCompoundDrawablesWithIntrinsicBounds(
                     ColorUtilities.colorIcon(getContext(), sport_e.getIconId(), sport.getTextColors().getDefaultColor()), null, null, null);
@@ -197,13 +191,17 @@ public class HomeFragment extends Fragment {
         start.setVisibility(View.GONE);
         pause.setVisibility(View.VISIBLE);
 
-        MusicCoach musicCoach = MusicCoach.create(getContext());
+        MusicCoach musicCoach = MusicCoach.getInstance(getContext());
         if(!musicCoach.isEmpty()) {
-            music.setImageResource(musicCoach.isActive() ? R.drawable.ic_music : R.drawable.ic_music_off );
+            music.setImageResource(musicCoach.isActive() ?
+                    R.drawable.ic_music : R.drawable.ic_music_off );
             music.setVisibility(View.VISIBLE);
+        }else{
+            MusicCoach.release();
         }
 
-        voice.setImageResource(VoiceCoach.create(getContext()).isActive() ? R.drawable.ic_voice_coach : R.drawable.ic_voice_coach_off);
+        voice.setImageResource(VoiceCoach.getInstance(getContext()).isActive() ?
+                R.drawable.ic_voice_coach : R.drawable.ic_voice_coach_off);
         voice.setVisibility(View.VISIBLE);
     }
 
@@ -229,7 +227,7 @@ public class HomeFragment extends Fragment {
 
         music.setOnClickListener(v ->{
             FloatingActionButton musicButton = ((FloatingActionButton)v);
-            MusicCoach.create(getContext()).toggleStartAndStop(new MusicCoach.OnStartOrStopListener() {
+            MusicCoach.getInstance(getContext()).toggleStartAndStop(new MusicCoach.OnStartOrStopListener() {
                 @Override
                 public void onStop() {
                     musicButton.setImageResource(R.drawable.ic_music_off);
@@ -245,7 +243,7 @@ public class HomeFragment extends Fragment {
 
         voice.setOnClickListener(v -> {
             FloatingActionButton voiceButton = ((FloatingActionButton)v);
-            VoiceCoach.create(getContext()).toggleActiveAndInActive(new VoiceCoach.OnActiveOrInActiveListener() {
+            VoiceCoach.getInstance(getContext()).toggleActiveAndInActive(new VoiceCoach.OnActiveOrInActiveListener() {
                 @Override
                 public void onActive() {
                     voiceButton.setImageResource(R.drawable.ic_voice_coach);
@@ -258,11 +256,11 @@ public class HomeFragment extends Fragment {
             });
         });
 
-        workout_duration.setOnChronometerTickListener(chronometer -> {
+        /*workout_duration.setOnChronometerTickListener(chronometer -> {
             long time = (SystemClock.elapsedRealtime() - chronometer.getBase()) /1000;
             String timer = Measure.Utilities.format(time);
             Log.d(TAG, "Timer = "+ timer);
-        });
+        });*/
 
         start.setOnClickListener(v ->{
             DelayedStartWorkoutDialog.create(getContext(), () -> {
@@ -271,9 +269,13 @@ public class HomeFragment extends Fragment {
                 try {
                     registerBroadcastReceiver();
                     bindService();
-                    Intent startIntent = new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.START_ACTION)
-                            .putExtra(KeysIntent.WEIGHT_MORE_RECENT, SqlLiteStatisticsDao.SqlLiteWeightDao.create(getContext()).getLast())
-                            .putExtra(KeysIntent.SPORT_DEFAULT, SqlLiteSettingsDao.create(getContext()).getSportDefault());
+
+                    Intent startIntent = new Intent(getContext(), WorkoutService.class)
+                            .setAction(ActionReceiver.START_ACTION)
+                            .putExtra(KeysIntent.WEIGHT_MORE_RECENT,
+                                    DaoFactory.getInstance(getContext()).getWeightDao().getLast())
+                            .putExtra(KeysIntent.SPORT_DEFAULT,
+                                    DaoFactory.getInstance(getContext()).getSettingDao().getSportDefault());
 
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         getContext().startForegroundService(startIntent);
@@ -287,14 +289,13 @@ public class HomeFragment extends Fragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }).show();
-
         });
+
         pause.setOnClickListener(v ->{
             pauseState();
-
-            Intent pauseIntent = new Intent(getContext(), WorkoutService.class).setAction(ActionReceiver.PAUSE_ACTION)
+            Intent pauseIntent = new Intent(getContext(), WorkoutService.class)
+                    .setAction(ActionReceiver.PAUSE_ACTION)
                     //.putExtra(KeysIntent.TIMER, time)
                     .putExtra(KeysIntent.FROM_NOTIFICATION, false);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -303,14 +304,12 @@ public class HomeFragment extends Fragment {
                 getContext().startService(pauseIntent);
             }
             //ContextCompat.startForegroundService(getContext(), pauseIntent);
-
             workout_duration.pause();
         });
+
         restart.setOnClickListener(v ->{
             restartState();
-
             workout_duration.restart();
-
             Intent restartIntent = new Intent(getContext(), WorkoutService.class)
                     .setAction(ActionReceiver.RESTART_ACTION)
                     //.putExtra(KeysIntent.TIMER, time)
@@ -322,6 +321,7 @@ public class HomeFragment extends Fragment {
             }
             //ContextCompat.startForegroundService(getContext(), restartIntent);
         });
+
         stop.setOnClickListener(v ->{
             final Workout workout = myService.getWorkout();
             workout_duration.stop();
@@ -331,28 +331,22 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart");
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-        unBindService();
+        if(isWorkoutServiceRunning())unBindService();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        bindService();
+        if(isWorkoutServiceRunning())bindService();
 
         ErrorQueue.getErrors(getContext());
         //TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
         //SyncServiceHandler.create(getContext()).start();
-        setSport();
+        if(!isWorkoutServiceRunning()) setSport();
         setIndoor(!LocationUtilities.isGpsEnable(getContext()));
         if(getFragmentManager()!=null){
             if(getFragmentManager().findFragmentByTag(TAG) instanceof MapFragment &&
@@ -382,6 +376,7 @@ public class HomeFragment extends Fragment {
         void OnStopWorkoutClick(Workout workout);
     }
 
+
     /* HANDLER SERVICE */
 
     public FloatingActionButton getStop() {
@@ -410,9 +405,10 @@ public class HomeFragment extends Fragment {
                 }
                 else {
                     HomeFragment.this.restartState();
+                    workout_duration.setTimeInMillSec(null, SystemClock.elapsedRealtime() - myService.getChronoBase());
+                    //workout_duration.setTimeInMillSec(null, Preferences.WorkoutInExecution.getDuration(getContext()));
                     workout_duration.restart();
-                    // FIXME : QUANDO L'APPLICAZIONE VIENE CHIUSA E POI RIAPERTA CON LA NOTIFICA : CHRONOMETRO NON SETTATO CORRETTAMENTE
-                    // - SE E' ATTIVO SETTATO (5 - 10 SEC IN MENO)
+                    //  QUANDO L'APPLICAZIONE VIENE CHIUSA E POI RIAPERTA CON LA NOTIFICA : CHRONOMETRO NON SETTATO CORRETTAMENTE
                 }
 
             }
@@ -441,9 +437,12 @@ public class HomeFragment extends Fragment {
 
                 final Workout workout = myService.getWorkout();
                 if(workout!=null){
+
                     workout_distance.setText(workout.getDistance().toString(true));
                     workout_energy.setText(workout.getCalories().toString(true));
-                    renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
+                    //renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
+                    if(LocationUtilities.isGpsEnable(getContext()))
+                        RenderingMapTask.create(getContext(), HomeFragment.this::renderingMap).execute();
                 }
             }
         }
@@ -460,10 +459,10 @@ public class HomeFragment extends Fragment {
     private void registerBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ActionReceiver.DISTANCE_ENERGY_ACTION);
-        intentFilter.addAction(ActionReceiver.DRAWING_MAP_TIMER_ACTION);
+        intentFilter.addAction(ActionReceiver.DRAWING_MAP_ACTION);
         intentFilter.addAction(ActionReceiver.PAUSE_ACTION);
         intentFilter.addAction(ActionReceiver.RESTART_ACTION);
-        intentFilter.addAction(ActionReceiver.STOP_ACTION);
+        //intentFilter.addAction(ActionReceiver.STOP_ACTION);
         if(!isRegister()){
             getContext().registerReceiver(broadcastReceiver, intentFilter);
             isRegister =true;
@@ -487,6 +486,10 @@ public class HomeFragment extends Fragment {
             getContext().unbindService(connection);
             isBound = false;
         }
+    }
+
+    private boolean isWorkoutServiceRunning(){
+        return ServiceUtilities.isServiceRunning(getContext(), WorkoutService.class);
     }
 
     private boolean isBound(){
@@ -516,21 +519,25 @@ public class HomeFragment extends Fragment {
 
                     case ActionReceiver.DISTANCE_ENERGY_ACTION: {
                         final String distance = intent.getStringExtra(KeysIntent.DISTANCE);
-                        final String energyInKcal  = intent.getStringExtra(KeysIntent.ENERGY) ;
+                        final String energyInKcal  = intent.getStringExtra(KeysIntent.ENERGY);
+                        /*final Workout workout = myService.getWorkout();
+                        final String distance = workout.getDistance().toString(true);
+                        final String energyInKcal  = workout.getCalories().toString(true);*/
                         Log.d(TAG, "Distance  = " + distance + ", Energy (kcal) = "+energyInKcal);
                         workout_energy.setText(energyInKcal);
                         workout_distance.setText(distance);
                     }
                     break;
-                    case ActionReceiver.DRAWING_MAP_TIMER_ACTION:
+                    case ActionReceiver.DRAWING_MAP_ACTION:
                        // final PolylineOptions route = intent.getParcelableExtra(KeysIntent.ROUTE);
-                        Log.e(TAG, "Route polyline receive");
+                        Log.d(TAG, "Route polyline receive");
                         //HomeFragment.this.renderingMap(route);
-                        HomeFragment.this.renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
+                        //HomeFragment.this.renderingMap(Preferences.MapLocation.getPolylineOptions(getContext()));
+
+                        RenderingMapTask.create(getContext(), HomeFragment.this::renderingMap).execute();
                         break;
                 }
             }
         }
     }
-
 }

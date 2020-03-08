@@ -38,7 +38,7 @@ public class FileUtilities {
         return file.renameTo(new File(pathImage));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public static boolean deleteDirectoryAndContent(File dir) {
         if(dir.exists()) {
             try {

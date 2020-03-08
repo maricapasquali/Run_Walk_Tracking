@@ -5,25 +5,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.PlayListsAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
 import com.run_walk_tracking_gps.model.PlayList;
-import com.run_walk_tracking_gps.model.builder.PlayListBuilder;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import androidx.annotation.Nullable;
@@ -52,7 +47,7 @@ public class MusicActivity extends CommonActivity {
         create_playlist = findViewById(R.id.create_playlist);
 
         use.setChecked(Preferences.Music.isActive(this));
-        playLists = SqlLitePlayListDao.create(this).getAll();
+        playLists = DaoFactory.getInstance(this).getPlayListDao().getAll();
         playListsAdapter = new PlayListsAdapter(this, playLists);
         playlistView.setAdapter(playListsAdapter);
 

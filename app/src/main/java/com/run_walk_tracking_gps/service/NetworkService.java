@@ -27,26 +27,12 @@ import androidx.annotation.RequiresApi;
 /**
  * Service -> SEND DATA TO SERVER
  */
+
 public class NetworkService extends Service {
 
     private final String TAG = NetworkService.class.getName();
-    //private final IBinder binder = new NetworkService.LocalBinder();
-
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-    /*public class LocalBinder extends Binder {
-        public NetworkService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return NetworkService.this;
-        }
-    }*/
 
     private Context context;
-    //private Response.Listener<JSONObject> responseListener;
-
-    //private ServiceConnection serviceConnection;
 
     @Override
     public void onCreate() {
@@ -54,7 +40,6 @@ public class NetworkService extends Service {
         this.context = getApplicationContext();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Thread threadCUD= new Thread(()->{
@@ -71,12 +56,11 @@ public class NetworkService extends Service {
 
                         data.getJSONObject(NetworkHelper.Constant.IMAGE).put(NetworkHelper.Constant.IMG_ENCODE, encode);
                     }
-                    Log.e(TAG, data.toString());
+                    Log.d(TAG, data.toString());
                     if(intent.getAction()!=null){
 
                         NetworkHelper.HttpRequest.getInstance(context).requestCUD(intent.getAction(), filter , data , response -> {
-                            Log.e(TAG, "Response after "+ intent.getAction() +" : "+ response.toString());
-                            //context.unbindService(serviceConnection);
+                            Log.d(TAG, "Response after "+ intent.getAction() +" : "+ response.toString());
                            NetworkService.this.stopSelf();
                         });
                     }
@@ -95,14 +79,6 @@ public class NetworkService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null; //binder;
+        return null;
     }
-
-    /*public void setResponseListener(Response.Listener<JSONObject> responseListener) {
-        this.responseListener = responseListener;
-    }
-    public void setServiceConnection(ServiceConnection serviceConnection) {
-        this.serviceConnection = serviceConnection;
-    }*/
-
 }

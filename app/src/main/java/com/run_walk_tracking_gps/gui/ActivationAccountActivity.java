@@ -42,7 +42,7 @@ public class ActivationAccountActivity extends CommonActivity {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void listenerAction() {
 

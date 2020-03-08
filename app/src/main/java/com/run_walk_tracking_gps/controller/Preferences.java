@@ -9,16 +9,20 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.db.dao.DaoFactory;
-import com.run_walk_tracking_gps.db.dao.SqlLiteUserDao;
 import com.run_walk_tracking_gps.db.tables.UserDescriptor;
 import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.MapsUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PrimitiveIterator;
 
 public class Preferences {
 
@@ -45,7 +49,7 @@ public class Preferences {
                     .put(NetworkHelper.Constant.TOKEN, session.getString(NetworkHelper.Constant.TOKEN, ""))
                     .put(NetworkHelper.Constant.LAST_UPDATE, session.getLong(NetworkHelper.Constant.LAST_UPDATE, 0))
                     .put(NetworkHelper.Constant.DB_EXIST, DaoFactory.existDatabase(context) &&
-                            SqlLiteUserDao.create(context).getUser()!=null);
+                            DaoFactory.getInstance(context).getUserDao().getUser()!=null);
             Log.d(PREFERENCE_SESSION, "session = " + s);
             return s;
         }
@@ -71,12 +75,7 @@ public class Preferences {
         }
 
         public static void logout(Context context) {
-            final SharedPreferences session = getSharedPreferencesSession(context);
-            session.edit()
-                    .remove(NetworkHelper.Constant.TOKEN)
-                    .remove(NetworkHelper.Constant.LAST_UPDATE)
-                    .remove(NetworkHelper.Constant.ID_USER)
-                    .apply();
+            getSharedPreferencesSession(context).edit().clear().apply();
         }
 
     }
@@ -140,58 +139,79 @@ public class Preferences {
         }
     }
 
-    public static class MapLocation{
-        private static final String PREFERENCE_LOCATION = "map_location";
+    public static class WorkoutInExecution{
+        private static final String TAG = WorkoutInExecution.class.getName();
+        private static final String PREFERENCE_WORKOUT = "workoutInExecution";
 
-        // private static String id = String.valueOf(11);
-        // GETTER SharedPreferences
-        private static SharedPreferences getSharedPreferencesLocation(Context context) {
-            return context.getSharedPreferences(PREFERENCE_LOCATION, Context.MODE_PRIVATE);
+        private static final String DATE = "date";
+        private static final String MILE_STONE_STEP = "milestonestep";
+        private static final String DURATION = Measure.Type.DURATION.toString();
+
+
+        private static SharedPreferences getSharedPreferencesWorkoutInExecution(Context context) {
+            return context.getSharedPreferences(PREFERENCE_WORKOUT, Context.MODE_PRIVATE);
         }
 
-        public static void create(Context context){
-            String id = String.valueOf(Session.getIdUser(context));
-            SharedPreferences ss = getSharedPreferencesLocation(context);
-            if(ss.contains(id) && !ss.getString(id, "").isEmpty())
-               delete(context);
-
-            ss.edit().putString(id, "").apply();
+        public static void setDate(Context context, Date date) {
+            getSharedPreferencesWorkoutInExecution(context).edit().putLong(DATE, date.getTime()).apply();
         }
 
-        public static PolylineOptions getPolylineOptions(Context context){
-            return MapsUtilities.getPolylineOptions(getLocationsEncode(context));
+        public static void setMileStoneStep(Context context, int milestoneStep) {
+            getSharedPreferencesWorkoutInExecution(context).edit().putInt(MILE_STONE_STEP, milestoneStep).apply();
         }
 
-        public static String getLocationsEncode(Context context){
-            String id = String.valueOf(Session.getIdUser(context));
-            return getSharedPreferencesLocation(context).getString(id,"");
+        public static void setDuration(Context context, long duration) {
+            Log.d(TAG, "setDuration = "+duration);
+            getSharedPreferencesWorkoutInExecution(context).edit().putLong(DURATION, duration).apply();
         }
 
-        public static void delete(Context context) {
-            String id = String.valueOf(Session.getIdUser(context));
-            getSharedPreferencesLocation(context).edit().remove(id).apply();
+        public static Date getDate(Context context){
+            SharedPreferences ss = getSharedPreferencesWorkoutInExecution(context);
+            long time = ss.getLong(DATE, -1);
+            return time == -1 ? DateHelper.create(context).getCalendar().getTime() : new Date(time);
         }
 
-        public static void addAll(Context context, List<Location> locations) {
-            SharedPreferences ss = getSharedPreferencesLocation(context);
-            String id = String.valueOf(Session.getIdUser(context));
-            List<LatLng> route = MapsUtilities.decodePolyLine(ss.getString(id,""));
-            locations.forEach(l -> route.add(new LatLng(l.getLatitude(), l.getLongitude())));
-            ss.edit().clear().putString(id, MapsUtilities.encodePolyLine(route)).apply();
-            route.clear();
+        public static int getMileStoneStep(Context context) {
+            SharedPreferences ss = getSharedPreferencesWorkoutInExecution(context);
+            return ss.getInt(MILE_STONE_STEP, 0);
         }
 
-        public static void add(Context context, LatLng location){
-            SharedPreferences ss = getSharedPreferencesLocation(context);
-            String id = String.valueOf(Session.getIdUser(context));
-            List<LatLng> hs = MapsUtilities.decodePolyLine(ss.getString(id,""));
-            hs.add(location);
-            ss.edit().clear().putString(id, MapsUtilities.encodePolyLine(hs)).apply();
+        public static long getDuration(Context context){
+            SharedPreferences ss = getSharedPreferencesWorkoutInExecution(context);
+            return ss.getLong(DURATION, 0);
         }
 
+        public static void clear(Context context){
+            getSharedPreferencesWorkoutInExecution(context).edit().clear().apply();
+        }
 
+        public static boolean inExecution(Context context) {
+            SharedPreferences ss = getSharedPreferencesWorkoutInExecution(context);
+            return ss.contains(MILE_STONE_STEP) && ss.contains(DATE) && ss.contains(MapLocation.MAP_ROUTE);
+        }
+
+        public static class MapLocation{
+
+            private static final String MAP_ROUTE = "map_route";
+
+
+            public static PolylineOptions getPolylineOptions(Context context){
+                return MapsUtilities.getPolylineOptions(getLocationsEncode(context));
+            }
+
+            public static String getLocationsEncode(Context context){
+                return WorkoutInExecution.getSharedPreferencesWorkoutInExecution(context).getString(MAP_ROUTE,"");
+            }
+
+            public static void addAll(Context context, List<Location> locations) {
+                SharedPreferences ss = WorkoutInExecution.getSharedPreferencesWorkoutInExecution(context);
+                List<LatLng> route = new LinkedList<>(MapsUtilities.decodePolyLine(ss.getString(MAP_ROUTE,"")));
+                locations.forEach(l -> route.add(new LatLng(l.getLatitude(), l.getLongitude())));
+                ss.edit().clear().putString(MAP_ROUTE, MapsUtilities.encodePolyLine(route)).apply();
+                route.clear();
+            }
+        }
 
     }
-
 }
 

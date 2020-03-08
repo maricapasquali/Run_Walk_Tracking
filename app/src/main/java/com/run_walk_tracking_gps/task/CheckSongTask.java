@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.dao.SongDao;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
 import com.run_walk_tracking_gps.utilities.AudioFileHelper;
@@ -22,7 +22,7 @@ public class CheckSongTask extends AsyncTask<Void, Void, Boolean> {
 
     private CheckSongTask(Context context){
         audioFileHelper = AudioFileHelper.getInstance(context);
-        songDao = SqlLiteSongDao.create(context);
+        songDao = DaoFactory.getInstance(context).getSongDao();
     }
 
     public static CheckSongTask create(Context context) {

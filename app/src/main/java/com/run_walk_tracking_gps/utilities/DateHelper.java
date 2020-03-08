@@ -25,6 +25,8 @@ public final class DateHelper {
     private static Locale locale;
     private Calendar calendar;
 
+    private static DateHelper helper;
+
     private DateHelper(Context context){
         locale = Language.getLocale(context);
 
@@ -36,8 +38,14 @@ public final class DateHelper {
     }
 
     // TODO: 12/30/2019 UTILIZZARE SYNGLETON (CONTEXT DELL'APPLICAZIONE)
-    public static DateHelper create(Context context){
-        return new DateHelper(context);
+    public static synchronized DateHelper create(Context context){
+        if(helper == null) helper = new DateHelper(context.getApplicationContext());
+        return helper;
+    }
+
+    public static void release(){
+        if(helper!=null)
+            helper = null;
     }
 
     public boolean isIs24Hour(){

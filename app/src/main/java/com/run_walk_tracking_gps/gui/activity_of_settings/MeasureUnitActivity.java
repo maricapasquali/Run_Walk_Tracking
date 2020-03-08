@@ -7,7 +7,7 @@ import android.widget.ListView;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.MeasureAdapter;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.model.Measure;
@@ -41,7 +41,7 @@ public class MeasureUnitActivity extends CommonActivity implements MeasureAdapte
     private LinkedHashMap<Measure.Type, Measure.Unit> getUnitDefaultForUser() throws JSONException {
         final Measure.Type[] typeChangeable = Measure.Type.getMeasureChangeable();
         final LinkedHashMap<Measure.Type, Measure.Unit> map = new LinkedHashMap<>();
-        final JSONObject measure = SqlLiteSettingsDao.create(MeasureUnitActivity.this).getUnitMeasureDefault();
+        final JSONObject measure = DaoFactory.getInstance(MeasureUnitActivity.this).getSettingDao().getUnitMeasureDefault();
         Stream.of(typeChangeable).forEach(type -> {
             try {
                 map.put(type, Measure.Unit.valueOf(measure.getString(type.toString().toLowerCase())));
@@ -59,7 +59,7 @@ public class MeasureUnitActivity extends CommonActivity implements MeasureAdapte
     @Override
     public void onCheckNewMeasure(Measure.Type filter, Measure.Unit unit) {
         Log.d(TAG, "Filter = " + filter + ", value = " + unit);
-        if(SqlLiteSettingsDao.create(this).update(filter, unit.toString())){
+        if(DaoFactory.getInstance(this).getSettingDao().update(filter, unit.toString())){
             Preferences.Session.update(this);
             try {
                 JSONObject data = new JSONObject().put(NetworkHelper.Constant.VALUE, unit.toString());

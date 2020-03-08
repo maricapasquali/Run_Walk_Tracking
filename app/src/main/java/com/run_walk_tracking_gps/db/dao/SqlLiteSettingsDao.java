@@ -20,22 +20,18 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SqlLiteSettingsDao implements SettingsDao {
+class SqlLiteSettingsDao implements SettingsDao {
 
-    private static SettingsDao settingsDao;
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLiteSettingsDao(Context context){
+    private SqlLiteSettingsDao(Context context, DaoFactory daoFactory){
         this.context = context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized SettingsDao create(Context context) {
-        if(settingsDao==null){
-            settingsDao = new SqlLiteSettingsDao(context.getApplicationContext());
-        }
-        return settingsDao; //new SqlLiteSettingsDao(context.getApplicationContext());
+    public static SettingsDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLiteSettingsDao(context.getApplicationContext(), daoFactory);
     }
 
 

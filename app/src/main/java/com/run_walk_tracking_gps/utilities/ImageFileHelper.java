@@ -30,14 +30,22 @@ public class ImageFileHelper {
     private File imageDir;
     private File imageTmpDir;
 
+    private static ImageFileHelper helper;
+
     private ImageFileHelper(Context context){
         this.context = context;
         this.imageDir = FileUtilities.getDirectory(context, IMAGE);
         this.imageTmpDir = FileUtilities.getDirectory(imageDir, TMP);
     }
 
-    public static ImageFileHelper create(Context context){
-        return new ImageFileHelper(context);
+    public static synchronized ImageFileHelper create(Context context){
+        if(helper == null) helper = new ImageFileHelper(context.getApplicationContext());
+        return helper;
+    }
+
+    public static void release(){
+        if(helper!=null)
+            helper = null;
     }
 
     public static String createNameRandom() {
@@ -103,12 +111,10 @@ public class ImageFileHelper {
         return FileUtilities.move(oldImage, getPathTmpImage(newName));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public boolean deleteTmpDir() {
         return FileUtilities.deleteDirectoryAndContent(getDirectoryTmp());
     }
-
-
 
 
     public void load(ImageView container, File image){

@@ -3,35 +3,41 @@ package com.run_walk_tracking_gps.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.utilities.ServiceUtilities;
 
+import org.json.JSONException;
 
-public class ReceiverRestartService  {
+import androidx.core.content.ContextCompat;
 
-    /*
+public class ReceiverRestartService  extends BroadcastReceiver{
 
-    extends BroadcastReceiver
+    private static final String TAG = ReceiverRestartService.class.getName();
+
     public ReceiverRestartService(){}
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        try {
+            if(!ServiceUtilities.isServiceRunning(context, WorkoutService.class)){
+                double weight = DaoFactory.getInstance(context).getWeightDao().getLast();
+                String sport = DaoFactory.getInstance(context).getSettingDao().getSportDefault();
+                Intent intentS =  new Intent(context, WorkoutService.class)
+                        .setAction(ActionReceiver.START_ACTION)
+                        .putExtra(KeysIntent.WEIGHT_MORE_RECENT, weight)
+                        .putExtra(KeysIntent.SPORT_DEFAULT, sport);
+                Log.d(TAG, "ReceiverRestartService = "+ intentS);
 
-        new Thread(()->  {
-            Bundle args = intent.getExtras();
-
-            Intent intentS = new Intent(context, WorkoutService.class)
-                                .setAction(ActionReceiver.START_ACTION)
-                                .putExtra(KeysIntent.WEIGHT_MORE_RECENT, args.getDouble(KeysIntent.WEIGHT_MORE_RECENT))
-                                .putExtra(KeysIntent.SPORT_DEFAULT, args.getString(KeysIntent.SPORT_DEFAULT))
-                                .putExtra(KeysIntent.WORKOUT, (Workout)args.getParcelable(KeysIntent.WORKOUT));
-            Log.d("ReceiverRestartService", "ReceiverRestartService = "+ intentS);
-            context.startService(intent);
-        });
-    }*/
+                ContextCompat.startForegroundService(context, intentS);
+            }else{
+                Log.d(TAG, "JUST STARTED");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

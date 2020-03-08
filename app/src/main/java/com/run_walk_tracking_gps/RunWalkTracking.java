@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 import androidx.annotation.RequiresApi;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
+
 public class RunWalkTracking extends Application {
 
     private static final String TAG = "RunWalkTracking";

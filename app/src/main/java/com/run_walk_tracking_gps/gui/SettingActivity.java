@@ -2,32 +2,29 @@ package com.run_walk_tracking_gps.gui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.ErrorQueue;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSettingsDao;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.MusicActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 import com.run_walk_tracking_gps.gui.activity_of_settings.VoiceCoachActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
-import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
-import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
-import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
@@ -39,8 +36,6 @@ import org.json.JSONObject;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import androidx.annotation.RequiresApi;
 
 public class SettingActivity extends CommonActivity {
 
@@ -97,21 +92,21 @@ public class SettingActivity extends CommonActivity {
         exit = findViewById(R.id.exit);
 
         try {
-            sportDefault = Sport.valueOf(SqlLiteSettingsDao.create(this).getSportDefault());
+            sportDefault = Sport.valueOf(DaoFactory.getInstance(this).getSettingDao().getSportDefault());
             sport.setSelection(Stream.of(Sport.values()).collect(Collectors.toList()).indexOf(sportDefault));
 
-            targetDefault = Target.valueOf(SqlLiteSettingsDao.create(this).getTargetDefault());
+            targetDefault = Target.valueOf(DaoFactory.getInstance(this).getSettingDao().getTargetDefault());
             target.setSelection(Stream.of(Target.values()).collect(Collectors.toList()).indexOf(targetDefault));
 
 
-            coachOnOff.setChecked(VoiceCoach.create(this).isActive());
+            coachOnOff.setChecked(VoiceCoach.getInstance(this).isActive());
             music_on_off.setChecked(Preferences.Music.isActive(this));
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -119,7 +114,7 @@ public class SettingActivity extends CommonActivity {
         // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
         //SyncServiceHandler.create(this).start();
 
-        coachOnOff.setChecked(VoiceCoach.create(this).isActive());
+        coachOnOff.setChecked(VoiceCoach.getInstance(this).isActive());
         music_on_off.setChecked(Preferences.Music.isActive(this));
 
         if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
@@ -148,7 +143,7 @@ public class SettingActivity extends CommonActivity {
 
     private void onChangeSpinnerSelection(Enum type){
 
-        if(SqlLiteSettingsDao.create(this).update(type, type.toString())){
+        if(DaoFactory.getInstance(this).getSettingDao().update(type, type.toString())){
             Preferences.Session.update(this);
 
             try {
@@ -207,7 +202,7 @@ public class SettingActivity extends CommonActivity {
             // TODO: 07/02/2020
             Preferences.Music.setActive(this, isChecked);
         });
-        coachOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> VoiceCoach.create(this).setActive(isChecked));
+        coachOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> VoiceCoach.getInstance(this).setActive(isChecked));
 
         Stream.of(music, coach).forEach(view-> {
             view.setOnTouchListener((v, event) -> {

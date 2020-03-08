@@ -32,6 +32,8 @@ public class VoiceCoach {
     private Context context;
     private TextToSpeech tts;
 
+    private int lastSpeak = 0;
+
     private boolean isActive;
     private int interval;
     private Map<Measure.Type, Boolean> activeFunctions;
@@ -49,29 +51,37 @@ public class VoiceCoach {
         this.voicePendingIntent = PendingIntent.getService(context, REQUEST_CODE_VOICE, voiceIntent,0);
     }
 
-    public static synchronized VoiceCoach create(Context context){
+    public static synchronized VoiceCoach getInstance(Context context){
         if(handler == null)
             handler = new VoiceCoach(context.getApplicationContext());
         return handler;
     }
 
-
-    public void setAlarmVoice(){
-        if(isActive()){
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                    Preferences.VoiceCoach.getInterval(context)*60000, voicePendingIntent);
-        }
+    public static void release(){
+        if(handler!=null) handler = null;
     }
-
-    public void cancelAlarmVoice(){
-        if(isActive()){
-            alarmManager.cancel(voicePendingIntent);
-        }
-    }
-
 
     public void start(){
-        if(this.isActive && tts==null){
+        if(this.isActive){
+            Log.d(WorkoutService.class.getName(), "START VOICE COACH");
+            init();
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis(),
+            this.interval*60000, voicePendingIntent);
+        }
+    }
+
+    public void stop(){
+        if(this.isActive){
+            Log.d(WorkoutService.class.getName(), "STOP VOICE COACH");
+            alarmManager.cancel(voicePendingIntent);
+            releaseTTS();
+            release();
+        }
+    }
+
+    private void init(){
+        if(this.isActive && this.tts==null){
             this.tts = new TextToSpeech(context, status -> {
                 switch (status){
                     case TextToSpeech.SUCCESS:
@@ -80,13 +90,13 @@ public class VoiceCoach {
                             @Override
                             public void onStart(String utteranceId) {
                                 Log.d(TAG, "onStart");
-                                MusicCoach.create(context).downVolume();
+                                MusicCoach.getInstance(context).downVolume();
                             }
 
                             @Override
                             public void onDone(String utteranceId) {
                                 Log.d(TAG, "onDone");
-                                MusicCoach.create(context).restoreVolume();
+                                MusicCoach.getInstance(context).restoreVolume();
                             }
                             @Override
                             public void onError(String utteranceId) {
@@ -99,46 +109,37 @@ public class VoiceCoach {
         }
     }
 
-    public void stop(){
-        if(this.isActive && tts!=null){
+    private void releaseTTS(){
+        if(this.isActive && this.tts!=null){
             tts.stop();
             tts.shutdown();
             tts=null;
         }
     }
 
-    /**
-     *
-     * @param time string of time format ( 00:00:00 )
-     * @return
-     */
     private boolean isNowToSpeak(String time){
-        return  Measure.Utilities.toSeconds(time) >= 60;
+        int timeSec = Measure.Utilities.toSeconds(time);
+        return  lastSpeak + interval*60 <= timeSec ;
     }
 
-    private void speak(CharSequence speak){
-        if(this.isActive)
-            tts.speak(speak, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
-    }
-
-    /**
-     *
-     * @param time
-     * @param distance
-     * @param calories
-     */
-    public void speakIfIsActive(String time, CharSequence distance, CharSequence calories){
+    public void speakIfIsActive(String time, String distance, String calories){
         if(isNowToSpeak(time)){
-            StringBuilder speak = new StringBuilder().append(speakString(Measure.Type.DURATION, time))
-                    .append(speakString(Measure.Type.DISTANCE, distance))
-                    .append(speakString(Measure.Type.ENERGY, calories));
+
+            StringBuilder speak = new StringBuilder()
+                                      .append(speakString(Measure.Type.DURATION, time))
+                                      .append(speakString(Measure.Type.DISTANCE, distance))
+                                      .append(speakString(Measure.Type.ENERGY, calories));
 
             if (speak.length() > 0)
-                speak(speak.toString());
+            {
+                lastSpeak = Measure.Utilities.toSeconds(time);
+                tts.speak(speak.toString(), TextToSpeech.QUEUE_FLUSH,
+                          null, TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
+            }
         }
     }
 
-    private String speakString(Measure.Type type, CharSequence val){
+    private String speakString(Measure.Type type, String val){
         return activeFunctions.get(type) ? this.context.getString(type.getStrId()) + " " + val + ", " :"";
     }
 
@@ -175,15 +176,13 @@ public class VoiceCoach {
 
     public void toggleActiveAndInActive(OnActiveOrInActiveListener onClickActiveListener){
         if(isActive){
-            cancelAlarmVoice();
             stop();
             setActive(false);
-            onClickActiveListener.onInActive();
+            if(onClickActiveListener!=null) onClickActiveListener.onInActive();
         }else{
             setActive(true);
-            setAlarmVoice();
             start();
-            onClickActiveListener.onActive();
+            if(onClickActiveListener!=null) onClickActiveListener.onActive();
         }
     }
 

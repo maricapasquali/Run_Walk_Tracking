@@ -6,20 +6,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
+import android.util.SparseArray;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapRouteDraw {
@@ -29,8 +33,9 @@ public class MapRouteDraw {
     private final Context context;
     private FusedLocationProviderClient fusedLocationClient;
 
-    private static MapRouteDraw handler;
+    private static MapRouteDraw mapRouteDraw;
 
+    private Handler handler;
 
     /* BACKGROUND */
     private static final int REQUEST_LOCATION_BACKGROUND = 0;
@@ -45,46 +50,56 @@ public class MapRouteDraw {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult != null) {
-                Preferences.MapLocation.addAll(context, locationResult.getLocations());
-                onReceiverListener.addPolyLineOnMap(Preferences.MapLocation.getPolylineOptions(context));
+                sendMessage(locationResult.getLocations());
+                /*new Thread(()-> {
+                    Log.d(TAG, "Foreground : Thread name = " + Thread.currentThread().getName()+
+                    ", id ="+Thread.currentThread().getId());
+                    List<Location> locations = locationResult.getLocations();
+                    Log.d(TAG, "Locations = "+ locations);
+                    Preferences.WorkoutInExecution.MapLocation.addAll(context, locations);
+                    onReceiverListener.addPolyLineOnMap();
+                }).start();*/
             }
         }
     };
 
     private MapRouteDraw(Context context) {
         this.context = context;
-
-        Preferences.MapLocation.create(context);
-
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
-    public static MapRouteDraw create(Context context) {
-        return LocationUtilities.isGpsEnable(context) ? new MapRouteDraw(context) : null;
+    public static synchronized MapRouteDraw create(Context context) {
+        boolean gpsEnable = LocationUtilities.isGpsEnable(context.getApplicationContext());
+        if(mapRouteDraw ==null && gpsEnable)
+            mapRouteDraw = new MapRouteDraw(context.getApplicationContext());
+        else if(mapRouteDraw !=null && !gpsEnable) mapRouteDraw = null;
+
+        return mapRouteDraw;
     }
 
+    // TODO : DA RIMUOVERE
     private MapRouteDraw(Context context, OnChangeLocationListener onChangeLocationListener) {
         this(context);
         this.onReceiverListener = onChangeLocationListener;
     }
-
+    // TODO : DA RIMUOVERE
     public static synchronized MapRouteDraw create(Context context, OnChangeLocationListener  onChangeLocationListener) {
         boolean gpsEnable = LocationUtilities.isGpsEnable(context.getApplicationContext());
-        if(handler==null && gpsEnable)
-            handler = new MapRouteDraw(context.getApplicationContext(), onChangeLocationListener);
-        else if(handler!=null && !gpsEnable) handler = null;
+        if(mapRouteDraw ==null && gpsEnable)
+            mapRouteDraw = new MapRouteDraw(context.getApplicationContext(), onChangeLocationListener);
+        else if(mapRouteDraw !=null && !gpsEnable) mapRouteDraw = null;
 
-        return handler; //LocationUtilities.isGpsEnable(context) ? new MapRouteDraw(context, onChangeLocationListener) : null;
+        return mapRouteDraw; //LocationUtilities.isGpsEnable(context) ? new MapRouteDraw(context, onChangeLocationListener) : null;
     }
 
     public void setBackground(boolean isBackground){
         this.isBackground = isBackground;
     }
 
-    public void startDrawing(Looper looper) {
+    public void startDrawing(Handler handler) {
         try {
-
             LocationRequest locationRequest ;
+            this.handler = handler;
             if(isBackground){
                 registerBroadcastReceiver();
                 locationRequest =  LocationUtilities.createLocationRequestBackground();
@@ -99,7 +114,7 @@ public class MapRouteDraw {
 
             }else{
                 locationRequest = LocationUtilities.createLocationRequestForeground();
-                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, looper)
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, handler.getLooper())
                         .addOnFailureListener(e -> { Log.e(TAG, "FOREGROUND: Exception getting location"); e.printStackTrace();});
                 //Toast.makeText(context, "Start LOCATION FOREGROUND", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "START LOCATION FOREGROUND!");
@@ -119,7 +134,6 @@ public class MapRouteDraw {
             else
                 fusedLocationClient.removeLocationUpdates(locationCallback);
 
-
             Log.d(TAG, "STOP LOCATION!");
             //Toast.makeText(context, "STOP LOCATION", Toast.LENGTH_LONG).show();
         }
@@ -131,31 +145,39 @@ public class MapRouteDraw {
         stopDrawing();
     }
 
-    public void restart(Looper looper) {
+    public void restart(Handler handler) {
         Log.d(TAG, "RESTART LOCATION!");
         //Toast.makeText(context, "RESTART LOCATION", Toast.LENGTH_LONG).show();
-        startDrawing(looper);
+        startDrawing(handler);
+    }
+
+    private void sendMessage(List<Location> locations){
+        Message message = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(KeysIntent.ROUTE, new ArrayList<>(locations));
+        message.setData(bundle);
+        handler.sendMessage(message);
     }
 
     public class MapRouteBackgroundReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if(intent!=null && intent.getAction()!=null) {
                 switch (intent.getAction()) {
                     case ActionReceiver.UPDATE_CHANGE_LOCATION:
-                        Log.d(TAG, "Location RECEIVER = "+LocationResult.hasResult(intent));
                         if(LocationResult.hasResult(intent)){
                             LocationResult locationResult = LocationResult.extractResult(intent);
                             if(locationResult!=null){
-                                List<Location> locations = locationResult.getLocations();
-                                Log.d(TAG, "Locations = "+ locations);
-                                Preferences.MapLocation.addAll(context, locations);
-                                Toast.makeText(context, "Locations = " + locations, Toast.LENGTH_SHORT).show();
-                                locations.clear();
+                                sendMessage(locationResult.getLocations());
+
+                               /*new Thread(()-> {
+                                   Log.d(TAG, "Background: Thread name = " + Thread.currentThread().getName()+", id ="+Thread.currentThread().getId());
+                                   List<Location> locations = locationResult.getLocations();
+                                   Log.d(TAG, "Locations = "+ locations);
+                                   Preferences.WorkoutInExecution.MapLocation.addAll(context, locations);
+                               }).start();*/
                             }
                         }
-
                         break;
                 }
             }
@@ -169,7 +191,7 @@ public class MapRouteDraw {
     private void registerBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter(ActionReceiver.UPDATE_CHANGE_LOCATION);
         if(!isRegister()){
-            context.registerReceiver(broadcastReceiver, intentFilter);
+            context.registerReceiver(broadcastReceiver, intentFilter, null, this.handler);
             isRegister =true;
         }
     }
@@ -181,7 +203,8 @@ public class MapRouteDraw {
         }
     }
 
+    // TODO : DA RIMUOVERE
     public interface OnChangeLocationListener{
-        void addPolyLineOnMap(PolylineOptions options); // TODO: 2/15/2020 RIMUOVERE ARGOMENTO
+        void addPolyLineOnMap();
     }
 }

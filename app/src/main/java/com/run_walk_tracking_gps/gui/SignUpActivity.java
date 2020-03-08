@@ -136,7 +136,7 @@ public class SignUpActivity extends CommonActivity
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     public void accessData(JSONObject jsonAccess) {
         try{
@@ -220,9 +220,7 @@ public class SignUpActivity extends CommonActivity
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
-
-                    }
+                   }
         };
     }
 

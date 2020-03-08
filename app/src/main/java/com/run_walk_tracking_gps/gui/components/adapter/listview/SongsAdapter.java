@@ -10,10 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLiteSongDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.model.PlayList;
 import com.run_walk_tracking_gps.model.Song;
-import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -52,7 +51,7 @@ public class SongsAdapter extends ArrayAdapter<Song> {
                                 (dialog, which) -> {
                                     Song song = getItem(position);
 
-                                    if(SqlLiteSongDao.create(getContext()).delete(song.getId(), playList.getId())){
+                                    if(DaoFactory.getInstance(getContext()).getSongDao().delete(song.getId(), playList.getId())){
                                         remove(song);
                                         listener.onClickDeleteSong(song.getId(), isEmpty());
                                     }

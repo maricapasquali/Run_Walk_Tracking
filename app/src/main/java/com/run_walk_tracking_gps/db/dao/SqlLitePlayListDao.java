@@ -26,24 +26,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SqlLitePlayListDao implements PlayListDao {
+class SqlLitePlayListDao implements PlayListDao {
 
     private static final String TAG = SqlLitePlayListDao.class.getName();
 
-    private static PlayListDao playListDao;
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLitePlayListDao(Context context){
+    private SqlLitePlayListDao(Context context, DaoFactory daoFactory){
         this.context = context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized PlayListDao create(Context context) {
-        if(playListDao==null){
-            playListDao = new SqlLitePlayListDao(context.getApplicationContext());
-        }
-        return playListDao;
+    public static PlayListDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLitePlayListDao(context.getApplicationContext(), daoFactory);
     }
 
     @Override
@@ -129,11 +125,10 @@ public class SqlLitePlayListDao implements PlayListDao {
     }
 
     @Override
-    public PlayList insert(PlayList playList){
+    public boolean insert(PlayList playList){
         final SQLiteDatabase db = daoFactory.getWritableDatabase();
-        final AtomicBoolean success = new AtomicBoolean(false);
         return DataBaseUtilities.transaction(db, ()-> {
-
+            boolean success = false;
             final ContentValues playListContentValues = new ContentValues();
             int id_user = Preferences.Session.getIdUser(context);
             playListContentValues.put(UserDescriptor.ID_USER, id_user);
@@ -143,16 +138,14 @@ public class SqlLitePlayListDao implements PlayListDao {
             playListContentValues.put(PlayListDescriptor.DATE_CREATION, playList.getCreationDate());
             playListContentValues.put(PlayListDescriptor.USE_PRIMARY, playList.isUseLikePrimary());
 
-            success.set(db.insert(PlayListDescriptor.TABLE_PLAYLIST, null, playListContentValues) != -1);
-            if(!success.get()) throw  new SQLiteException("Insert PLAYLIST FAIL");
+            success = db.insert(PlayListDescriptor.TABLE_PLAYLIST, null, playListContentValues) != -1;
+            if(!success) throw  new SQLiteException("Insert PLAYLIST FAIL");
             playList.setId(id_playlist);
             // songs
-            success.set(insertAllSongs(db, playList.songs()));
+            success = insertAllSongs(db, playList.songs());
             // compound
-            success.set(insertAllCompound(db, id_playlist, playList.songs()));
-
-           return success.get();
-        }) ? playList : null;
+           return success && insertAllCompound(db, id_playlist, playList.songs());
+        });
     }
 
     @Override
@@ -198,9 +191,10 @@ public class SqlLitePlayListDao implements PlayListDao {
     }
 
     @Override
-    public ArrayList<Song> updateSongs(List<Song> songs, int id_playlist) {
+    public boolean updateSongs(List<Song> songs, int id_playlist) {
         final SQLiteDatabase db = daoFactory.getWritableDatabase();
-        DataBaseUtilities.transaction(db, ()->{
+        return DataBaseUtilities.transaction(db, ()->{
+
             insertAllSongs(db, songs);
             Log.d(TAG, songs.toString());
             // TODO: 12/02/2020 MIGLIORARE
@@ -214,7 +208,6 @@ public class SqlLitePlayListDao implements PlayListDao {
 
             return insertAllCompound(db, id_playlist, newOrderSong);
         });
-        return new ArrayList<>(songs);
     }
 
     @Override

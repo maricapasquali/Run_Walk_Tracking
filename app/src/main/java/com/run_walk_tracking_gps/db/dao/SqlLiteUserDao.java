@@ -21,23 +21,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SqlLiteUserDao implements UserDao {
+class SqlLiteUserDao implements UserDao {
 
     private static final String TAG = SqlLiteUserDao.class.getName();
-    private static UserDao userDao;
+
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLiteUserDao(Context context){
+    private SqlLiteUserDao(Context context, DaoFactory daoFactory){
         this.context = context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized UserDao create(Context context) {
-        if(userDao==null){
-            userDao = new SqlLiteUserDao(context.getApplicationContext());
-        }
-        return userDao; //new SqlLiteUserDao(context.getApplicationContext());
+    public static UserDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLiteUserDao(context.getApplicationContext(), daoFactory);
     }
 
     @Override
@@ -48,7 +45,7 @@ public class SqlLiteUserDao implements UserDao {
                 new String[]{String.valueOf(Preferences.Session.getIdUser(context))})) {
             user =  (!c.moveToFirst()) ? null : UserDescriptor.from(c);
         }
-        final JSONObject image = SqlLiteUserDao.SqlLiteImageDao.create(context).getImage();
+        final JSONObject image = daoFactory.getImageDao().getImage();
 
         return image==null ? user : JSONUtilities.merge(user, image);
     }
@@ -67,8 +64,8 @@ public class SqlLiteUserDao implements UserDao {
         userContentValues.put(UserDescriptor.HEIGHT, user.getDouble(UserDescriptor.HEIGHT));
 
         return DataBaseUtilities.replace(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER, userContentValues)
-                && ( user.isNull(NetworkHelper.Constant.IMAGE) ? SqlLiteUserDao.SqlLiteImageDao.create(context).delete() :
-                SqlLiteUserDao.SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE)));
+                && ( user.isNull(NetworkHelper.Constant.IMAGE) ? daoFactory.getImageDao().delete() :
+                daoFactory.getImageDao().save(user.getJSONObject(NetworkHelper.Constant.IMAGE)));
     }
 
     @Override
@@ -103,7 +100,7 @@ public class SqlLiteUserDao implements UserDao {
         }
 
         if(user.has(NetworkHelper.Constant.IMAGE)){
-            success = SqlLiteUserDao.SqlLiteImageDao.create(context).save(user.getJSONObject(NetworkHelper.Constant.IMAGE));
+            success = daoFactory.getImageDao().save(user.getJSONObject(NetworkHelper.Constant.IMAGE));
         }
 
         return success;
@@ -118,23 +115,19 @@ public class SqlLiteUserDao implements UserDao {
         return DataBaseUtilities.delete(daoFactory.getWritableDatabase(), UserDescriptor.TABLE_USER, whereCondition);
     }
 
-    public static class SqlLiteImageDao implements UserDao.ImageDao {
+    static class SqlLiteImageDao implements UserDao.ImageDao {
 
         private static final String TAG = SqlLiteImageDao.class.getName();
-        private static UserDao.ImageDao imageDao;
         private Context context;
         private DaoFactory daoFactory;
 
-        private SqlLiteImageDao(Context context){
+        private SqlLiteImageDao(Context context, DaoFactory daoFactory){
             this.context = context;
-            daoFactory = DaoFactory.getInstance(context);
+            this.daoFactory = daoFactory;
         }
 
-        public static synchronized UserDao.ImageDao  create(Context context) {
-            if(imageDao==null){
-                imageDao = new SqlLiteImageDao(context.getApplicationContext());
-            }
-            return imageDao;
+        public static UserDao.ImageDao  create(Context context, DaoFactory daoFactory) {
+            return new SqlLiteImageDao(context.getApplicationContext(), daoFactory);
         }
 
         @Override

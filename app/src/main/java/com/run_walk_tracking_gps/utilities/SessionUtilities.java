@@ -1,7 +1,5 @@
 package com.run_walk_tracking_gps.utilities;
 
-import android.os.Build;
-
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 
 import org.json.JSONObject;
@@ -14,21 +12,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import androidx.annotation.RequiresApi;
-
 public class SessionUtilities {
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static final Base64.Encoder encoder = Base64.getEncoder();
+    private static final Base64.Decoder decoder = Base64.getDecoder();
+
     private static String encode(Object i){
-        return Base64.getEncoder().encodeToString(Base64.getEncoder().encode(String.valueOf(i).getBytes()));
+        return encoder.encodeToString(encoder.encode(String.valueOf(i).getBytes()));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private static String decode(Object i){
-        return new String(Base64.getDecoder().decode(Base64.getDecoder().decode(String.valueOf(i).getBytes())));
+        return new String(decoder.decode(decoder.decode(String.valueOf(i).getBytes())));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String getEncodedSession(int id_user_value, String token_value, long last_update_value, String device_value ){
 
         String id_user = encode(id_user_value);
@@ -41,8 +37,6 @@ public class SessionUtilities {
         return encode(session_string);
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static JSONObject getDecodedSession(String encodeSession) {
         String session_string = decode(encodeSession);
         String[] tmp_session_value = session_string.split("\\.");

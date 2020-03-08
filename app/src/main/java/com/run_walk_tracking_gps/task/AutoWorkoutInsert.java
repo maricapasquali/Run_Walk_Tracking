@@ -3,7 +3,7 @@ package com.run_walk_tracking_gps.task;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.DetailsWorkoutActivity;
 
 import org.json.JSONException;
@@ -28,7 +28,7 @@ public class AutoWorkoutInsert extends AsyncTask<JSONObject, Void, Long> {
     @Override
     protected Long doInBackground(JSONObject... jsonObjects) {
         try {
-            return SqlLiteWorkoutDao.create(context).insert(jsonObjects[0]);
+            return DaoFactory.getInstance(context).getWorkoutDao().insert(jsonObjects[0]);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -38,7 +38,7 @@ public class AutoWorkoutInsert extends AsyncTask<JSONObject, Void, Long> {
     @Override
     protected void onPostExecute(Long aLong) {
         super.onPostExecute(aLong);
-        if(aLong!=-1){
+        if(aLong!=-1L){
             onInsertAutoWorkoutListener.onSuccess(aLong);
         }else{
             onInsertAutoWorkoutListener.onFail();

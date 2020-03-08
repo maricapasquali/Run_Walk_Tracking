@@ -23,24 +23,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SqlLiteSongDao implements SongDao {
+class SqlLiteSongDao implements SongDao {
 
     private String TAG = SqlLiteSongDao.class.getName();
 
-    private static SongDao songDao;
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLiteSongDao(Context context){
+    private SqlLiteSongDao(Context context, DaoFactory daoFactory){
         this.context = context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized SongDao create(Context context) {
-        if(songDao==null){
-            songDao = new SqlLiteSongDao(context.getApplicationContext());
-        }
-        return songDao;
+    public static SongDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLiteSongDao(context.getApplicationContext(), daoFactory);
     }
 
     @Override
@@ -119,7 +115,7 @@ public class SqlLiteSongDao implements SongDao {
 
         Log.d(TAG, "NUM SONG = " + num_song);
         if(num_song.get() ==0)
-            SqlLitePlayListDao.create(context).delete(id_playlist);
+            daoFactory.getPlayListDao().delete(id_playlist);
 
         return true;
     }

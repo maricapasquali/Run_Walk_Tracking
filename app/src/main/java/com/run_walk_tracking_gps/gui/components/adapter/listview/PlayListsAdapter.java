@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.components.dialog.InputDialog;
 import com.run_walk_tracking_gps.model.MusicCoach;
 import com.run_walk_tracking_gps.model.PlayList;
@@ -117,7 +117,7 @@ public class PlayListsAdapter extends BaseAdapter {
                             .setPositiveButton(R.string.ok, text -> {
 
                                 PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
-                                if (SqlLitePlayListDao.create(context).updateName(text, p.getId())) {
+                                if (DaoFactory.getInstance(context).getPlayListDao().updateName(text, p.getId())) {
                                     p.setName(text);
                                     notifyDataSetChanged();
                                     Log.d(TAG, p.toString());
@@ -135,7 +135,7 @@ public class PlayListsAdapter extends BaseAdapter {
                             .setPositiveButton(R.string.delete,
                                     (dialog, which) -> {
                                         PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
-                                        if(SqlLitePlayListDao.create(context).delete(p.getId())){
+                                        if(DaoFactory.getInstance(context).getPlayListDao().delete(p.getId())){
                                             remove(p.getId());
                                             if(p.isUseLikePrimary()) MusicCoach.release();
                                         }
@@ -149,7 +149,7 @@ public class PlayListsAdapter extends BaseAdapter {
                 case R.id.use_primary: {
 
                     PlayList p = ((Map.Entry<Integer, PlayList>) getItem(position)).getValue();
-                    if(SqlLitePlayListDao.create(context).updateUsePrimary(p.getId())){
+                    if(DaoFactory.getInstance(context).getPlayListDao().updateUsePrimary(p.getId())){
                         playlists.entrySet().forEach(e -> e.getValue().setUseLikePrimary(false));
                         p.setUseLikePrimary(true);
                         notifyDataSetChanged();

@@ -11,7 +11,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteStatisticsDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
@@ -69,7 +69,7 @@ public class ModifyWeightActivity extends NewInformationActivity {
                             bodyJson.put(WeightDescriptor.DATE, statisticsData.getDateStrDB());
                         }
                         Log.e(TAG, bodyJson.toString());
-                        if(SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).update(bodyJson)) {
+                        if(DaoFactory.getInstance(this).getWeightDao().update(bodyJson)) {
                             Preferences.Session.update(this);
 
                             NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
@@ -94,7 +94,7 @@ public class ModifyWeightActivity extends NewInformationActivity {
                     new AlertDialog.Builder(this)
                             .setMessage(R.string.delete_weight_mex)
                             .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                if(SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).delete(statisticsData.getId())){
+                                if(DaoFactory.getInstance(this).getWeightDao().delete(statisticsData.getId())){
                                     Preferences.Session.update(this);
 
 
@@ -138,7 +138,7 @@ public class ModifyWeightActivity extends NewInformationActivity {
                 adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString(), onSetInfo());
                 statisticsData = oldStatisticsData.clone();
             }
-            isLastWeight = SqlLiteStatisticsDao.SqlLiteWeightDao.create(this).isOne();
+            isLastWeight = DaoFactory.getInstance(this).getWeightDao().isOne();
         }
         return adapter ;
     }

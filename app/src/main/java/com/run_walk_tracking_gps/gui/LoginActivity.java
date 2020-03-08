@@ -1,14 +1,11 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
@@ -24,11 +21,7 @@ import org.json.JSONObject;
 
 import java.util.stream.Stream;
 
-import androidx.annotation.RequiresApi;
-
-public class LoginActivity extends CommonActivity
-        //implements  Response.Listener<JSONObject>
-{
+public class LoginActivity extends CommonActivity {
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -51,7 +44,7 @@ public class LoginActivity extends CommonActivity
         login = findViewById(R.id.login);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void listenerAction() {
 
@@ -104,7 +97,7 @@ public class LoginActivity extends CommonActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        NetworkHelper.HttpRequest.cancelAllRequestPending(bodyJson);
+        NetworkHelper.cancelAllRequestPending(bodyJson);
     }
 
     private boolean check(Editable user, Editable pass){

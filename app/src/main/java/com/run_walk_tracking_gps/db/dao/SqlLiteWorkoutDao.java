@@ -20,23 +20,19 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SqlLiteWorkoutDao implements WorkoutDao {
+class SqlLiteWorkoutDao implements WorkoutDao {
 
     private static final String TAG = SqlLiteWorkoutDao.class.getName();
-    private static WorkoutDao workoutDao;
     private Context context;
     private DaoFactory daoFactory;
 
-    private SqlLiteWorkoutDao(Context context){
+    private SqlLiteWorkoutDao(Context context, DaoFactory daoFactory){
         this.context = context;
-        daoFactory = DaoFactory.getInstance(context);
+        this.daoFactory = daoFactory;
     }
 
-    public static synchronized WorkoutDao create(Context context) {
-        if(workoutDao==null){
-            workoutDao = new SqlLiteWorkoutDao(context.getApplicationContext());
-        }
-        return workoutDao; //new SqlLiteWorkoutDao(context.getApplicationContext());
+    public static WorkoutDao create(Context context, DaoFactory daoFactory) {
+        return new SqlLiteWorkoutDao(context.getApplicationContext(), daoFactory);
     }
 
     @Override
@@ -94,8 +90,8 @@ public class SqlLiteWorkoutDao implements WorkoutDao {
         workoutContentValues.put(WorkoutDescriptor.DATE, workout.getString(WorkoutDescriptor.DATE));
         workoutContentValues.put(WorkoutDescriptor.SPORT, workout.getString(WorkoutDescriptor.SPORT));
         workoutContentValues.put(WorkoutDescriptor.DURATION, workout.getInt(WorkoutDescriptor.DURATION));
-
-        workoutContentValues.put(WorkoutDescriptor.MAP_ROUTE, workout.optString(WorkoutDescriptor.MAP_ROUTE));
+        if(!workout.isNull(WorkoutDescriptor.MAP_ROUTE))
+            workoutContentValues.put(WorkoutDescriptor.MAP_ROUTE, workout.getString(WorkoutDescriptor.MAP_ROUTE));
         workoutContentValues.put(WorkoutDescriptor.DISTANCE, workout.optDouble(WorkoutDescriptor.DISTANCE, 0));
         workoutContentValues.put(WorkoutDescriptor.CALORIES, workout.optDouble(WorkoutDescriptor.CALORIES, 0));
 

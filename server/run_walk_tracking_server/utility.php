@@ -1,6 +1,6 @@
 <?php
-//define("_SERVER_", "https://runwalktracking.000webhostapp.com/");
-define("_SERVER_", "http://192.168.1.132/run_walk_tracking_server/");
+define("_SERVER_", "https://runwalktracking.000webhostapp.com/");
+//define("_SERVER_", "http://192.168.1.132/run_walk_tracking_server/");
 
 define("APP_NAME", "Run/Walk Tracking");
 
@@ -99,8 +99,9 @@ function cast($strNum) {
 }
 
 function getEncodedSession($session){
-  return encode(implode(SEPARATOR, array(encode($session[ID_USER]), encode($session[TOKEN]),
-                                         encode($session[LAST_UPDATE]), encode($session[DEVICE]))));
+  return encode(implode(SEPARATOR,
+                  array(encode($session[ID_USER]), encode($session[TOKEN]),
+                        encode($session[LAST_UPDATE]), encode($session[DEVICE]))));
 }
 
 function getDecodedSession($token_session){
@@ -129,6 +130,8 @@ function formatDate($date){
 }
 
 function date_end_validity_link(){
+  //return date('Y-m-d H:i:s',strtotime('+30 minutes',strtotime(current_datetime())));
+
   return date('Y-m-d H:i:s',strtotime('+24 hours',strtotime(current_datetime())));
 }
 
@@ -146,7 +149,7 @@ function docHtml($url){
 //define('_EMAIL_REDIRECT_', 'marica.alex097@gmail.com');
 define('_EMAIL_REDIRECT_', 'email_redirect@localhost.com');
 function sendEmail($to_email, $subject, $body){
-     $to_email = _EMAIL_REDIRECT_; // TODO: COMMENTARE QUESTA RIGA o MOFICARE _EMAIL_REDIRECT_
+     //$to_email = _EMAIL_REDIRECT_; // TODO: COMMENTARE QUESTA RIGA o MOFICARE _EMAIL_REDIRECT_
      $headers = "Content-Type: text/html; charset=ISO-8859-1\r\n";
   	 error_reporting(E_ERROR | E_PARSE);
   	 $success = mail($to_email, APP_NAME ." - " . $subject, $body, $headers);

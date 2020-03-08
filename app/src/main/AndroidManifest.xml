@@ -6,34 +6,23 @@
 
     <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
 
-
-    <!-- Permission for map -->
-    <permission
-        android:name="com.run_walk_tracking_gps.permission.MAPS_RECEIVE" android:protectionLevel="signature" />
-    <uses-permission
-        android:name="com.run_walk_tracking_gps.permission.MAPS_RECEIVE"/>
+    <!-- Permission to FOREGROUND SERVICE -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Permission Position  -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> 
 
+    <!-- Feature SENSOR (distance) -->
+    <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
 
-    <!-- Permissions to Take or Write image /Audio-->
+    <!-- Permissions to Take or Write image /Audio, Android ID-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Permissions to speech with server -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-
-    <!-- Permission to FOREGROUND SERVICE -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-
-    <!-- Feature SENSOR (distance) -->
-    <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
 
 
     <application
@@ -73,7 +62,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <activity
             android:name=".gui.BootAppActivity"
             android:screenOrientation="portrait"
@@ -170,6 +159,8 @@
         <service android:name=".service.WorkoutService" />
 
         <!-- RECEIVER -->
+
+        <receiver android:name=".receiver.ReceiverRestartService" />
 
         <!--<receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
             android:exported="false">

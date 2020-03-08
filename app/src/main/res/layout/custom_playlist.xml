@@ -36,7 +36,7 @@
                 android:singleLine="true"
                 android:text="TextView"
                 android:textAlignment="viewStart"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="18sp" />
 
             <TextView
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textAlignment="viewStart"
-                android:textColor="@color/white" />
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <ImageView

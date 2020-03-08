@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLitePlayListDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.utilities.MediaPlayerHelper;
 
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ public class MusicCoach {
     private static MusicCoach handler;
 
     private Context context;
+    private boolean isActive;
     private int songPlaying = 0;
     private ArrayList<Song> songs = new ArrayList<>();
     private MediaPlayerHelper mediaPlayerHelper;
@@ -24,22 +25,26 @@ public class MusicCoach {
     private MusicCoach(Context context){
         this.context = context;
         this.resetPrimaryPlayList();
-        this.mediaPlayerHelper = MediaPlayerHelper.getInstance(context);
+        this.isActive = Preferences.Music.isActive(context);
+        this.mediaPlayerHelper = MediaPlayerHelper.getInstance(context, true);
         this.mediaPlayerHelper.setOnCompleteSong(mp -> {
-            this.songPlaying = (songPlaying+1)%songs.size();
-            this.stop();
+            this.songPlaying = (songPlaying + 1)%songs.size();
+            this.mediaPlayerHelper.reset();
             this.next();
         });
     }
 
-    public static MusicCoach create(Context context){
+    public static synchronized MusicCoach getInstance(Context context){
         if(handler == null)
             handler = new MusicCoach(context.getApplicationContext());
         return handler;
     }
 
     public static void release(){
-        if(handler != null) handler = null;
+        if(handler != null) {
+            handler = null;
+            MediaPlayerHelper.release();
+        }
     }
 
     public void toggleStartAndStop(OnStartOrStopListener onStartOrStopListener) {
@@ -47,47 +52,60 @@ public class MusicCoach {
             if (this.mediaPlayerHelper.isPlaying()) {
                 this.stop();
                 setActive(false);
-                onStartOrStopListener.onStop();
-
+                if(onStartOrStopListener!=null) onStartOrStopListener.onStop();
             } else {
                 setActive(true);
                 this.start();
-                onStartOrStopListener.onStart();
+                if(onStartOrStopListener!=null) onStartOrStopListener.onStart();
             }
         }else{
             setActive(true);
             this.start();
-            onStartOrStopListener.onStart();
+            if(onStartOrStopListener!=null) onStartOrStopListener.onStart();
         }
+    }
+
+    private void next() {
+        this.mediaPlayerHelper.startMedia(this.songs.get(songPlaying).getPath());
+        Log.d(TAG, "Index =" + songPlaying + ", Song = " + songs.get(songPlaying));
     }
 
     public void start(){
         if(this.isActive()) {
-            Log.d(TAG, "START");
+            Log.d(TAG, "START MUSIC COACH");
             this.next();
+        }else{
+            release();
         }
     }
 
     public void stop(){
         if(this.isActive()) {
             this.mediaPlayerHelper.stopMedia();
-            Log.d(TAG, "STOP");
+            Log.d(TAG, "STOP MUSIC COACH");
+        }else{
+            release();
         }
     }
 
-    public void setActive(boolean isActive){
+    private void setActive(boolean isActive){
         Preferences.Music.setActive(context,isActive);
+        this.isActive = isActive;
     }
 
     public void downVolume() {
         if(this.isActive()){
             mediaPlayerHelper.downVolume(DOWN_VOLUME_DEFAULT);
+        }else{
+            release();
         }
     }
 
     public void restoreVolume() {
         if(this.isActive()){
-            mediaPlayerHelper.restoreVolume();
+            this.mediaPlayerHelper.restoreVolume();
+        }else{
+            release();
         }
     }
 
@@ -96,22 +114,19 @@ public class MusicCoach {
     }
 
     public boolean isActive(){
-        return Preferences.Music.isActive(context) && !isEmpty();
+        return this.isActive && !isEmpty();
     }
 
     public boolean isEmpty() {
-        return songs.isEmpty();
+        return this.songs.isEmpty();
     }
 
     private void resetPrimaryPlayList(){
         this.songs.clear();
-        this.songs.addAll(SqlLitePlayListDao.create(context).getSongsFromPrimaryPlayList());
+        this.songs.addAll(DaoFactory.getInstance(context)
+                                    .getPlayListDao()
+                                    .getSongsFromPrimaryPlayList());
         Log.d(TAG, "Songs = " + this.songs);
-    }
-
-    private void next() {
-        this.mediaPlayerHelper.startMedia(this.songs.get(songPlaying).getPath());
-        Log.d(TAG, "Index =" + songPlaying + ", Song = " + songs.get(songPlaying));
     }
 
     public interface OnStartOrStopListener{

@@ -35,7 +35,7 @@ public class BootAppActivity extends CommonActivity {
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void onResume() {
         super.onResume();

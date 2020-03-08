@@ -17,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.controller.Preferences;
-import com.run_walk_tracking_gps.db.dao.SqlLiteWorkoutDao;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
@@ -67,6 +67,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
             Log.d(TAG, workout.toString());
 
             setMapView();
+            Preferences.WorkoutInExecution.clear(this);
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -90,8 +91,8 @@ public class DetailsWorkoutActivity extends  CommonActivity{
     private void setMapView(){
         PolylineOptions mapRoute;
         if(workout.getMapRoute()==null) {
-            mapRoute = Preferences.MapLocation.getPolylineOptions(this.getApplicationContext());
-            workout.setMapRoute(Preferences.MapLocation.getLocationsEncode(this.getApplicationContext()));
+            mapRoute = Preferences.WorkoutInExecution.MapLocation.getPolylineOptions(this.getApplicationContext());
+            workout.setMapRoute(Preferences.WorkoutInExecution.MapLocation.getLocationsEncode(this.getApplicationContext()));
         }else{
             mapRoute = MapsUtilities.getPolylineOptions(workout.getMapRoute());
         }
@@ -104,7 +105,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
         }else {
             findViewById(R.id.summary_map).setVisibility(View.GONE);
         }
-        Preferences.MapLocation.delete(this.getApplicationContext());
+        //Preferences.MapLocation.delete(this.getApplicationContext());
     }
 
 
@@ -141,7 +142,7 @@ public class DetailsWorkoutActivity extends  CommonActivity{
                             if(isSummary)
                                 setResult(RESULT_CANCELED, new Intent());
                             else {
-                                if(SqlLiteWorkoutDao.create(this).delete(workout.getIdWorkout())){
+                                if(DaoFactory.getInstance(this).getWorkoutDao().delete(workout.getIdWorkout())){
                                     Preferences.Session.update(this);
 
                                     try {

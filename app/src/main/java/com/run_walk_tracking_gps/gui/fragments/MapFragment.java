@@ -1,9 +1,7 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +24,7 @@ import com.run_walk_tracking_gps.exception.NoGPSException;
 import com.run_walk_tracking_gps.gui.components.dialog.ChooseDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.MapTypeDialog;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+import com.run_walk_tracking_gps.utilities.PermissionUtilities;
 
 import java.util.List;
 
@@ -126,6 +125,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onPause() {
+        Log.d(TAG, "onPause");
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
     public void onResume() {
         Log.d(TAG, "onResume");
         mapView.onResume();
@@ -177,7 +183,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             final FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
-            if (LocationUtilities.hasPermission(getContext())) {
+            if (PermissionUtilities.hasLocationPermission(getContext())) {
                 googleMap.setMyLocationEnabled(true);
                 googleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
@@ -189,7 +195,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 });
 
             }else{
-                LocationUtilities.setLocationPermission(getActivity());
+                PermissionUtilities.setLocationPermission(getActivity());
             }
 
 

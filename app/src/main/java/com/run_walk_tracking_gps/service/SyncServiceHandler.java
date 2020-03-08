@@ -58,7 +58,7 @@ public class SyncServiceHandler {
     }
 
     public static class RequestSyncBroadcastReceiver extends BroadcastReceiver {
-        @RequiresApi(api = Build.VERSION_CODES.O)
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(SyncServiceHandler.TAG, "Richiesta Sync");

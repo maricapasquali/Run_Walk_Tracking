@@ -36,7 +36,7 @@ public class DecompressionEncodeImageTask extends AsyncTask<String, Void, Bitmap
         //Toast.makeText(context, R.string.start_compression_image, Toast.LENGTH_LONG).show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected Bitmap doInBackground(String... encodes) {
         publishProgress();

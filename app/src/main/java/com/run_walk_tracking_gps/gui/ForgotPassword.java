@@ -36,7 +36,7 @@ public class ForgotPassword extends CommonActivity {
         request = findViewById(R.id.password_forgot_request);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     @Override
     protected void listenerAction() {
         email.addTextChangedListener(new TextWatcher() {
