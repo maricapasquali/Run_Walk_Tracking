@@ -2,10 +2,10 @@ package com.run_walk_tracking_gps.gui.components.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+
+import androidx.appcompat.app.AlertDialog;
 
 public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterface.OnClickListener{
 
@@ -50,7 +50,7 @@ public class ChooseDialog<T> extends AlertDialog.Builder implements DialogInterf
         try {
             if(type.length!=strings.length) throw new ArrayIndexOutOfBoundsException(ERROR);
 
-            indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem);
+            indexCheckedItem = Arrays.asList(strings).indexOf(checkedItem.toString());
             setSingleChoiceItems(strings, indexCheckedItem, this);
         } catch (Exception e) {
             e.printStackTrace();

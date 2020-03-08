@@ -3,16 +3,12 @@ package com.run_walk_tracking_gps.gui.components.dialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 
-import com.run_walk_tracking_gps.model.enumerations.Language;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Calendar;
-import java.util.Locale;
-
 
 public class DateTimePickerDialog {
 
@@ -41,6 +37,7 @@ public class DateTimePickerDialog {
 
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
     }
 
     private TimePickerDialog createTimePicker(Context context, OnSelectDateTime onSelectDateTime){

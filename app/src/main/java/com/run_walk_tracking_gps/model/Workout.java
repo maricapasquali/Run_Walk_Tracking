@@ -5,8 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.utilities.DateHelper;
 import com.run_walk_tracking_gps.utilities.NumberUtilities;
@@ -15,13 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,10 +29,10 @@ public class Workout implements Parcelable, Cloneable{
     private Context context;
 
     private int id_workout;
-    private String map_route;
+    private String map_route = null;
     private Date date;
     private ArrayList<Measure> parameters;
-    private Sport sport;
+    private Sport sport = null;
 
     public Workout(){}
 
@@ -43,7 +42,6 @@ public class Workout implements Parcelable, Cloneable{
         parameters.add(Measure.create(context, Measure.Type.DISTANCE));
         parameters.add(Measure.create(context, Measure.Type.ENERGY));
         parameters.add(Measure.create(context, Measure.Type.MIDDLE_SPEED));
-        sport = DefaultPreferencesUser.getSportDefault(context);
 
         setContext(context);
     }
@@ -63,21 +61,23 @@ public class Workout implements Parcelable, Cloneable{
 
     // TODO: 11/14/2019 MIGLIORARE
     public static ArrayList<Workout> createList(Context context,JSONArray workouts) {
-        final ArrayList<Workout> workoutsList = (ArrayList<Workout>) Stream.generate(() -> new Workout(context))
+        final ArrayList<Workout> workoutsList =
+                (ArrayList<Workout>) Stream.generate(() -> new Workout(context))
                 .limit(workouts.length())
                 .collect(Collectors.toList());
         for (int i = 0; i < workouts.length(); i++){
 
             try {
                 JSONObject w = (JSONObject)workouts.get(i);
-                workoutsList.get(i).setIdWorkout(w.getInt(HttpRequest.Constant.ID_WORKOUT));
-                String map = w.getString(HttpRequest.Constant.MAP_ROUTE);
-                if(!map.equals("null")) workoutsList.get(i).setMapRoute(map);
-                workoutsList.get(i).setDate(w.getLong(HttpRequest.Constant.DATE));
-                workoutsList.get(i).getDuration().setValue(true, (double)w.getInt(HttpRequest.Constant.DURATION));
-                workoutsList.get(i).getDistance().setValue(true, w.getDouble(HttpRequest.Constant.DISTANCE));
-                workoutsList.get(i).getCalories().setValue(true, w.getDouble(HttpRequest.Constant.CALORIES));
-                workoutsList.get(i).setSport(Sport.valueOf(w.getString(HttpRequest.Constant.SPORT)));
+                // TODO: 12/29/2019 CAMBIARE COSTANT. to WorkoutDescriptor.
+                workoutsList.get(i).setIdWorkout(w.getInt(NetworkHelper.Constant.ID_WORKOUT));
+                if(!w.isNull(NetworkHelper.Constant.MAP_ROUTE))
+                    workoutsList.get(i).setMapRoute(w.optString(NetworkHelper.Constant.MAP_ROUTE));
+                workoutsList.get(i).setDate(w.getInt(NetworkHelper.Constant.DATE));
+                workoutsList.get(i).getDuration().setValue(true, (double)w.getInt(NetworkHelper.Constant.DURATION));
+                workoutsList.get(i).getDistance().setValue(true, w.getDouble(NetworkHelper.Constant.DISTANCE));
+                workoutsList.get(i).getCalories().setValue(true, w.getDouble(NetworkHelper.Constant.CALORIES));
+                workoutsList.get(i).setSport(Sport.valueOf(w.getString(NetworkHelper.Constant.SPORT)));
                 double duration = workoutsList.get(i).getDuration().getValue(true);
                 double distance = workoutsList.get(i).getDistance().getValue(true);
                 workoutsList.get(i).setMiddleSpeed(distance, duration);
@@ -90,7 +90,7 @@ public class Workout implements Parcelable, Cloneable{
     }
 
     private void setMiddleSpeed(double distance,double duration){
-        getMiddleSpeed().setValue(true, NumberUtilities.round2(distance==0d ? 0d : (duration>0d ? distance/(duration/3600) : 0d)));
+        getMiddleSpeed().setValue(true, NumberUtilities.round2(duration>0d ? distance/(duration/3600) : 0d));
     }
 
     public void setMiddleSpeed(){
@@ -157,6 +157,10 @@ public class Workout implements Parcelable, Cloneable{
         return DateHelper.create(getContext()).formatShortDateTimeToString(date);
     }
 
+    public long getUnixTime() {
+        return DateHelper.create(getContext()).getUnixTime(date);
+    }
+
     public Sport getSport() {
         return sport;
     }
@@ -207,7 +211,7 @@ public class Workout implements Parcelable, Cloneable{
         map.put(Info.DATE, this.getDateStr());
         map.put(Info.SPORT, this.getSport());
         map.put(Info.TIME, this.getDuration().toString());
-        map.put(Info.DISTANCE,this.getDistance().toString() );
+        map.put(Info.DISTANCE, this.getDistance().toString() );
         map.put(Info.CALORIES, this.getCalories().toString());
         if(withMiddleSpeed) map.put(Info.MIDDLE_SPEED, this.getMiddleSpeed().toString());
         return map;
@@ -219,13 +223,30 @@ public class Workout implements Parcelable, Cloneable{
 
     public JSONObject toJson(Context context) throws JSONException {
         return new JSONObject()
-                .put(HttpRequest.Constant.ID_USER, Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(context)))
-                .put(HttpRequest.Constant.MAP_ROUTE, this.getMapRoute())
-                .put(HttpRequest.Constant.DATE, this.getDate().getTime())
-                .put(HttpRequest.Constant.DURATION, this.getDuration().getValue(true))
-                .put(HttpRequest.Constant.DISTANCE, this.getDistance().getValue(true))
-                .put(HttpRequest.Constant.CALORIES, this.getCalories().getValue(true))
-                .put(HttpRequest.Constant.SPORT, this.getSport());
+                .put(NetworkHelper.Constant.ID_USER, Preferences.Session.getIdUser(context))
+                .put(NetworkHelper.Constant.MAP_ROUTE, this.getMapRoute())
+                .put(NetworkHelper.Constant.DATE, this.getUnixTime())
+                .put(NetworkHelper.Constant.DURATION, this.getDuration().getValue(true))
+                .put(NetworkHelper.Constant.DISTANCE, this.getDistance().getValue(true))
+                .put(NetworkHelper.Constant.CALORIES, this.getCalories().getValue(true))
+                .put(NetworkHelper.Constant.SPORT, this.getSport());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Workout workout = (Workout) o;
+        return id_workout == workout.id_workout &&
+                Objects.equals(map_route, workout.map_route) &&
+                Objects.equals(date, workout.date) &&
+                Objects.equals(parameters, workout.parameters) &&
+                sport == workout.sport;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id_workout, map_route, date, parameters, sport);
     }
 
     @Override
@@ -245,7 +266,7 @@ public class Workout implements Parcelable, Cloneable{
     public enum Info {
 
         DATE(R.string.date, R.drawable.ic_calendar),
-        SPORT(R.string.sport),
+        SPORT(R.string.sport, R.drawable.ic_sport),
         TIME(Measure.Type.DURATION),
         DISTANCE(Measure.Type.DISTANCE),
         CALORIES(Measure.Type.ENERGY),

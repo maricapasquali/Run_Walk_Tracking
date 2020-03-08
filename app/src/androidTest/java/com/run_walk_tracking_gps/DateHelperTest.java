@@ -1,17 +1,18 @@
 package com.run_walk_tracking_gps;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.utilities.DateHelper;
 
 import org.junit.Test;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
+import androidx.test.InstrumentationRegistry;
+
+// TODO: 2/17/2020 RIMUOVERE
 public class DateHelperTest {
 
     private String TAG =  DateHelperTest.class.getName();
@@ -23,6 +24,9 @@ public class DateHelperTest {
         Date date = calendar.getTime();
         long mill = 1576007079550L;
         Log.e(TAG, new Date(mill).toString());
+        Log.e(TAG, "Date unix : "+ DateHelper.create(context).getCurrentDate());
+
+
 
         /*final String dateShortToDate = DateHelper.create(context).formatShortToString(date);
         final String dateShortDateTimeToDate = DateHelper.create(context).formatShortDateTimeToString(date);

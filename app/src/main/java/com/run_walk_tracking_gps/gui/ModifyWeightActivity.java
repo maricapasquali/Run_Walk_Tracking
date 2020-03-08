@@ -1,90 +1,44 @@
 package com.run_walk_tracking_gps.gui;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.View;
 
-import com.android.volley.Response;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
+import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
 import com.run_walk_tracking_gps.exception.DataException;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.ModifyWeightAdapter;
+import com.run_walk_tracking_gps.gui.components.adapter.listview.NewInformationAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.WeightDialog;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.StatisticsData;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.stream.Stream;
+import androidx.appcompat.app.AlertDialog;
 
-
-public class ModifyWeightActivity extends CommonActivity implements Response.Listener<JSONObject>{
+public class ModifyWeightActivity extends NewInformationActivity {
 
     private static final String TAG = ModifyWeightActivity.class.getName();
 
-
-    private ListView listView;
-
-    private ModifyWeightAdapter adapter;
     private StatisticsData statisticsData;
     private StatisticsData oldStatisticsData;
 
     private boolean isLastWeight;
 
-    @Override
-    protected void init(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_add_info);
-
-        getSupportActionBar().setTitle(R.string.modify);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        listView = findViewById(R.id.info_to_add);
-
-        if(getIntent()!=null){
-            oldStatisticsData = getIntent().getParcelableExtra(KeysIntent.MODIFY_WEIGHT);
-            if(oldStatisticsData!=null){
-                oldStatisticsData.setContext(this);
-                adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString()) ;
-                listView.setAdapter(adapter);
-                statisticsData = oldStatisticsData.clone();
-            }
-            isLastWeight = getIntent().getBooleanExtra(KeysIntent.IS_LAST_WEIGHT, false);
-            Log.d(TAG, "Weights size = 1 : "+ isLastWeight);
-        }
-    }
-
-    @Override
-    protected void listenerAction() {
-        listView.setOnItemClickListener((parent, view, position, id) ->{
-            final StatisticsData.InfoWeight title =(StatisticsData.InfoWeight) parent.getAdapter().getItem(position);
-            final TextView detail = view.findViewById(R.id.detail_description);
-
-            switch (title){
-                case DATE:
-                    DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
-                            (date, calendar) -> {
-                                detail.setText(date);
-                                statisticsData.setDate(calendar.getTime());
-                                Log.e(TAG, statisticsData.getDateStr());
-                            }).show();
-                    break;
-                case WEIGHT:
-                    WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
-                        detail.setText(weightMeasure.toString());
-                        statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
-                    }).show();
-                    break;
-            }
-        });
+    public ModifyWeightActivity() {
+        super(R.string.modify);
     }
 
     @Override
@@ -93,13 +47,13 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
         if(isLastWeight){
             menu.findItem(R.id.delete_weight).setVisible(false);
         }
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try{
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WEIGHT, statisticsData.getId());
+            final JSONObject bodyJson = new JSONObject().put(WeightDescriptor.ID_WEIGHT, statisticsData.getId());
 
             switch (item.getItemId()) {
                 case R.id.save_weight: {
@@ -108,23 +62,30 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                             throw new DataException(this, StatisticsData.class);
 
                         if(!statisticsData.getValue().equals(oldStatisticsData.getValue())){
-                            bodyJson.put(HttpRequest.Constant.VALUE, statisticsData.getValue());
+                            bodyJson.put(WeightDescriptor.VALUE, statisticsData.getValue());
                         }
 
                         if(!statisticsData.getDate().equals(oldStatisticsData.getDate())){
-                            bodyJson.put(HttpRequest.Constant.DATE, statisticsData.getDate());
+                            bodyJson.put(WeightDescriptor.DATE, statisticsData.getDateStrDB());
                         }
                         Log.e(TAG, bodyJson.toString());
+                        if(DaoFactory.getInstance(this).getWeightDao().update(bodyJson)) {
+                            Preferences.Session.update(this);
 
-                        HttpRequest.requestUpdateWeight(this, bodyJson, this);
+                            NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
+                                    NetworkHelper.Constant.WEIGHT, bodyJson.toString())
+                                    .startService();
 
-                    }catch (NullPointerException e){
-                        e.printStackTrace();
+                            setResult(RESULT_OK, new Intent());
+                        }else {
+                            setResult(RESULT_CANCELED, new Intent());
+                        }
+
+                        finish();
                     }catch (JSONException je){
                         je.printStackTrace();
-                    } catch (InternetNoAvailableException e) {
-                        e.alert();
-                    } catch (DataException e) {
+                    }
+                    catch (DataException e) {
                         e.alert();
                     }
                 }
@@ -133,12 +94,24 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
                     new AlertDialog.Builder(this)
                             .setMessage(R.string.delete_weight_mex)
                             .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                try {
-                                    HttpRequest.requestDeleteWeight(this, bodyJson, this);
-                                } catch (InternetNoAvailableException e) {
-                                    e.alert();
-                                }
+                                if(DaoFactory.getInstance(this).getWeightDao().delete(statisticsData.getId())){
+                                    Preferences.Session.update(this);
 
+
+                                    try {
+                                        NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.DELETE,
+                                                NetworkHelper.Constant.WEIGHT, new JSONObject()
+                                                        .put(WeightDescriptor.ID_WEIGHT, statisticsData.getId()).toString())
+                                                .startService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    setResult(RESULT_OK, new Intent());
+                                }else {
+                                    setResult(RESULT_CANCELED, new Intent());
+                                }
+                                finish();
                             }).setNegativeButton(R.string.cancel, null).create().show();
                 }
                 break;
@@ -152,22 +125,60 @@ public class ModifyWeightActivity extends CommonActivity implements Response.Lis
     }
 
     @Override
-    public void onResponse(JSONObject response) {
+    protected void setModel() {
+    }
 
-        final Intent modifyWeightIntent = new Intent();
-        Log.d(TAG, response.toString());
-
-        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.UPDATE))){
-            modifyWeightIntent.putExtra(KeysIntent.CHANGED_WEIGHT, statisticsData);
-            Log.d(TAG, statisticsData.toString());
+    @Override
+    public NewInformationAdapter getAdapterListView() {
+        ModifyWeightAdapter adapter = null;
+        if(getIntent()!=null) {
+            oldStatisticsData = getIntent().getParcelableExtra(KeysIntent.MODIFY_WEIGHT);
+            if (oldStatisticsData != null) {
+                oldStatisticsData.setContext(this);
+                adapter = new ModifyWeightAdapter(this, oldStatisticsData.toArrayListString(), onSetInfo());
+                statisticsData = oldStatisticsData.clone();
+            }
+            isLastWeight = DaoFactory.getInstance(this).getWeightDao().isOne();
         }
+        return adapter ;
+    }
 
-        if(Stream.of(response.keys()).anyMatch(i -> i.next().equals(HttpRequest.Constant.DELETE))){
-            modifyWeightIntent.putExtra(KeysIntent.DELETE_WEIGHT, statisticsData.getId());
-            Log.d(TAG, "Id to delete : " +statisticsData.getId());
-        }
+    @Override
+    public View.OnFocusChangeListener onSetInfo() {
+        return (view, hasFocus) ->{
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
 
-        setResult(RESULT_OK, modifyWeightIntent);
-        finish();
+                StatisticsData.InfoWeight title = null;
+                try{
+                    title = (StatisticsData.InfoWeight) EnumUtilities.getEnumFromString(StatisticsData.InfoWeight.class , this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
+
+                switch (title){
+                    case DATE:
+                        DateTimePickerDialog.createDatePicker(ModifyWeightActivity.this,
+                                (date, calendar) -> {
+                                    detail.setText(date);
+                                    statisticsData.setDate(calendar.getTime());
+                                    Log.e(TAG, statisticsData.getDateStr());
+                                }).show();
+                        break;
+                    case WEIGHT:
+                        WeightDialog.create(ModifyWeightActivity.this, (weightMeasure) -> {
+                            detail.setText(weightMeasure.toString());
+                            statisticsData.getMeasure().setValue(false, weightMeasure.getValue(false));
+                        }).show();
+                        break;
+                }
+            }
+
+        };
+    }
+
+    @Override
+    public void onClickAddInfo() {
     }
 }

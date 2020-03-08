@@ -3,11 +3,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,23 +11,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.controller.UserSingleton;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
-import com.run_walk_tracking_gps.gui.BootAppActivity;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.CommonActivity;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
 import com.run_walk_tracking_gps.model.User;
-import com.run_walk_tracking_gps.utilities.BitmapUtilities;
+import com.run_walk_tracking_gps.model.builder.UserBuilder;
+
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
-
+import androidx.appcompat.app.AlertDialog;
 
 public class UserActivity extends CommonActivity {
 
@@ -40,26 +34,26 @@ public class UserActivity extends CommonActivity {
     private static final int REQUEST_MODIFY_PROFILE = 11;
 
     private ImageView img;
-    private TextView name;
-    private TextView lastName;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView email;
-    private TextView city;
-    private TextView tel;
-    private TextView height;
+    private TextInputEditText name;
+    private TextInputEditText lastName;
+    private TextInputEditText gender;
+    private TextInputEditText birthDate;
+    private TextInputEditText email;
+    private TextInputEditText city;
+    private TextInputEditText tel;
+    private TextInputEditText height;
 
     private User user;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void init(Bundle savedInstanceState) {
-
         setContentView(R.layout.activity_profile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.profile);
 
         img = findViewById(R.id.profile_img);
+
         name = findViewById(R.id.profile_name);
         lastName = findViewById(R.id.profile_lastname);
         gender = findViewById(R.id.profile_gender);
@@ -69,12 +63,10 @@ public class UserActivity extends CommonActivity {
         tel = findViewById(R.id.profile_tel);
         height = findViewById(R.id.profile_height);
 
-        if(getIntent()!=null){
-            user = UserSingleton.getInstance().getUser();
-            if(user!=null){
-                setGui(user);
-                getSupportActionBar().setTitle(user.getUsername());
-            }
+        try {
+            setGui(UserBuilder.create(this, DaoFactory.getInstance(this).getUserDao().getUser()).build());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -82,6 +74,12 @@ public class UserActivity extends CommonActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // TODO: 03/03/2020 CONTROLLARE CHE L'IMMAGINE ESISTA E CHE SIA STATA SCARICATA E DECOMPRESSA CORRETTAMENTE
     }
 
     @Override
@@ -103,36 +101,13 @@ public class UserActivity extends CommonActivity {
             case R.id.delete_account: {
                 Log.d(TAG, getString(R.string.delete_account));
                 //Toast.makeText(this, R.string.delete_account, Toast.LENGTH_LONG).show();
-                try {
-                    final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER,  user.getIdUser());
-
-                    new AlertDialog.Builder(this)
-                            .setMessage(R.string.delete_account_mex)
-                            .setPositiveButton(R.string.delete, (dialog, id) -> {
-                                try {
-                                    HttpRequest.requestDeleteUser(this, bodyJson, response -> {
-                                        // CANCELLAZIONE PREFERENCES
-                                        DefaultPreferencesUser.deleteUser(this, String.valueOf(user.getIdUser()));
-                                        //EXIT
-                                        DefaultPreferencesUser.unSetUserLogged(this);
-
-                                        final Intent intent = new Intent(this, BootAppActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                        finish();
-
-                                    });
-                                } catch (InternetNoAvailableException e) {
-                                    e.alert();
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .create()
-                            .show();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                new AlertDialog.Builder(this)
+                               .setMessage(R.string.delete_account_mex)
+                               .setPositiveButton(R.string.delete, (dialog, id) ->
+                                       NetworkHelper.HttpRequest.request(this, NetworkHelper.Constant.DELETE_ACCOUNT, null))
+                               .setNegativeButton(R.string.cancel, null)
+                               .create()
+                               .show();
             }
             break;
 
@@ -140,16 +115,16 @@ public class UserActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_MODIFY_PROFILE:
                 if(resultCode== Activity.RESULT_OK){
-                    setGui((User) data.getParcelableExtra(KeysIntent.CHANGED_USER));
-                }
-                else if(resultCode== Activity.RESULT_CANCELED){
+                    User user = (User) data.getParcelableExtra(KeysIntent.CHANGED_USER);
+                    user.setContext(this);
+                    setGui(user);
+                } else if(resultCode== Activity.RESULT_CANCELED){
                     Log.e(TAG, "USER NON MODIFICATO");
                 }
                 break;
@@ -158,41 +133,30 @@ public class UserActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
-
-        findViewById(R.id.profile_img).setOnClickListener(v ->{
-            ImageView i = (ImageView)v;
-            try {
-                ZoomImageDialog.create(this, ((BitmapDrawable) i.getDrawable()).getBitmap()).show();
-            }catch (ClassCastException e){
-                Log.e(TAG, "Immagine vuota");
-            }
-        });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void setGui(User user){
-        user.setContext(this);
-        name.setText(user.getName());
-        lastName.setText(user.getLastName());
-        gender.setText(user.getGender().getStrId());
-        gender.setCompoundDrawablesWithIntrinsicBounds(getDrawable(user.getGender().getIconId()),null, null, null);
-        birthDate.setText(user.getBirthDateString());
-        email.setText(user.getEmail());
-        city.setText(user.getCity());
-        tel.setText(user.getPhone());
+        if(user!=null){
 
-        height.setText(user.getHeight().toString());
+            name.setText(user.getName());
+            lastName.setText(user.getLastName());
+            gender.setText(user.getGender().getStrId());
+            gender.setCompoundDrawablesWithIntrinsicBounds(
+                    getDrawable(user.getGender().getIconId()),
+                    null, null, null);
+            birthDate.setText(user.getBirthDateString());
+            email.setText(user.getEmail());
+            city.setText(user.getCity());
+            tel.setText(user.getPhone());
+            height.setText(user.getHeight().toString());
 
-        try{
-            String img_encode = DefaultPreferencesUser.getSharedPreferencesImagesUser(this).getString(String.valueOf(user.getIdUser()),null);
-            Log.e(TAG, "IMAGE ENCODE = " + img_encode);
-            if(img_encode!=null)img.setImageBitmap(BitmapUtilities.StringToBitMap(img_encode));
-        }catch (IOException e){
-            img.setImageResource(R.drawable.ic_user_empty);
+            if(user.getImage()!=null && user.getImage().exists())
+                ImageFileHelper.create(this).load(img, user.getImage());
+
+            this.user = user;
+            Log.d(TAG, "User = " + user);
         }
-
-        this.user = user;
-        Log.d(TAG, "User = " + user);
     }
+
 
 }

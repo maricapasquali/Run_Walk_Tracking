@@ -2,42 +2,51 @@ package com.run_walk_tracking_gps.gui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
+import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
+import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.fragments.MapFragment;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.task.AutoWorkoutInsert;
+import com.run_walk_tracking_gps.utilities.LocationUtilities;
+import com.run_walk_tracking_gps.utilities.MapsUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DetailsWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>{
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+
+public class DetailsWorkoutActivity extends  CommonActivity{
 
     private final static String TAG = DetailsWorkoutActivity.class.getName();
 
     private final static int REQUEST_MODIFY = 0;
 
+    private MenuItem cancel;
     private ListView summary_workout;
     private FloatingActionButton summary_ok;
 
     private DetailsWorkoutAdapter adapter;
 
-    private boolean isChangedWorkout = false;
     private boolean isSummary = false;
     private Workout workout;
 
@@ -58,6 +67,7 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
             Log.d(TAG, workout.toString());
 
             setMapView();
+            Preferences.WorkoutInExecution.clear(this);
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle(R.string.summary_workout);
@@ -66,10 +76,8 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
             workout = (Workout)getIntent().getParcelableExtra(KeysIntent.DETAIL);
             if(workout!=null){
                 workout.setContext(this);
-
                 Log.d(TAG, workout.toString());
                 setMapView();
-
                 summary_ok.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(R.string.detail_workout);
             }
@@ -81,14 +89,25 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     }
 
     private void setMapView(){
-        if(workout.getMapRoute()!=null){
+        PolylineOptions mapRoute;
+        if(workout.getMapRoute()==null) {
+            mapRoute = Preferences.WorkoutInExecution.MapLocation.getPolylineOptions(this.getApplicationContext());
+            workout.setMapRoute(Preferences.WorkoutInExecution.MapLocation.getLocationsEncode(this.getApplicationContext()));
+        }else{
+            mapRoute = MapsUtilities.getPolylineOptions(workout.getMapRoute());
+        }
+        Log.e(TAG, "MAP ROUTE = "+ workout.getMapRoute());
+
+        if(LocationUtilities.isGpsEnable(this) && mapRoute.getPoints().size()>0){
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.summary_map, MapFragment.createWithArguments(workout.getMapRoute()))
-                    .commit();
+                        .replace(R.id.summary_map, MapFragment.createWithArguments(mapRoute))
+                        .commit();
         }else {
             findViewById(R.id.summary_map).setVisibility(View.GONE);
         }
+        //Preferences.MapLocation.delete(this.getApplicationContext());
     }
+
 
     @Override
     protected void listenerAction() {
@@ -97,7 +116,12 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(!isSummary) getMenuInflater().inflate(R.menu.menu_detail_workout, menu);
+        getMenuInflater().inflate(R.menu.menu_detail_workout, menu);
+
+        if(isSummary){
+            cancel = menu.findItem(R.id.summary_cancel_workout);
+            menu.findItem(R.id.summary_modify_workout).setVisible(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -105,8 +129,6 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.summary_modify_workout:
-                //Toast.makeText(this, getString(R.string.modify), Toast.LENGTH_LONG).show();
-
                 final Intent intentModify = new Intent(this, ModifyWorkoutActivity.class);
                 intentModify.putExtra(KeysIntent.MODIFY_WORKOUT, workout);
                 startActivityForResult(intentModify, REQUEST_MODIFY);
@@ -117,28 +139,28 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
                         .setMessage(R.string.delete_workout_mex)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
 
-                            try{
-                                JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
-
-                                HttpRequest.requestDeleteWorkout(this, bodyJson, response -> {
+                            if(isSummary)
+                                setResult(RESULT_CANCELED, new Intent());
+                            else {
+                                if(DaoFactory.getInstance(this).getWorkoutDao().delete(workout.getIdWorkout())){
+                                    Preferences.Session.update(this);
 
                                     try {
-                                        if(response.getBoolean(HttpRequest.Constant.DELETE)){
-                                            final Intent resultIntent = new Intent();
-                                            resultIntent.putExtra(KeysIntent.DELETE_WORKOUT, workout.getIdWorkout());
-                                            setResult(Activity.RESULT_OK, resultIntent);
-                                            finish();
-                                        }
+
+                                        NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.DELETE,
+                                                NetworkHelper.Constant.WORKOUT,
+                                                new JSONObject().put(WorkoutDescriptor.ID_WORKOUT,
+                                                        workout.getIdWorkout()).toString())
+                                                .startService();
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
-                                });
 
-                            }catch (JSONException e){
-                                e.printStackTrace();
-                            } catch (InternetNoAvailableException e) {
-                                e.alert();
+                                    setResult(RESULT_OK, new Intent());
+                                }else
+                                    setResult(RESULT_CANCELED, new Intent());
                             }
+                            finish();
                         })
                         .setNegativeButton(R.string.cancel, null).create().show();
                 break;
@@ -158,10 +180,9 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
         switch (requestCode){
             case REQUEST_MODIFY:
                 if(resultCode==Activity.RESULT_OK) {
-                    Toast.makeText(this, KeysIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, KeysIntent.CHANGED_WORKOUT, Toast.LENGTH_LONG).show();
                     Workout work = (Workout) data.getParcelableExtra(KeysIntent.CHANGED_WORKOUT);
-                    isChangedWorkout = (work!=null);
-                    if(isChangedWorkout){
+                    if(work!=null){
                         work.setContext(this);
                         adapter.updateDetails(work);
                         workout = work;
@@ -175,46 +196,66 @@ public class DetailsWorkoutActivity extends  CommonActivity implements Response.
     @Override
     public void onBackPressed() {
         Log.d(TAG, "OnBackPressed");
-        if(isSummary){
+        if(isSummary)
             saveWorkout();
-        }else {
-            if(isChangedWorkout){
-                Log.d(TAG, "Return Workout changed");
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-                setResult(Activity.RESULT_OK, returnIntent);
-
-            }
+        else
             super.onBackPressed();
-        }
+
     }
 
     private void saveWorkout(){
-        Log.d(KeysIntent.NEW_WORKOUT, "Summary : Workout = "+ workout);
+        Log.d(KeysIntent.NEW_WORKOUT, "Save Workout (Summary)");
+
         try {
-            final JSONObject bodyJson = workout.toJson(this);
+            JSONObject bodyJson = workout.toJson(this);
+            /*
             Log.d(TAG, bodyJson.toString());
-            HttpRequest.requestNewWorkout(this, bodyJson, this);
-        } catch (JSONException e) {
+            long id_workout = SqlLiteWorkoutDao.create(this).insert(bodyJson);
+            if(id_workout!=-1){
+                Preferences.Session.update(this);
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.INSERT,
+                        NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
+                        .startService();
+
+                setResult(RESULT_OK, new Intent());
+            }else {
+                setResult(RESULT_CANCELED, new Intent());
+            }
+            finish();*/
+            AutoWorkoutInsert.create(this, new OnInsertAutoWorkoutListener() {
+                @Override
+                public void onSuccess(long id_workout) {
+                    Preferences.Session.update(DetailsWorkoutActivity.this);
+
+                    try {
+                        NetworkServiceHandler.getInstance(DetailsWorkoutActivity.this, NetworkHelper.Constant.INSERT,
+                                NetworkHelper.Constant.WORKOUT, bodyJson.put(WorkoutDescriptor.ID_WORKOUT, id_workout).toString())
+                                .startService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    setResult(RESULT_OK, new Intent());
+                    finish();
+                }
+
+                @Override
+                public void onFail() {
+                    setResult(RESULT_CANCELED, new Intent());
+                    finish();
+                }
+            }).execute(workout.toJson(this));
+
+
+        }catch (JSONException e){
             e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
         }
+
     }
 
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-            int id_workout = response.getInt(HttpRequest.Constant.ID_WORKOUT);
-            // save and send to workouts list
-            final Intent resultIntent = new Intent();
-            workout.setIdWorkout(id_workout);
-            resultIntent.putExtra(KeysIntent.NEW_WORKOUT, workout);
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
-        } catch (JSONException e) {
-           e.printStackTrace();
-        }
+    public interface OnInsertAutoWorkoutListener{
+        void onSuccess(long id_workout);
+        void onFail();
     }
 
 }

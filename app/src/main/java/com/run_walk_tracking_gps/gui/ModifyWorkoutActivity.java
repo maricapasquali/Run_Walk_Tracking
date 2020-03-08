@@ -9,14 +9,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
+import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.gui.components.adapter.listview.DetailsWorkoutAdapter;
 import com.run_walk_tracking_gps.gui.components.dialog.DateTimePickerDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.DistanceDialog;
@@ -25,13 +25,13 @@ import com.run_walk_tracking_gps.gui.components.dialog.EnergyDialog;
 import com.run_walk_tracking_gps.gui.components.dialog.SportDialog;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.model.Workout;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
+import com.run_walk_tracking_gps.utilities.EnumUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
-
-public class ModifyWorkoutActivity extends  CommonActivity implements Response.Listener<JSONObject>  {
+public class ModifyWorkoutActivity extends  CommonActivity{
 
     private final static String TAG = ModifyWorkoutActivity.class.getName();
 
@@ -61,75 +61,85 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
                 Log.d(TAG,"OLD " + oldWorkout.toString());
                 Log.d(TAG,"CLONE " + workout.toString());
 
-                final DetailsWorkoutAdapter adapter = new DetailsWorkoutAdapter(this, oldWorkout.details(false));
+                final DetailsWorkoutAdapter adapter =
+                        new DetailsWorkoutAdapter(this,
+                                oldWorkout.details(false), showDialog());
                 details_workout.setAdapter(adapter);
             }
         }
     }
 
+    private View.OnFocusChangeListener showDialog(){
+        return (view, hasFocus) ->{
+            if(hasFocus){
+                final TextInputEditText detail = (TextInputEditText)view;
+                final TextInputLayout detailTitle = (TextInputLayout) detail.getParent().getParent();
+
+                Workout.Info info = null;
+                try{
+                    info = (Workout.Info)EnumUtilities.getEnumFromString(Workout.Info.class , this, detailTitle.getHint().toString());
+                }catch (Exception ignored){
+                }
+                Log.d(TAG, detailTitle.getHint().toString());
+
+                switch (info){
+                    case DATE:
+                        DateTimePickerDialog.createDateTimePicker(ModifyWorkoutActivity.this, (date, calendar) -> {
+                            detail.setText(date);
+                            workout.setDate(calendar.getTime());
+                        }).show();
+
+                        break;
+                    case SPORT:
+                        SportDialog.create(ModifyWorkoutActivity.this, detail.getText(), (val, description) -> {
+                            detail.setText(description);
+                            detail.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null,null);
+                            workout.setSport(val);
+                        }).show();
+
+                        break;
+
+                    case TIME:
+                        DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
+                            if (durationMeasure!=null){
+                                detail.setText(durationMeasure.toString());
+                                workout.getDuration().setValue(true, durationMeasure.getValue(true));
+                                workout.setMiddleSpeed();
+                            }
+                        }).show();
+                        break;
+                    case DISTANCE:
+                        DistanceDialog.create(ModifyWorkoutActivity.this, (distanceMeasure)  -> {
+                            if(distanceMeasure==null){
+                                detail.setText(R.string.no_available_abbr);
+                                workout.getDistance().setValue(true, 0d);
+                            }else{
+                                detail.setText(distanceMeasure.toString());
+                                workout.getDistance().setValue(false,distanceMeasure.getValue(false));
+                                workout.setMiddleSpeed();
+                            }
+                        }).show();
+                        break;
+                    case CALORIES:
+                        EnergyDialog.create(ModifyWorkoutActivity.this,(caloriesMeasure) ->{
+
+                            if(caloriesMeasure==null){
+                                detail.setText(R.string.no_available_abbr);
+                                workout.getCalories().setValue(true, 0d);
+                            }else{
+                                detail.setText(caloriesMeasure.toString());
+                                workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
+                            }
+                        }).show();
+                        break;
+                }
+
+            }
+        };
+    }
 
     @Override
     protected void listenerAction() {
-        details_workout.setOnItemClickListener((parent, view, position, id) -> {
-            final Map.Entry<Workout.Info, Object> entry = (Map.Entry<Workout.Info, Object>)parent.getAdapter().getItem(position);
-            final Workout.Info info = entry.getKey();
-            Log.d(TAG,"Item = " + entry);
-
-            final TextView detail = (TextView)view.findViewById(R.id.detail_description);
-
-            switch (info){
-                case DATE:
-                    DateTimePickerDialog.createDateTimePicker(ModifyWorkoutActivity.this, (date, calendar) -> {
-                        detail.setText(date);
-                        workout.setDate(calendar.getTime());
-                    }).show();
-
-                    break;
-                case SPORT:
-                    SportDialog.create(ModifyWorkoutActivity.this, detail.getText(), (val, description) -> {
-                        detail.setText(description);
-                        detail.setCompoundDrawablesWithIntrinsicBounds(getDrawable(val.getIconId()), null, null,null);
-                        workout.setSport(val);
-                    }).show();
-
-                    break;
-
-                case TIME:
-                    DurationDialog.create(ModifyWorkoutActivity.this, durationMeasure -> {
-                        if (durationMeasure!=null){
-                            detail.setText(durationMeasure.toString());
-                            workout.getDuration().setValue(true, durationMeasure.getValue(true));
-                            workout.setMiddleSpeed();
-                        }
-                    }).show();
-                    break;
-                case DISTANCE:
-                    DistanceDialog.create(ModifyWorkoutActivity.this, (distanceMeasure)  -> {
-                        if(distanceMeasure==null){
-                            detail.setText(R.string.no_available_abbr);
-                            workout.getDistance().setValue(true, 0d);
-                        }else{
-                            detail.setText(distanceMeasure.toString());
-                            workout.getDistance().setValue(false,distanceMeasure.getValue(false));
-                            workout.setMiddleSpeed();
-                        }
-                    }).show();
-                    break;
-                case CALORIES:
-                    EnergyDialog.create(ModifyWorkoutActivity.this,(caloriesMeasure) ->{
-
-                        if(caloriesMeasure==null){
-                            detail.setText(R.string.no_available_abbr);
-                            workout.getCalories().setValue(true, 0d);
-                        }else{
-                            detail.setText(caloriesMeasure.toString());
-                            workout.getCalories().setValue(false, caloriesMeasure.getValue(false));
-                        }
-                    }).show();
-                    break;
-            }
-        });
-
     }
 
     @Override
@@ -154,49 +164,42 @@ public class ModifyWorkoutActivity extends  CommonActivity implements Response.L
     private void saveWorkoutChanged(){
         try {
 
-            final JSONObject bodyJson = new JSONObject().put(HttpRequest.Constant.ID_WORKOUT, workout.getIdWorkout());
+            final JSONObject bodyJson = new JSONObject().put(WorkoutDescriptor.ID_WORKOUT, workout.getIdWorkout());
             if(!workout.getDate().equals(oldWorkout.getDate())){
-                bodyJson.put(HttpRequest.Constant.DATE, workout.getDate().getTime());
+                bodyJson.put(WorkoutDescriptor.DATE, workout.getUnixTime());
             }
             if(!workout.getSport().equals(oldWorkout.getSport())){
-                bodyJson.put(HttpRequest.Constant.SPORT, workout.getSport());
+                bodyJson.put(WorkoutDescriptor.SPORT, workout.getSport());
             }
             if(!workout.getDuration().getValue(true).equals(oldWorkout.getDuration().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.DURATION, workout.getDuration().getValue(true));
+                bodyJson.put(WorkoutDescriptor.DURATION, workout.getDuration().getValue(true));
             }
             if(!workout.getDistance().getValue(true).equals(oldWorkout.getDistance().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.DISTANCE, workout.getDistance().getValue(true));
+                bodyJson.put(WorkoutDescriptor.DISTANCE, workout.getDistance().getValue(true));
             }
             if(!workout.getCalories().getValue(true).equals(oldWorkout.getCalories().getValue(true))){
-                bodyJson.put(HttpRequest.Constant.CALORIES, workout.getCalories().getValue(true));
+                bodyJson.put(WorkoutDescriptor.CALORIES, workout.getCalories().getValue(true));
             }
 
             Log.d(TAG, bodyJson.toString());
-            HttpRequest.requestUpdateWorkout(this, bodyJson, this);
+            if(DaoFactory.getInstance(this).getWorkoutDao().update(bodyJson)){
+                Preferences.Session.update(this);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        }
-    }
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE,
+                        NetworkHelper.Constant.WORKOUT, bodyJson.toString())
+                        .startService();
 
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-
-            //Toast.makeText(this, getString(R.string.save), Toast.LENGTH_LONG).show();
-            Intent returnIntent = new Intent();
-            if(response.getBoolean(HttpRequest.Constant.UPDATE)){
-                returnIntent.putExtra(KeysIntent.CHANGED_WORKOUT, workout);
-            }
-            setResult(Activity.RESULT_OK, returnIntent);
+                setResult(Activity.RESULT_OK, new Intent().putExtra(KeysIntent.CHANGED_WORKOUT, workout));
+            } else
+                setResult(RESULT_CANCELED, new Intent());
             finish();
 
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
 }
 
 

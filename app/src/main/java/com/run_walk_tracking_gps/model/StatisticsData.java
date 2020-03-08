@@ -4,13 +4,21 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.run_walk_tracking_gps.db.tables.WeightDescriptor;
+import com.run_walk_tracking_gps.db.tables.WorkoutDescriptor;
 import com.run_walk_tracking_gps.utilities.DateHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StatisticsData implements Parcelable{
 
@@ -43,6 +51,35 @@ public class StatisticsData implements Parcelable{
     public StatisticsData clone(){
         return new StatisticsData(this);
     }
+
+    // TODO: 11/14/2019 MIGLIORARE
+    public static ArrayList<StatisticsData> createList(Context context, Measure.Type type, JSONArray statistics) {
+        final ArrayList<StatisticsData> statisticsDataList = (ArrayList<StatisticsData>) Stream.generate(() -> new StatisticsData(context, type))
+                .limit(statistics.length())
+                .collect(Collectors.toList());
+        for (int i = 0; i < statistics.length(); i++){
+
+            try {
+
+                JSONObject s = (JSONObject)statistics.get(i);
+                if(!s.isNull(WeightDescriptor.ID_WEIGHT))
+                    statisticsDataList.get(i).setId(s.getInt(WeightDescriptor.ID_WEIGHT));
+                Date date = type.equals(Measure.Type.WEIGHT) ?
+                            DateHelper.create(context).parseShortToDate(s.getString(WorkoutDescriptor.DATE)) :
+                            DateHelper.create(context).parseShortDateTimeToDate(s.getInt(WorkoutDescriptor.DATE));
+
+                statisticsDataList.get(i).setDate(date);
+                statisticsDataList.get(i).setValue(s.getDouble(WorkoutDescriptor.Statistic.VALUE));
+            }catch (JSONException e){
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        statisticsDataList.sort((w1, w2) -> w2.getDate().compareTo(w1.getDate()));
+        return statisticsDataList;
+    }
+
 
 // START - Parcelable IMPLEMENTATION
     protected StatisticsData(Parcel in) {
@@ -91,6 +128,10 @@ public class StatisticsData implements Parcelable{
 
     public String getDateStr(){
         return DateHelper.create(measure.getContext()).formatFullToString(date);
+    }
+
+    public String getDateStrDB(){
+        return DateHelper.create(measure.getContext()).formatForDB(getDate());
     }
 
     public Double getValue() {

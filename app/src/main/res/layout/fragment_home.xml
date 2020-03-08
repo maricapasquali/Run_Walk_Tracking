@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/indoor">
 
     <RelativeLayout
-        android:id="@+id/toogle_layout"
+        android:id="@+id/toggle_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="24dp">
@@ -16,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/sport"
+            android:layout_marginBottom="1dp"
             android:background="@drawable/textview_border"
             android:orientation="vertical"
             android:paddingTop="10dp"
@@ -33,8 +33,20 @@
                 android:textColor="@color/checkState"
                 android:textSize="18sp" />
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/time_workout_indoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:text="@string/time_workout"
+                android:textAlignment="center"
+                android:textColor="@color/checkState"
+                android:textSize="18sp" />-->
+
+            <view
+                android:id="@+id/time_workout_indoor"
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomChronometer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -51,6 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/duration_layout"
+            android:layout_marginBottom="1dp"
             android:background="@drawable/textview_border"
             android:orientation="vertical"
             android:paddingTop="10dp"
@@ -86,6 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/distance_layout"
+            android:layout_marginBottom="1dp"
             android:background="@drawable/textview_border"
             android:orientation="vertical"
             android:paddingTop="10dp"
@@ -100,8 +114,8 @@
                 android:paddingTop="10dp"
                 android:text="@string/calories"
                 android:textAlignment="center"
-                android:textSize="18sp"
-                android:textColor="@color/checkState" />
+                android:textColor="@color/checkState"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/calories_workout_indoor"
@@ -119,6 +133,7 @@
             android:id="@+id/sport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
             android:background="@drawable/textview_border"
             android:elevation="24dp"
             android:paddingStart="70dp"
@@ -187,8 +202,9 @@
             android:orientation="horizontal"
             android:visibility="visible">
 
-            <TextView
+            <view
                 android:id="@+id/time_workout"
+                class="com.run_walk_tracking_gps.gui.components.Factory$CustomChronometer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -198,6 +214,17 @@
                 android:textAlignment="center"
                 android:textColor="@color/checkState"
                 android:textSize="18sp" />
+            <!--<TextView
+                android:id="@+id/time_workout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/time_workout"
+                android:textAlignment="center"
+                android:textColor="@color/checkState"
+                android:textSize="18sp" />-->
 
             <TextView
                 android:id="@+id/distance_workout"
@@ -230,18 +257,10 @@
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toogle_layout" />
+        android:layout_below="@+id/toggle_layout" />
 
 
-    <!--<fragment
-        android:id="@+id/map"
-        android:name="com.run_walk_tracking_gps.gui.fragments.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/info_workout_numbers" />-->
-
-
-    <android.support.design.widget.FloatingActionButton
+    <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/block_screen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -252,23 +271,30 @@
         android:contentDescription="@string/block_screen"
         android:focusable="true"
         android:padding="10dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:backgroundTint="@color/colorPrimaryDark"
-        app:srcCompat="@drawable/ic_locked" />
+        app:srcCompat="@drawable/ic_locked" />-->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/voiceCoach"
+        style="@style/FloatingButtonStart"
+        android:layout_marginBottom="50dp"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/layout_btn_workout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal"
+        android:paddingStart="30dp"
+        android:paddingEnd="0dp"
         android:visibility="visible">
 
-        <com.ncorti.slidetoact.SlideToActView
+        <!--<com.ncorti.slidetoact.SlideToActView
             android:id="@+id/unlock_screen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -281,66 +307,32 @@
             app:slider_height="55dp"
             app:slider_icon="@drawable/ic_unlocked"
             app:text="@string/unlock_screen"
-            app:text_size="15sp" />
+            app:text_size="15sp" />-->
 
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/start_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="@string/start"
-            android:focusable="true"
-            android:padding="10dp"
-            android:visibility="visible"
-            app:backgroundTint="@color/startBtn"
-            app:srcCompat="@drawable/ic_play_button" />
+            style="@style/FloatingButton.Play" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/restart_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="20dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="@string/restart"
-            android:focusable="true"
-            android:padding="10dp"
-            android:visibility="gone"
-            app:backgroundTint="@color/RestartBtn"
-            app:srcCompat="@drawable/ic_play_button" />
+            style="@style/FloatingButton.Restart" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/stop_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="0dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="@string/stop"
-            android:focusable="true"
-            android:padding="10dp"
-            android:visibility="gone"
-            app:backgroundTint="@color/stopBtn"
-            app:srcCompat="@drawable/ic_stop" />
+            style="@style/FloatingButton.Stop" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/pause_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:contentDescription="@string/pause"
-            android:focusable="true"
-            android:padding="10dp"
-            android:visibility="gone"
-            app:backgroundTint="@color/pauseBtn"
-            app:srcCompat="@drawable/ic_pause" />
+            style="@style/FloatingButton.Pause" />
 
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/musicCoach"
+        style="@style/FloatingButton"
+        android:layout_marginBottom="50dp"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
 
 import com.run_walk_tracking_gps.model.enumerations.FilterTime;
 import com.run_walk_tracking_gps.model.StatisticsData;
@@ -16,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import androidx.core.util.Pair;
 
 public class FilterUtilities {
 

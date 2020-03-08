@@ -3,6 +3,7 @@ package com.run_walk_tracking_gps.utilities;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+
 public class NumberUtilities {
     public static Double round2(final double val) {
         return round_n(2, val);
@@ -14,5 +15,15 @@ public class NumberUtilities {
 
     private static Double round_n(final int scale, final double val) {
         return new BigDecimal(val).setScale(scale, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    public static Object cast(String strNum) {
+        double d = 0;
+        try {
+            d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return strNum;
+        }
+        return (int)d;
     }
 }

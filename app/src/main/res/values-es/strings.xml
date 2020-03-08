@@ -52,6 +52,11 @@
     <string name="password_not_empty">Password no vacía</string>
     <string name="confirm_password_not_empty">Confirmas password no vacía</string>
 
+
+    <!-- Activation Account -->
+    <string name="activation_account">Activación Cuenta</string>
+    <string name="check_code">Código de activación</string>
+
     <!-- Impostazioni -->
     <string name="sport">Deporte</string>
     <string name="walk">Caminata</string>
@@ -60,7 +65,7 @@
     <string name="location">Localización</string>
     <string name="measure_unit">Unidad de dimensión</string>
     <string name="language">Idioma</string>
-    <string name="vocal_coach">Entrenador vocal</string>
+    <string name="vocal_coach">Entrenador de voz</string>
     <string name="info">Información</string>
     <string name="exit">Sales</string>
 
@@ -92,6 +97,10 @@
         <item name="hybrid">Híbrido</item>
     </string-array>
 
+    <!-- MapFragment -->
+    <string name="departure">Salida</string>
+    <string name="arrivals">llegada</string>
+
     <!-- Riepilogo / Dettaglio Allenamento -->
 
     <string name="summary_workout">Resumen</string>
@@ -112,11 +121,29 @@
     <string name="change_password">Cambias Password</string>
     <string name="save">Guardas</string>
     <string name="delete_account">Eliminas cuenta</string>
+    <string name="old_password">Antigua Password</string>
+    <string name="new_password">Nueva Password</string>
 
     <!-- Statistiche -->
     <string name="statistic_data">Datos</string>
     <string name="graphic_statistics">Gráfico</string>
     <string name="nothing_value">No valor</string>
+
+    <!-- Vocal Coach -->
+    <string name="use_coach">Usar entrenador de voz</string>
+    <string name="interval">Intervalo (min)</string>
+
+    <!-- Music -->
+    <string name="music">Música</string>
+    <string name="use_playlist">Usar Playlist</string>
+    <string name="rename">Rebautizar</string>
+    <string name="use_like_primary">Usar como primaria</string>
+    <string name="preview">Preestreno</string>
+    <string name="create">Crear</string>
+    <string name="search">Buscar</string>
+    <string name="close">Cerrar</string>
+    <string name="num_songs">Songs Number</string>
+    <string name="date_creation">Creation Date</string>
 
     <!-- Informazioni account -->
 
@@ -135,22 +162,27 @@
     <string name="gps_disabled">El GPS parece estar deshabilitado, ¿quieres activarlo?</string>
     <string name="delete_weight_mex">¿Estás seguro de que deseas eliminar este peso?</string>
     <string name="delete_workout_mex">¿Estás seguro de que deseas eliminar este entrenamiento?</string>
+    <string name="delete_playlist_mex">¿Estás seguro de que deseas eliminar este playlist?</string>
+    <string name="delete_song_mex">¿Estás seguro de que deseas eliminar este canción?</string>
     <string name="correctly_sign_up">¡Registro exitoso! Recibirá un correo electrónico con un código.</string>
-
+    <string name="account_use_other_device">Cuenta en uso en otro dispositivo. Continuar aqui?</string>
+    <string name="check_code_text">Ingrese el código de activación de la cuenta que se le envió por correo electrónico.</string>
+    <string name="continue_here">Continuar aqui</string>
 
     <!-- Messaggi di errore -->
     <string name="error">Error</string>
     <string name="not_correct_password">Password incorrecta</string>
     <string name="workout_not_set_correctly">Al menos DÍA, DEPORTE y DURACIÓN deben estar configurados.</string>
     <string name="weight_not_set_correctly">PESO y FECHA deben estar configurados.</string>
-    <string name="not_empty">\\u0020 no puede estar vacio</string>
+    <string name="not_empty">\\u0020 no vacío</string>
     <string name="user_not_set">User no configurado</string>
     <string name="account_not_checked">¡Cuenta no verificada!</string>
     <string name="start_compression_image">Iniciar compresión de imagen</string>
     <string name="end_compression_image">Compresión de imagen terminada</string>
     <string name="internet_not_available_title">Datos móviles desactivados</string>
     <string name="internet_not_available_mex">Activa la conexión de datos móviles o utiliza la red WI-FI para acceder a los datos.</string>
-
-
+    <string name="token_not_valid">Sesión inválida</string>
+    <string name="connection_slow">¡Uy! Conexión lenta, intente nuevamente más tarde.</string>
+    <string name="internal_server_error">Error de servidor interno</string>
 
 </resources>

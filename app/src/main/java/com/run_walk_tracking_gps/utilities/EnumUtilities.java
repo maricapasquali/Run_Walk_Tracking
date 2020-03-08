@@ -2,12 +2,10 @@ package com.run_walk_tracking_gps.utilities;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,9 +13,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import androidx.annotation.RequiresApi;
 
 public class EnumUtilities {
 
@@ -34,9 +33,6 @@ public class EnumUtilities {
         }
         if(enumeration== Gender.class){
             return R.string.gender;
-        }
-        if(enumeration== Sport.class){
-            return R.string.sport;
         }
         return 0;
     }
@@ -158,7 +154,6 @@ public class EnumUtilities {
 
         return iconId;
     }
-
 
     public static Enum<?> getEnumFromString(Class<?> enumeration, Context context, String string){
         return getEnumFromStrId(enumeration, Stream.of(valuesStrId(enumeration)).filter(i -> context.getString(i).equals(string)).findFirst()

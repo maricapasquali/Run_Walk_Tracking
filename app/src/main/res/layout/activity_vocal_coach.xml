@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/coach"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/custom_item_setting"
+            android:orientation="horizontal"
+            android:padding="30dp">
+
+            <Switch
+                android:id="@+id/vocal_coach_on_off"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:elevation="8dp"
+                android:text="@string/use_coach"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorPrimaryDark"
+                android:textOff="@string/off"
+                android:textOn="@string/on"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/duration"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/coach"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/custom_item_setting"
+            android:orientation="horizontal"
+            android:padding="25dp">
+
+            <Switch
+                android:id="@+id/duration_on_off"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:elevation="8dp"
+                android:text="@string/time"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorPrimaryDark"
+                android:textOff="@string/off"
+                android:textOn="@string/on"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/distance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/duration"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/custom_item_setting"
+            android:orientation="horizontal"
+            android:padding="25dp">
+
+            <Switch
+                android:id="@+id/distance_on_off"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:elevation="8dp"
+                android:text="@string/distance"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorPrimaryDark"
+                android:textOff="@string/off"
+                android:textOn="@string/on"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/calories"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/distance"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/custom_item_setting"
+
+            android:orientation="horizontal"
+            android:padding="25dp">
+
+            <Switch
+                android:id="@+id/calories_on_off"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:elevation="8dp"
+                android:text="@string/calories"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorPrimaryDark"
+                android:textOff="@string/off"
+                android:textOn="@string/on"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/interval"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/calories"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="50dp"
+            android:background="@drawable/custom_item_setting"
+            android:padding="20dp"
+            android:paddingStart="25dp"
+            android:paddingEnd="0dp">
+
+            <TextView
+                android:id="@+id/interval_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/interval"
+                android:textColor="@android:color/background_light"
+                android:textSize="18sp" />
+
+            <com.warkiz.widget.IndicatorSeekBar
+                android:id="@+id/interval_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="false"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/interval_text"
+                android:paddingStart="30dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="0dp"
+                app:isb_max="10"
+                app:isb_min="1"
+                app:isb_show_indicator="none"
+                app:isb_show_thumb_text="true"
+                app:isb_thumb_color="@android:color/background_light"
+                app:isb_thumb_text_color="@android:color/background_light"
+                app:isb_tick_marks_color="@android:color/background_light"
+                app:isb_tick_texts_typeface="sans"
+                app:isb_ticks_count="10"
+                app:isb_track_background_color="@android:color/background_light"
+                app:isb_track_progress_color="@color/colorPrimary" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+</ScrollView>

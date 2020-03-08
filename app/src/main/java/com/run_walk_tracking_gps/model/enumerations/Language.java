@@ -1,8 +1,6 @@
 package com.run_walk_tracking_gps.model.enumerations;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 
 import com.run_walk_tracking_gps.R;
 

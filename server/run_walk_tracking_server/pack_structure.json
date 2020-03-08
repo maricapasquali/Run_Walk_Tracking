@@ -1,0 +1,166 @@
+//INPUT insert, update, delete
+{
+  "token": "...",
+  "last_update": "...",
+  "filter": "...",
+  "data":{
+    ....
+  }
+}
+
+// INPUT sign_up
+{
+  "name":"...",
+  "last_name":"...",
+  "gender":"...",
+  "birth_date":"...",
+  "email":"...",
+  "city":"...",
+  "phone":"...",
+  "height":"...",
+  "target":"...",
+  "weight":"...",
+  "username":"...",
+  "password":"...",
+  "image": {
+    "name":"...",
+    "content":"..."
+  }
+}
+
+// INPUT sign_in
+{
+  "username":"...",
+  "password":"...",
+  "device":"..."
+}
+
+// INPUT FIRST_LOGIN
+{
+  "username":"...",
+  "password":"...",
+  "token":"...", // codice di attivazione
+  "device":"...",
+}
+
+// OUTPUT SYNC
+
+{
+  "state":{
+    "code": "0/2"
+    "description":"consistent/no consistent : send data to server",
+  }
+}
+
+{
+  "state":{
+    "code": "1"
+    "description":"no consistent : receive data from server",
+    "data":{
+      "user":{
+        "name":"...",
+        "last_name":"...",
+        "gender":"...",
+        "birth_date":"...",
+        "email":"...",
+        "city":"...",
+        "phone":"...",
+        "height":"...",
+        "username":"...",
+        "image":{
+          "name": "...",
+          "content": "..."
+        }
+      },
+      "weights":[
+        {
+          "id_weight":"...",
+          "date":"...",
+          "value":"..."
+        },
+        ....
+      ],
+      "workouts":[
+        {
+          "id_workout":"...",
+          "map_route":"...",
+          "date":"...",
+          "duration":"...",
+          "distance":"...",
+          "calories":"...",
+          "sport":"..."
+        },
+        ...
+      ],
+      "settings":{
+          "sport":"...",
+          "target":"...",
+          "unit_measure":{
+            "energy":"...",
+            "distance":"...",
+            "weight":"...",
+            "height":"..."
+          }
+      }
+    }
+  }
+}
+
+
+
+// OUTPUT sign_in
+
+{
+  "session" : "...",
+}
+
+// OUTPUT FIRST_LOGIN
+{
+  "session":"...",
+  "data":{
+    "user":{
+      "name":"...",
+      "last_name":"...",
+      "gender":"...",
+      "birth_date":"...",
+      "email":"...",
+      "city":"...",
+      "phone":"...",
+      "height":"...",
+      "username":"...",
+      "image":{
+        "name": "...",
+        "content": "..."
+      }
+    },
+    "weights":[{
+        "id_weight":"...",
+        "date":"...",
+        "value":"..."
+      }],
+    "settings":{
+        "sport":"...",
+        "target":"...",
+        "unit_measure":{
+          "energy":"...",
+          "distance":"...",
+          "weight":"...",
+          "height":"..."
+        }
+    }
+  }
+}
+
+// PACK ERRORE FIRST_LOGIN
+
+{
+  "Error": {
+    "code":"...",
+    "description": "..."
+  }
+}
+
+// OUTPUT insert, update, delete
+{
+  "sign_up/insert/update/delete" : true/false
+}

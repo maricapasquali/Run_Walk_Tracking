@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/profile_modify"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@drawable/ic_edit"
         android:title="@string/modify" />
     <item
         android:id="@+id/profile_change_password"

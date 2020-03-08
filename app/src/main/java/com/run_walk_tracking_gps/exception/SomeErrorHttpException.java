@@ -1,26 +1,29 @@
 package com.run_walk_tracking_gps.exception;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.util.Log;
 
-import com.android.volley.RequestQueue;
 import com.run_walk_tracking_gps.R;
 
-public class SomeErrorHttpException extends AbstractException {
+import androidx.appcompat.app.AlertDialog;
 
-    public SomeErrorHttpException(Context context, String mex){
-        super(context, mex);
+public class SomeErrorHttpException extends BackgroundException{
+
+    public SomeErrorHttpException(Context context, String mex) {
+        super(context, mex, SomeErrorHttpException.class.getSimpleName());
+    }
+
+    public static SomeErrorHttpException create(Context context, String mex){
+        return new SomeErrorHttpException(context, mex);
     }
 
     @Override
-    public void alert() {
-        Log.e(getContext().getPackageName(), getMessage());
+    protected void createAlertDialog() {
         new AlertDialog.Builder(getContext())
                 .setTitle(R.string.error)
                 .setMessage(getMessage())
-                .setPositiveButton(R.string.ok, null)
+                .setPositiveButton(R.string.ok, super.close())
                 .create()
                 .show();
     }
+
 }

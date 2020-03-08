@@ -1,7 +1,6 @@
 package com.run_walk_tracking_gps;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.run_walk_tracking_gps.utilities.CollectionsUtilities;
@@ -13,9 +12,12 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.test.InstrumentationRegistry;
+
+// TODO: 2/17/2020 RIMUOVERE
 public class CollectionsUtilitiesTest {
 
-    private Context context= InstrumentationRegistry.getTargetContext();
+    /*private Context context= InstrumentationRegistry.getTargetContext();
     private List<LatLng> list;
     private String string;
 
@@ -38,5 +40,5 @@ public class CollectionsUtilitiesTest {
     @Test
     public void convertStringToListObject(){
         Assert.assertEquals(list, CollectionsUtilities.convertStringToListLatLng(string));
-    }
+    }*/
 }

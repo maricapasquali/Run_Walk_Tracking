@@ -54,6 +54,10 @@
     <string name="password_not_empty">Password non vuota</string>
     <string name="confirm_password_not_empty">Conferma Password non vuota</string>
 
+    <!-- Activation Account -->
+    <string name="activation_account">Attivazione Account</string>
+    <string name="check_code">Codice di attivazione</string>
+
     <!-- Impostazioni -->
     <string name="sport">Sport</string>
     <string name="walk">Camminata</string>
@@ -94,6 +98,10 @@
         <item name="hybrid">Ibrida</item>
     </string-array>
 
+    <!-- MapFragment -->
+    <string name="departure">Partenza</string>
+    <string name="arrivals">Arrivo</string>
+
     <!-- Riepilogo / Dettaglio Allenamento -->
     <string name="summary_workout">Riepilogo</string>
     <string name="modify">Modifica</string>
@@ -113,11 +121,29 @@
     <string name="change_password">Cambia Password</string>
     <string name="save">Salva</string>
     <string name="delete_account">Elimina account</string>
+    <string name="old_password">Vecchia Password</string>
+    <string name="new_password">Nuova Password</string>
 
     <!-- Statistiche -->
     <string name="statistic_data">Dati</string>
     <string name="graphic_statistics">Grafico</string>
     <string name="nothing_value">Nessun Valore</string>
+
+    <!-- Vocal Coach -->
+    <string name="use_coach">Utilizza allenatore vocale</string>
+    <string name="interval">Intervallo (min)</string>
+
+    <!-- Music -->
+    <string name="music">Musica</string>
+    <string name="use_playlist">Usa PlayList</string>
+    <string name="rename">Rinomina</string>
+    <string name="use_like_primary">Usa come primaria</string>
+    <string name="preview">Anteprima</string>
+    <string name="create">Crea</string>
+    <string name="search">Cerca</string>
+    <string name="close">Chiudi</string>
+    <string name="num_songs">Numero brani</string>
+    <string name="date_creation">Data di creazione</string>
 
     <!-- Informazioni account -->
     <string name="info_description">
@@ -134,20 +160,29 @@
     <string name="gps_disabled">Il GPS sembra essere disattivato, vuoi attivarlo?</string>
     <string name="delete_weight_mex">Sei sicuro di voler eliminare questo peso?</string>
     <string name="delete_workout_mex"> Sei sicuro di voler eliminare questo allenamento?</string>
+    <string name="delete_playlist_mex">Sei sicuro di voler eliminare questa playlist?</string>
+    <string name="delete_song_mex">Sei sicuro di voler eliminare questa canzone?</string>
     <string name="correctly_sign_up">Registrazione avvenuta correttamente! Riceverai un email con un codice.</string>
+    <string name="account_use_other_device">Account in uso in un altro dispositivo. Continua qui ?</string>
+    <string name="check_code_text">" Inserisci il codice di attivazione dell'account che ti è stato inviato per email."</string>
+    <string name="continue_here">Continua qui</string>
 
     <!-- Messaggi di errore -->
     <string name="error">Errore</string>
     <string name="not_correct_password">Password non corretta</string>
     <string name="workout_not_set_correctly">Devono essere settati almeno GIORNO, SPORT e DURATA</string>
     <string name="weight_not_set_correctly">Devono essere settati sia PESO sia GIORNO</string>
-    <string name="not_empty">\u0020 non può essere vuoto</string>
+    <string name="not_empty">\u0020 non vuoto</string>
     <string name="user_not_set">User non settato</string>
     <string name="account_not_checked">Account non verificato!</string>
     <string name="start_compression_image">Inizio Compressione Immagine</string>
     <string name="end_compression_image">Compressione Immagine Finita</string>
     <string name="internet_not_available_title">Dati cellulare disattivati</string>
     <string name="internet_not_available_mex">Attiva i dati cellulare o usa la rete WI-FI per accedere ai dati.</string>
+    <string name="token_not_valid">Sessione non valida</string>
+    <string name="connection_slow">Ops ! Connessione lenta, riprova più tardi.</string>
+    <string name="internal_server_error">Errore interno al Server</string>
+
 
 
 </resources>

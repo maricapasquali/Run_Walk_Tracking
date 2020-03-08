@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 
@@ -18,7 +17,7 @@ public abstract class NewInformationActivity extends CommonActivity {
     private ListView listView;
 
     private NewInformationAdapter adapter;
-    private OnAddInfoListener onAddInfoListener;
+    //private OnAddInfoListener onAddInfoListener;
 
     public NewInformationActivity(int titleBar) {
         this.title = titleBar;
@@ -34,13 +33,7 @@ public abstract class NewInformationActivity extends CommonActivity {
 
         listView = findViewById(R.id.info_to_add);
 
-        try {
-            onAddInfoListener = (OnAddInfoListener)this;
-        }catch (ClassCastException e){
-            throw new ClassCastException(this + " must implement NewInformationActivity.OnAddInfoListener");
-        }
-
-        adapter = onAddInfoListener.getAdapterListView();
+        adapter = getAdapterListView();
 
         if(adapter==null)
             throw new NullPointerException("Adapter must be other than null");
@@ -49,15 +42,16 @@ public abstract class NewInformationActivity extends CommonActivity {
         setModel();
     }
 
-
     protected abstract void setModel();
+
+    protected abstract NewInformationAdapter getAdapterListView();
+
+    protected abstract View.OnFocusChangeListener onSetInfo();
+
+    protected abstract void onClickAddInfo();
 
     @Override
     protected void listenerAction() {
-
-        listView.setOnItemClickListener((parent, view, position, id) ->
-                onAddInfoListener.onSetInfo(parent, view, position, id));
-
     }
 
     @Override
@@ -70,18 +64,13 @@ public abstract class NewInformationActivity extends CommonActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.add_info:
-                onAddInfoListener.onClickAddInfo();
+                //onAddInfoListener.onClickAddInfo();
+                onClickAddInfo();
                 break;
             case android.R.id.home:
                 onBackPressed();
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public interface OnAddInfoListener{
-        NewInformationAdapter getAdapterListView();
-        void onSetInfo(AdapterView<?> parent, View view, int position, long id);
-        void onClickAddInfo();
     }
 }

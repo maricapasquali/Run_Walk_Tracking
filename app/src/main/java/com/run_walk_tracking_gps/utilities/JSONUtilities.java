@@ -29,4 +29,9 @@ public class JSONUtilities {
         final Iterable<String> itr = jsonObject::keys;
         return StreamSupport.stream(itr.spliterator(), false).count();
     }
+
+    public static JSONObject replace(final JSONObject out, final JSONObject in) throws JSONException {
+        if(countKey(out)==0) return in;
+       return merge(out, in);
+    }
 }

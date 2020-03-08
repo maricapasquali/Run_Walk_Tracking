@@ -1,24 +1,5 @@
 package com.run_walk_tracking_gps;
-
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.util.Log;
-
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.model.enumerations.Gender;
-import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.CryptographicHashFunctions;
-import com.run_walk_tracking_gps.utilities.DateHelper;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-
-import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Locale;
-
+// TODO: 2/17/2020 RIMUOVERE
 public class HttpRequestVolleyTest {
 /*
     private final static String ERROR ="Error";
@@ -98,7 +79,7 @@ public class HttpRequestVolleyTest {
     }
 
     @Test
-    public void requestUpdatePasswordVolley(){
+    public void requestChangePasswordVolley(){
 
 
         final JSONObject bodyJson = new JSONObject();
@@ -107,7 +88,7 @@ public class HttpRequestVolleyTest {
             //bodyJson.put( HttpRequest.Constant.NAME, "Mario");
             bodyJson.put( HttpRequest.Constant.ID_USER, 27);
 
-            HttpRequest.requestUpdatePassword(context, bodyJson,this::responseServer);
+            HttpRequest.requestChangePassword(context, bodyJson,this::responseServer);
 
         } catch (Exception e) {
             Log.e(TAG, e.toString());

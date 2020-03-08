@@ -1,22 +1,23 @@
 package com.run_walk_tracking_gps.gui.components.dialog;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.ActivationAccountActivity;
 import com.run_walk_tracking_gps.gui.ForgotPassword;
 import com.run_walk_tracking_gps.gui.LoginActivity;
 import com.run_walk_tracking_gps.gui.SignUpActivity;
-import com.run_walk_tracking_gps.gui.TokenActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
 
-public class RequestDialog extends ProgressDialog {
+import androidx.appcompat.app.AlertDialog;
+
+public class RequestDialog extends AlertDialog {
 
     private static final String TAG = RequestDialog.class.getName();
-    private TextView progressMsg;
 
     private Activity activity;
 
@@ -33,23 +34,26 @@ public class RequestDialog extends ProgressDialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
+
         setContentView(R.layout.custom_dialog_saving_fullscreen);
         getWindow().setLayout(AppBarLayout.LayoutParams.MATCH_PARENT, AppBarLayout.LayoutParams.MATCH_PARENT);
 
-        progressMsg = findViewById(R.id.progressmsg);
+        TextView progressMsg = findViewById(R.id.progressmsg);
+        progressMsg.setText(""); // TODO : NOME DEL PROGRESS DIALOG IN BASE ALL'ACTIVITY
 
         if(activity instanceof SignUpActivity){
             progressMsg.setText(new StringBuilder(getContext().getString(R.string.rec) + " ..."));
         }
-        if(activity instanceof LoginActivity || activity instanceof TokenActivity){
+        if(activity instanceof LoginActivity || activity instanceof ActivationAccountActivity){
             progressMsg.setText(new StringBuilder(getContext().getString(R.string.login) + " ..."));
         }
-
+        if(activity instanceof UserActivity){
+            progressMsg.setText(new StringBuilder(getContext().getString(R.string.delete_account) + " ..."));
+        }
         if(activity instanceof ForgotPassword){
             progressMsg.setText(getContext().getString(R.string.request));
         }
 
-
-        Log.e(TAG, progressMsg.getText().toString());
+        Log.d(TAG, progressMsg.getText().toString());
     }
 }

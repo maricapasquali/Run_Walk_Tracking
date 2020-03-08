@@ -2,24 +2,30 @@ package com.run_walk_tracking_gps.gui.components.adapter.listview;
 
 import android.content.Context;
 
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.run_walk_tracking_gps.R;
 
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
+import com.run_walk_tracking_gps.utilities.ColorUtilities;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import androidx.appcompat.view.ContextThemeWrapper;
+
 public class DetailsWorkoutAdapter extends BaseAdapter {
 
     private final static String TAG = DetailsWorkoutAdapter.class.getName();
+    private View.OnFocusChangeListener listener;
 
     private Context context;
     private Map<Workout.Info, Object> details;
@@ -27,6 +33,11 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
     public DetailsWorkoutAdapter(Context context, Map<Workout.Info, Object> map){
         this.context = context;
         this.details = map;
+    }
+
+    public DetailsWorkoutAdapter(Context context, Map<Workout.Info, Object> map, View.OnFocusChangeListener listener){
+        this(context,map);
+        this.listener = listener;
     }
 
     public void updateDetails(Workout workout){
@@ -59,9 +70,15 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         if (convertView == null) {
             view = LayoutInflater.from(context).inflate(R.layout.custom_item_details_workout, null);
 
-            final TextView title = view.findViewById(R.id.detail_title);
-            final TextView description = view.findViewById(R.id.detail_description);
-
+            final TextInputLayout title = view.findViewById(R.id.detail_title);
+            final TextInputEditText description = view.findViewById(R.id.detail_description);
+            if(listener==null) {
+                title.setErrorEnabled(false);
+                description.setFocusable(false);
+            }else{
+                description.setOnFocusChangeListener(listener);
+                description.setOnClickListener(v -> listener.onFocusChange(v, true));
+            }
             viewHolder = new ListHolder(title, description);
 
             view.setTag(viewHolder);
@@ -73,32 +90,29 @@ public class DetailsWorkoutAdapter extends BaseAdapter {
         final Map.Entry<Workout.Info, Object> entry = (Map.Entry<Workout.Info, Object>)getItem(position);
 
         final Workout.Info info = entry.getKey();
-        viewHolder.infoWorkout.setText(info.getStrId());
+        viewHolder.infoWorkout.setHint(context.getString(info.getStrId()));
 
         final Object det = entry.getValue();
-
+        Drawable icon;
         if(Workout.Info.isSport(info)){
             Sport sport = ((Sport)det);
             viewHolder.details.setText(sport.getStrId());
-            viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(sport.getIconId()),
-                    null,null,null);
+            icon = ColorUtilities.darkIcon(context, sport.getIconId());
         }
         else{
-            viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(info.getIconId()),
-                    null,null,null);
-
+            icon = ColorUtilities.darkIcon(context, info.getIconId());
             viewHolder.details.setText((String)det);
         }
+        viewHolder.details.setCompoundDrawablesWithIntrinsicBounds(icon,null,null,null);
+
         return view;
     }
 
     private static class ListHolder {
-        private TextView infoWorkout;
-        private TextView details;
+        private TextInputLayout infoWorkout;
+        private TextInputEditText details;
 
-        private ListHolder(TextView titleItem, TextView description) {
+        private ListHolder(TextInputLayout titleItem, TextInputEditText description) {
             this.infoWorkout = titleItem;
             this.details = description;
         }

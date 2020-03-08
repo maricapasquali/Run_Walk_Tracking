@@ -1,184 +1,89 @@
 package com.run_walk_tracking_gps.gui;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-import com.android.volley.Response;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.controller.UserSingleton;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
-import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.model.builder.StatisticsBuilder;
-import com.run_walk_tracking_gps.model.StatisticsData;
-import com.run_walk_tracking_gps.model.Workout;
-import com.run_walk_tracking_gps.utilities.DeviceUtilities;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.receiver.ActionReceiver;
+import com.run_walk_tracking_gps.service.WorkoutService;
+import com.run_walk_tracking_gps.task.CheckSongTask;
+import com.run_walk_tracking_gps.utilities.PermissionUtilities;
+import com.run_walk_tracking_gps.utilities.ServiceUtilities;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-
-public class SplashScreenActivity extends AppCompatActivity implements Response.Listener<JSONObject> {
-
+public class SplashScreenActivity extends AppCompatActivity {
 
     private final static String TAG = SplashScreenActivity.class.getName();
-    private static Intent intent;
-
-    private JSONObject bodyJson;
-
-    private boolean requestPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
+        if(!PermissionUtilities.hasReadExternalStoragePermission(this)){
+            PermissionUtilities.setReadExternalStoragePermission(this);
+        }else{
+            CheckSongTask.create(this).execute();//startService(new Intent(this, CheckSongService.class));
+            goOn();
+        }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    protected void onResume() {
-        super.onResume();
-        String idDevice;
-        try {
-            idDevice = DeviceUtilities.getIdDevice(this);
-            Log.d(TAG, "IMEI = "+idDevice);
-        }catch (SecurityException e){
-            DeviceUtilities.requestStatePhonePermission(this);
-            requestPermission=true;
-            return;
+    private void goOn(){
+
+        if( getIntent().getAction()!=null &&
+                ( getIntent().getAction().equals(ActionReceiver.RUNNING_WORKOUT) ||
+                        getIntent().getAction().equals(ActionReceiver.STOP_ACTION)))
+        {
+            startApplicationActivity(getIntent().getAction());
+
+        }else if(ServiceUtilities.isServiceRunning(this, WorkoutService.class)){
+            startApplicationActivity(ActionReceiver.RUNNING_WORKOUT);
         }
-
-        if(requestPermission){
-            Log.e(TAG, "SET NULL ID="+idDevice);
-
-            try {
-                bodyJson = new JSONObject().put(HttpRequest.Constant.IMEI, idDevice);
-                HttpRequest.requestReset(this, bodyJson, response -> {
-                    try {
-                        if(response.has(HttpRequest.Constant.RESET) && response.getBoolean(HttpRequest.Constant.RESET)){
-                            go(idDevice);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (InternetNoAvailableException e) {
-                e.alert();
+        else {
+            if(Preferences.Session.isLogged(this)) {
+                NetworkHelper.HttpRequest.syncInForeground(this);
+            } else {
+                startActivity(new Intent(SplashScreenActivity.this, BootAppActivity.class));
+                finish();
             }
-        }else {
-            go(idDevice);
         }
-
     }
 
-    private void go(final String idDevice){
-        if(DefaultPreferencesUser.isJustUserLogged(this)){
-            int id_user = Integer.valueOf(DefaultPreferencesUser.getIdUserLogged(this));
-
-            try {
-                // REQUEST IMAGE PROFILE, WEIGHTS AND WORKOUTS
-                bodyJson = new JSONObject().put(HttpRequest.Constant.ID_USER, id_user)
-                                           .put(HttpRequest.Constant.IMEI, idDevice);
-                HttpRequest.requestDataAfterAccess(this, bodyJson, this);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (InternetNoAvailableException e) {
-                e.alert();
-            }
-
-        }else {
-            intent = new Intent(SplashScreenActivity.this, BootAppActivity.class);
-            startActivity(intent);
-            finish();
-        }
+    private void startApplicationActivity(String action){
+        startActivity(new Intent(this, ApplicationActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setAction(action));
     }
 
     @Override
     public void onBackPressed() {
-        HttpRequest.cancelAllRequestPending(bodyJson);
         super.onBackPressed();
+        finishAffinity();
     }
 
     @Override
-    public void onResponse(JSONObject response) {
-        if(dataAccessResponse(this, response)) finishAffinity();
-    }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case PermissionUtilities.READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE: {
+                PermissionUtilities.onRequestPermissionsResult(grantResults, new PermissionUtilities.OnPermissionListener() {
+                    @Override
+                    public void onGranted() {
+                        CheckSongTask.create(SplashScreenActivity.this).execute();//startService(new Intent(this, CheckSongService.class));
+                    }
 
+                    @Override
+                    public void onDenied() {
+                    }
+                });
 
-    public static Intent restoreData(final JSONObject response, Context context){
-        try {
-
-            JSONObject user = (JSONObject)response.get(HttpRequest.Constant.USER);
-            UserSingleton.getInstance().setUser(context, user);
-            Log.d(TAG, UserSingleton.getInstance().getUser().toString());
-
-            if(user.has(HttpRequest.Constant.IMG_ENCODE)) {
-                DefaultPreferencesUser.setImage(context, response);
-                Log.e(TAG, "Set Image");
+                goOn();
             }
-            DefaultPreferencesUser.setSettings(context, response);
-
-            intent = new Intent(context, ApplicationActivity.class);
-            final ArrayList<Workout> workouts = Workout.createList(context, (JSONArray)response.get(HttpRequest.Constant.WORKOUTS));
-            final ArrayList<StatisticsData> statisticsWeight = new ArrayList<>();
-            // TODO: 11/2/2019 MIGLIORARE
-            final JSONArray array = (JSONArray)response.get(HttpRequest.Constant.WEIGHTS);
-            for(int i = 0; i < array.length(); i++){
-                JSONObject s = (JSONObject)array.get(i);
-                StatisticsData statisticsData = StatisticsBuilder.createStatisticWeight(context)
-                        .setDate(s.getString(HttpRequest.Constant.DATE))
-                        .setValue(s.getDouble(HttpRequest.Constant.WEIGHT))
-                        .build();
-                statisticsData.setId(s.getInt(HttpRequest.Constant.ID_WEIGHT));
-                statisticsWeight.add(statisticsData);
-            }
-            /*Log.e(TAG, statisticsWeight.toString()); Log.e(TAG, workouts.toString());*/
-            intent.putExtra(KeysIntent.WORKOUTS, workouts);
-            intent.putExtra(KeysIntent.WEIGHTS, statisticsWeight);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        }catch (JSONException e){
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+            break;
         }
-        return intent;
-    }
-
-
-    public static boolean dataAccessResponse(final Context context, final JSONObject response){
-        try {
-            if(response.has(HttpRequest.Constant.FIRST_LOGIN) && response.getBoolean(HttpRequest.Constant.FIRST_LOGIN)){
-
-                final Intent intent = new Intent(context, TokenActivity.class);
-                intent.putExtra(HttpRequest.Constant.ID_USER, response.getInt(HttpRequest.Constant.ID_USER));
-                context.startActivity(intent);
-
-            } else {
-
-                Intent intent = restoreData(response, context);
-                context.startActivity(intent);
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
     }
 }

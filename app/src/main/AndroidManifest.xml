@@ -3,46 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.run_walk_tracking_gps">
 
-    <!-- Permission for IMEI code -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
-    <!-- Permission for map -->
-    <uses-permission android:name="com.example.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
+
+    <!-- Permission to FOREGROUND SERVICE -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Permission Position  -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> 
 
-    <!-- Permissions to Take or Write image -->
+    <!-- Feature SENSOR (distance) -->
+    <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
+
+    <!-- Permissions to Take or Write image /Audio, Android ID-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Permissions to speech with server -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-
-    <!-- Permission to FOREGROUND SERVICE -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Feature SENSOR (distance) -->
-    <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
-
 
 
     <application
         android:allowBackup="true"
+        android:name=".RunWalkTracking"
         android:icon="@mipmap/ic_launcher_runwalktracking"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_runwalktracking_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        >
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -57,16 +57,11 @@
 
         <activity android:name=".gui.SplashScreenActivity" android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-          <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".gui.NotificationSplashScreenActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"
-            />
 
         <activity
             android:name=".gui.BootAppActivity"
@@ -78,7 +73,7 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".gui.TokenActivity"
+            android:name=".gui.ActivationAccountActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
@@ -93,7 +88,7 @@
             android:name=".gui.ApplicationActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask">
-         <!--   android:launchMode="singleInstance"-->
+
         </activity>
 
         <activity
@@ -123,6 +118,11 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".gui.activity_of_settings.VoiceCoachActivity"
+            android:parentActivityName=".gui.SettingActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name=".gui.activity_of_settings.ModifyUserActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -138,11 +138,34 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".gui.SettingActivity" />
 
+
+        <activity
+            android:name=".gui.activity_of_settings.MusicActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".gui.SettingActivity" />
+
+        <activity android:name=".gui.activity_of_settings.NewPlayListActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".gui.activity_of_settings.PlayListActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".gui.activity_of_settings.AddSongToPlayListActivity"
+            android:screenOrientation="portrait" />
+
         <!-- SERVICE -->
-        <service android:name=".service.WorkoutService"/>
+
+        <service android:name=".service.NetworkService"/>
+        <service android:name=".service.WorkoutService" />
 
         <!-- RECEIVER -->
-        <receiver android:name=".receiver.ReceiverNotificationButtonHandler" />
+
+        <receiver android:name=".receiver.ReceiverRestartService" />
+
+        <!--<receiver android:name=".service.SyncServiceHandler$RequestSyncBroadcastReceiver"
+            android:exported="false">
+        </receiver>-->
+
     </application>
 
 </manifest>

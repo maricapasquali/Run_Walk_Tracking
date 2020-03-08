@@ -5,30 +5,37 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.controller.DefaultPreferencesUser;
-import com.run_walk_tracking_gps.exception.InternetNoAvailableException;
+import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
+import com.run_walk_tracking_gps.controller.ErrorQueue;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.activity_of_settings.InfoActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.MusicActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
+import com.run_walk_tracking_gps.gui.activity_of_settings.VoiceCoachActivity;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.SportAdapterSpinner;
 import com.run_walk_tracking_gps.gui.components.adapter.spinner.TargetAdapterSpinner;
-import com.run_walk_tracking_gps.gui.activity_of_settings.MeasureUnitActivity;
-import com.run_walk_tracking_gps.gui.activity_of_settings.UserActivity;
-import com.run_walk_tracking_gps.connectionserver.HttpRequest;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.model.enumerations.Target;
-import com.run_walk_tracking_gps.utilities.EnumUtilities;
+import com.run_walk_tracking_gps.service.NetworkServiceHandler;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SettingActivity extends CommonActivity {
 
@@ -42,14 +49,17 @@ public class SettingActivity extends CommonActivity {
     private LinearLayout location;
     private LinearLayout unit;
 
-    private LinearLayout playlist;
-    private LinearLayout coach;
+    private TextView music;
+    private Switch music_on_off;
+    private TextView coach;
+    private Switch coachOnOff;
 
     private LinearLayout info;
     private LinearLayout exit;
 
-    private int idStrTarget;
-    private int idStrSport;
+    private Sport sportDefault;
+
+    private Target targetDefault;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -59,12 +69,12 @@ public class SettingActivity extends CommonActivity {
 
         // sport
         sport = findViewById(R.id.setting_spinner_sport);
-        final SportAdapterSpinner spinnerAdapterSport = new SportAdapterSpinner(this, false);
+        final SportAdapterSpinner spinnerAdapterSport = new SportAdapterSpinner(this);
         sport.setAdapter(spinnerAdapterSport);
 
         // target
         target = findViewById(R.id.setting_spinner_target);
-        final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this, false);
+        final TargetAdapterSpinner spinnerAdapterTarget = new TargetAdapterSpinner(this);
         target.setAdapter(spinnerAdapterTarget);
 
         profile = findViewById(R.id.profile);
@@ -72,24 +82,40 @@ public class SettingActivity extends CommonActivity {
         location = findViewById(R.id.location);
         unit = findViewById(R.id.unit);
 
-        playlist = findViewById(R.id.playlist);
-        coach = findViewById(R.id.voacal_coach);
+        music = findViewById(R.id.setting_playlist);
+        music_on_off = findViewById(R.id.setting_playlist_on_off);
+        coach = findViewById(R.id.setting_vocal);
+        coachOnOff = findViewById(R.id.setting_vocal_on_off);
+
 
         info = findViewById(R.id.info);
         exit = findViewById(R.id.exit);
 
+        try {
+            sportDefault = Sport.valueOf(DaoFactory.getInstance(this).getSettingDao().getSportDefault());
+            sport.setSelection(Stream.of(Sport.values()).collect(Collectors.toList()).indexOf(sportDefault));
 
-        idStrSport = DefaultPreferencesUser.getSportDefault(this).getStrId();
-        sport.setSelection(spinnerAdapterSport.getPositionOf(idStrSport));
+            targetDefault = Target.valueOf(DaoFactory.getInstance(this).getSettingDao().getTargetDefault());
+            target.setSelection(Stream.of(Target.values()).collect(Collectors.toList()).indexOf(targetDefault));
 
-        idStrTarget = DefaultPreferencesUser.getTargetDefault(this).getStrId();
-        target.setSelection(spinnerAdapterTarget.getPositionOf(idStrTarget));
 
+            coachOnOff.setChecked(VoiceCoach.getInstance(this).isActive());
+            music_on_off.setChecked(Preferences.Music.isActive(this));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     protected void onResume() {
         super.onResume();
+        ErrorQueue.getErrors(this);
+        // TODO: 1/3/2020 ADD SYNC SERVICE ONRESUME
+        //SyncServiceHandler.create(this).start();
+
+        coachOnOff.setChecked(VoiceCoach.getInstance(this).isActive());
+        music_on_off.setChecked(Preferences.Music.isActive(this));
 
         if((LocationUtilities.isGpsEnable(this) && !locationOnOff.isChecked()) ||
                 (!LocationUtilities.isGpsEnable(this) && locationOnOff.isChecked())){
@@ -115,19 +141,42 @@ public class SettingActivity extends CommonActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void onChangeSpinnerSelection(Enum type){
+
+        if(DaoFactory.getInstance(this).getSettingDao().update(type, type.toString())){
+            Preferences.Session.update(this);
+
+            try {
+                JSONObject data = new JSONObject().put(NetworkHelper.Constant.VALUE, type.toString());
+                Log.e(TAG, data.toString());
+                String filter = null;
+                if(type instanceof Sport){
+                    sportDefault = (Sport) type;
+                    filter = NetworkHelper.Constant.SPORT;
+                }else if(type instanceof Target){
+                    targetDefault = (Target) type;
+                    filter = NetworkHelper.Constant.TARGET;
+                }
+                NetworkServiceHandler.getInstance(this, NetworkHelper.Constant.UPDATE, filter, data.toString())
+                                     .startService();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     protected void listenerAction() {
 
         sport.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(idStrSport!=(int)parent.getSelectedItem()){
-                    Sport sport = (Sport) EnumUtilities.getEnumFromStrId(Sport.class, (int)parent.getSelectedItem());
-                    Log.e(TAG, sport.toString());
-                    onChangeSpinnerSelection(Sport.class.getSimpleName().toLowerCase(), sport);
-                }
+                Sport selectedSport = (Sport) parent.getSelectedItem();
+                if(sportDefault!=selectedSport){
+                    onChangeSpinnerSelection(selectedSport);
+                    Log.e(TAG, "Sport = " + selectedSport.toString());
+                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -136,10 +185,10 @@ public class SettingActivity extends CommonActivity {
         target.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (idStrTarget != (int) parent.getSelectedItem()) {
-                    Target target = (Target) EnumUtilities.getEnumFromStrId(Target.class, (int) parent.getSelectedItem());
-                    Log.e(TAG, target.toString());
-                    onChangeSpinnerSelection(Target.class.getSimpleName().toLowerCase(), target);
+                Target selectedTarget = (Target) parent.getSelectedItem();
+                if (targetDefault != selectedTarget) {
+                    onChangeSpinnerSelection(selectedTarget);
+                    Log.e(TAG, "Target = " + selectedTarget.toString());
                 }
             }
             @Override
@@ -149,9 +198,38 @@ public class SettingActivity extends CommonActivity {
 
         location.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
 
-        playlist.setOnClickListener(v -> Toast.makeText(this, getString(R.string.playlist), Toast.LENGTH_SHORT).show());
+        music_on_off.setOnCheckedChangeListener((buttonView, isChecked) ->{
+            // TODO: 07/02/2020
+            Preferences.Music.setActive(this, isChecked);
+        });
+        coachOnOff.setOnCheckedChangeListener((buttonView, isChecked) -> VoiceCoach.getInstance(this).setActive(isChecked));
 
-        coach.setOnClickListener(v -> Toast.makeText(this, getString(R.string.vocal_coach), Toast.LENGTH_SHORT).show());
+        Stream.of(music, coach).forEach(view-> {
+            view.setOnTouchListener((v, event) -> {
+                final LinearLayout parent = ((LinearLayout)((TextView)v).getParent());
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        parent.setPressed(true);
+                        break;
+                    case MotionEvent.ACTION_CANCEL:
+                        parent.setPressed(false);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        parent.setPressed(false);
+                        switch(v.getId()){
+                            case R.id.setting_playlist:
+                                startActivity(new Intent(this, MusicActivity.class));
+                                break;
+                            case R.id.setting_vocal:
+                                startActivity(new Intent(this, VoiceCoachActivity.class));
+                                break;
+                        }
+                        break;
+                }
+                return true;
+            });
+
+        });
 
         info.setOnClickListener(v -> startActivity(new Intent(this, InfoActivity.class)));
 
@@ -160,46 +238,13 @@ public class SettingActivity extends CommonActivity {
         unit.setOnClickListener(v -> startActivity(new Intent(this, MeasureUnitActivity.class)));
 
         exit.setOnClickListener(v -> {
-            DefaultPreferencesUser.unSetUserLogged(this);
-
-            final Intent intent = new Intent(this, BootAppActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            //SyncServiceHandler.create(this).stop();
+            Preferences.Session.logout(this);
+            startActivity(new Intent(this, BootAppActivity.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
         });
+
     }
 
-
-    private void onChangeSpinnerSelection(String type, Enum value){
-        try {
-
-            String id_user = DefaultPreferencesUser.getIdUserLogged(this);
-            JSONObject settingsJson = DefaultPreferencesUser.getSettingsJsonUserLogged(this, id_user);
-
-            String s_default = settingsJson.getString(type);
-            String id = value.toString();
-            Log.d(TAG, "Selected " + type + " = " + id + ", Default = " + s_default);
-
-            if(!id.equals(s_default)){
-                // request update
-                JSONObject bodyJson = new JSONObject();
-                bodyJson.put(HttpRequest.Constant.ID_USER, Integer.valueOf(id_user))
-                        .put(HttpRequest.Constant.FILTER, type)
-                        .put(HttpRequest.Constant.VALUE, id);
-
-                HttpRequest.requestUpdateSetting(SettingActivity.this, bodyJson, response -> {
-                    try {
-                        DefaultPreferencesUser.updateSpinnerSettings(this, type, response.getString(type));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InternetNoAvailableException e) {
-            e.alert();
-        }
-    }
 }

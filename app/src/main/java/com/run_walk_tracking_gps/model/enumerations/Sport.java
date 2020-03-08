@@ -7,10 +7,9 @@ public enum Sport {
     RUN(R.string.run, R.drawable.ic_run, 1.0),
     WALK(R.string.walk, R.drawable.ic_walk, 0.5);
 
-
-    private final double constant;
     private final int strId;
     private final int iconId;
+    private final double constant;
 
     Sport(int strId, int iconId, double constant) {
         this.strId = strId;
@@ -26,7 +25,8 @@ public enum Sport {
         return this.iconId;
     }
 
-    public double getConsumedEnergy(final double weight, final double distance){
+    public double getConsumedEnergy(final double weight,
+                                    final double distance){
         return this.constant*weight*distance;
     }
 }

@@ -1,6 +1,7 @@
 package com.run_walk_tracking_gps.service;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -8,29 +9,37 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Binder;
-import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.model.Measure;
+import com.run_walk_tracking_gps.controller.Preferences;
+import com.run_walk_tracking_gps.gui.NotificationWorkout;
+import com.run_walk_tracking_gps.model.MusicCoach;
+import com.run_walk_tracking_gps.model.VoiceCoach;
 import com.run_walk_tracking_gps.model.Workout;
 import com.run_walk_tracking_gps.model.builder.WorkoutBuilder;
 import com.run_walk_tracking_gps.model.enumerations.Sport;
 import com.run_walk_tracking_gps.receiver.ActionReceiver;
-import com.run_walk_tracking_gps.receiver.ReceiverWorkoutElement;
 
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
 
-public class WorkoutService extends Service {
+public class WorkoutService extends Service //implements MapRouteDraw.OnChangeLocationListener
+{
 
     private static final String TAG = WorkoutService.class.getName();
 
-    private final IBinder binder = new LocalBinder();
+    private static final int REQUEST_RESTART_SERVICE = 311;
+
+    private IBinder binder = null;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -43,17 +52,87 @@ public class WorkoutService extends Service {
         }
     }
 
-    private boolean isLock = false;
-    private boolean isWorkoutServiceRunning = false;
-    private boolean isWorkoutServicePause = false;
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind : INTENT = " + intent);
+        if(binder==null) binder = new LocalBinder();
+        return binder;
+    }
 
-    private Context context;
-    private ReceiverWorkoutElement receiver;
+    @Override
+    public void onRebind(Intent intent) {
+        Log.d(TAG, "onRebind : INTENT = " + intent);
+        if(binder==null) binder = new LocalBinder();
+        if(isRunning() &&  !isPause() && !isIndoor ){
+            mapRouteDraw.stopDrawing();
+            mapRouteDraw.setBackground(false);
+            mapRouteDraw.startDrawing(handler);
+        }
+        super.onRebind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG, "onUnbind : INTENT = " + intent);
+        binder = null;
+        if(isRunning() && !isPause() && !isIndoor){
+            mapRouteDraw.stopDrawing();
+            mapRouteDraw.setBackground(true);
+            mapRouteDraw.startDrawing(handler);
+        }
+        return true;
+    }
+
     private NotificationWorkout notificationWorkout;
     private Workout workout;
+    private boolean isRunning = false;
+    private boolean isInPause = false;
 
-    /* MAP */
-    private MapRouteDraw mapRouteDraw;
+    private Context context;
+    private Thread workoutThread;
+    private Handler handler;
+
+    private Handler.Callback handlerCallback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            Log.d(TAG, "Thread = [ id = " +
+                    Thread.currentThread().getId() + ", name = "+
+                    Thread.currentThread().getName() +" ]");
+
+            if(msg!=null && msg.getData()!=null){
+                Bundle bundle = msg.getData();
+                Log.d(TAG, bundle.toString());
+
+                String distance = bundle.getString(KeysIntent.DISTANCE);
+                String energy = bundle.getString(KeysIntent.ENERGY);
+                if(distance!=null && energy!=null){
+                    notificationWorkout.updateDistanceAndEnergy(distance, energy);
+                    Log.d(TAG, "Update Notification");
+                    if(binder!=null) {
+                        Log.d(TAG, "Send to activity");
+                        sendBroadcast(new Intent(ActionReceiver.DISTANCE_ENERGY_ACTION)
+                                .putExtra(KeysIntent.DISTANCE, distance)
+                                .putExtra(KeysIntent.ENERGY, energy));
+                    }
+                }
+                ArrayList<Location> locations = bundle.getParcelableArrayList(KeysIntent.ROUTE);
+                if(locations!=null){
+                    Preferences.WorkoutInExecution.MapLocation.addAll(context, locations);
+                    Log.d(TAG, "Update Preferences MAP ROUTE");
+                    if(binder!=null){
+                        Log.d(TAG, "Send to activity");
+                        sendBroadcast(new Intent(ActionReceiver.DRAWING_MAP_ACTION));
+                    }
+                }
+
+            }
+            return false;
+        }
+    };
+
+    /* MOVIMENT */
+
+    /* CALORIES AND DISTANCE */
 
     /* ENERGY */
     private Sport sport;
@@ -61,211 +140,306 @@ public class WorkoutService extends Service {
 
     /* DISTANCE */
     private static final double STEPS_TO_KM = 0.000762;
+    private static final int LATENCY = 1000000;
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
     private SensorManager sensorManager;
     private Sensor stepCounterSensor;
     private boolean firstTime = true;
-    private int oldValue = 0;
     private int milestoneStep;
     private SensorEventListener sensorEventListener = new SensorEventListener() {
+
         @Override
         public void onSensorChanged(SensorEvent event) {
             Log.d(TAG, "onSensorChanged");
-            if(isRunning()&& !isPause()){
-                if(firstTime) {
-                    Log.d(TAG, "Reset milestoneStep");
+            //boolean screenOn = powerManager.isInteractive();if(!screenOn) wakeLock.acquire();
+            if (isRunning && !isInPause) {
+               // boolean screenOn = powerManager.isInteractive();
+               // if(!screenOn) wakeLock.acquire();
+                if (firstTime) {
+                    if(Preferences.WorkoutInExecution.inExecution(context)){
+                        milestoneStep = Preferences.WorkoutInExecution.getMileStoneStep(context);
+                        Log.d(TAG, "MilestoneStep in Preferences = " + milestoneStep);
+                    }
+                    else{
+                        milestoneStep = (int) event.values[0];
+                        Preferences.WorkoutInExecution.setMileStoneStep(context, milestoneStep);
+                        Log.d(TAG, "Reset milestoneStep : " + milestoneStep);
+                    }
                     firstTime = false;
-                    milestoneStep = (int)event.values[0];
-
-                    if(oldValue>0) milestoneStep-=oldValue;
                 }
-                oldValue = (int)event.values[0] - milestoneStep;
 
+                int steps = (int) event.values[0] - milestoneStep;
                 // distance and energy
-                final double km = oldValue * STEPS_TO_KM;
-                final double kcal = sport.getConsumedEnergy(weight, km);
-               // Log.e(TAG, "Distance = " +km + " Km, Energy = " +kcal + " kcal");
+                double km = steps * STEPS_TO_KM;
+                double kcal = sport.getConsumedEnergy(weight, km);
                 workout.getDistance().setValue(true, km);
                 workout.getCalories().setValue(true, kcal);
 
-                sendBroadcast(new Intent(ActionReceiver.DISTANCE_ENERGY_ACTION)
-                                     .putExtra(KeysIntent.DISTANCE, workout.getDistance().toString(true))
-                                     .putExtra(KeysIntent.ENERGY, workout.getCalories().toString(true)));
+
+                String distance = workout.getDistance().toString(true);
+                String energy = workout.getCalories().toString(true);
+
+                //if(screenOn) {
+                if(powerManager.isInteractive()) {
+                    Message msg = Message.obtain();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KeysIntent.DISTANCE, distance);
+                    bundle.putString(KeysIntent.ENERGY, energy);
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                }
+                else{
+                    Log.d(TAG, "Steps = "+ steps + ", Distance = " + distance +" , Calories = " + energy);
+                   // wakeLock.release();
+                }
+
+                /*if(screenOn) {
+                    Log.d(TAG, "Update Notification");
+                    notificationWorkout.updateDistanceAndEnergy(distance, energy);
+                    if(binder!=null)
+                    {
+                        Log.d(TAG, "Send to activity");
+                        sendBroadcast(new Intent(ActionReceiver.DISTANCE_ENERGY_ACTION)
+                                .putExtra(KeysIntent.DISTANCE, distance)
+                                .putExtra(KeysIntent.ENERGY, energy));
+                    }
+                }
+                else
+                    wakeLock.release();*/
 
             }
+            //if(wakeLock.isHeld()) wakeLock.release();
         }
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            Log.d(TAG, "onAccuracyChanged");
+            Log.d(TAG, "onAccuracyChanged : " + sensor + ", accuracy = " + accuracy);
         }
     };
 
-    /* TIMER */
-    private static final long TIMER_INTERVAL = 1000;
-    private int time = 0;
-    private Timer mTimer;
-    private TimerTask timerTask = new TimerTask() {
-        @Override
-        public void run() {
-            //Log.d(TAG, "TimerTask");
-            if(isRunning() && !isPause()){
-                ++time;
-               // Log.e(TAG, "Timer = " +time);
-                workout.getDuration().setValue(true, (double) time);
-                sendBroadcast(new Intent(ActionReceiver.TIMER_ACTION).putExtra(KeysIntent.SECONDS, Measure.Utilities.format(time)));
-            }
+    /* MAP */
+    private MapRouteDraw mapRouteDraw;
+    private boolean isIndoor = false;
+    /*@Override
+    public void addPolyLineOnMap() {
+        if(binder!=null) {
+            Log.d(TAG, "MapRoute : Send to activity ");
+            sendBroadcast(new Intent(ActionReceiver.DRAWING_MAP_ACTION));
+            //.putExtra(KeysIntent.ROUTE, options));
         }
-    };
-
-    public WorkoutService(){}
+    }*/
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void setOnReceiverListener(Context context, final OnReceiverListener onReceiverListener){
-        if(this.receiver==null){
-            this.notificationWorkout = NotificationWorkout.create(context);
-            this.receiver = ReceiverWorkoutElement.create(notificationWorkout, onReceiverListener);
-        }
-        else
-            this.receiver.setBroadcastReceiver(onReceiverListener);
-
-        if(this.mapRouteDraw ==null)
-            this.mapRouteDraw = MapRouteDraw.create(context, onReceiverListener.onReceiverMapRoute());
-        else
-            this.mapRouteDraw.setOnChangeLocationListener(onReceiverListener.onReceiverMapRoute());
-
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate() {
+        super.onCreate();
         Log.d(TAG, "onCreate");
         this.context = getApplicationContext();
-        this.workout = WorkoutBuilder.create(context).setDate(Calendar.getInstance().getTime()).build();
-
-        /* notifiation */
         this.notificationWorkout = NotificationWorkout.create(context);
-        this.receiver = ReceiverWorkoutElement.create(notificationWorkout);
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ActionReceiver.TIMER_ACTION);
-        intentFilter.addAction(ActionReceiver.DISTANCE_ENERGY_ACTION);
-        context.registerReceiver(receiver, intentFilter);
+        this.workout = WorkoutBuilder.create(context)
+                        .setDate(Preferences.WorkoutInExecution.getDate(context)).build();
+        /* MOVIMENT */
+        this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        this.stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
-        /* map */
+        this.powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
+        //this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        Log.d(TAG, "StepCounter sensor is wake up = " + this.stepCounterSensor.isWakeUpSensor());
+
+        /* MAP */
         this.mapRouteDraw = MapRouteDraw.create(context);
-
-        /* distance*/
-        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sensorManager.registerListener(sensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_UI);
-
-        /* timer */
-        this.mTimer = new Timer();
-        this.time = 0;
+        this.isIndoor = (mapRouteDraw==null);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
-        if(intent!=null){
-            weight = intent.getDoubleExtra(KeysIntent.WEIGHT_MORE_RECENT, 0d);
-            sport = Sport.valueOf(intent.getStringExtra(KeysIntent.SPORT_DEFAULT));
-        }
-        if(isWorkoutServiceRunning) return super.onStartCommand(intent, flags, startId);
-        isWorkoutServiceRunning = true;
-        /* notification */
-        startForeground(NotificationWorkout.NOTIFICATION_ID, notificationWorkout.build());
-        /* timer */
-        mTimer.scheduleAtFixedRate(timerTask, 0, TIMER_INTERVAL);
-        /* map */
-        mapRouteDraw.start();
-        return super.onStartCommand(intent, flags, startId);
+        workoutThread = new Thread(()->{
+            Looper.prepare();
+            Log.d(TAG, "Thread Workout  = [ id = " +
+                    Thread.currentThread().getId() + ", name = "+
+                    Thread.currentThread().getName() +" ]");
+
+            if(intent!=null && intent.getAction()!=null){
+                isRunning = true;
+                switch (intent.getAction()){
+                    case ActionReceiver.START_ACTION:
+                        start(intent);
+                        break;
+                    case ActionReceiver.PAUSE_ACTION:
+                        pause(intent);
+                        break;
+                    case ActionReceiver.RESTART_ACTION:
+                        restart(intent);
+                        break;
+                    case ActionReceiver.VOICE:
+                        voiceCoach();
+                        break;
+                }
+            }
+            Looper.loop();
+        });
+        workoutThread.start();
+
+        return START_NOT_STICKY;
+        //return START_REDELIVER_INTENT;
     }
+
+    private void start(Intent intent){
+        Log.d(TAG, "START REQUEST");
+
+        handler = new Handler(Looper.myLooper(), handlerCallback);
+        weight = intent.getDoubleExtra(KeysIntent.WEIGHT_MORE_RECENT, 0d);
+        sport = Sport.valueOf(intent.getStringExtra(KeysIntent.SPORT_DEFAULT));
+        workout.setSport(sport);
+        Preferences.WorkoutInExecution.setDate(context, workout.getDate());
+
+        MusicCoach.getInstance(context).start();
+        VoiceCoach.getInstance(context).start();
+
+        startForeground(NotificationWorkout.NOTIFICATION_ID, notificationWorkout.build());
+        notificationWorkout.startClicked(Preferences.WorkoutInExecution.getDuration(context));
+
+        registerUnLockScreenBroadcastReceiver();
+        sensorManager.registerListener(sensorEventListener, stepCounterSensor,
+                SensorManager.SENSOR_DELAY_UI, LATENCY, handler);
+        if(!isIndoor) this.mapRouteDraw.startDrawing(handler);
+    }
+
+    private void pause(Intent intent){
+        Log.d(TAG, "PAUSE REQUEST");
+        isInPause = true;
+
+        notificationWorkout.pauseClicked();
+        VoiceCoach.getInstance(context).stop();
+
+        sensorManager.unregisterListener(sensorEventListener);
+        if(!isIndoor) this.mapRouteDraw.pause();
+        if(intent.getBooleanExtra(KeysIntent.FROM_NOTIFICATION,true))
+        {
+            Log.d(TAG, "SEND REQUEST");
+            sendBroadcast(new Intent(ActionReceiver.PAUSE_ACTION)
+                    .putExtra(KeysIntent.TIMER, getTimeInMillSec()));
+        }
+    }
+
+    private void restart(Intent intent){
+        Log.d(TAG, "RESTART REQUEST");
+        isInPause = false;
+        notificationWorkout.restartClicked();
+        VoiceCoach.getInstance(context).start();
+
+        sensorManager.registerListener(sensorEventListener, stepCounterSensor,
+                SensorManager.SENSOR_DELAY_UI, LATENCY, handler);
+        if(!isIndoor) this.mapRouteDraw.restart(handler);
+        if(intent.getBooleanExtra(KeysIntent.FROM_NOTIFICATION,true))
+        {
+            Log.d(TAG, "SEND REQUEST");
+            sendBroadcast(new Intent(ActionReceiver.RESTART_ACTION).putExtra(KeysIntent.TIMER, getTimeInMillSec()));
+        }
+    }
+
+    private void stop(){
+        Log.d(TAG, "STOP REQUEST");
+        isRunning = false;
+        unRegisterUnLockScreenBroadcastReceiver();
+        MusicCoach.getInstance(context).stop();
+        MusicCoach.release();
+        VoiceCoach.release();
+
+        notificationWorkout.stopClicked();
+
+        workoutThread.interrupt();
+    }
+
+    public void voiceCoach(){
+        String timeFormat = notificationWorkout.getTimeStamp();
+        Preferences.WorkoutInExecution.setDuration(context, SystemClock.elapsedRealtime() - getChronoBase());
+        Log.d(TAG, timeFormat+ ", distanza = " +
+                workout.getDistance().toString(true)+
+                ", calorie = " + workout.getCalories().toString(true));
+        VoiceCoach.getInstance(context).speakIfIsActive(timeFormat,
+                                                       workout.getDistance().toString(true),
+                                                       workout.getCalories().toString(true));
+    }
+
+    /*@Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.d(TAG, "ON TASK REMOVED");
+        Preferences.WorkoutInExecution.setDuration(context, SystemClock.elapsedRealtime() - getChronoBase());
+
+        Intent restartServiceTask = new Intent(context, ReceiverRestartService.class);restartServiceTask.setPackage(getPackageName());
+        PendingIntent restartPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
+                REQUEST_RESTART_SERVICE, restartServiceTask, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager myAlarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        myAlarmService.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, restartPendingIntent);
+
+        super.onTaskRemoved(rootIntent);
+    }*/
 
     @Override
     public void onDestroy() {
+        stop();
+        Log.d(TAG, "ON DESTROY");
+        Preferences.WorkoutInExecution.setDuration(context, SystemClock.elapsedRealtime() - getChronoBase());
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        isWorkoutServiceRunning = false;
-
-        /* timer */
-        this.mTimer.cancel();
-        this.mTimer.purge();
-        this.mTimer = null;
-
-        /* distance*/
-        oldValue = 0;
-        firstTime = true;
-        context.unregisterReceiver(receiver);
-        sensorManager.unregisterListener(sensorEventListener);
-
-        /* map */
-        mapRouteDraw.stop();
-
-        /* notification */
-        notificationWorkout.stopClicked();
     }
 
-    public Workout getWorkout() {
-        workout.setMapRoute(mapRouteDraw.getListCoordinates());
+    public Workout getWorkout(){
+        workout.getDuration().setValue(true, (double)getTimeInMillSec()/1000);
+        workout.setMiddleSpeed();
         return workout;
     }
 
-    public void pause(){
-        Log.d(TAG, "pause");
-        isWorkoutServicePause = true;
-        /* map */
-        mapRouteDraw.pause();
-        /* notification */
-        notificationWorkout.pauseClicked();
-    }
-
-    public void restart(){
-        Log.d(TAG, "restart");
-        isWorkoutServicePause = false;
-        /* distance*/
-        firstTime = true;
-        /* map */
-        mapRouteDraw.start();
-        /* notification */
-        notificationWorkout.restartClicked();
-    }
-
-    public void lock() {
-        Log.d(TAG, "lock_screen");
-        isLock = true;
-        /* notification */
-        notificationWorkout.lockClicked();
-    }
-
-    public void unlock() {
-        Log.d(TAG, "unlock_screen");
-        isLock = false;
-        /* notification */
-        notificationWorkout.unlockClicked();
-    }
-
-    public boolean isRunning(){
-        return isWorkoutServiceRunning;
-    }
-
-    public boolean isLock(){
-        return isLock;
-    }
-
     public boolean isPause() {
-        return isWorkoutServicePause;
+        return isInPause;
     }
 
-    public interface OnReceiverListener{
-        void onReceiverDuration(String sec);
-        void onReceiverDistance(String distance);
-        void onReceiverEnergy(String energy);
-        MapRouteDraw.OnChangeLocationListener onReceiverMapRoute();
+    public boolean isRunning() {
+        return isRunning;
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
+    public long getChronoBase() {
+        return notificationWorkout.getChronoBase();
     }
+
+    public long getTimeInMillSec() {
+        return notificationWorkout.getTimeInMillSec();
+    }
+
+    private class ScreenReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent!=null && intent.getAction()!=null){
+                switch (intent.getAction()){
+                    case Intent.ACTION_SCREEN_ON:
+                        Log.d(TAG, "SCREEN ON");
+                        String distance = workout.getDistance().toString(true);
+                        String energy = workout.getCalories().toString(true);
+                        notificationWorkout.updateDistanceAndEnergy(distance, energy);
+                        break;
+                }
+            }
+        }
+    }
+    private ScreenReceiver screenReceiver = new ScreenReceiver();
+    private boolean isRegister = false;
+    private boolean isRegister(){
+        return isRegister;
+    }
+    private void registerUnLockScreenBroadcastReceiver() {
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        if(!isRegister()){
+            context.registerReceiver(screenReceiver, intentFilter, null, this.handler);
+            isRegister =true;
+        }
+    }
+    private void unRegisterUnLockScreenBroadcastReceiver() {
+        if(isRegister()){
+            context.unregisterReceiver(screenReceiver);
+            isRegister = false;
+        }
+    }
+
 }

@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/save_profile"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/ic_save"
         android:title="@string/save"
         app:showAsAction="ifRoom" />
 </menu>

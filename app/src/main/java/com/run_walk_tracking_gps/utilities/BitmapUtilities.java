@@ -3,7 +3,6 @@ package com.run_walk_tracking_gps.utilities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +10,8 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
+
+import androidx.annotation.RequiresApi;
 
 public class BitmapUtilities {
 
@@ -21,7 +22,7 @@ public class BitmapUtilities {
      * @return a encoding Base64 and compressing string
      */
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public static String BitMapToString(Bitmap bitmap) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.WEBP,100, bos);
@@ -55,7 +56,7 @@ public class BitmapUtilities {
      * @param encodedString
      * @return bitmap (from given string)
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     public static Bitmap StringToBitMap(String encodedString) throws IOException {
         byte[] b = Base64.getDecoder().decode(encodedString);
         byte[] decompress = decompress(b);

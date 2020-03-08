@@ -1,27 +1,24 @@
 package com.run_walk_tracking_gps.exception;
 
 import android.content.Context;
-
 import com.run_walk_tracking_gps.R;
 
 public abstract class AbstractException extends Exception {
 
-    protected static final int STATUS_NO_INTERNET_AVAILABLE = 1;
-
-    private String mex ;
+    private String mex;
     private Context context;
 
-    public AbstractException(Context context, int mex){
+    public AbstractException(Context context, int mex) {
         this(context);
         setMessage(mex);
     }
 
-    public AbstractException(Context context, String mex){
+    public AbstractException(Context context, String mex) {
         this(context);
         setMessage(mex);
     }
 
-    public AbstractException(Context context){
+    public AbstractException(Context context) {
         setContext(context);
         setMessage(R.string.space);
     }
