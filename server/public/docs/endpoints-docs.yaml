@@ -1,0 +1,1308 @@
+openapi: 3.0.3
+info:
+  title: Run/Walk Tracking Server
+  description: Run/Walk Tracking Server
+  version: 1.0.0
+
+servers:
+- url: 'http://localhost:80'
+
+paths:
+  # USER
+  /account/signup.php:
+    post:
+      summary: "Signup of an user"
+      description: |
+        The user is registered on the platform. 
+        This process sends them an email containing a token for their first sign in.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/User'
+              - type: object
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+                  target:
+                    $ref: '#/components/schemas/Settings/properties/target'
+                  weight:
+                    type: number
+                required:
+                - username
+                - password
+                - target
+                - weight
+      responses:
+        200:
+          description: "Successfully sign up"
+          content:
+            application/json:
+              schema:
+                properties:
+                  sign_up:
+                    type: boolean
+                    default: true
+        400:
+          $ref: '#/components/responses/IllegalInput'
+
+        409:
+          description: "User is already sign up"
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/GeneralError'
+                - type: object
+                  properties:
+                    Error:
+                      type: object
+                      properties:
+                        code:
+                          default: 13
+                        description:
+                          type: string
+                          default:
+                          - oneOf:
+                            - "User già registato"
+                            - "Username già utilizzato"
+
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /account/download_image.php:
+    post:
+      summary: "Download user profile image"
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                token:
+                  $ref: '#/components/schemas/AccessToken'
+                image:
+                  type: string
+                  description: image name with its extension
+                  example: YQuNNbwlcemweBEjyAY5fZGRWw2ebJAdasce1baMOaGBqW37nJNFD9Cow19fHc.jpg
+
+      responses:
+        200:
+          description: "Successfully download image of user profile"
+          content:
+            application/json:
+              schema:
+                properties:
+                  image:
+                    type: string
+                    format: base64
+                    description: Base64 encoded image content
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        404:
+          description: "User profile image not found"
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/GeneralError'
+                - type: object
+                  properties:
+                    Error:
+                      type: object
+                      properties:
+                        code:
+                          default: 16
+                        description:
+                          type: string
+                          default: "Immagine non esiste"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /insert.php:
+    post:
+      summary: "Insert data into the database"
+      description: |
+        This endpoint is used to insert workouts and weights into the database.  
+        It allows the user to add new data about their activities and progress.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/BasicCrudRequestBody'
+              - type: object
+                properties:
+                  filter:
+                    enum:
+                    - "workout"
+                    - "weight"
+                  data:
+                    oneOf:
+                    - $ref: '#/components/schemas/Workout'
+                    - $ref: '#/components/schemas/Weight'
+                    description: Data to insert
+                required:
+                - data
+      responses:
+        200:
+          description: "Successfully inserted data"
+          content:
+            application/json:
+              schema:
+                properties:
+                  insert:
+                    type: boolean
+                    default: true
+        400:
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NoValidUrl'
+                - $ref: '#/components/schemas/NoEnoughData'
+                - $ref: '#/components/schemas/WrongFilter'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /delete.php:
+    post:
+      summary: "Delete data from the database"
+      description: |
+        This endpoint is used to delete user account, workouts, and weights.  
+        It allows the user to remove their existing data from the database.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/BasicCrudRequestBody'
+              - type: object
+                properties:
+                  filter:
+                    enum:
+                    - "user"
+                    - "workout"
+                    - "weight"
+                  data:
+                    oneOf:
+                    - type: object
+                      properties:
+                        id_workout:
+                          type: integer
+                          description: ID of the workout to delete (required for workout filter)
+                    - type: object
+                      properties:
+                        id_weight:
+                          type: integer
+                          description: ID of the weight to delete (required for weight filter)
+                    description: Data to delete
+      responses:
+        200:
+          description: "Successfully deleted data"
+          content:
+            application/json:
+              schema:
+                properties:
+                  delete:
+                    type: boolean
+                    default: true
+        400:
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NoValidUrl'
+                - $ref: '#/components/schemas/NoEnoughData'
+                - $ref: '#/components/schemas/WrongFilter'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /update.php:
+    post:
+      summary: "Update data in the database"
+      description: |
+        This endpoint is used to update user data, workouts, weights, and some default unit measure like distance, weight and height.  
+        It allows the user to modify their existing data in the database.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/BasicCrudRequestBody'
+              - type: object
+                properties:
+                  filter:
+                    enum:
+                    - "user"
+                    - "sport"
+                    - "target"
+                    - "unit_distance"
+                    - "unit_weight"
+                    - "unit_height"
+                    - "workout"
+                    - "weight"
+                  data:
+                    oneOf:
+                    - anyOf:
+                      - type: object
+                        properties:
+                          name:
+                            $ref: '#/components/schemas/User/properties/name'
+                          last_name:
+                            $ref: '#/components/schemas/User/properties/last_name'
+                          gender:
+                            $ref: '#/components/schemas/User/properties/gender'
+                          birth_date:
+                            $ref: '#/components/schemas/User/properties/birth_date'
+                          email:
+                            $ref: '#/components/schemas/User/properties/email'
+                          city:
+                            $ref: '#/components/schemas/User/properties/city'
+                          phone:
+                            $ref: '#/components/schemas/User/properties/phone'
+                          height:
+                            $ref: '#/components/schemas/User/properties/height'
+                          image:
+                            $ref: '#/components/schemas/UserImageNullable'
+                    - type: object
+                      properties:
+                        value:
+                          oneOf:
+                          - $ref: '#/components/schemas/Settings/properties/sport'
+                          - $ref: '#/components/schemas/Settings/properties/target'
+                          - $ref: '#/components/schemas/Settings/properties/unit_measure/properties/distance'
+                          - $ref: '#/components/schemas/Settings/properties/unit_measure/properties/weight'
+                          - $ref: '#/components/schemas/Settings/properties/unit_measure/properties/height'
+                          description: Value to update for filter equal to "sport", "target", "unit_distance", "unit_weight", or "unit_height"
+                      required:
+                      - value
+                    - allOf:
+                      - type: object
+                        properties:
+                          id_workout:
+                            $ref: '#/components/schemas/Workout/properties/id_workout'
+                      - anyOf:
+                        - type: object
+                          properties:
+                            date:
+                              $ref: '#/components/schemas/Workout/properties/date'
+                            duration:
+                              $ref: '#/components/schemas/Workout/properties/duration'
+                            distance:
+                              $ref: '#/components/schemas/Workout/properties/distance'
+                            calories:
+                              $ref: '#/components/schemas/Workout/properties/calories'
+                            sport:
+                              $ref: '#/components/schemas/Workout/properties/sport'
+                            map_route:
+                              $ref: '#/components/schemas/Workout/properties/map_route'
+                      required:
+                      - id_workout
+                    - allOf:
+                      - type: object
+                        properties:
+                          id_weight:
+                            $ref: '#/components/schemas/Weight/properties/id_weight'
+                      - anyOf:
+                        - type: object
+                          properties:
+                            date:
+                              $ref: '#/components/schemas/Weight/properties/date'
+                            value:
+                              $ref: '#/components/schemas/Weight/properties/value'
+                      required:
+                      - id_weight
+                    description: Data to update
+                required:
+                - data
+      responses:
+        200:
+
+          description: "Successfully updated data"
+          content:
+            application/json:
+              schema:
+                properties:
+                  update:
+                    type: boolean
+                    default: true
+        400:
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NoValidUrl'
+                - $ref: '#/components/schemas/NoEnoughData'
+                - $ref: '#/components/schemas/WrongFilter'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  # SESSION
+  /account/first_signin.php:
+    post:
+      summary: First sign in of an user
+      description: |
+        This endpoint manages a user's first login after registration.
+        The user must provide their credentials (`username` and `password`) 
+        and an activation code (`token`) received via email.
+
+        If the data provided is valid and activation has not already been completed, 
+        the system activates the account, creates a valid session, and returns the 
+        initial user data (`data`) along with the session token.
+      tags:
+      - user-session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                username:
+                  type: string
+                  description: username of signed user
+                password:
+                  type: string
+                  description: password of signed user
+                token:
+                  type: string
+                  description: Activation Code (from signup email)
+                device:
+                  type: string
+                  description: device where the user logs in
+              required:
+              - username
+              - password
+              - token
+              - device
+      responses:
+        200:
+          description: "Successfully first sign in"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/SessionToken'
+                  data:
+                    allOf:
+                    - $ref: "#/components/schemas/AllData"
+                    - type: object
+                      properties:
+                        weights:
+                          minLength: 1
+                          maxLength: 1
+                        workouts:
+                          maxLength: 0
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        401:
+          description: "Unauthorized user"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: "#/components/schemas/NoSignedUser"
+                - $ref: "#/components/schemas/WrongPassword"
+                - allOf:
+                  - $ref: '#/components/schemas/GeneralError'
+                  - type: object
+                    properties:
+                      Error:
+                        type: object
+                        properties:
+                          code:
+                            default: 11
+                          description:
+                            type: string
+                            default: "Codice di attivazione non valido"
+        409:
+          description: "Confirmation of registration already completed"
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/GeneralError'
+                - type: object
+                  properties:
+                    Error:
+                      type: object
+                      properties:
+                        code:
+                          default: 12
+                        description:
+                          type: string
+                          default: "Conferma della registrazione già avvenuta"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /account/signin.php:
+    post:
+      summary: "Signin of an user"
+      tags:
+      - user-session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                username:
+                  type: string
+                  description: username of signed user
+                password:
+                  type: string
+                  description: password of signed user
+                device:
+                  type: string
+                  description: device where the user logs in
+              required:
+              - username
+              - password
+      responses:
+        200:
+          description: "Successfully sign in"
+          content:
+            application/json:
+              schema:
+                properties:
+                  session:
+                    $ref: '#/components/schemas/SessionToken'
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        401:
+          description: "Unauthorized user"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: "#/components/schemas/NoSignedUser"
+                - $ref: "#/components/schemas/WrongPassword"
+        403:
+          description: "User has not logged in for the first time yet"
+          content:
+            application/json:
+              schema:
+                properties:
+                  first_login:
+                    type: boolean
+                    default: true
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /continueHere.php:
+    post:
+      tags:
+      - user-session
+      summary: "Update session token"
+      description: |
+        This endpoint is used to update the session token when it has expired.
+        It allows the user to continue their session without needing to sign in again.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                session:
+                  $ref: '#/components/schemas/SessionToken'
+                  description: Actual session token of the user
+              required:
+              - token
+      responses:
+        200:
+          description: "New session token generated successfully or the same session token returned"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/SessionToken'
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: "#/components/schemas/InvalidToken"
+                - $ref: "#/components/schemas/NoSignedUser"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  # PASSWORD
+  /account/change_password.php:
+    post:
+      summary: "Update password knowing old password and username."
+      tags:
+      - user-password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                token:
+                  $ref: '#/components/schemas/AccessToken'
+                username:
+                  type: string
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+              required:
+              - token
+              - username
+              - old_password
+              - new_password
+      responses:
+        200:
+          description: "Successfully changed password"
+          content:
+            application/json:
+              schema:
+                properties:
+                  update:
+                    type: boolean
+                    default: true
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: "#/components/schemas/InvalidToken"
+                - $ref: "#/components/schemas/NoSignedUser"
+                - $ref: "#/components/schemas/WrongPassword"
+                - allOf:
+                  - $ref: '#/components/schemas/GeneralError'
+                  - type: object
+                    properties:
+                      Error:
+                        type: object
+                        properties:
+                          code:
+                            default: 15
+                          description:
+                            type: string
+                            default: "Sessione e credenziali non coincidono"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /request_change_password.php:
+    post:
+      summary: "Forgotten password request"
+      description: |
+        This endpoint allows a user to request a password reset if they've forgotten it. 
+        The user must provide a valid email address associated with an existing account in the system.  
+        If the email address is valid, the system sends an email containing a link valid for 30 minutes 
+        to complete the password change process.
+      tags:
+      - user-password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  description: Email of the user who wants to change their password
+                  format: email
+              required:
+              - email
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                properties:
+                  email:
+                    type: string
+                    description: Email to which the password change request was sent
+                    format: email
+                  key:
+                    type: integer
+                    example: 123456
+                    description: Key to be used for changing the password
+                  expiry_date:
+                    type: string
+                    format: date-time
+                    example: "2025-07-25 09:33:52"
+                    description: Expiry date of the password change request
+                  request_password_forgot_send:
+                    type: boolean
+                    default: true
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /emails/change_password.php:
+    get:
+      summary: "Change forgotten password form"
+      description: |
+        This endpoint provides an HTML form for changing the password.
+
+        This endpoint is sent to the user via email when a forgotten password request is submitted.
+
+      tags:
+      - user-password
+      parameters:
+      - name: c_key
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Key to change the password
+      responses:
+        200:
+          description: ""
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML Form for changing the password
+                example: |
+                  <form id="change_password" class="form-horizontal">
+                    <div class="fields-for-password">
+                      <div class="form-group">
+                        <label class="control-label" for="username">Username *</label>
+                        <div class="class-new-password">
+                          <input id="username" class="form-control" type="text" name="username" placeholder="insert" required>
+                          <span class="feedback"></span>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label" for="new-password">New Password *</label>
+                        <div class="class-new-password">
+                          <input id="new-password" class="form-control" type="password" name="password" placeholder="insert"
+                            required>
+                          <span class="feedback"></span>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label" for="conf-new-password">Confirm Password *</label>
+                        <div class="class-conf-password">
+                          <input id="conf-new-password" class="form-control" type="password" name="conf-password"
+                            placeholder="insert" required>
+                          <span class="feedback"></span>
+                        </div>
+                      </div>
+                      <div class="form-group text-right">
+                        <button class="btn btn-primary" name='change_password' type="button">Change</button>
+                      </div>
+                    </div>
+                  </form>
+
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/GeneralError'
+                - type: object
+                  properties:
+                    Error:
+                      type: object
+                      properties:
+                        code:
+                          default: 14
+                        description:
+                          type: string
+                          default: "Link for the reset you clicked is EXPIRED !! Please request a new one."
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /account/password_forgot.php:
+    post:
+      summary: "Reset user password when the user forgets it."
+      tags:
+      - user-password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  description: New password to set
+              required:
+              - username
+              - password
+      responses:
+        200:
+          description: "User password is resetted"
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        401:
+          description: "Unauthorized user"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoSignedUser"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  # APP  
+  /sync.php:
+    post:
+      summary: Data synchronization between client and server
+      description: >
+        This endpoint enables synchronization between the device's local database and the server's remote database.  
+
+        Depending on the local data's up-to-date status, the server will respond with one of the following scenarios:
+
+        - **Code 0 - Data Consistent**: No action required; data between the client and server is synchronized.
+
+        - **Code 1 - Inconsistency: Receive Data from Server**: The client should update its data with that received from the server.
+
+        - **Code 2 - Inconsistency: Send Data to Server**: The client should send its updated data to the server.
+
+      tags:
+      - app-sync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  $ref: '#/components/schemas/AccessToken'
+                last_update:
+                  $ref: '#/components/schemas/BasicCrudRequestBody/properties/last_update'
+                db_exist:
+                  type: boolean
+                device:
+                  type: string
+              required:
+              - last_update
+              - db_exist
+              - token
+              - device
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  description: The client and server databases are synchronized
+                  properties:
+                    state:
+                      type: object
+                      properties:
+                        code:
+                          type: integer
+                          default: 0
+                        description:
+                          type: string
+                          default: consistent
+                - type: object
+                  description: |
+                    The client and server databases are not synchronized.   
+                    The client must receive data from server.
+                  properties:
+                    state:
+                      type: object
+                      properties:
+                        code:
+                          type: integer
+                          default: 1
+                        description:
+                          type: string
+                          default: "no consistent: receive data from server"
+                        data:
+                          type: object
+                          properties:
+                            session:
+                              $ref: '#/components/schemas/SessionToken'
+                            data:
+                              $ref: "#/components/schemas/AllData"
+
+                - type: object
+                  description: |
+                    The client and server databases are not synchronized.   
+                    The client must send data to the server.
+                  properties:
+                    state:
+                      type: object
+                      properties:
+                        code:
+                          type: integer
+                          default: 2
+                        description:
+                          type: string
+                          default: "no consistent: send data to server"
+
+        400:
+          $ref: '#/components/responses/IllegalInput'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /updateAll.php:
+    post:
+      tags:
+      - app-sync
+      summary: "Replace all data in the database for a client"
+      description: |
+        This endpoint is used to REPLACE ALL DATA in the database with the provided data.  
+        It allows the client to send all their data at once, including user information, settings, workouts, and weights.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  $ref: '#/components/schemas/BasicCrudRequestBody/properties/token'
+                last_update:
+                  $ref: '#/components/schemas/BasicCrudRequestBody/properties/last_update'
+                data:
+                  type: object
+                  properties:
+                    user:
+                      allOf:
+                      - $ref: '#/components/schemas/User'
+                      - type: object
+                        properties:
+                          image:
+                            $ref: '#/components/schemas/UserImageNullable'
+                    settings:
+                      $ref: '#/components/schemas/Settings'
+                    workouts:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Workout'
+                    weights:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Weight'
+                  required:
+                  - user
+                  - settings
+                  - workouts
+                  - weights
+              required:
+              - token
+              - last_update
+              - data
+      responses:
+        200:
+          description: "Successfully updated all data"
+          content:
+            application/json:
+              schema:
+                properties:
+                  update:
+                    type: boolean
+                    default: true
+        400:
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/NoValidUrl'
+                - $ref: '#/components/schemas/NoEnoughData'
+        403:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidToken"
+        500:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        last_name:
+          type: string
+        gender:
+          type: string
+        birth_date:
+          type: string
+        email:
+          type: string
+          format: email
+        city:
+          type: string
+        phone:
+          type: string
+        height:
+          type: number
+        image:
+          type: object
+          nullable: true
+          properties:
+            name:
+              type: string
+            content:
+              type: string
+              format: base64
+              description: Base64 encoded image content
+          required:
+          - name
+          - content
+      required:
+      - name
+      - last_name
+      - gender
+      - birth_date
+      - email
+      - city
+      - phone
+      - height
+
+    UserImageNullable:
+      allOf:
+      - $ref: '#/components/schemas/User/properties/image'
+      - type: object
+        description: |
+          If the image is null, it means that the user wants to delete their profile image.
+          In this case, the image field should be set to null.
+
+    Settings:
+      type: object
+      properties:
+        sport:
+          type: string
+          enum:
+          - WALK
+          - RUN
+        target:
+          type: string
+          enum:
+          - MARATHON
+          - LOSE_WEIGHT
+        unit_measure:
+          type: object
+          properties:
+            distance:
+              type: string
+              enum:
+              - 'KILOMETER'
+              - 'MILE'
+            weight:
+              type: string
+              enum:
+              - 'KILOGRAM'
+              - 'POUND'
+            height:
+              type: string
+              enum:
+              - 'METER'
+              - 'FEET'
+          required:
+          - distance
+          - weight
+          - height
+      required:
+      - sport
+      - target
+      - unit_measure
+
+    Workout:
+      type: object
+      properties:
+        id_workout:
+          type: integer
+        id_user:
+          type: integer
+        map_route:
+          type: string
+          format: base64
+          description: map route
+        date:
+          type: integer
+          description: Date of the workout in timestamp format
+          format: millis
+          example: 1753476283385
+        duration:
+          type: integer
+        distance:
+          type: number
+        calories:
+          type: number
+        sport:
+          $ref: "#/components/schemas/Settings/properties/sport"
+      required:
+      - id_workout
+      - id_user
+      - date
+      - duration
+      - sport
+
+    Weight:
+      type: object
+      properties:
+        id_weight:
+          type: integer
+        date:
+          type: string
+          format: date-time
+          example: "2025-07-25 09:33:52"
+        value:
+          type: number
+      required:
+      - id_weight
+      - date
+      - value
+
+    SessionToken:
+      type: string
+      description: |
+        Encoded session token containing user information and access token.
+        This token is used to authenticate the user in subsequent requests.
+
+        It includes:
+        - User's identifier
+        - Access token (used to authenticate the user in subsequent requests)
+        - Last update timestamp
+        - Device information
+
+        All information is encoded in base64 format.
+
+    AccessToken:
+      type: string
+      description: |
+        Access token used to authenticate the user in subsequent requests.
+        It is a unique identifier for the user's session and is typically generated during the sign-in process.
+
+    AllData:
+      type: object
+      properties:
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          - type: object
+            properties:
+              username:
+                type: string
+            required:
+            - username
+        weights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weight'
+        workouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workout'
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/Settings'
+          - type: object
+            properties:
+              unit_measure:
+                type: object
+                properties:
+                  energy:
+                    type: string
+                    enum:
+                    - 'KILO_CALORIES'
+                required:
+                - energy
+                - distance
+                - weight
+                - height
+      required:
+      - user
+      - weights
+      - workouts
+      - settings
+
+    BasicCrudRequestBody:
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/AccessToken'
+        last_update:
+          type: integer
+          description: Last update in timestamp format
+          format: unix
+          example: 1753476452
+        filter:
+          type: string
+          description: Filter to apply
+        data:
+          description: Data to insert or delete or update
+      required:
+      - token
+      - last_update
+      - filter
+
+    GeneralError:
+      type: object
+      properties:
+        Error:
+          type: object
+          properties:
+            code:
+              type: integer
+              default: 0
+              description: "Error code"
+            description:
+              type: string
+              description: "Error description"
+
+    NoSignedUser:
+      allOf:
+      - $ref: '#/components/schemas/GeneralError'
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                default: 6
+              description:
+                type: string
+                default: "User non registato"
+
+    InvalidToken:
+      allOf:
+      - $ref: '#/components/schemas/GeneralError'
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                default: 10
+              description:
+                type: string
+                default: "Token sessione non valido"
+
+    WrongPassword:
+      allOf:
+      - $ref: '#/components/schemas/GeneralError'
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                default: 5
+              description:
+                type: string
+                default: "Password non corretta"
+    NoValidUrl:
+      allOf:
+      - $ref: "#/components/schemas/GeneralError"
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                type: integer
+                default: 9
+              description:
+                type: string
+                default: "Url non valido"
+    NoEnoughData:
+      allOf:
+      - $ref: '#/components/schemas/GeneralError'
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                default: 8
+              description:
+                type: string
+                default: "Dati non sufficienti"
+    WrongFilter:
+      allOf:
+      - $ref: '#/components/schemas/GeneralError'
+      - type: object
+        properties:
+          Error:
+            type: object
+            properties:
+              code:
+                default: 7
+              description:
+                type: string
+                default: "Filtro non valido"
+
+  responses:
+    IllegalInput:
+      description: "Bad Request"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NoValidUrl"
+
+    ServerError:
+      description: "Server Error"
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/GeneralError"

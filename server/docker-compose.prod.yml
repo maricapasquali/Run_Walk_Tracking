@@ -1,0 +1,44 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    image: marica/run_walk_tracking_server
+    container_name: run_walk_tracking_server
+    restart: always
+    ports:
+      - 80:80
+    env_file:
+      - ./config/database.env
+    environment:
+      - MYSQL_HOST=db
+    depends_on:
+      - db
+
+  db:
+    image: mysql:lts
+    container_name: run_walk_tracking_server_db
+    restart: always
+    volumes:
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql
+    env_file:
+      - ./config/database.env
+
+  db-adminer:
+    image: phpmyadmin
+    container_name: run_walk_tracking_server_db-adminer
+    restart: always
+    ports:
+      - 8080:80
+    env_file:
+      - ./config/database.env
+    environment:
+      - PMA_HOST=db
+    depends_on:
+      - db
+
+volumes:
+  db-data:
+    name: run_walk_tracking_server_db-data

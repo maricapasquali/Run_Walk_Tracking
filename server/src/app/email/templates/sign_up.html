@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang='it' dir='ltr'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>SignUp</title>
+  <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css' integrity='sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS' crossorigin='anonymous'>
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.8.1/css/all.css' integrity='sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf' crossorigin='anonymous'>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+  <style media="screen">
+    td,
+    th {
+      padding: 10px 20px 10px 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class='container-fluid'>
+    <div class="col">
+      <h1 class="mt-5 mb-5"><app-name></app-name></h1>
+      <p> Dear <strong id="username"></strong>, your account has been created.</p>
+        <table id='table-info'>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td id='name'></td>
+            </tr>
+            <tr>
+              <th>Last Name</th>
+              <td id='last_name'></td>
+            </tr>
+            <tr>
+              <th>Gender</th>
+              <td id='gender'></td>
+            </tr>
+            <tr>
+              <th>Birth Date</th>
+              <td id='birth_date'></td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td id='email'></td>
+            </tr>
+            <tr>
+              <th>City</th>
+              <td id='city'></td>
+            </tr>
+            <tr>
+              <th>Phone</th>
+              <td id='phone'></td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      <div class="mt-4 mb-4">
+        <p>To complete the registration you will have to use the Activation Code below when requested:</p>
+        <strong id="token"></strong>
+      </div>
+
+      <p>Team <strong><app-name></app-name></strong></p>
+    </div>
+  </div>
+</body>
+
+</html>

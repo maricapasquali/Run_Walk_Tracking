@@ -1,0 +1,30 @@
+{
+    "name": "marica/run_walk_tracking_server",
+    "description": "A PHP/MySQL server-side component for data synchronization through RESTful APIs for the **Run/Walk Tracking** mobile application",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Marica Pasquali"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "app\\": "src/app"
+        },
+        "files": [
+            "config/config.php",
+            "src/app/utils/constants.php",
+            "src/app/utils/utility.php",
+            "src/app/exceptions/Exceptions.php",
+            "src/app/request/Request.php"
+        ]
+    },
+    "require": {
+        "ext-dom": "*",
+        "ext-mysqli": "*",
+        "ext-libxml": "*",
+        "ext-json": "*",
+        "phpmailer/phpmailer": "^6.10",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

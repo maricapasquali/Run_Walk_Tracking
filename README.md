@@ -51,11 +51,12 @@ The project also includes a PHP/MySQL server-side component for data synchroniza
 - **Volley** for HTTP requests
 - **Google Maps API**, **GraphView**, **TextToSpeech**
 
-### Backend
-- **PHP 5+**
+
+### [Backend](./server/README.md)
+
+- **PHP 7.4+**
 - **MySQL** managed via phpMyAdmin
 - **DAO Pattern** on both client and server side
-- Hosting: [000webhost](https://runwalktracking.000webhostapp.com/)
 
 ---
 
