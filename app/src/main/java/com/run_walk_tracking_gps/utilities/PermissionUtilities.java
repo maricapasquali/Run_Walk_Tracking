@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
 
@@ -13,6 +14,7 @@ public class PermissionUtilities {
     // TODO: 26/02/2020 RICHIEDERE IN TUTTE LE ACTIVITY CHE LE UTILIZZANO
 
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    public final static int ACTIVITY_RECOGNITION_PERMISSION_REQUEST_CODE = 1001;
     public final static int READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 7;
 
     private static boolean isGranted(int[] grantResults){
@@ -35,6 +37,12 @@ public class PermissionUtilities {
                 context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public static boolean hasActivityRecognitionPermission(final Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            return context.checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED;
+        return true;
+    }
+
     public static boolean hasReadExternalStoragePermission(final Context context) {
         return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
@@ -42,6 +50,16 @@ public class PermissionUtilities {
     public static void setLocationPermission(final Activity activity) {
         final String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
         ActivityCompat.requestPermissions(activity, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+    }
+
+    public static void setActivityRecognitionPermission(final Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (activity.checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+                final String[] permissions = new String[]{Manifest.permission.ACTIVITY_RECOGNITION};
+                ActivityCompat.requestPermissions(activity, permissions, ACTIVITY_RECOGNITION_PERMISSION_REQUEST_CODE);
+            }
+        }
+        // For devices with API level < 29, permission is granted automatically if declared in the Manifest.
     }
 
     public static void setReadExternalStoragePermission(final Activity activity) {

@@ -3,7 +3,7 @@
 An Android application for managing indoor and outdoor workouts, with support for statistics, vocal coach, GPS tracking, and personalized music.
 
 _Developed by: Marica Pasquali_  
-_Thesis – Bachelor's Degree in Ingegneria e Scienze Informatiche_ (Project for the "Programmazione di sistemi mobile" course)    
+_[Thesis](./Progettazione_Design/Pasquali_Marica_Tesi.pdf) – Bachelor's Degree in Ingegneria e Scienze Informatiche_ (Project for the "Programmazione di sistemi mobile" course)    
 _Academic Year: 2018/2019 – University of Bologna, Cesena Campus_
 
 ---
@@ -21,7 +21,7 @@ The project also includes a PHP/MySQL server-side component for data synchroniza
 
 ---
 
-## Project Goals
+### Project Goals
 
 - Develop a functional mobile app for daily workouts.
 - Integrate advanced features (voice coach, music, weight tracking).
@@ -31,7 +31,7 @@ The project also includes a PHP/MySQL server-side component for data synchroniza
 
 ---
 
-## Key Features
+### Key Features
 
 - 📍 **Real-time workouts** with GPS support.
 - 🎧 **Custom music playlists**.
@@ -43,10 +43,37 @@ The project also includes a PHP/MySQL server-side component for data synchroniza
 
 ---
 
+### Authentication
+
+The system uses session-based tokens. Upon registration, a confirmation email is sent. Password reset is available in case of credential loss.
+
+---
+
+### Statistics
+
+Interactive charts show the trend of:
+- Average speed
+- Calories burned
+- Distance covered
+- Body weight
+
+Filterable by week, month, year, or all sessions.
+
+---
+
+### Route Tracking
+
+The route tracking uses:
+- **Google Maps API** (Polyline, MapFragment)
+- Foreground/background location services
+- Temporary saving of routes via `SharedPreferences`
+
+---
+
 ## Technologies Used
 
 ### Mobile
-- **Android (Java)**
+- **Android (Java)** with target SDK version 29
 - **SQLite** for local persistence
 - **Volley** for HTTP requests
 - **Google Maps API**, **GraphView**, **TextToSpeech**
@@ -60,32 +87,18 @@ The project also includes a PHP/MySQL server-side component for data synchroniza
 
 ---
 
-## Authentication
+## Configuration
 
-The system uses session-based tokens. Upon registration, a confirmation email is sent. Password reset is available in case of credential loss.
+Before running the application, add a [Google Maps API Key](https://console.cloud.google.com/apis/credentials) and [Server URL](./server/README.md#serverenv) to the `local.properties` file.
 
----
+### local.properties
 
-## Statistics
+```
+....
 
-Interactive charts show the trend of:
-- Average speed
-- Calories burned
-- Distance covered
-- Body weight
-
-Filterable by week, month, year, or all sessions.
-
----
-
-## Route Tracking
-
-The route tracking uses:
-- **Google Maps API** (Polyline, MapFragment)
-- Foreground/background location services
-- Temporary saving of routes via `SharedPreferences`
-
----
+MAPS_API_KEY=
+SERVER_URL=
+```
 
 ## Future Enhancements
 
@@ -95,12 +108,6 @@ The route tracking uses:
 - Smartwatch integration
 - Personalized training plans
 - iOS porting
-
----
-
-## Documentation
-
-Full thesis available [here](./Progettazione_Design/Pasquali_Marica_Tesi.pdf)
 
 ---
 

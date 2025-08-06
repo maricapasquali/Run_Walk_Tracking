@@ -2,6 +2,7 @@ package com.run_walk_tracking_gps.gui.components;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -15,22 +16,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
-import com.myhexaville.smartimagepicker.ImagePicker;
-import com.myhexaville.smartimagepicker.ImagePickerContract;
-import com.myhexaville.smartimagepicker.OnImagePickedListener;
-import com.run_walk_tracking_gps.KeysIntent;
-import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.gui.activity_of_settings.PlayListActivity;
-import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
-import com.run_walk_tracking_gps.model.Song;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 
+import com.run_walk_tracking_gps.R;
+import com.run_walk_tracking_gps.gui.components.dialog.ZoomImageDialog;
+import com.run_walk_tracking_gps.utilities.ImageFileHelper;
+
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.widget.AppCompatImageView;
+
+import kotlin.Unit;
 
 public class Factory {
 
@@ -69,20 +69,14 @@ public class Factory {
     public static class CustomTakePhotoButton extends FloatingActionButton implements View.OnClickListener  {
         private static final String ERROR = "Must Implements OnTakePhotoListener";
         private static final String TAG = CustomTakePhotoButton.class.getSimpleName();
-        private ImagePicker picker;
-
         private OnTakePhotoListener onTakePhotoListener;
 
         public CustomTakePhotoButton(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
-        public ImagePickerContract getImagePiker() {
-            return picker;
-        }
-
         public void onTakePhotoListener(OnTakePhotoListener onTakePhotoListener){
-            if(onTakePhotoListener==null || onTakePhotoListener.getActivity()==null || onTakePhotoListener.setonClickListener()==null)
+            if(onTakePhotoListener==null || onTakePhotoListener.getActivity()==null || onTakePhotoListener.getLauncher()==null)
                 throw new NullPointerException(ERROR);
 
             this.onTakePhotoListener = onTakePhotoListener;
@@ -91,14 +85,21 @@ public class Factory {
 
         @Override
         public void onClick(View v) {
-            picker = new ImagePicker(onTakePhotoListener.getActivity(),null ,
-                    onTakePhotoListener.setonClickListener()).setWithImageCrop(1,1);
-            picker.choosePicture(true);
+            ImagePicker.with(onTakePhotoListener.getActivity())
+                    .galleryOnly()
+                    .crop(1f, 1f)
+                    .compress(1024)
+                    .maxResultSize(1080, 1080)
+                    .saveDir(ImageFileHelper.create(v.getContext()).getDirectoryTmp())
+                    .createIntent(intent -> {
+                        onTakePhotoListener.getLauncher().launch(intent);
+                        return Unit.INSTANCE;
+                    });
         }
 
         public interface OnTakePhotoListener{
             Activity getActivity();
-            OnImagePickedListener setonClickListener();
+            ActivityResultLauncher<Intent> getLauncher();
         }
     }
 
@@ -184,7 +185,7 @@ public class Factory {
 
     }
 
-    public static class CustomDragSortController extends DragSortController{
+    public static class CustomDragSortController extends DragSortController {
 
         private CustomDragSortController(DragSortListView dslv) {
             super(dslv);

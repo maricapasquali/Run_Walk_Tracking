@@ -13,6 +13,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> 
 
+    <!-- Permission for playing the music playlist in the background during workout -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Permission Physical Activity (for distance and calories counter) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Android 10 (API 29) or later versions -->
+
     <!-- Feature SENSOR (distance) -->
     <uses-feature android:name="android.hardware.sensor.STEPCOUNTER" />
 
@@ -35,6 +41,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         >
 
         <uses-library
@@ -43,19 +50,14 @@
 
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="@string/google_maps_key"/>
 
-        <activity android:name=".gui.SplashScreenActivity" android:screenOrientation="portrait"
+        <activity android:name=".gui.SplashScreenActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

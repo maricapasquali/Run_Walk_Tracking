@@ -243,10 +243,11 @@ public class WorkoutService extends Service //implements MapRouteDraw.OnChangeLo
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
+        if(this.stepCounterSensor == null) Log.d(TAG, "StepCounter sensor is not available.");
+        else Log.d(TAG, "StepCounter sensor is wake up = " + this.stepCounterSensor.isWakeUpSensor());
+
         this.powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
         //this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
-        Log.d(TAG, "StepCounter sensor is wake up = " + this.stepCounterSensor.isWakeUpSensor());
 
         /* MAP */
         this.mapRouteDraw = MapRouteDraw.create(context);

@@ -1,6 +1,8 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +30,7 @@ import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.gui.BootAppActivity;
 import com.run_walk_tracking_gps.gui.components.Factory;
 import com.run_walk_tracking_gps.gui.components.dialog.DelayedStartWorkoutDialog;
+import com.run_walk_tracking_gps.gui.components.dialog.permissions.ActivityRecognitionPermissionDialog;
 import com.run_walk_tracking_gps.model.Measure;
 import com.run_walk_tracking_gps.model.MusicCoach;
 import com.run_walk_tracking_gps.model.VoiceCoach;
@@ -38,6 +41,7 @@ import com.run_walk_tracking_gps.service.WorkoutService;
 import com.run_walk_tracking_gps.task.RenderingMapTask;
 import com.run_walk_tracking_gps.utilities.ColorUtilities;
 import com.run_walk_tracking_gps.utilities.LocationUtilities;
+import com.run_walk_tracking_gps.utilities.PermissionUtilities;
 import com.run_walk_tracking_gps.utilities.ServiceUtilities;
 
 import org.json.JSONException;
@@ -131,6 +135,8 @@ public class HomeFragment extends Fragment {
         getFragmentManager().beginTransaction().add(R.id.map, isGps ? new MapFragment() : new IndoorFragment(), TAG).commit();
         setIndoor(!isGps);
 
+        setPhysicalActivityPermission();
+
         setListener();
         return rootView;
     }
@@ -174,6 +180,16 @@ public class HomeFragment extends Fragment {
 
         workout_distance.setText(workoutMeasure.get(1).toString(true));
         workout_energy.setText(workoutMeasure.get(2).toString(true));
+    }
+
+    public void setPhysicalActivityPermission() {
+        if(!PermissionUtilities.hasActivityRecognitionPermission(this.getActivity())) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACTIVITY_RECOGNITION)) {
+                showActivityRecognitionPermissionDialog(this.getActivity());
+            } else {
+                PermissionUtilities.setActivityRecognitionPermission(this.getActivity());
+            }
+        }
     }
 
     private void renderingMap(PolylineOptions polylineOptions){
@@ -370,6 +386,15 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onDestroy");
         unRegisterBroadcastReceiver();
         unBindService();
+    }
+
+    public void showActivityRecognitionPermissionDialog(Activity activity) {
+        new ActivityRecognitionPermissionDialog(activity)
+                .setOnNegatePermissionListener((dialog, which) -> {
+                    // The user has denied permissions.
+                    // TODO: REMOVE FROM GUI: Distance and calories.
+                })
+                .show();
     }
 
     public interface OnStopWorkoutClickListener{

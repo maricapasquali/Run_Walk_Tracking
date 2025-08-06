@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.run_walk_tracking_gps.BuildConfig;
 import com.run_walk_tracking_gps.KeysIntent;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.controller.Preferences;
@@ -316,8 +317,7 @@ public class NetworkHelper {
 
         private static final String TAG = NetworkHelper.class.getName();
 
-
-        private static final String SERVER = "https://runwalktracking.000webhostapp.com/";
+        private static final String SERVER = BuildConfig.SERVER_URL;
         private static final String ACCOUNT = SERVER + "account/";
 
         private static final String INSERT = SERVER + "insert.php";

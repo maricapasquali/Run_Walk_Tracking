@@ -259,6 +259,21 @@ public class ApplicationActivity extends CommonActivity
                 });
             }
             break;
+            case PermissionUtilities.ACTIVITY_RECOGNITION_PERMISSION_REQUEST_CODE:
+                PermissionUtilities.onRequestPermissionsResult(grantResults, new PermissionUtilities.OnPermissionListener() {
+                    @Override
+                    public void onGranted() {
+                    }
+
+                    @Override
+                    public void onDenied() {
+                        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG);
+                        if(fragment instanceof HomeFragment) {
+                           ((HomeFragment) fragment).showActivityRecognitionPermissionDialog(ApplicationActivity.this);
+                        }
+                    }
+                });
+                break;
 
         }
     }

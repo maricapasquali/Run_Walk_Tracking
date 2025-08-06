@@ -5,18 +5,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 
 
-import com.myhexaville.smartimagepicker.ImagePicker;
-import com.myhexaville.smartimagepicker.OnImagePickedListener;
-import com.run_walk_tracking_gps.model.User;
-import com.run_walk_tracking_gps.model.builder.UserBuilder;
 import com.run_walk_tracking_gps.task.CompressionBitMapTask;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.gui.fragments.AccessDataFragment;
@@ -32,8 +26,8 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 public class SignUpActivity extends CommonActivity
@@ -55,6 +49,8 @@ public class SignUpActivity extends CommonActivity
     private List<Fragment> fragmentSignUp = new LinkedList<>();
 
     private Uri imageUri;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void init(Bundle savedInstanceState) {
@@ -108,6 +104,41 @@ public class SignUpActivity extends CommonActivity
 
     @Override
     protected void listenerAction() {
+        imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri pickedImageUri = result.getData().getData();
+                Log.d(TAG, "Get cropped image profile: " + pickedImageUri.getPath());
+                String newName = ImageFileHelper.createNameRandom();
+                ImageFileHelper imageFileHelper = ImageFileHelper.create(this);
+
+                if(imageFileHelper.moveToTmpDir(pickedImageUri, newName)) {
+                    try {
+                        this.imageUri = Uri.parse(imageFileHelper.getPathTmpImage(newName));
+                        Log.d(TAG, "New path image profile: " + imageUri.getPath());
+
+                        user.put(NetworkHelper.Constant.IMAGE, new JSONObject().put(NetworkHelper.Constant.NAME, newName));
+
+                        Bitmap bitmap = BitmapFactory.decodeFile(
+                                imageFileHelper.getPathTmpImage(newName)
+                        );
+                        if (bitmap != null) {
+                            CompressionBitMapTask.create(this, image_encode -> {
+                                try {
+                                    user.getJSONObject(NetworkHelper.Constant.IMAGE)
+                                            .put(NetworkHelper.Constant.IMG_ENCODE, image_encode);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }).execute(bitmap);
+                        } else {
+                            user.remove(NetworkHelper.Constant.IMAGE);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -177,51 +208,8 @@ public class SignUpActivity extends CommonActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
-        fragment.getTakePhoto().getImagePiker().handleActivityResult(resultCode,requestCode, data);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PersonalDataFragment fragment = (PersonalDataFragment)getSupportFragmentManager().findFragmentByTag(TAG);
-        fragment.getTakePhoto().getImagePiker().handlePermission(requestCode, grantResults);
-    }
-
-    @Override
-    public OnImagePickedListener imagePickerHandler(ImageView imageView) {
-        return imageUri -> {
-                    String newName = ImageFileHelper.createNameRandom();
-                    Log.e("PICKERIMAGE", "Name : "+ newName);
-                    ImageFileHelper imageFileHelper = ImageFileHelper.create(this);
-                    if(imageFileHelper.moveToTmpDir(imageUri, newName)){
-                        try {
-                            this.imageUri = Uri.parse(imageFileHelper.getPathTmpImage(newName));
-                            imageView.setImageURI(this.imageUri);
-                            user.put(NetworkHelper.Constant.IMAGE, new JSONObject().put(NetworkHelper.Constant.NAME, newName));
-
-
-                            Bitmap bitmap = null;
-                            if(!user.isNull(NetworkHelper.Constant.IMAGE)) {
-                                bitmap = BitmapFactory.decodeFile(ImageFileHelper.create(this)
-                                        .getPathTmpImage(user.getJSONObject(NetworkHelper.Constant.IMAGE).getString(NetworkHelper.Constant.NAME)));
-                            }
-                            if(bitmap!=null){
-                                CompressionBitMapTask.create(this, image_encode -> {
-                                    user.getJSONObject(NetworkHelper.Constant.IMAGE).put(NetworkHelper.Constant.IMG_ENCODE, image_encode);
-                                    Log.d(TAG, "After compress : " + user.toString());
-                                }).execute(bitmap);
-                            }else {
-                                user.remove(NetworkHelper.Constant.IMAGE);
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                   }
-        };
+    public ActivityResultLauncher<Intent> getLauncher() {
+        return imagePickerLauncher;
     }
 
     @Override

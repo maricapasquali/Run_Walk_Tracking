@@ -1,6 +1,5 @@
 package com.run_walk_tracking_gps.gui.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,14 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.myhexaville.smartimagepicker.ImagePickerContract;
-import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.R;
 import com.run_walk_tracking_gps.connectionserver.NetworkHelper;
 import com.run_walk_tracking_gps.gui.components.Factory;
@@ -126,17 +119,7 @@ public class PersonalDataFragment extends Fragment {
             if(hasFocus) showDateDialog(v);
         });
 
-        takePhoto.onTakePhotoListener(new Factory.CustomTakePhotoButton.OnTakePhotoListener() {
-            @Override
-            public Activity getActivity() {
-                return imagePickerHandlerListener.getActivity();
-            }
-
-            @Override
-            public OnImagePickedListener setonClickListener() {
-                return imagePickerHandlerListener.imagePickerHandler(img);
-            }
-        });
+        takePhoto.onTakePhotoListener(imagePickerHandlerListener);
     }
 
     private void showDateDialog(View v) {
@@ -201,14 +184,8 @@ public class PersonalDataFragment extends Fragment {
         }
     }
 
-    public Factory.CustomTakePhotoButton getTakePhoto() {
-        return takePhoto;
-    }
-
-    public interface ImagePickerHandlerListener{
-        OnImagePickedListener imagePickerHandler(ImageView imageView);
+    public interface ImagePickerHandlerListener extends Factory.CustomTakePhotoButton.OnTakePhotoListener {
         Uri getImageUri();
-        Activity getActivity();
     }
 
     public interface PersonalDataListener{

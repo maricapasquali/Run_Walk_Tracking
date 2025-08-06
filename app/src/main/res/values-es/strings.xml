@@ -183,6 +183,12 @@
     <string name="internet_not_available_mex">Activa la conexión de datos móviles o utiliza la red WI-FI para acceder a los datos.</string>
     <string name="token_not_valid">Sesión inválida</string>
     <string name="connection_slow">¡Uy! Conexión lenta, intente nuevamente más tarde.</string>
+    <string name="no_connection">Servidor no disponible</string>
     <string name="internal_server_error">Error de servidor interno</string>
+
+    <!-- Messaggi di warming per permessi -->
+    <string name="permission_activity_recognition_title">Permiso de actividad física</string>
+    <string name="permission_activity_recognition_message">Esta aplicación necesita acceder a tus datos de actividad física para registrar tus pasos y movimientos. Sin este permiso, no podremos ofrecerte un recuento preciso.</string>
+    <string name="goto_settings">Vaya a las configuraciones</string>
 
 </resources>

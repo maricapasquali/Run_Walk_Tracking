@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public abstract class CustomSpinnerAdapter<T> extends BaseAdapter {
+public abstract class CustomSpinnerAdapter<T extends Enum<T>> extends BaseAdapter {
 
     private Context context;
     private int layout;

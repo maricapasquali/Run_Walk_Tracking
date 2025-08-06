@@ -1,2 +1,2 @@
 include ':app'
-include ':drag-sort-listview'
+include 'libs:drag-sort-listview'

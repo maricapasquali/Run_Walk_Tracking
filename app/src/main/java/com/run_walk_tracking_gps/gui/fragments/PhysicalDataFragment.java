@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListPopupWindow;
-import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -28,6 +27,8 @@ import org.json.JSONObject;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import java.util.Arrays;
 
 public class PhysicalDataFragment extends Fragment {
 
@@ -201,9 +202,19 @@ public class PhysicalDataFragment extends Fragment {
         super.onPause();
         try {
 
+            final Gender genderEnum = Arrays.stream(Gender.values())
+                    .filter(g -> getString(g.getStrId()).equals(gender.getText().toString()))
+                    .findFirst()
+                    .orElse(null);
+
+            final Target targetEnum = Arrays.stream(Target.values())
+                    .filter(g -> getString(g.getStrId()).equals(target.getText().toString()))
+                    .findFirst()
+                    .orElse(null);
+
             JSONObject physicalData = new JSONObject()
-                                .put(NetworkHelper.Constant.GENDER, gender.getText().toString())
-                                .put(NetworkHelper.Constant.TARGET, target.getText().toString())
+                                .put(NetworkHelper.Constant.GENDER, genderEnum)
+                                .put(NetworkHelper.Constant.TARGET, targetEnum)
                                 .put(NetworkHelper.Constant.HEIGHT, heightValue)
                                 .put(NetworkHelper.Constant.WEIGHT, weightValue);
 

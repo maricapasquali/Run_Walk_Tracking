@@ -2,7 +2,7 @@ package com.run_walk_tracking_gps.gui.activity_of_settings;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,7 +14,6 @@ import android.widget.ListPopupWindow;
 
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.myhexaville.smartimagepicker.OnImagePickedListener;
 import com.run_walk_tracking_gps.controller.Preferences;
 import com.run_walk_tracking_gps.db.dao.DaoFactory;
 import com.run_walk_tracking_gps.db.tables.ImageProfileDescriptor;
@@ -38,7 +37,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 
-import androidx.annotation.RequiresApi;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 public class ModifyUserActivity extends CommonActivity {
 
@@ -46,6 +46,7 @@ public class ModifyUserActivity extends CommonActivity {
 
     private ImageView img;
     private Factory.CustomTakePhotoButton take_photo;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
     private TextInputEditText name;
     private TextInputEditText lastName;
     private TextInputEditText email;
@@ -204,6 +205,25 @@ public class ModifyUserActivity extends CommonActivity {
 
     @Override
     protected void listenerAction() {
+        imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            int resultCode = result.getResultCode();
+            Intent data = result.getData();
+            if (resultCode == RESULT_OK && data != null) {
+                Uri imageUri = data.getData();
+
+                String newName = ImageFileHelper.createNameRandom();
+                Log.d(TAG, "Name: " + newName);
+
+                assert imageUri != null;
+                if (imageFileHelper.moveToTmpDir(imageUri, newName)) {
+                    File imageTmp = imageFileHelper.getImageTmp(newName);
+                    imageFileHelper.load(img, imageTmp);
+                    user.setImageProfile(imageTmp);
+
+                    Log.d(TAG, "Name File user changed: " + user.getImage());
+                }
+            }
+        });
 
         take_photo.onTakePhotoListener(new Factory.CustomTakePhotoButton.OnTakePhotoListener() {
             @Override
@@ -212,18 +232,8 @@ public class ModifyUserActivity extends CommonActivity {
             }
 
             @Override
-            public OnImagePickedListener setonClickListener() {
-                return imageUri -> {
-                    String newName = ImageFileHelper.createNameRandom();
-                    Log.e(TAG, "Name : "+ newName);
-                    if(imageFileHelper.moveToTmpDir(imageUri, newName)){
-                        File imageTmp = imageFileHelper.getImageTmp(newName);
-                        imageFileHelper.load(img, imageTmp);
-                        user.setImageProfile(imageTmp);
-
-                        Log.e(TAG, "Name File user changed : "+ user.getImage());
-                    }
-                };
+            public ActivityResultLauncher<Intent> getLauncher() {
+                return imagePickerLauncher;
             }
         });
 
@@ -272,19 +282,6 @@ public class ModifyUserActivity extends CommonActivity {
             }).show();
         }
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        take_photo.getImagePiker().handleActivityResult(resultCode,requestCode, data);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        take_photo.getImagePiker().handlePermission(requestCode, grantResults);
-    }
-
 
     @Override
     public void onBackPressed() {

@@ -178,7 +178,14 @@
     <string name="internet_not_available_mex">Turn on mobile data or use WI-FI to access data.</string>
     <string name="token_not_valid">Invalid Session</string>
     <string name="connection_slow">Oops! Slow connection, try again later.</string>
+    <string name="no_connection">Server unavailable</string>
     <string name="internal_server_error">Internal Server Error</string>
+
+    <!-- Messaggi di warming per permessi -->
+    <string name="permission_activity_recognition_title">Physical Activity Permit</string>
+    <string name="permission_activity_recognition_message">This app needs access to your fitness data to track your steps and movement. Without this permission, we won\'t be able to provide you with an accurate count.</string>
+    <string name="goto_settings">Go to settings</string>
+
 
     <!-- Da non TRADURRE -->
 

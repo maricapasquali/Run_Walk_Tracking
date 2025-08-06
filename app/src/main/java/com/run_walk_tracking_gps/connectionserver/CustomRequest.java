@@ -4,24 +4,18 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
-import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.run_walk_tracking_gps.R;
-import com.run_walk_tracking_gps.exception.BackgroundException;
 import com.run_walk_tracking_gps.exception.SomeErrorHttpException;
 import com.run_walk_tracking_gps.exception.TokenException;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 
 import static com.run_walk_tracking_gps.connectionserver.NetworkHelper.Constant.ERROR;
 import static com.run_walk_tracking_gps.connectionserver.NetworkHelper.TAG;
@@ -40,40 +34,42 @@ public class CustomRequest extends StringRequest {
             try {
                 final JSONObject JSONResponse = new JSONObject(response);
                 Log.d(TAG, JSONResponse.toString());
-                if(JSONResponse.has(ERROR)) {
-                    final JSONObject error = JSONResponse.getJSONObject(ERROR);
-                    switch (error.getInt(NetworkHelper.Constant.CODE)){
-                        case NetworkHelper.HttpResponse.Code.Error.TOKEN_NOT_VALID:
-                            throw new TokenException(context);
-                    }
-                    throw new SomeErrorHttpException(context, error.getString(NetworkHelper.Constant.DESCRIPTION));
-                }
                 responseJsonListener.onResponse(JSONResponse);
             } catch (Exception e) {
                 Log.e(TAG, "Error = " + e + ", (response) = " + response);
 
-                BackgroundException ex;
-                if(e instanceof TokenException)
-                    ex = (TokenException) e;
-                else if(e instanceof SomeErrorHttpException)
-                    ex = (SomeErrorHttpException)e;
-                else{
-                    ex = SomeErrorHttpException.create(context, e instanceof JSONException? response: e.getMessage());
-                }
-                ex.alert();
+                SomeErrorHttpException.create(context, e instanceof JSONException? response: e.getMessage())
+                                      .alert();
             }
         }, error -> {
-            if(error.networkResponse!=null){
-                String errorHandler = String.valueOf(error.networkResponse.statusCode);
-
-                if(error instanceof TimeoutError)
-                    errorHandler = " : " + context.getString(R.string.connection_slow);
-                else if(error instanceof ServerError)
-                    errorHandler = " : " + context.getString(R.string.internal_server_error);
-
-                SomeErrorHttpException ex = SomeErrorHttpException.create(context, errorHandler);
-                ex.alert();
+            Log.e(TAG, error.toString() + ": status = " + error.networkResponse);
+            String errorHandlerMessage = "";
+            if(error instanceof TimeoutError)
+                errorHandlerMessage = context.getString(R.string.connection_slow);
+            else if(error instanceof NoConnectionError) {
+                errorHandlerMessage = context.getString(R.string.no_connection);
+            } else if(error.networkResponse != null) {
+                errorHandlerMessage = error.networkResponse.statusCode + " : ";
+                try {
+                    JSONObject body = new JSONObject(new String(error.networkResponse.data));
+                    Log.e(TAG, "Error: " + errorHandlerMessage + " - " + body);
+                    if(body.has(ERROR)) {
+                        final JSONObject errorJson = body.getJSONObject(ERROR);
+                        if(
+                                errorJson.has(NetworkHelper.Constant.CODE) &&
+                                errorJson.getInt(NetworkHelper.Constant.CODE) == NetworkHelper.HttpResponse.Code.Error.TOKEN_NOT_VALID
+                        ){
+                            TokenException.create(context).alert();
+                            return;
+                        }
+                        errorHandlerMessage += errorJson.getString(NetworkHelper.Constant.DESCRIPTION);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                    errorHandlerMessage += context.getString(R.string.internal_server_error);
+                }
             }
+            SomeErrorHttpException.create(context, errorHandlerMessage).alert();
         });
         this.bodyJson = bodyJson;
     }
