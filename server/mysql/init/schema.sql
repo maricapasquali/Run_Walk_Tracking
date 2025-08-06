@@ -153,7 +153,7 @@ CREATE TABLE `user` (
   `id_user` int(11) NOT NULL,
   `name` varchar(20) NOT NULL,
   `last_name` varchar(30) NOT NULL,
-  `gender` varchar(10) NOT NULL,
+  `gender` set('FEMALE','MALE','OTHER') NOT NULL,
   `birth_date` date NOT NULL,
   `email` varchar(50) NOT NULL,
   `phone` varchar(20) NOT NULL,
