@@ -2,6 +2,7 @@
 
 use app\exceptions\DataException;
 use app\exceptions\FilterException;
+use app\exceptions\SessionTokenException;
 use app\exceptions\UrlException;
 use app\request\Request;
 use app\database\SessionDao;

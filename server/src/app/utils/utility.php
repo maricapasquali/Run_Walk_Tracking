@@ -81,6 +81,7 @@ function json_response($data)
 
 function json_response_errors($ex)
 {
+  error_log($ex);
   return json_response([ERROR => [CODE => $ex->getCode(), DESCRIPTION => $ex->getMessage()]]);
 }
 
